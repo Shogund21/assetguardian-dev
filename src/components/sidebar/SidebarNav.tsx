@@ -50,7 +50,11 @@ const items = [
   },
 ];
 
-export function SidebarNav() {
+interface SidebarNavProps {
+  closeMenuOnMobile?: () => void;
+}
+
+export function SidebarNav({ closeMenuOnMobile }: SidebarNavProps) {
   const location = useLocation();
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
@@ -69,7 +73,11 @@ export function SidebarNav() {
                   isActive={isActive}
                   className={isActive ? "bg-sidebar-accent text-sidebar-accent-foreground" : ""}
                 >
-                  <Link to={item.url} className="flex items-center">
+                  <Link 
+                    to={item.url} 
+                    className="flex items-center"
+                    onClick={closeMenuOnMobile}
+                  >
                     <item.icon className="h-4 w-4" />
                     {!isCollapsed && <span>{item.title}</span>}
                   </Link>
