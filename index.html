@@ -98,7 +98,7 @@
       setTimeout(function() {
         var root = document.getElementById('root');
         var fallback = document.getElementById('fallback-content');
-        if (root && root.childNodes.length <= 1) {
+        if (root && root.childNodes.length <= 1 && fallback) {
           fallback.style.display = 'block';
         }
       }, 3000);
@@ -106,19 +106,24 @@
       // Fix for iOS 100vh issue
       function setViewportHeight() {
         let vh = window.innerHeight * 0.01;
-        document.documentElement.style.setProperty('--vh', `${vh}px`);
+        if (document.documentElement) {
+          document.documentElement.style.setProperty('--vh', `${vh}px`);
+        }
       }
       setViewportHeight();
       window.addEventListener('resize', setViewportHeight);
       
-      // Force content visibility
+      // Force content visibility with null checks
       function forceContentVisibility() {
-        document.querySelectorAll('#root, #root > div, .dashboard-content, .overflow-container').forEach(function(el) {
-          if (el instanceof HTMLElement) {
-            el.style.display = 'block';
-            el.style.visibility = 'visible';
-            el.style.opacity = '1';
-          }
+        var selectors = ['#root', '#root > div', '.dashboard-content', '.overflow-container'];
+        selectors.forEach(function(selector) {
+          document.querySelectorAll(selector).forEach(function(el) {
+            if (el instanceof HTMLElement) {
+              el.style.display = 'block';
+              el.style.visibility = 'visible';
+              el.style.opacity = '1';
+            }
+          });
         });
       }
       
