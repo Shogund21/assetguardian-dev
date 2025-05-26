@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { SensorReading, PredictiveAlert, AssetGuardianAIRequest, AssetGuardianAIResponse } from "@/types/predictive";
 
@@ -68,7 +67,7 @@ export class PredictiveMaintenanceService {
   }
 
   /**
-   * Process AI analysis for equipment
+   * Process AI analysis for equipment using real OpenAI integration
    */
   static async processAIAnalysis(equipmentId: string): Promise<AssetGuardianAIResponse | null> {
     try {
@@ -84,7 +83,7 @@ export class PredictiveMaintenanceService {
         return null;
       }
 
-      // Get recent sensor readings (using mock data)
+      // Get recent sensor readings (using mock data for now)
       const sensorReadings = await this.getRecentSensorReadings(equipmentId, 72); // 3 days
       
       if (!sensorReadings || sensorReadings.length === 0) {
@@ -104,17 +103,25 @@ export class PredictiveMaintenanceService {
       ];
 
       // Transform data for AI analysis
-      const aiRequest: AssetGuardianAIRequest = this.prepareAIRequest(
+      const aiRequest = this.prepareAIRequest(
         equipment,
         sensorReadings,
         mockThresholds,
         mockMaintenanceHistory
       );
 
-      // Call AI analysis
-      const aiResponse = await this.callAssetGuardianAI(aiRequest);
-      
-      return aiResponse;
+      // Call real AI analysis via Supabase Edge Function
+      const { data: aiResponse, error: aiError } = await supabase.functions.invoke('predictive-ai-analysis', {
+        body: aiRequest
+      });
+
+      if (aiError) {
+        console.error('AI analysis error:', aiError);
+        // Fallback to mock analysis
+        return this.callMockAI(aiRequest);
+      }
+
+      return aiResponse as AssetGuardianAIResponse;
     } catch (error) {
       console.error('Error processing AI analysis:', error);
       return null;
@@ -164,10 +171,10 @@ export class PredictiveMaintenanceService {
   }
 
   /**
-   * Call AssetGuardian AI service (mock implementation)
+   * Fallback mock AI analysis (used when real AI is unavailable)
    */
-  private static async callAssetGuardianAI(request: AssetGuardianAIRequest): Promise<AssetGuardianAIResponse> {
-    console.log('AI Analysis Request:', request);
+  private static async callMockAI(request: AssetGuardianAIRequest): Promise<AssetGuardianAIResponse> {
+    console.log('Using fallback mock AI analysis');
     
     // Simulate AI analysis with basic rule-based logic
     const response: AssetGuardianAIResponse = {
