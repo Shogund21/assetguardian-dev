@@ -1,3 +1,4 @@
+
 import { Database } from './database';
 
 type PublicSchema = Database['public'];

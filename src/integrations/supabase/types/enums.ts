@@ -1,4 +1,5 @@
-import { Database } from './schema';
+
+import { Database } from './database';
 
 type PublicSchema = Database['public'];
 
