@@ -8,6 +8,8 @@ import MaintenanceObservations from "./MaintenanceObservations";
 import AHUMaintenanceFields from "./AHUMaintenanceFields";
 import ElevatorMaintenanceFields from "./ElevatorMaintenanceFields";
 import RestroomMaintenanceFields from "./RestroomMaintenanceFields";
+import ChillerMaintenanceFields from "./ChillerMaintenanceFields";
+import RTUMaintenanceFields from "./RTUMaintenanceFields";
 
 interface EquipmentFieldsProps {
   form: UseFormReturn<MaintenanceFormValues>;
@@ -22,6 +24,14 @@ const EquipmentFields = ({ form, equipmentType }: EquipmentFieldsProps) => {
     return <AHUMaintenanceFields form={form} />;
   }
   
+  if (equipmentType === 'chiller') {
+    return <ChillerMaintenanceFields form={form} />;
+  }
+  
+  if (equipmentType === 'rtu') {
+    return <RTUMaintenanceFields form={form} />;
+  }
+  
   if (equipmentType === 'elevator') {
     return <ElevatorMaintenanceFields form={form} />;
   }
@@ -30,7 +40,7 @@ const EquipmentFields = ({ form, equipmentType }: EquipmentFieldsProps) => {
     return <RestroomMaintenanceFields form={form} />;
   }
   
-  // Default or general equipment (includes chiller and cooling_tower)
+  // Default or general equipment (includes cooling_tower)
   return (
     <>
       <MaintenanceReadings form={form} />
