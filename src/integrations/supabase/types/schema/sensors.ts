@@ -27,6 +27,7 @@ export interface SensorReadingsTable {
     unit?: string;
     created_at?: string;
   };
+  Relationships: [];
 }
 
 export interface PredictiveAlertsTable {
@@ -36,7 +37,7 @@ export interface PredictiveAlertsTable {
     risk_level: "low" | "medium" | "high";
     finding: string;
     recommendation: string;
-    confidence_score: number;
+    confidence_score: number | null;
     created_at: string;
     resolved_at: string | null;
     work_order_id: string | null;
@@ -47,7 +48,7 @@ export interface PredictiveAlertsTable {
     risk_level: "low" | "medium" | "high";
     finding: string;
     recommendation: string;
-    confidence_score: number;
+    confidence_score?: number | null;
     created_at?: string;
     resolved_at?: string | null;
     work_order_id?: string | null;
@@ -58,11 +59,12 @@ export interface PredictiveAlertsTable {
     risk_level?: "low" | "medium" | "high";
     finding?: string;
     recommendation?: string;
-    confidence_score?: number;
+    confidence_score?: number | null;
     created_at?: string;
     resolved_at?: string | null;
     work_order_id?: string | null;
   };
+  Relationships: [];
 }
 
 export interface EquipmentThresholdsTable {
@@ -96,4 +98,5 @@ export interface EquipmentThresholdsTable {
     created_at?: string;
     updated_at?: string;
   };
+  Relationships: [];
 }

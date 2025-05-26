@@ -33,6 +33,7 @@ export interface Database {
           created_at?: string;
           is_admin?: boolean;
         };
+        Relationships: [];
       };
       companies: {
         Row: {
@@ -65,6 +66,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       company_users: {
         Row: {
@@ -88,6 +90,7 @@ export interface Database {
           role?: string;
           created_at?: string;
         };
+        Relationships: [];
       };
       filter_changes: {
         Row: {
@@ -105,6 +108,7 @@ export interface Database {
           equipment_id?: string;
           created_at?: string;
         };
+        Relationships: [];
       };
       locations: {
         Row: {
@@ -131,6 +135,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       maintenance_documents: {
         Row: {
@@ -157,6 +162,7 @@ export interface Database {
           file_type?: string;
           uploaded_at?: string;
         };
+        Relationships: [];
       };
       refactoring_rules: {
         Row: {
@@ -177,6 +183,7 @@ export interface Database {
           description?: string;
           created_at?: string;
         };
+        Relationships: [];
       };
     };
     Views: {
@@ -188,7 +195,37 @@ export interface Database {
         };
       };
     };
-    Functions: Record<string, never>;
+    Functions: {
+      get_sensor_analysis: {
+        Args: {
+          p_equipment_id: string;
+          p_hours?: number;
+        };
+        Returns: {
+          sensor_type: string;
+          latest_value: number;
+          avg_value: number;
+          min_value: number;
+          max_value: number;
+          reading_count: number;
+          trend_direction: string;
+          unit: string;
+        }[];
+      };
+      check_threshold_violations: {
+        Args: {
+          p_equipment_id: string;
+        };
+        Returns: {
+          sensor_type: string;
+          current_value: number;
+          warning_threshold: number;
+          critical_threshold: number;
+          violation_level: string;
+          unit: string;
+        }[];
+      };
+    };
     Enums: {
       maintenance_check_status: "completed" | "pending" | "issue_found";
       risk_level: "low" | "medium" | "high";
