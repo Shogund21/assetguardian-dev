@@ -1,69 +1,86 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { SensorReading, PredictiveAlert, AssetGuardianAIRequest, AssetGuardianAIResponse } from "@/types/predictive";
 
 export class PredictiveMaintenanceService {
   
   /**
-   * Store sensor reading data (mock implementation for now)
+   * Store sensor reading data
    */
   static async storeSensorReading(reading: Omit<SensorReading, 'id' | 'created_at'>) {
-    // For now, return a mock response since tables don't exist yet
-    console.log('Storing sensor reading (mock):', reading);
-    return {
-      id: crypto.randomUUID(),
-      ...reading,
-      created_at: new Date().toISOString()
-    };
+    const { data, error } = await supabase
+      .from('sensor_readings')
+      .insert({
+        equipment_id: reading.equipment_id,
+        timestamp_utc: reading.timestamp_utc,
+        sensor_type: reading.sensor_type,
+        value: reading.value,
+        unit: reading.unit
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error storing sensor reading:', error);
+      throw error;
+    }
+
+    return data;
   }
 
   /**
-   * Get recent sensor readings for equipment (mock implementation)
+   * Get recent sensor readings for equipment
    */
   static async getRecentSensorReadings(equipmentId: string, hours: number = 24): Promise<SensorReading[]> {
-    console.log(`Getting sensor readings for equipment ${equipmentId} (mock)`);
-    
-    // Return mock sensor data for demonstration
-    const now = new Date();
-    const mockReadings: SensorReading[] = [];
-    
-    for (let i = hours * 6; i >= 0; i--) { // Every 10 minutes
-      const timestamp = new Date(now.getTime() - (i * 10 * 60 * 1000));
-      
-      // Vibration data (mm/s)
-      mockReadings.push({
-        id: `vib-${i}`,
-        equipment_id: equipmentId,
-        timestamp_utc: timestamp.toISOString(),
-        sensor_type: 'vibration_mm_s',
-        value: 2.5 + Math.random() * 2 + Math.sin(i * 0.1) * 0.5,
-        unit: 'mm/s',
-        created_at: timestamp.toISOString()
-      });
-      
-      // Temperature data (°C)
-      mockReadings.push({
-        id: `temp-${i}`,
-        equipment_id: equipmentId,
-        timestamp_utc: timestamp.toISOString(),
-        sensor_type: 'bearing_temp_C',
-        value: 65 + Math.random() * 15 + Math.sin(i * 0.05) * 3,
-        unit: '°C',
-        created_at: timestamp.toISOString()
-      });
-      
-      // Current data (A)
-      mockReadings.push({
-        id: `current-${i}`,
-        equipment_id: equipmentId,
-        timestamp_utc: timestamp.toISOString(),
-        sensor_type: 'current_A',
-        value: 58 + Math.random() * 8 + Math.sin(i * 0.03) * 2,
-        unit: 'A',
-        created_at: timestamp.toISOString()
-      });
+    const { data, error } = await supabase
+      .from('sensor_readings')
+      .select('*')
+      .eq('equipment_id', equipmentId)
+      .gte('timestamp_utc', new Date(Date.now() - hours * 60 * 60 * 1000).toISOString())
+      .order('timestamp_utc', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching sensor readings:', error);
+      throw error;
     }
-    
-    return mockReadings;
+
+    return data || [];
+  }
+
+  /**
+   * Get equipment thresholds
+   */
+  static async getEquipmentThresholds(equipmentId: string) {
+    const { data, error } = await supabase
+      .from('equipment_thresholds')
+      .select('*')
+      .eq('equipment_id', equipmentId);
+
+    if (error) {
+      console.error('Error fetching equipment thresholds:', error);
+      throw error;
+    }
+
+    return data || [];
+  }
+
+  /**
+   * Get maintenance history for equipment
+   */
+  static async getMaintenanceHistory(equipmentId: string, limit: number = 10) {
+    const { data, error } = await supabase
+      .from('hvac_maintenance_checks')
+      .select('check_date, notes, status')
+      .eq('equipment_id', equipmentId)
+      .order('check_date', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error('Error fetching maintenance history:', error);
+      return [];
+    }
+
+    return data || [];
   }
 
   /**
@@ -83,7 +100,7 @@ export class PredictiveMaintenanceService {
         return null;
       }
 
-      // Get recent sensor readings (using mock data for now)
+      // Get recent sensor readings
       const sensorReadings = await this.getRecentSensorReadings(equipmentId, 72); // 3 days
       
       if (!sensorReadings || sensorReadings.length === 0) {
@@ -91,23 +108,16 @@ export class PredictiveMaintenanceService {
         return null;
       }
 
-      // Mock thresholds and maintenance history for now
-      const mockThresholds = [
-        { sensor_type: 'vibration_mm_s', critical_threshold: 4.5, warning_threshold: 3.5 },
-        { sensor_type: 'bearing_temp_C', critical_threshold: 80, warning_threshold: 70 },
-        { sensor_type: 'current_A', critical_threshold: 70, warning_threshold: 65 }
-      ];
-
-      const mockMaintenanceHistory = [
-        { check_date: '2025-03-01', notes: 'Routine maintenance completed', status: 'completed' }
-      ];
+      // Get thresholds and maintenance history
+      const thresholds = await this.getEquipmentThresholds(equipmentId);
+      const maintenanceHistory = await this.getMaintenanceHistory(equipmentId);
 
       // Transform data for AI analysis
       const aiRequest = this.prepareAIRequest(
         equipment,
         sensorReadings,
-        mockThresholds,
-        mockMaintenanceHistory
+        thresholds,
+        maintenanceHistory
       );
 
       // Call real AI analysis via Supabase Edge Function
@@ -225,69 +235,115 @@ export class PredictiveMaintenanceService {
   }
 
   /**
-   * Create predictive alert (mock implementation)
+   * Create predictive alert
    */
   static async createPredictiveAlert(alert: Omit<PredictiveAlert, 'id' | 'created_at'>) {
-    console.log('Creating predictive alert (mock):', alert);
-    return {
-      id: crypto.randomUUID(),
-      ...alert,
-      created_at: new Date().toISOString()
-    };
+    const { data, error } = await supabase
+      .from('predictive_alerts')
+      .insert({
+        asset_id: alert.asset_id,
+        risk_level: alert.risk_level,
+        finding: alert.finding,
+        recommendation: alert.recommendation,
+        confidence_score: alert.confidence_score,
+        work_order_id: alert.work_order_id
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating predictive alert:', error);
+      throw error;
+    }
+
+    return data;
   }
 
   /**
-   * Get active predictive alerts (mock implementation)
+   * Get active predictive alerts
    */
   static async getActivePredictiveAlerts(): Promise<PredictiveAlert[]> {
-    console.log('Getting active predictive alerts (mock)');
-    
-    // Return mock alerts for demonstration
-    const mockAlerts: PredictiveAlert[] = [
-      {
-        id: crypto.randomUUID(),
-        asset_id: 'chiller-001',
-        risk_level: 'medium',
-        finding: 'Bearing temperature elevated to 72°C',
-        recommendation: 'Schedule preventive maintenance within 48 hours',
-        confidence_score: 0.85,
-        created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
-        resolved_at: null,
-        work_order_id: null,
-        equipment: {
-          name: 'Main Chiller Unit',
-          location: 'Roof - North Side'
-        }
-      },
-      {
-        id: crypto.randomUUID(),
-        asset_id: 'ahu-003',
-        risk_level: 'high',
-        finding: 'Vibration levels approaching critical threshold (4.2 mm/s)',
-        recommendation: 'Immediate inspection required - possible bearing failure',
-        confidence_score: 0.92,
-        created_at: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
-        resolved_at: null,
-        work_order_id: null,
-        equipment: {
-          name: 'Air Handling Unit 3',
-          location: 'Mechanical Room B'
-        }
-      }
-    ];
-    
-    return mockAlerts;
+    const { data, error } = await supabase
+      .from('predictive_alerts')
+      .select(`
+        *,
+        equipment:equipment(name, location)
+      `)
+      .is('resolved_at', null)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching predictive alerts:', error);
+      return [];
+    }
+
+    return data?.map(alert => ({
+      ...alert,
+      equipment: alert.equipment ? {
+        name: alert.equipment.name,
+        location: alert.equipment.location
+      } : undefined
+    })) || [];
   }
 
   /**
-   * Create automated work order (mock implementation)
+   * Create automated work order
    */
   static async createAutomatedWorkOrder(workOrder: any) {
-    console.log('Creating automated work order (mock):', workOrder);
-    return {
-      id: crypto.randomUUID(),
-      ...workOrder,
-      created_at: new Date().toISOString()
-    };
+    const { data, error } = await supabase
+      .from('automated_work_orders')
+      .insert({
+        asset_id: workOrder.asset_id,
+        title: workOrder.title,
+        description: workOrder.description,
+        priority: workOrder.priority,
+        due_hours: workOrder.due_hours,
+        assigned_team: workOrder.assigned_team,
+        alert_id: workOrder.alert_id
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating automated work order:', error);
+      throw error;
+    }
+
+    return data;
+  }
+
+  /**
+   * Get sensor analysis using database function
+   */
+  static async getSensorAnalysis(equipmentId: string, hours: number = 24) {
+    const { data, error } = await supabase
+      .rpc('get_sensor_analysis', {
+        p_equipment_id: equipmentId,
+        p_hours: hours
+      });
+
+    if (error) {
+      console.error('Error getting sensor analysis:', error);
+      throw error;
+    }
+
+    return data || [];
+  }
+
+  /**
+   * Check threshold violations using database function
+   */
+  static async checkThresholdViolations(equipmentId: string) {
+    const { data, error } = await supabase
+      .rpc('check_threshold_violations', {
+        p_equipment_id: equipmentId
+      });
+
+    if (error) {
+      console.error('Error checking threshold violations:', error);
+      throw error;
+    }
+
+    return data || [];
   }
 }
