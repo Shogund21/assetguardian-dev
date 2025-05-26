@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { SensorReading, PredictiveAlert, AssetGuardianAIRequest, AssetGuardianAIResponse } from "@/types/predictive";
 
@@ -8,6 +7,7 @@ export class PredictiveMaintenanceService {
    * Store sensor reading data
    */
   static async storeSensorReading(reading: Omit<SensorReading, 'id' | 'created_at'>) {
+    console.log('Storing sensor reading:', reading);
     const { data, error } = await supabase
       .from('sensor_readings')
       .insert({
@@ -32,6 +32,7 @@ export class PredictiveMaintenanceService {
    * Get recent sensor readings for equipment
    */
   static async getRecentSensorReadings(equipmentId: string, hours: number = 24): Promise<SensorReading[]> {
+    console.log(`Fetching sensor readings for equipment ${equipmentId} for last ${hours} hours`);
     const { data, error } = await supabase
       .from('sensor_readings')
       .select('*')
@@ -44,6 +45,7 @@ export class PredictiveMaintenanceService {
       throw error;
     }
 
+    console.log(`Found ${data?.length || 0} sensor readings`);
     return data || [];
   }
 
@@ -51,6 +53,7 @@ export class PredictiveMaintenanceService {
    * Get equipment thresholds
    */
   static async getEquipmentThresholds(equipmentId: string) {
+    console.log('Fetching equipment thresholds for:', equipmentId);
     const { data, error } = await supabase
       .from('equipment_thresholds')
       .select('*')
@@ -61,6 +64,7 @@ export class PredictiveMaintenanceService {
       throw error;
     }
 
+    console.log(`Found ${data?.length || 0} thresholds`);
     return data || [];
   }
 
@@ -238,6 +242,7 @@ export class PredictiveMaintenanceService {
    * Create predictive alert
    */
   static async createPredictiveAlert(alert: Omit<PredictiveAlert, 'id' | 'created_at'>) {
+    console.log('Creating predictive alert:', alert);
     const { data, error } = await supabase
       .from('predictive_alerts')
       .insert({
@@ -263,6 +268,7 @@ export class PredictiveMaintenanceService {
    * Get active predictive alerts
    */
   static async getActivePredictiveAlerts(): Promise<PredictiveAlert[]> {
+    console.log('Fetching active predictive alerts');
     const { data, error } = await supabase
       .from('predictive_alerts')
       .select(`
@@ -277,6 +283,7 @@ export class PredictiveMaintenanceService {
       return [];
     }
 
+    console.log(`Found ${data?.length || 0} active alerts`);
     return data?.map(alert => ({
       ...alert,
       equipment: alert.equipment ? {
