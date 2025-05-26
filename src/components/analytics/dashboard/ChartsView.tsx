@@ -5,10 +5,14 @@ import EquipmentStatusChart from "@/components/analytics/EquipmentStatusChart";
 import MaintenanceCompletionRate from "@/components/analytics/MaintenanceCompletionRate";
 import TechnicianPerformance from "@/components/analytics/technician/TechnicianPerformance";
 import EquipmentHealthMatrixWrapper from "@/components/analytics/health-matrix/EquipmentHealthMatrixWrapper";
+import PredictiveMaintenanceSection from "./PredictiveMaintenanceSection";
 
 const ChartsView = () => {
   return (
     <div className="grid grid-cols-1 gap-4 md:gap-6">
+      {/* Predictive Maintenance Section - New Addition */}
+      <PredictiveMaintenanceSection />
+      
       {/* Main Trends Chart - Full width */}
       <AnalyticsCard
         title="Maintenance Trends"
