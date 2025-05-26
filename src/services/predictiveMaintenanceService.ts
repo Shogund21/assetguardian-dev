@@ -1,5 +1,14 @@
+
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types/schema";
 import { SensorReading, PredictiveAlert, AssetGuardianAIRequest, AssetGuardianAIResponse } from "@/types/predictive";
+
+// Type aliases for cleaner code
+type Tables = Database['public']['Tables'];
+type SensorReadingRow = Tables['sensor_readings']['Row'];
+type PredictiveAlertRow = Tables['predictive_alerts']['Row'];
+type EquipmentThresholdRow = Tables['equipment_thresholds']['Row'];
+type AutomatedWorkOrderRow = Tables['automated_work_orders']['Row'];
 
 export class PredictiveMaintenanceService {
   
