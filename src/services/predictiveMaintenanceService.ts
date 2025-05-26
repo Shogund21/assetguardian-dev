@@ -5,34 +5,66 @@ import { SensorReading, PredictiveAlert, AssetGuardianAIRequest, AssetGuardianAI
 export class PredictiveMaintenanceService {
   
   /**
-   * Store sensor reading data
+   * Store sensor reading data (mock implementation for now)
    */
   static async storeSensorReading(reading: Omit<SensorReading, 'id' | 'created_at'>) {
-    const { data, error } = await supabase
-      .from('sensor_readings')
-      .insert(reading)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
+    // For now, return a mock response since tables don't exist yet
+    console.log('Storing sensor reading (mock):', reading);
+    return {
+      id: crypto.randomUUID(),
+      ...reading,
+      created_at: new Date().toISOString()
+    };
   }
 
   /**
-   * Get recent sensor readings for equipment
+   * Get recent sensor readings for equipment (mock implementation)
    */
-  static async getRecentSensorReadings(equipmentId: string, hours: number = 24) {
-    const since = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
+  static async getRecentSensorReadings(equipmentId: string, hours: number = 24): Promise<SensorReading[]> {
+    console.log(`Getting sensor readings for equipment ${equipmentId} (mock)`);
     
-    const { data, error } = await supabase
-      .from('sensor_readings')
-      .select('*')
-      .eq('equipment_id', equipmentId)
-      .gte('timestamp_utc', since)
-      .order('timestamp_utc', { ascending: true });
+    // Return mock sensor data for demonstration
+    const now = new Date();
+    const mockReadings: SensorReading[] = [];
     
-    if (error) throw error;
-    return data;
+    for (let i = hours * 6; i >= 0; i--) { // Every 10 minutes
+      const timestamp = new Date(now.getTime() - (i * 10 * 60 * 1000));
+      
+      // Vibration data (mm/s)
+      mockReadings.push({
+        id: `vib-${i}`,
+        equipment_id: equipmentId,
+        timestamp_utc: timestamp.toISOString(),
+        sensor_type: 'vibration_mm_s',
+        value: 2.5 + Math.random() * 2 + Math.sin(i * 0.1) * 0.5,
+        unit: 'mm/s',
+        created_at: timestamp.toISOString()
+      });
+      
+      // Temperature data (°C)
+      mockReadings.push({
+        id: `temp-${i}`,
+        equipment_id: equipmentId,
+        timestamp_utc: timestamp.toISOString(),
+        sensor_type: 'bearing_temp_C',
+        value: 65 + Math.random() * 15 + Math.sin(i * 0.05) * 3,
+        unit: '°C',
+        created_at: timestamp.toISOString()
+      });
+      
+      // Current data (A)
+      mockReadings.push({
+        id: `current-${i}`,
+        equipment_id: equipmentId,
+        timestamp_utc: timestamp.toISOString(),
+        sensor_type: 'current_A',
+        value: 58 + Math.random() * 8 + Math.sin(i * 0.03) * 2,
+        unit: 'A',
+        created_at: timestamp.toISOString()
+      });
+    }
+    
+    return mockReadings;
   }
 
   /**
@@ -52,7 +84,7 @@ export class PredictiveMaintenanceService {
         return null;
       }
 
-      // Get recent sensor readings
+      // Get recent sensor readings (using mock data)
       const sensorReadings = await this.getRecentSensorReadings(equipmentId, 72); // 3 days
       
       if (!sensorReadings || sensorReadings.length === 0) {
@@ -60,29 +92,26 @@ export class PredictiveMaintenanceService {
         return null;
       }
 
-      // Get equipment thresholds
-      const { data: thresholds } = await supabase
-        .from('equipment_thresholds')
-        .select('*')
-        .eq('equipment_id', equipmentId);
+      // Mock thresholds and maintenance history for now
+      const mockThresholds = [
+        { sensor_type: 'vibration_mm_s', critical_threshold: 4.5, warning_threshold: 3.5 },
+        { sensor_type: 'bearing_temp_C', critical_threshold: 80, warning_threshold: 70 },
+        { sensor_type: 'current_A', critical_threshold: 70, warning_threshold: 65 }
+      ];
 
-      // Get maintenance history
-      const { data: maintenanceHistory } = await supabase
-        .from('hvac_maintenance_checks')
-        .select('check_date, notes, status')
-        .eq('equipment_id', equipmentId)
-        .order('check_date', { ascending: false })
-        .limit(10);
+      const mockMaintenanceHistory = [
+        { check_date: '2025-03-01', notes: 'Routine maintenance completed', status: 'completed' }
+      ];
 
       // Transform data for AI analysis
       const aiRequest: AssetGuardianAIRequest = this.prepareAIRequest(
         equipment,
         sensorReadings,
-        thresholds || [],
-        maintenanceHistory || []
+        mockThresholds,
+        mockMaintenanceHistory
       );
 
-      // Call AI analysis (this would be replaced with actual AI service call)
+      // Call AI analysis
       const aiResponse = await this.callAssetGuardianAI(aiRequest);
       
       return aiResponse;
@@ -138,7 +167,6 @@ export class PredictiveMaintenanceService {
    * Call AssetGuardian AI service (mock implementation)
    */
   private static async callAssetGuardianAI(request: AssetGuardianAIRequest): Promise<AssetGuardianAIResponse> {
-    // This is a mock implementation - in production, this would call your AI service
     console.log('AI Analysis Request:', request);
     
     // Simulate AI analysis with basic rule-based logic
@@ -159,24 +187,24 @@ export class PredictiveMaintenanceService {
           const maxValue = Math.max(...values);
           if (maxValue > threshold * 0.9) {
             response.risk_level = "high";
-            response.finding = `${sensorType} approaching critical threshold (${maxValue})`;
+            response.finding = `${sensorType} approaching critical threshold (${maxValue.toFixed(1)})`;
             response.recommendation = `Immediate inspection required for ${sensorType}`;
             response.create_work_order = true;
             response.work_order = {
               title: `High ${sensorType} Alert - ${request.asset_id}`,
-              description: `${sensorType} reading of ${maxValue} is approaching critical threshold of ${threshold}. Immediate inspection required.`,
+              description: `${sensorType} reading of ${maxValue.toFixed(1)} is approaching critical threshold of ${threshold}. Immediate inspection required.`,
               priority: "high",
               due_hours: 4,
               assigned_team: "maintenance"
             };
           } else if (maxValue > threshold * 0.8) {
             response.risk_level = "medium";
-            response.finding = `${sensorType} elevated (${maxValue})`;
+            response.finding = `${sensorType} elevated (${maxValue.toFixed(1)})`;
             response.recommendation = `Schedule preventive maintenance for ${sensorType}`;
             response.create_work_order = true;
             response.work_order = {
               title: `Preventive Maintenance - ${request.asset_id}`,
-              description: `${sensorType} reading of ${maxValue} indicates need for preventive maintenance.`,
+              description: `${sensorType} reading of ${maxValue.toFixed(1)} indicates need for preventive maintenance.`,
               priority: "medium",
               due_hours: 48,
               assigned_team: "maintenance"
@@ -190,50 +218,69 @@ export class PredictiveMaintenanceService {
   }
 
   /**
-   * Create predictive alert
+   * Create predictive alert (mock implementation)
    */
   static async createPredictiveAlert(alert: Omit<PredictiveAlert, 'id' | 'created_at'>) {
-    const { data, error } = await supabase
-      .from('predictive_alerts')
-      .insert(alert)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
+    console.log('Creating predictive alert (mock):', alert);
+    return {
+      id: crypto.randomUUID(),
+      ...alert,
+      created_at: new Date().toISOString()
+    };
   }
 
   /**
-   * Get active predictive alerts
+   * Get active predictive alerts (mock implementation)
    */
-  static async getActivePredictiveAlerts() {
-    const { data, error } = await supabase
-      .from('predictive_alerts')
-      .select(`
-        *,
-        equipment:asset_id (
-          name,
-          location
-        )
-      `)
-      .is('resolved_at', null)
-      .order('created_at', { ascending: false });
+  static async getActivePredictiveAlerts(): Promise<PredictiveAlert[]> {
+    console.log('Getting active predictive alerts (mock)');
     
-    if (error) throw error;
-    return data;
+    // Return mock alerts for demonstration
+    const mockAlerts: PredictiveAlert[] = [
+      {
+        id: crypto.randomUUID(),
+        asset_id: 'chiller-001',
+        risk_level: 'medium',
+        finding: 'Bearing temperature elevated to 72°C',
+        recommendation: 'Schedule preventive maintenance within 48 hours',
+        confidence_score: 0.85,
+        created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+        resolved_at: null,
+        work_order_id: null,
+        equipment: {
+          name: 'Main Chiller Unit',
+          location: 'Roof - North Side'
+        }
+      },
+      {
+        id: crypto.randomUUID(),
+        asset_id: 'ahu-003',
+        risk_level: 'high',
+        finding: 'Vibration levels approaching critical threshold (4.2 mm/s)',
+        recommendation: 'Immediate inspection required - possible bearing failure',
+        confidence_score: 0.92,
+        created_at: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
+        resolved_at: null,
+        work_order_id: null,
+        equipment: {
+          name: 'Air Handling Unit 3',
+          location: 'Mechanical Room B'
+        }
+      }
+    ];
+    
+    return mockAlerts;
   }
 
   /**
-   * Create automated work order
+   * Create automated work order (mock implementation)
    */
   static async createAutomatedWorkOrder(workOrder: any) {
-    const { data, error } = await supabase
-      .from('automated_work_orders')
-      .insert(workOrder)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
+    console.log('Creating automated work order (mock):', workOrder);
+    return {
+      id: crypto.randomUUID(),
+      ...workOrder,
+      created_at: new Date().toISOString()
+    };
   }
 }

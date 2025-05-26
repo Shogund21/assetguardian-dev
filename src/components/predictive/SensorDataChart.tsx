@@ -38,58 +38,14 @@ export const SensorDataChart: React.FC<SensorDataChartProps> = ({
       }
     } catch (error) {
       console.error('Error loading sensor data:', error);
+      setSensorReadings([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // Generate mock sensor data for demonstration
-  const generateMockData = () => {
-    const now = new Date();
-    const mockReadings: SensorReading[] = [];
-    
-    for (let i = timeRange * 6; i >= 0; i--) { // Every 10 minutes
-      const timestamp = new Date(now.getTime() - (i * 10 * 60 * 1000));
-      
-      // Vibration data (mm/s)
-      mockReadings.push({
-        id: `vib-${i}`,
-        equipment_id: equipmentId,
-        timestamp_utc: timestamp.toISOString(),
-        sensor_type: 'vibration_mm_s',
-        value: 2.5 + Math.random() * 2 + Math.sin(i * 0.1) * 0.5,
-        unit: 'mm/s',
-        created_at: timestamp.toISOString()
-      });
-      
-      // Temperature data (°C)
-      mockReadings.push({
-        id: `temp-${i}`,
-        equipment_id: equipmentId,
-        timestamp_utc: timestamp.toISOString(),
-        sensor_type: 'bearing_temp_C',
-        value: 65 + Math.random() * 15 + Math.sin(i * 0.05) * 3,
-        unit: '°C',
-        created_at: timestamp.toISOString()
-      });
-      
-      // Current data (A)
-      mockReadings.push({
-        id: `current-${i}`,
-        equipment_id: equipmentId,
-        timestamp_utc: timestamp.toISOString(),
-        sensor_type: 'current_A',
-        value: 58 + Math.random() * 8 + Math.sin(i * 0.03) * 2,
-        unit: 'A',
-        created_at: timestamp.toISOString()
-      });
-    }
-    
-    return mockReadings;
-  };
-
-  // Use mock data if no real data available
-  const displayData = sensorReadings.length > 0 ? sensorReadings : generateMockData();
+  // Use the sensor readings from the service (which includes mock data)
+  const displayData = sensorReadings;
   const sensorTypes = [...new Set(displayData.map(r => r.sensor_type))];
 
   // Prepare chart data
