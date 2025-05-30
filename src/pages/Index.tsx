@@ -13,7 +13,6 @@ const Index = () => {
 
   // Force content to render and stop loading state
   useEffect(() => {
-    // Short timeout to ensure components have time to initialize
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 200);
@@ -23,50 +22,66 @@ const Index = () => {
 
   return (
     <CustomLayout>
-      <div className="dashboard-content min-h-[200px]">
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        
-        {/* Simple welcome panel that always shows */}
-        <div className="my-4 p-4 bg-white rounded-md shadow">
-          <h2 className="text-lg font-medium">Welcome to AssetGuardian</h2>
-          <p className="text-gray-500">Your equipment management platform</p>
+      <div className="dashboard-content min-h-[200px] bg-gray-50">
+        {/* Enhanced Header Section */}
+        <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-700 text-white p-6 rounded-xl mb-6 shadow-lg">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+              <h1 className="text-3xl font-bold mb-2 flex items-center gap-3">
+                <i className="fas fa-shield-alt text-2xl"></i>
+                Dashboard
+              </h1>
+              <p className="text-blue-100 text-lg">Facility Management Overview</p>
+            </div>
+            <div className="mt-4 md:mt-0 flex items-center gap-4">
+              <span className="text-blue-100">Welcome, Admin</span>
+              <button className="bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors duration-200">
+                <i className="fas fa-bell text-lg"></i>
+              </button>
+            </div>
+          </div>
         </div>
         
         {isLoading ? (
           <div className="my-6 animate-pulse space-y-4">
-            <div className="h-24 bg-gray-200 rounded"></div>
-            <div className="h-64 bg-gray-200 rounded"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
+              ))}
+            </div>
+            <div className="h-64 bg-gray-200 rounded-lg"></div>
           </div>
         ) : (
-          <div>
+          <div className="space-y-6">
+            {/* Enhanced KPI Section */}
             <div className="my-6">
               <Stats />
             </div>
             
-            {/* Use simple layout for mobile */}
+            {/* Content Sections */}
             {isMobile ? (
-              <div className="space-y-4">
-                <div className="mb-4">
+              <div className="space-y-6">
+                <div className="bg-white rounded-xl shadow-lg border border-gray-100">
                   <RecentActivities />
                 </div>
-                <div className="mb-4">
+                <div className="bg-white rounded-xl shadow-lg border border-gray-100">
                   <FilterChangesOverview />
                 </div>
-                <div className="mb-4">
+                <div className="bg-white rounded-xl shadow-lg border border-gray-100">
                   <EquipmentOverview />
                 </div>
               </div>
             ) : (
-              <div className="space-y-4 pb-8">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="md:col-span-2">
+              <div className="space-y-6 pb-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="md:col-span-2 bg-white rounded-xl shadow-lg border border-gray-100">
                     <RecentActivities />
                   </div>
-                  <div>
+                  <div className="bg-white rounded-xl shadow-lg border border-gray-100">
                     <FilterChangesOverview />
                   </div>
                 </div>
-                <div>
+                <div className="bg-white rounded-xl shadow-lg border border-gray-100">
                   <EquipmentOverview />
                 </div>
               </div>
