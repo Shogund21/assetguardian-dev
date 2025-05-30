@@ -14,15 +14,18 @@ export const useAuth = () => {
     const getUser = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
+        console.log("Current user:", user);
         setUser(user);
         
         // Validate user email if user exists
         if (user?.email) {
           const validation = await validateEmailAccess(user.email);
+          console.log("User validation result:", validation);
           setUserValidation(validation);
           
           // If user is not valid, sign them out
           if (!validation.isValid) {
+            console.log("Invalid user, signing out");
             await supabase.auth.signOut();
             setUser(null);
           }
@@ -39,15 +42,18 @@ export const useAuth = () => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log("Auth state change:", event, session?.user?.email);
         const sessionUser = session?.user ?? null;
         setUser(sessionUser);
         
         if (sessionUser?.email) {
           const validation = await validateEmailAccess(sessionUser.email);
+          console.log("Session user validation:", validation);
           setUserValidation(validation);
           
           // If user is not valid, sign them out
           if (!validation.isValid) {
+            console.log("Invalid session user, signing out");
             await supabase.auth.signOut();
             setUser(null);
             setUserValidation(null);

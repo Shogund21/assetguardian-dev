@@ -7,12 +7,13 @@ import { validateEmailAccess, sendMagicLink } from "@/services/emailValidationSe
 const Landing = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState<"success" | "error" | "">("");
+  const [messageType, setMessageType] = useState<"success" | "error" | "info" | "">("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAdminSetup, setShowAdminSetup] = useState(false);
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  const showMessage = (msg: string, type: "success" | "error") => {
+  const showMessage = (msg: string, type: "success" | "error" | "info") => {
     setMessage(msg);
     setMessageType(type);
     
@@ -20,7 +21,28 @@ const Landing = () => {
       setTimeout(() => {
         setMessage("");
         setMessageType("");
-      }, 8000); // Extended time for success messages
+      }, 8000);
+    }
+  };
+
+  const handleAdminSetup = async () => {
+    setIsSubmitting(true);
+    
+    try {
+      const { createAdminUser } = await import("@/services/emailValidationService");
+      const result = await createAdminUser(email);
+      
+      if (result.success) {
+        showMessage("Admin setup initiated! Check your email for the access link.", "success");
+        setShowAdminSetup(false);
+        setEmail("");
+      } else {
+        showMessage(result.error || "Failed to set up admin user. Please contact support.", "error");
+      }
+    } catch (error) {
+      showMessage("An error occurred during admin setup. Please try again.", "error");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -29,6 +51,7 @@ const Landing = () => {
     
     setMessage("");
     setMessageType("");
+    setShowAdminSetup(false);
     
     if (!email.trim()) {
       showMessage("Please enter your email address.", "error");
@@ -44,6 +67,7 @@ const Landing = () => {
     
     try {
       // First validate if the email has access
+      const { validateEmailAccess, sendMagicLink } = await import("@/services/emailValidationService");
       const validation = await validateEmailAccess(email);
       
       if (!validation.isValid) {
@@ -58,10 +82,14 @@ const Landing = () => {
       if (result.success) {
         showMessage(`Access link sent! Check your email (${email}) and click the link to sign in.`, "success");
         setEmail("");
+      } else if (result.requiresSetup) {
+        showMessage("Admin user needs to be set up first.", "info");
+        setShowAdminSetup(true);
       } else {
         showMessage(result.error || "Failed to send access link. Please try again.", "error");
       }
     } catch (error) {
+      console.error("Submit error:", error);
       showMessage("An error occurred. Please try again.", "error");
     } finally {
       setIsSubmitting(false);
@@ -144,6 +172,22 @@ const Landing = () => {
               {message && (
                 <div className={`landing-form-message ${messageType}`}>
                   {message}
+                </div>
+              )}
+
+              {showAdminSetup && (
+                <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-blue-800 mb-3">
+                    This is the admin email. Click below to set up the admin user account:
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleAdminSetup}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Setting Up..." : "Set Up Admin Account"}
+                  </button>
                 </div>
               )}
             </form>
