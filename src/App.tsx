@@ -17,6 +17,7 @@ import MaintenanceChecks from "./pages/MaintenanceChecks";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import CustomerManual from "./pages/CustomerManual";
+import Landing from "./pages/Landing";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
             <PageTransition>
               <Routes>
                 <Route path="/" element={<Index />} />
+                <Route path="/landing" element={<Landing />} />
                 <Route path="/equipment" element={<Equipment />} />
                 <Route path="/equipment/:id" element={<EquipmentDetails />} />
                 <Route path="/add-equipment" element={<AddEquipment />} />
