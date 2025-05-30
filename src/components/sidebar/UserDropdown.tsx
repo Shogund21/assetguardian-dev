@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
+import { LogoutButton } from "@/components/auth/LogoutButton";
 
 export function UserDropdown() {
   const isMobile = useIsMobile();
@@ -53,11 +54,11 @@ export function UserDropdown() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="cursor-pointer" onClick={handleItemClick}>
-          <div className="flex w-full justify-between">
-            Log out
+        <DropdownMenuItem className="cursor-pointer p-0">
+          <LogoutButton className="w-full justify-between p-2 h-auto font-normal hover:bg-transparent">
+            <span>Log out</span>
             <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
-          </div>
+          </LogoutButton>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

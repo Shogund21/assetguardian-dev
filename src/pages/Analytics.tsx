@@ -6,7 +6,6 @@ import { DateRange } from "react-day-picker";
 import { sub } from "date-fns";
 import { AnalyticsFilterProvider } from "@/components/analytics/AnalyticsFilterContext";
 import { useToast } from "@/components/ui/use-toast";
-import { LogoutButton } from "@/components/auth/LogoutButton";
 
 // Import refactored components
 import AnalyticsHeader from "@/components/analytics/dashboard/AnalyticsHeader";
@@ -48,18 +47,11 @@ const Analytics = () => {
     <Layout>
       <AnalyticsFilterProvider>
         <div className="w-full max-w-full space-y-6 px-1 sm:px-2 md:px-3 pb-20">
-          {/* Header Section with Logout Button */}
-          <div className="flex justify-between items-start">
-            <div className="flex-1">
-              <AnalyticsHeader 
-                activeView={activeView} 
-                setActiveView={setActiveView} 
-              />
-            </div>
-            <LogoutButton className="ml-4 bg-red-500 hover:bg-red-600 text-white">
-              Logout
-            </LogoutButton>
-          </div>
+          {/* Header Section */}
+          <AnalyticsHeader 
+            activeView={activeView} 
+            setActiveView={setActiveView} 
+          />
           
           {/* Controls Section */}
           <AnalyticsControls 
