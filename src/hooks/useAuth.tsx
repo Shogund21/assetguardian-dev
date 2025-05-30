@@ -1,8 +1,7 @@
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
-import { validateEmailAccess, ValidationResult } from "@/services/emailValidationService";
+import { checkAuthStatus, ValidationResult } from "@/services/emailValidationService";
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -10,63 +9,60 @@ export const useAuth = () => {
   const [userValidation, setUserValidation] = useState<ValidationResult | null>(null);
 
   useEffect(() => {
-    // Get initial user
-    const getUser = async () => {
+    const checkAuth = () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        console.log("Current user:", user);
-        setUser(user);
+        const authStatus = checkAuthStatus();
+        console.log("Auth status check:", authStatus);
         
-        // Validate user email if user exists
-        if (user?.email) {
-          const validation = await validateEmailAccess(user.email);
-          console.log("User validation result:", validation);
-          setUserValidation(validation);
-          
-          // If user is not valid, sign them out
-          if (!validation.isValid) {
-            console.log("Invalid user, signing out");
-            await supabase.auth.signOut();
-            setUser(null);
-          }
+        if (authStatus.isAuthenticated && authStatus.userData) {
+          // Create a mock user object compatible with Supabase User type
+          const mockUser: User = {
+            id: authStatus.userData.email,
+            email: authStatus.userData.email,
+            aud: 'authenticated',
+            role: 'authenticated',
+            email_confirmed_at: new Date().toISOString(),
+            phone: '',
+            confirmed_at: new Date().toISOString(),
+            last_sign_in_at: new Date().toISOString(),
+            app_metadata: {},
+            user_metadata: {},
+            identities: [],
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            is_anonymous: false
+          };
+
+          setUser(mockUser);
+          setUserValidation({
+            isValid: true,
+            userType: authStatus.userData.userType,
+            userData: authStatus.userData.userData
+          });
+        } else {
+          setUser(null);
+          setUserValidation(null);
         }
       } catch (error) {
-        console.error("Error fetching user:", error);
+        console.error("Error checking authentication:", error);
+        setUser(null);
+        setUserValidation(null);
       } finally {
         setIsLoading(false);
       }
     };
 
-    getUser();
+    checkAuth();
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log("Auth state change:", event, session?.user?.email);
-        const sessionUser = session?.user ?? null;
-        setUser(sessionUser);
-        
-        if (sessionUser?.email) {
-          const validation = await validateEmailAccess(sessionUser.email);
-          console.log("Session user validation:", validation);
-          setUserValidation(validation);
-          
-          // If user is not valid, sign them out
-          if (!validation.isValid) {
-            console.log("Invalid session user, signing out");
-            await supabase.auth.signOut();
-            setUser(null);
-            setUserValidation(null);
-          }
-        } else {
-          setUserValidation(null);
-        }
-        
-        setIsLoading(false);
+    // Listen for storage changes (for logout from other tabs)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'assetguardian_auth') {
+        checkAuth();
       }
-    );
+    };
 
-    return () => subscription.unsubscribe();
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const getUserDisplayName = () => {

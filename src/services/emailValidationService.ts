@@ -7,25 +7,18 @@ export interface ValidationResult {
   isValid: boolean;
   userType: "admin" | "technician" | "invalid";
   userData?: any;
-  needsUserCreation?: boolean;
 }
 
 export const validateEmailAccess = async (email: string): Promise<ValidationResult> => {
   console.log("Validating email access for:", email);
   
-  // Check if it's the admin email - no database lookup needed
+  // Check if it's the admin email - immediate access
   if (email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-    console.log("Admin email detected");
-    
-    // Check if admin user exists in Supabase Auth
-    const { data: { user } } = await supabase.auth.getUser();
-    const adminUserExists = user?.email?.toLowerCase() === email.toLowerCase();
-    
+    console.log("Admin email detected - granting access");
     return {
       isValid: true,
       userType: "admin",
-      userData: { email, role: "admin", name: "Admin User" },
-      needsUserCreation: !adminUserExists
+      userData: { email, role: "admin", name: "Admin User" }
     };
   }
 
@@ -53,8 +46,7 @@ export const validateEmailAccess = async (email: string): Promise<ValidationResu
         ...technician,
         role: "technician",
         name: `${technician.firstName} ${technician.lastName}`
-      },
-      needsUserCreation: false
+      }
     };
   } catch (error) {
     console.error("Error validating email:", error);
@@ -65,87 +57,62 @@ export const validateEmailAccess = async (email: string): Promise<ValidationResu
   }
 };
 
-export const sendMagicLink = async (email: string): Promise<{ success: boolean; error?: string; requiresSetup?: boolean }> => {
+// Direct authentication function that bypasses email sending
+export const authenticateUser = async (email: string): Promise<{ success: boolean; error?: string; userData?: any }> => {
   try {
-    console.log("Attempting to send magic link to:", email);
+    console.log("Attempting direct authentication for:", email);
     
-    // First validate the email
+    // Validate the email
     const validation = await validateEmailAccess(email);
     
     if (!validation.isValid) {
       return { success: false, error: "Email not authorized for access" };
     }
 
-    // For admin email, check if user creation is needed
-    if (validation.userType === "admin" && validation.needsUserCreation) {
-      console.log("Admin user needs to be created first");
-      return { 
-        success: false, 
-        error: "Admin user needs to be set up. Please contact system administrator.", 
-        requiresSetup: true 
-      };
-    }
+    // Store authentication state in localStorage
+    const authData = {
+      isAuthenticated: true,
+      email: email.toLowerCase(),
+      userType: validation.userType,
+      userData: validation.userData,
+      timestamp: Date.now()
+    };
 
-    // Send magic link with appropriate options
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        shouldCreateUser: false, // Don't auto-create users
-        emailRedirectTo: window.location.origin
-      }
-    });
-
-    if (error) {
-      console.error("Magic link error:", error);
-      
-      // Handle specific error cases
-      if (error.message.includes("Signups not allowed")) {
-        return { 
-          success: false, 
-          error: "User account needs to be created. Please contact your administrator.",
-          requiresSetup: validation.userType === "admin"
-        };
-      }
-      
-      return { success: false, error: error.message };
-    }
-
-    console.log("Magic link sent successfully");
-    return { success: true };
+    localStorage.setItem('assetguardian_auth', JSON.stringify(authData));
+    console.log("User authenticated successfully:", validation.userType);
+    
+    return { 
+      success: true, 
+      userData: validation.userData 
+    };
   } catch (error) {
-    console.error("Unexpected error sending magic link:", error);
-    return { success: false, error: "Failed to send magic link" };
+    console.error("Authentication error:", error);
+    return { success: false, error: "Authentication failed" };
   }
 };
 
-// New function to handle admin user setup
-export const createAdminUser = async (email: string): Promise<{ success: boolean; error?: string }> => {
+// Function to check if user is currently authenticated
+export const checkAuthStatus = (): { isAuthenticated: boolean; userData?: any } => {
   try {
-    console.log("Creating admin user for:", email);
-    
-    // Verify it's the admin email
-    if (email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
-      return { success: false, error: "Not authorized for admin user creation" };
+    const authData = localStorage.getItem('assetguardian_auth');
+    if (!authData) {
+      return { isAuthenticated: false };
     }
 
-    // Attempt to create the user with signups temporarily enabled
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        shouldCreateUser: true, // Allow user creation for admin
-        emailRedirectTo: window.location.origin
-      }
-    });
-
-    if (error) {
-      console.error("Admin user creation error:", error);
-      return { success: false, error: `Admin setup failed: ${error.message}` };
-    }
-
-    console.log("Admin user creation initiated");
-    return { success: true };
+    const parsed = JSON.parse(authData);
+    // Check if auth is still valid (optional: add expiration logic here)
+    return {
+      isAuthenticated: parsed.isAuthenticated,
+      userData: parsed
+    };
   } catch (error) {
-    console.error("Unexpected error creating admin user:", error);
-    return { success: false, error: "Failed to create admin user" };
+    console.error("Error checking auth status:", error);
+    return { isAuthenticated: false };
   }
+};
+
+// Function to logout user
+export const logoutUser = (): void => {
+  localStorage.removeItem('assetguardian_auth');
+  console.log("User logged out");
 };
