@@ -6,10 +6,12 @@ import RecentActivities from "@/components/dashboard/RecentActivities";
 import EquipmentOverview from "@/components/dashboard/EquipmentOverview";
 import { FilterChangesOverview } from "@/components/dashboard/FilterChangesOverview";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   const isMobile = useIsMobile();
+  const { getUserDisplayName, isLoading: userLoading, isAuthenticated } = useAuth();
 
   // Force content to render and stop loading state
   useEffect(() => {
@@ -34,7 +36,9 @@ const Index = () => {
               <p className="text-blue-100 text-lg">Facility Management Overview</p>
             </div>
             <div className="mt-4 md:mt-0 flex items-center gap-4">
-              <span className="text-blue-100">Welcome, Admin</span>
+              <span className="text-blue-100">
+                {userLoading ? "Loading..." : `Welcome, ${getUserDisplayName()}`}
+              </span>
               <button className="bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors duration-200">
                 <i className="fas fa-bell text-lg"></i>
               </button>
