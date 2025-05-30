@@ -81,6 +81,9 @@ export const authenticateUser = async (email: string): Promise<{ success: boolea
     localStorage.setItem('assetguardian_auth', JSON.stringify(authData));
     console.log("User authenticated successfully:", validation.userType);
     
+    // Dispatch custom event to notify auth state change
+    window.dispatchEvent(new CustomEvent('authStateChanged', { detail: authData }));
+    
     return { 
       success: true, 
       userData: validation.userData 

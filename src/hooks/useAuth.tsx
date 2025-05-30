@@ -8,61 +8,73 @@ export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [userValidation, setUserValidation] = useState<ValidationResult | null>(null);
 
-  useEffect(() => {
-    const checkAuth = () => {
-      try {
-        const authStatus = checkAuthStatus();
-        console.log("Auth status check:", authStatus);
-        
-        if (authStatus.isAuthenticated && authStatus.userData) {
-          // Create a mock user object compatible with Supabase User type
-          const mockUser: User = {
-            id: authStatus.userData.email,
-            email: authStatus.userData.email,
-            aud: 'authenticated',
-            role: 'authenticated',
-            email_confirmed_at: new Date().toISOString(),
-            phone: '',
-            confirmed_at: new Date().toISOString(),
-            last_sign_in_at: new Date().toISOString(),
-            app_metadata: {},
-            user_metadata: {},
-            identities: [],
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            is_anonymous: false
-          };
+  const checkAuth = () => {
+    try {
+      const authStatus = checkAuthStatus();
+      console.log("Auth status check:", authStatus);
+      
+      if (authStatus.isAuthenticated && authStatus.userData) {
+        // Create a mock user object compatible with Supabase User type
+        const mockUser: User = {
+          id: authStatus.userData.email,
+          email: authStatus.userData.email,
+          aud: 'authenticated',
+          role: 'authenticated',
+          email_confirmed_at: new Date().toISOString(),
+          phone: '',
+          confirmed_at: new Date().toISOString(),
+          last_sign_in_at: new Date().toISOString(),
+          app_metadata: {},
+          user_metadata: {},
+          identities: [],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          is_anonymous: false
+        };
 
-          setUser(mockUser);
-          setUserValidation({
-            isValid: true,
-            userType: authStatus.userData.userType,
-            userData: authStatus.userData.userData
-          });
-        } else {
-          setUser(null);
-          setUserValidation(null);
-        }
-      } catch (error) {
-        console.error("Error checking authentication:", error);
+        setUser(mockUser);
+        setUserValidation({
+          isValid: true,
+          userType: authStatus.userData.userType,
+          userData: authStatus.userData.userData
+        });
+      } else {
         setUser(null);
         setUserValidation(null);
-      } finally {
-        setIsLoading(false);
       }
-    };
+    } catch (error) {
+      console.error("Error checking authentication:", error);
+      setUser(null);
+      setUserValidation(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     checkAuth();
 
     // Listen for storage changes (for logout from other tabs)
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'assetguardian_auth') {
+        console.log("Storage change detected, rechecking auth");
         checkAuth();
       }
     };
 
+    // Listen for custom auth update events
+    const handleAuthUpdate = () => {
+      console.log("Auth update event received, rechecking auth");
+      checkAuth();
+    };
+
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener('authStateChanged', handleAuthUpdate);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('authStateChanged', handleAuthUpdate);
+    };
   }, []);
 
   const getUserDisplayName = () => {
@@ -96,6 +108,7 @@ export const useAuth = () => {
     isAuthenticated: !!user && !!userValidation?.isValid,
     userValidation,
     isAdmin,
-    isTechnician
+    isTechnician,
+    forceAuthCheck: checkAuth
   };
 };

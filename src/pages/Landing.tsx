@@ -49,10 +49,12 @@ const Landing = () => {
       
       if (result.success) {
         showMessage(`Access granted! Redirecting to dashboard...`, "success");
-        // Redirect to dashboard after short delay
+        
+        // Use a more reliable navigation approach
         setTimeout(() => {
-          navigate("/");
-        }, 1500);
+          // Force navigation to root and reload to ensure auth state is picked up
+          window.location.href = "/";
+        }, 1000);
       } else {
         showMessage(result.error || "Access denied. This email is not authorized.", "error");
       }
