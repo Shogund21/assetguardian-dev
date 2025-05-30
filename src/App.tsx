@@ -8,7 +8,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { CompanyProvider } from "@/contexts/CompanyContext";
 import PageTransition from "@/components/PageTransition";
 
-import Index from "./pages/Index";
+import RootPage from "@/components/RootPage";
 import Equipment from "./pages/Equipment";
 import EquipmentDetails from "./pages/EquipmentDetails";
 import AddEquipment from "./pages/AddEquipment";
@@ -31,7 +31,7 @@ const App = () => (
           <SidebarProvider>
             <PageTransition>
               <Routes>
-                <Route path="/" element={<Index />} />
+                <Route path="/" element={<RootPage />} />
                 <Route path="/landing" element={<Landing />} />
                 <Route path="/equipment" element={<Equipment />} />
                 <Route path="/equipment/:id" element={<EquipmentDetails />} />
