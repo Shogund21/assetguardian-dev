@@ -11,7 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   const isMobile = useIsMobile();
-  const { getUserDisplayName, isLoading: userLoading, isAuthenticated } = useAuth();
+  const { getUserDisplayName, isLoading: userLoading, isAuthenticated, isAdmin, userValidation } = useAuth();
 
   // Force content to render and stop loading state
   useEffect(() => {
@@ -36,9 +36,16 @@ const Index = () => {
               <p className="text-blue-100 text-lg">Facility Management Overview</p>
             </div>
             <div className="mt-4 md:mt-0 flex items-center gap-4">
-              <span className="text-blue-100">
-                {userLoading ? "Loading..." : `Welcome, ${getUserDisplayName()}`}
-              </span>
+              <div className="text-right">
+                <span className="text-blue-100 block">
+                  {userLoading ? "Loading..." : `Welcome, ${getUserDisplayName()}`}
+                </span>
+                {userValidation && (
+                  <span className="text-xs text-blue-200">
+                    {isAdmin() ? "Administrator" : "Technician"} Access
+                  </span>
+                )}
+              </div>
               <button className="bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors duration-200">
                 <i className="fas fa-bell text-lg"></i>
               </button>

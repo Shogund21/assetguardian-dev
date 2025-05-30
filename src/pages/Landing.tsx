@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "../styles/landing.css";
+import { validateEmailAccess, sendMagicLink } from "@/services/emailValidationService";
 
 const Landing = () => {
   const [email, setEmail] = useState("");
@@ -19,7 +20,7 @@ const Landing = () => {
       setTimeout(() => {
         setMessage("");
         setMessageType("");
-      }, 5000);
+      }, 8000); // Extended time for success messages
     }
   };
 
@@ -41,12 +42,30 @@ const Landing = () => {
     
     setIsSubmitting(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // First validate if the email has access
+      const validation = await validateEmailAccess(email);
+      
+      if (!validation.isValid) {
+        showMessage("Access denied. This email is not authorized to access the system. Please contact your administrator.", "error");
+        setIsSubmitting(false);
+        return;
+      }
+      
+      // Send magic link
+      const result = await sendMagicLink(email);
+      
+      if (result.success) {
+        showMessage(`Access link sent! Check your email (${email}) and click the link to sign in.`, "success");
+        setEmail("");
+      } else {
+        showMessage(result.error || "Failed to send access link. Please try again.", "error");
+      }
+    } catch (error) {
+      showMessage("An error occurred. Please try again.", "error");
+    } finally {
       setIsSubmitting(false);
-      showMessage("Success! Check your email to start your free trial.", "success");
-      setEmail("");
-    }, 1500);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -109,7 +128,7 @@ const Landing = () => {
                   type="email"
                   value={email}
                   onChange={handleInputChange}
-                  placeholder="Enter your work email"
+                  placeholder="Enter your work email to access the system"
                   className="landing-email-form__input"
                   disabled={isSubmitting}
                 />
@@ -118,7 +137,7 @@ const Landing = () => {
                   className="landing-email-form__button"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "Processing..." : "Start Free Trial"}
+                  {isSubmitting ? "Sending Link..." : "Send Access Link"}
                 </button>
               </div>
               
@@ -130,7 +149,7 @@ const Landing = () => {
             </form>
             
             <p className="landing-hero__form-note">
-              Free 14-day trial • No credit card required
+              Access restricted to authorized technicians and administrators
             </p>
           </div>
         </div>
