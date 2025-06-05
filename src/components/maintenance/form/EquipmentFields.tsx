@@ -1,7 +1,7 @@
 
 import React from "react";
 import { UseFormReturn } from "react-hook-form";
-import { MaintenanceFormValues } from "./hooks/useMaintenanceForm";
+import { MaintenanceFormValues } from "./hooks/schema/maintenanceFormSchema";
 import MaintenanceReadings from "./MaintenanceReadings";
 import MaintenanceStatus from "./MaintenanceStatus";
 import MaintenanceObservations from "./MaintenanceObservations";

@@ -5,11 +5,8 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/comp
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { MaintenanceFormValues } from "./hooks/useMaintenanceForm";
+import { MaintenanceFormValues } from "./hooks/schema/maintenanceFormSchema";
 import FormSection from "./FormSection";
-import ElevatorOperationalStatus from "./elevator/ElevatorOperationalStatus";
-import ElevatorSafetyFeatures from "./elevator/ElevatorSafetyFeatures";
-import ElevatorNotes from "./elevator/ElevatorNotes";
 
 interface ElevatorMaintenanceFieldsProps {
   form: UseFormReturn<MaintenanceFormValues>;
@@ -28,7 +25,6 @@ const ElevatorMaintenanceFields = ({ form }: ElevatorMaintenanceFieldsProps) => 
                 <FormLabel>Elevator Operation</FormLabel>
                 <Select 
                   onValueChange={field.onChange} 
-                  defaultValue={field.value || ""}
                   value={field.value || ""}
                 >
                   <FormControl>
@@ -56,7 +52,6 @@ const ElevatorMaintenanceFields = ({ form }: ElevatorMaintenanceFieldsProps) => 
                 <FormLabel>Door Operation</FormLabel>
                 <Select 
                   onValueChange={field.onChange} 
-                  defaultValue={field.value || ""}
                   value={field.value || ""}
                 >
                   <FormControl>
@@ -127,7 +122,6 @@ const ElevatorMaintenanceFields = ({ form }: ElevatorMaintenanceFieldsProps) => 
                 <FormLabel>Emergency Phone</FormLabel>
                 <Select 
                   onValueChange={field.onChange} 
-                  defaultValue={field.value || ""}
                   value={field.value || ""}
                 >
                   <FormControl>
@@ -154,7 +148,6 @@ const ElevatorMaintenanceFields = ({ form }: ElevatorMaintenanceFieldsProps) => 
                 <FormLabel>Elevator Lighting</FormLabel>
                 <Select 
                   onValueChange={field.onChange} 
-                  defaultValue={field.value || ""}
                   value={field.value || ""}
                 >
                   <FormControl>

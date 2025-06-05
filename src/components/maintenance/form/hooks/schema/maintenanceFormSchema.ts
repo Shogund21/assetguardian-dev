@@ -11,7 +11,7 @@ export const naString = z.union([z.string(), z.literal("NA")]);
  */
 export const maintenanceFormSchema = z.object({
   selected_location: z.string().optional(),
-  location_id: z.string().optional(),
+  location_id: z.string().min(1, "Location is required"),
   equipment_id: z.string().min(1, "Equipment is required"),
   technician_id: z.string().min(1, "Technician is required"),
   equipment_type: z.string().optional(),
@@ -93,7 +93,7 @@ export const maintenanceFormSchema = z.object({
   bearing_lubrication_status: naString.optional(),
   rtu_notes: z.string().optional().nullable(),
   
-  // Elevator fields
+  // Elevator fields (ADDED MISSING FIELDS)
   elevator_operation: z.string().optional(),
   door_operation: z.string().optional(),
   unusual_noise_elevator: z.boolean().optional(),
