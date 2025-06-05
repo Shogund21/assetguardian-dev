@@ -38,13 +38,17 @@ const MaintenanceCheckForm = ({
   // Track form value changes for debugging
   const locationId = form.watch('location_id');
   const equipmentId = form.watch('equipment_id');
+  const technicianId = form.watch('technician_id');
 
   useEffect(() => {
     console.log('Form values changed:', { 
       locationId, 
-      equipmentId 
+      equipmentId,
+      technicianId,
+      equipmentIdType: typeof equipmentId,
+      equipmentIdValue: equipmentId
     });
-  }, [locationId, equipmentId]);
+  }, [locationId, equipmentId, technicianId]);
 
   // Log initialData to help with debugging
   useEffect(() => {
@@ -89,26 +93,55 @@ const MaintenanceCheckForm = ({
         throw error;
       }
       
+      console.log('Technicians fetched:', data?.length || 0, 'technicians');
       return data || [];
     },
   });
 
-  const selectedEquipment = equipment?.find(
-    (eq) => eq.id === form.watch('equipment_id')
-  );
+  // FIXED: Properly find selected equipment using clean string comparison
+  const selectedEquipment = equipment?.find((eq) => {
+    const formEquipmentId = typeof equipmentId === 'string' ? equipmentId : String(equipmentId || '');
+    const isMatch = eq.id === formEquipmentId;
+    if (isMatch) {
+      console.log('Found selected equipment:', eq.name, 'with ID:', eq.id);
+    }
+    return isMatch;
+  });
 
+  // FIXED: Improved equipment type detection with better logging
   const getEquipmentType = () => {
-    if (!selectedEquipment) return null;
+    if (!selectedEquipment) {
+      console.log('No selected equipment for type detection');
+      return null;
+    }
+    
     const name = selectedEquipment.name.toLowerCase();
-    if (name.includes('ahu') || name.includes('air handler')) return 'ahu';
-    if (name.includes('chiller')) return 'chiller';
-    if (name.includes('cooling tower')) return 'cooling_tower';
-    if (name.includes('elevator')) return 'elevator';
-    if (name.includes('restroom')) return 'restroom';
-    return 'general';
+    console.log('Detecting equipment type for:', name);
+    
+    let detectedType = null;
+    if (name.includes('ahu') || name.includes('air handler')) detectedType = 'ahu';
+    else if (name.includes('chiller')) detectedType = 'chiller';
+    else if (name.includes('rtu') || name.includes('rooftop')) detectedType = 'rtu';
+    else if (name.includes('cooling tower')) detectedType = 'cooling_tower';
+    else if (name.includes('elevator')) detectedType = 'elevator';
+    else if (name.includes('restroom')) detectedType = 'restroom';
+    else detectedType = 'general';
+    
+    console.log('Equipment type detected:', detectedType);
+    return detectedType;
   };
 
   const equipmentType = getEquipmentType();
+
+  // Additional debugging for context values
+  useEffect(() => {
+    console.log('Context values debug:', {
+      selectedEquipment: selectedEquipment?.name || 'None',
+      equipmentType,
+      techniciansCount: technicians?.length || 0,
+      equipmentCount: equipment?.length || 0
+    });
+  }, [selectedEquipment, equipmentType, technicians, equipment]);
 
   const onSubmitForm = async (values: any) => {
     console.log('Form submission initiated with values:', values);

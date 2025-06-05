@@ -10,6 +10,11 @@ interface TechnicianSelectProps {
 }
 
 const TechnicianSelect = ({ form, technicians }: TechnicianSelectProps) => {
+  console.log('TechnicianSelect render:', {
+    techniciansCount: technicians?.length || 0,
+    currentValue: form.watch('technician_id')
+  });
+
   return (
     <FormField
       control={form.control}
@@ -18,9 +23,11 @@ const TechnicianSelect = ({ form, technicians }: TechnicianSelectProps) => {
         <FormItem>
           <FormLabel className="text-base font-semibold text-gray-700">Technician</FormLabel>
           <Select
-            onValueChange={field.onChange}
-            value={field.value || "no-technician"}
-            defaultValue={field.value || "no-technician"}
+            onValueChange={(value) => {
+              console.log('Technician selected:', value);
+              field.onChange(value === "no-technician" ? "" : value);
+            }}
+            value={field.value || ""}
           >
             <FormControl>
               <SelectTrigger 
@@ -36,7 +43,7 @@ const TechnicianSelect = ({ form, technicians }: TechnicianSelectProps) => {
               className="z-[1000] bg-white divide-y divide-gray-100 rounded-lg shadow-lg w-[--radix-select-trigger-width] max-h-[300px] overflow-y-auto"
             >
               <SelectItem 
-                value="no-technician" 
+                value="" 
                 className="py-3 px-4 hover:bg-blue-50 cursor-pointer focus:bg-blue-50 focus:text-blue-600"
               >
                 No technician selected
