@@ -27,7 +27,7 @@ const TechnicianSelect = ({ form, technicians }: TechnicianSelectProps) => {
               console.log('Technician selected:', value);
               field.onChange(value === "no-technician" ? "" : value);
             }}
-            value={field.value || ""}
+            value={field.value || "no-technician"}
           >
             <FormControl>
               <SelectTrigger 
@@ -43,7 +43,7 @@ const TechnicianSelect = ({ form, technicians }: TechnicianSelectProps) => {
               className="z-[1000] bg-white divide-y divide-gray-100 rounded-lg shadow-lg w-[--radix-select-trigger-width] max-h-[300px] overflow-y-auto"
             >
               <SelectItem 
-                value="" 
+                value="no-technician" 
                 className="py-3 px-4 hover:bg-blue-50 cursor-pointer focus:bg-blue-50 focus:text-blue-600"
               >
                 No technician selected
