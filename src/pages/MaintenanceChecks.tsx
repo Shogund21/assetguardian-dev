@@ -1,6 +1,6 @@
 
 import Layout from "@/components/Layout";
-import MaintenanceCheckForm from "@/components/maintenance/MaintenanceCheckFormRefactored";
+import MaintenanceCheckFormRefactored from "@/components/maintenance/MaintenanceCheckFormRefactored";
 import MaintenanceHistory from "@/components/maintenance/MaintenanceHistory";
 import DocumentManager from "@/components/maintenance/documents/DocumentManager";
 import { Button } from "@/components/ui/button";
@@ -95,7 +95,7 @@ const MaintenanceChecks = () => {
 
         {showForm && (
           <div className="bg-white rounded-lg shadow-sm p-4 animate-fade-in">
-            <MaintenanceCheckForm onComplete={() => setShowForm(false)} />
+            <MaintenanceCheckFormRefactored onComplete={() => setShowForm(false)} />
           </div>
         )}
       </div>
