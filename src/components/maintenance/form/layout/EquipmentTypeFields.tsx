@@ -12,9 +12,19 @@ import ChillerMaintenanceFields from '../ChillerMaintenanceFields';
 import RTUMaintenanceFields from '../RTUMaintenanceFields';
 
 const EquipmentTypeFields = () => {
-  const { form, equipmentType } = useMaintenanceFormContext();
+  const { form, equipmentType, selectedEquipment } = useMaintenanceFormContext();
   
-  console.log('Rendering EquipmentTypeFields with type:', equipmentType);
+  console.log('EquipmentTypeFields - equipmentType:', equipmentType);
+  console.log('EquipmentTypeFields - selectedEquipment:', selectedEquipment);
+  
+  // If no equipment is selected, show a message
+  if (!selectedEquipment) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        <p>Please select equipment to view the maintenance checklist</p>
+      </div>
+    );
+  }
   
   // Render appropriate fields based on equipment type
   switch (equipmentType) {

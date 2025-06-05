@@ -11,7 +11,7 @@ const MaintenanceFormBody = () => {
 
   return (
     <>
-      <FormSection>
+      <FormSection title="Basic Information">
         <MaintenanceBasicInfo 
           form={form} 
           equipment={equipment} 
@@ -19,11 +19,11 @@ const MaintenanceFormBody = () => {
         />
       </FormSection>
       
-      <FormSection>
+      <FormSection title="Equipment Maintenance Checklist">
         <EquipmentTypeFields />
       </FormSection>
 
-      <FormSection>
+      <FormSection title="Documents">
         <DocumentManager equipmentId={form.watch('equipment_id')} />
       </FormSection>
     </>

@@ -95,13 +95,21 @@ const MaintenanceCheckForm = ({ onComplete }: MaintenanceCheckFormProps) => {
           onSubmit(form.getValues());
         }}
       >
-        <MaintenanceBasicInfo 
-          form={form} 
-          equipment={equipment || []} 
-          technicians={technicians || []} 
-        />
-        
-        <EquipmentFields form={form} equipmentType={equipmentType} />
+        <div className="space-y-6">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Basic Information</h2>
+            <MaintenanceBasicInfo 
+              form={form} 
+              equipment={equipment || []} 
+              technicians={technicians || []} 
+            />
+          </div>
+          
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Equipment Maintenance Checklist</h2>
+            <EquipmentFields form={form} equipmentType={equipmentType} />
+          </div>
+        </div>
 
         <FormSubmitButtons onCancel={onComplete} isSubmitting={isSubmitting} />
       </form>
