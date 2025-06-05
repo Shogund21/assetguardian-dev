@@ -105,6 +105,8 @@ export interface MaintenanceCheck {
   // Elevator specific fields
   elevator_operation: string | null;
   door_operation: string | null;
+  unusual_noise_elevator: boolean | null;
+  vibration_elevator: boolean | null;
   emergency_phone: string | null;
   elevator_lighting: string | null;
   elevator_notes: string | null;
