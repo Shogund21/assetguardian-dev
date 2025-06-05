@@ -1,39 +1,23 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import PasswordProtectionModal from "./PasswordProtectionModal";
+
+import { useAuth } from "@/hooks/useAuth";
 
 interface EquipmentAuthProps {
   children: React.ReactNode;
 }
 
 export const EquipmentAuth = ({ children }: EquipmentAuthProps) => {
-  const navigate = useNavigate();
-  const [showPasswordModal, setShowPasswordModal] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { isAdmin, hasFullAccess, isLoading } = useAuth();
 
-  useEffect(() => {
-    const wasAuthenticated = sessionStorage.getItem("equipment-authenticated");
-    if (wasAuthenticated === "true") {
-      setIsAuthenticated(true);
-      setShowPasswordModal(false);
-    }
-  }, []);
-
-  const handlePasswordSuccess = () => {
-    setIsAuthenticated(true);
-    setShowPasswordModal(false);
-    sessionStorage.setItem("equipment-authenticated", "true");
-  };
-
-  if (!isAuthenticated) {
-    return (
-      <PasswordProtectionModal
-        isOpen={showPasswordModal}
-        onClose={() => navigate("/")}
-        onSuccess={handlePasswordSuccess}
-      />
-    );
+  if (isLoading) {
+    return <div className="flex items-center justify-center p-8">Loading...</div>;
   }
 
+  // Admin users and users with full access bypass any restrictions
+  if (isAdmin() || hasFullAccess()) {
+    return <>{children}</>;
+  }
+
+  // For non-admin users, you could add additional checks here if needed
+  // For now, we'll allow access for all authenticated users
   return <>{children}</>;
 };

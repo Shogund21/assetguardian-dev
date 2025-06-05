@@ -101,6 +101,15 @@ export const useAuth = () => {
     return userValidation?.userType === "technician";
   };
 
+  const hasPermission = (permission: string) => {
+    if (isAdmin()) return true; // Admin has all permissions
+    return userValidation?.userData?.permissions?.includes(permission) || false;
+  };
+
+  const hasFullAccess = () => {
+    return isAdmin() || userValidation?.userData?.hasFullAccess === true;
+  };
+
   return {
     user,
     isLoading,
@@ -109,6 +118,8 @@ export const useAuth = () => {
     userValidation,
     isAdmin,
     isTechnician,
+    hasPermission,
+    hasFullAccess,
     forceAuthCheck: checkAuth
   };
 };

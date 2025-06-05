@@ -14,11 +14,17 @@ export const validateEmailAccess = async (email: string): Promise<ValidationResu
   
   // Check if it's the admin email - immediate access
   if (email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-    console.log("Admin email detected - granting access");
+    console.log("Admin email detected - granting full access");
     return {
       isValid: true,
       userType: "admin",
-      userData: { email, role: "admin", name: "Admin User" }
+      userData: { 
+        email, 
+        role: "admin", 
+        name: "Admin User",
+        hasFullAccess: true,
+        permissions: ["equipment", "settings", "analytics", "projects", "maintenance", "technicians", "all"]
+      }
     };
   }
 
@@ -45,7 +51,9 @@ export const validateEmailAccess = async (email: string): Promise<ValidationResu
       userData: {
         ...technician,
         role: "technician",
-        name: `${technician.firstName} ${technician.lastName}`
+        name: `${technician.firstName} ${technician.lastName}`,
+        hasFullAccess: false,
+        permissions: ["equipment", "maintenance", "analytics"]
       }
     };
   } catch (error) {
