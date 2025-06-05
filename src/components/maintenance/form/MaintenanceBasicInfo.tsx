@@ -20,6 +20,7 @@ const MaintenanceBasicInfo = ({ form, equipment, technicians }: MaintenanceBasic
   console.log('MaintenanceBasicInfo render:', { 
     locationId, 
     equipmentId,
+    techniciansCount: technicians?.length || 0,
     values: form.getValues() 
   });
 
@@ -61,6 +62,7 @@ const MaintenanceBasicInfo = ({ form, equipment, technicians }: MaintenanceBasic
       {/* Only pass the locationId to EquipmentSelect if it exists */}
       <EquipmentSelect form={form} locationId={locationId || ''} />
       
+      {/* Add the TechnicianSelect component */}
       <TechnicianSelect form={form} technicians={technicians} />
     </div>
   );
