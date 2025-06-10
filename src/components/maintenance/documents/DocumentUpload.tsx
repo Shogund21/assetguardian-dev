@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -158,8 +159,7 @@ const DocumentUpload = ({
           id="file-upload"
         />
         <Button
-          variant="outline"
-          className="mt-4"
+          className="mt-4 bg-blue-900 hover:bg-blue-800 text-white"
           onClick={() => document.getElementById('file-upload')?.click()}
         >
           Select Files
@@ -203,7 +203,7 @@ const DocumentUpload = ({
         <Button
           onClick={uploadFiles}
           disabled={!files || isUploading}
-          className="w-full bg-blue-500 text-white hover:bg-blue-600"
+          className="w-full bg-blue-900 hover:bg-blue-800 text-white"
         >
           {isUploading ? "Uploading..." : "Upload Documents"}
         </Button>
