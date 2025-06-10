@@ -46,7 +46,7 @@ const DocumentManager = ({
         </h2>
         <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
           <Button 
-            className={isMobile ? "px-3 py-1 h-8" : ""} 
+            className={`${isMobile ? "px-3 py-1 h-8" : ""} bg-blue-900 hover:bg-blue-800 text-white`}
             size={isMobile ? "sm" : "default"}
             onClick={() => setIsUploadOpen(true)}
           >

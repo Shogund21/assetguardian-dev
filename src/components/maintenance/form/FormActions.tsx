@@ -32,7 +32,7 @@ const FormActions = ({
         variant="outline"
         onClick={onCancel}
         disabled={isSubmitting}
-        className="text-base font-medium"
+        className="text-base font-medium bg-blue-900 hover:bg-blue-800 text-white border-blue-900"
       >
         Cancel
       </Button>
@@ -40,7 +40,7 @@ const FormActions = ({
       <Button 
         type={onSubmit ? "button" : "submit"}
         onClick={onSubmit ? handleClick : undefined}
-        className={`${isMobile ? 'w-full' : ''} bg-[#1EAEDB] hover:bg-[#33C3F0] text-white text-base font-medium`}
+        className={`${isMobile ? 'w-full' : ''} bg-blue-900 hover:bg-blue-800 text-white text-base font-medium`}
         disabled={isSubmitting}
       >
         {isSubmitting ? (

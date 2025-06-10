@@ -46,7 +46,7 @@ const MaintenanceChecks = () => {
             <Button 
               onClick={() => setShowForm(false)}
               variant="outline"
-              className="w-full md:w-auto flex items-center justify-center"
+              className="w-full md:w-auto flex items-center justify-center bg-blue-900 hover:bg-blue-800 text-white border-blue-900"
               size={isMobile ? "default" : "lg"}
             >
               <ArrowLeft className="mr-2 h-4 w-4" /> Back to List
@@ -57,7 +57,7 @@ const MaintenanceChecks = () => {
                 setShowForm(true);
                 setActiveTab("form");
               }}
-              className={`${isMobile ? 'w-full py-2 text-sm' : ''} bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow transition-all duration-200`}
+              className={`${isMobile ? 'w-full py-2 text-sm' : ''} bg-blue-900 hover:bg-blue-800 text-white shadow transition-all duration-200`}
               size={isMobile ? "default" : "lg"}
             >
               <Plus className={`${isMobile ? 'mr-1 h-4 w-4' : 'mr-2 h-5 w-5'}`} /> New Check

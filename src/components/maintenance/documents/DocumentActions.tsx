@@ -19,7 +19,7 @@ export const DocumentActions = ({ document, onDownload, onDelete }: DocumentActi
         variant="outline"
         size={isMobile ? "sm" : "icon"}
         onClick={() => onDownload(document)}
-        className="h-8 w-8"
+        className="h-8 w-8 bg-blue-900 hover:bg-blue-800 text-white border-blue-900"
       >
         <Download className="h-4 w-4" />
       </Button>
@@ -27,7 +27,7 @@ export const DocumentActions = ({ document, onDownload, onDelete }: DocumentActi
         variant="outline"
         size={isMobile ? "sm" : "icon"}
         onClick={() => onDelete(document)}
-        className="h-8 w-8"
+        className="h-8 w-8 bg-blue-900 hover:bg-blue-800 text-white border-blue-900"
       >
         <Trash2 className="h-4 w-4" />
       </Button>
