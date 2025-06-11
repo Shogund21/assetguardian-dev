@@ -1,3 +1,4 @@
+
 import { z } from "zod";
 
 export const maintenanceFormSchema = z.object({
@@ -55,6 +56,33 @@ export const maintenanceFormSchema = z.object({
   floor_condition: z.string().optional(),
   restroom_notes: z.string().optional(),
   
+  // RTU specific fields
+  heat_exchanger_condition: z.string().optional(),
+  gas_pressure_reading: z.string().optional(),
+  ignition_system_status: z.string().optional(),
+  heat_strip_status: z.string().optional(),
+  flue_gas_temperature: z.string().optional(),
+  high_side_pressure: z.string().optional(),
+  low_side_pressure: z.string().optional(),
+  compressor_operation_status: z.string().optional(),
+  condenser_coil_condition: z.string().optional(),
+  evaporator_coil_condition: z.string().optional(),
+  expansion_valve_operation: z.string().optional(),
+  supply_air_temperature: z.string().optional(),
+  return_air_temperature: z.string().optional(),
+  static_pressure_reading: z.string().optional(),
+  filter_pressure_drop: z.string().optional(),
+  ductwork_condition: z.string().optional(),
+  thermostat_calibration: z.string().optional(),
+  control_sequence_verified: z.boolean().optional(),
+  safety_circuit_operation: z.string().optional(),
+  economizer_operation: z.string().optional(),
+  fan_motor_amp_draw: z.string().optional(),
+  blower_wheel_condition: z.string().optional(),
+  belt_tension_status: z.string().optional(),
+  bearing_lubrication_status: z.string().optional(),
+  rtu_notes: z.string().optional(),
+  
   // New tiered maintenance fields
   evaporator_entering_temp: z.string().optional(),
   evaporator_leaving_temp: z.string().optional(),
@@ -68,7 +96,6 @@ export const maintenanceFormSchema = z.object({
   supply_air_temp: z.string().optional(),
   return_air_temp: z.string().optional(),
   static_pressure: z.string().optional(),
-  filter_pressure_drop: z.string().optional(),
   fan_motor_current: z.string().optional(),
   
   // Internal tracking
