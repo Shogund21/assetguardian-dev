@@ -16,6 +16,7 @@ const FormSubmitButtons = ({ onCancel, isSubmitting }: FormSubmitButtonsProps) =
         variant="outline"
         onClick={onCancel}
         disabled={isSubmitting}
+        className="bg-blue-900 hover:bg-blue-800 text-white border-blue-900"
       >
         Cancel
       </Button>
@@ -23,7 +24,7 @@ const FormSubmitButtons = ({ onCancel, isSubmitting }: FormSubmitButtonsProps) =
         type="submit"
         variant="default"
         disabled={isSubmitting}
-        className={`bg-[#1EAEDB] hover:bg-[#33C3F0] text-white ${isSubmitting ? "opacity-70" : ""}`}
+        className={`bg-blue-900 hover:bg-blue-800 text-white ${isSubmitting ? "opacity-70" : ""}`}
       >
         {isSubmitting ? (
           <>

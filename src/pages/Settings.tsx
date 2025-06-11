@@ -29,7 +29,7 @@ const Settings = () => {
               variant="outline" 
               size="sm" 
               onClick={toggleTabList} 
-              className="flex items-center text-sm"
+              className="flex items-center text-sm bg-blue-900 hover:bg-blue-800 text-white border-blue-900"
             >
               {showTabList ? "Hide" : "Show"} Menu
             </Button>
