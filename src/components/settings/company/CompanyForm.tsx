@@ -172,6 +172,7 @@ export const CompanyForm = ({ initialData, onSuccess }: CompanyFormProps) => {
           <Button
             type="submit"
             disabled={isSubmitting}
+            className="bg-blue-900 hover:bg-blue-800 text-white"
           >
             {isSubmitting
               ? "Saving..."
