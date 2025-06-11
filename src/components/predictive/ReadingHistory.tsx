@@ -14,10 +14,24 @@ interface ReadingHistoryProps {
   readingType?: string;
 }
 
+interface SensorReading {
+  id: string;
+  equipment_id: string;
+  sensor_type: string;
+  value: number;
+  unit: string;
+  timestamp_utc: string;
+}
+
+interface ProcessedReading extends SensorReading {
+  timestamp: number;
+  formattedDate: string;
+}
+
 const ReadingHistory = ({ equipmentId, equipmentType, readingType }: ReadingHistoryProps) => {
   const { data: readings = [], isLoading } = useQuery({
     queryKey: ['reading-history', equipmentId, readingType],
-    queryFn: async () => {
+    queryFn: async (): Promise<SensorReading[]> => {
       let query = supabase
         .from('sensor_readings')
         .select('*')
@@ -49,7 +63,7 @@ const ReadingHistory = ({ equipmentId, equipmentType, readingType }: ReadingHist
   }
 
   // Group readings by sensor type
-  const groupedReadings = readings.reduce((acc, reading) => {
+  const groupedReadings = readings.reduce((acc: Record<string, ProcessedReading[]>, reading) => {
     if (!acc[reading.sensor_type]) {
       acc[reading.sensor_type] = [];
     }
@@ -59,7 +73,7 @@ const ReadingHistory = ({ equipmentId, equipmentType, readingType }: ReadingHist
       formattedDate: format(new Date(reading.timestamp_utc), 'MMM dd, HH:mm'),
     });
     return acc;
-  }, {} as Record<string, any[]>);
+  }, {});
 
   const getStatusBadge = (value: number, sensorType: string) => {
     const standards = getReadingStandards(equipmentType, sensorType);
@@ -128,7 +142,7 @@ const ReadingHistory = ({ equipmentId, equipmentType, readingType }: ReadingHist
                       <>
                         <Line 
                           type="monotone" 
-                          dataKey={() => standards.normalRange.min}
+                          dataKey={() => standards.normalRange!.min}
                           stroke="#10b981" 
                           strokeDasharray="5 5"
                           strokeWidth={1}
@@ -136,7 +150,7 @@ const ReadingHistory = ({ equipmentId, equipmentType, readingType }: ReadingHist
                         />
                         <Line 
                           type="monotone" 
-                          dataKey={() => standards.normalRange.max}
+                          dataKey={() => standards.normalRange!.max}
                           stroke="#10b981" 
                           strokeDasharray="5 5"
                           strokeWidth={1}

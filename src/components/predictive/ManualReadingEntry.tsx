@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { getEquipmentReadingTemplate } from "../utils/equipmentTemplates";
+import { getEquipmentReadingTemplate } from "@/utils/equipmentTemplates";
 
 const readingSchema = z.object({
   equipment_id: z.string().min(1, "Equipment is required"),
