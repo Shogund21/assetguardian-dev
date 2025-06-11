@@ -1,14 +1,10 @@
-
 import React from "react";
 import { UseFormReturn } from "react-hook-form";
 import { MaintenanceFormValues } from "./hooks/schema/maintenanceFormSchema";
-import MaintenanceReadings from "./MaintenanceReadings";
-import MaintenanceStatus from "./MaintenanceStatus";
-import MaintenanceObservations from "./MaintenanceObservations";
-import AHUMaintenanceFields from "./AHUMaintenanceFields";
+import MaintenanceFrequencySelector from "./MaintenanceFrequencySelector";
+import TieredEquipmentFields from "./TieredEquipmentFields";
 import ElevatorMaintenanceFields from "./ElevatorMaintenanceFields";
 import RestroomMaintenanceFields from "./RestroomMaintenanceFields";
-import ChillerMaintenanceFields from "./ChillerMaintenanceFields";
 import RTUMaintenanceFields from "./RTUMaintenanceFields";
 
 interface EquipmentFieldsProps {
@@ -19,15 +15,17 @@ interface EquipmentFieldsProps {
 const EquipmentFields = ({ form, equipmentType }: EquipmentFieldsProps) => {
   console.log('Rendering EquipmentFields with type:', equipmentType);
   
-  // Render appropriate fields based on equipment type
-  if (equipmentType === 'ahu') {
-    return <AHUMaintenanceFields form={form} />;
+  // Use tiered maintenance for chiller and AHU
+  if (equipmentType === 'chiller' || equipmentType === 'ahu') {
+    return (
+      <div className="space-y-6">
+        <MaintenanceFrequencySelector form={form} equipmentType={equipmentType} />
+        <TieredEquipmentFields form={form} equipmentType={equipmentType} />
+      </div>
+    );
   }
   
-  if (equipmentType === 'chiller') {
-    return <ChillerMaintenanceFields form={form} />;
-  }
-  
+  // Keep existing logic for other equipment types
   if (equipmentType === 'rtu') {
     return <RTUMaintenanceFields form={form} />;
   }
@@ -42,11 +40,10 @@ const EquipmentFields = ({ form, equipmentType }: EquipmentFieldsProps) => {
   
   // Default or general equipment (includes cooling_tower)
   return (
-    <>
-      <MaintenanceReadings form={form} />
-      <MaintenanceStatus form={form} />
-      <MaintenanceObservations form={form} />
-    </>
+    <div className="space-y-6">
+      <MaintenanceFrequencySelector form={form} equipmentType={equipmentType} />
+      <TieredEquipmentFields form={form} equipmentType={equipmentType} />
+    </div>
   );
 };
 

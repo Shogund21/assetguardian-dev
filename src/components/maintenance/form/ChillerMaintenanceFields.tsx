@@ -1,510 +1,309 @@
 
-import React from 'react';
+import React from "react";
 import { UseFormReturn } from "react-hook-form";
-import { MaintenanceFormValues } from "./hooks/schema/maintenanceFormSchema";
-import FormSection from './FormSection';
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { MaintenanceFormValues } from "./hooks/schema/maintenanceFormSchema";
 
 interface ChillerMaintenanceFieldsProps {
   form: UseFormReturn<MaintenanceFormValues>;
+  isQuickCheck?: boolean;
 }
 
-const ChillerMaintenanceFields = ({ form }: ChillerMaintenanceFieldsProps) => {
-  return (
-    <>
-      <FormSection title="Refrigerant System">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="refrigerant_level"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Refrigerant Level</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="normal">Normal</SelectItem>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="critical">Critical</SelectItem>
-                    <SelectItem value="NA">N/A</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="condenser_pressure_reading"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Condenser Pressure (PSI)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="Enter pressure" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="evaporator_pressure_reading"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Evaporator Pressure (PSI)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="Enter pressure" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="superheat_reading"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Superheat (°F)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="Enter superheat" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="subcooling_reading"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Subcooling (°F)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="Enter subcooling" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="oil_level_status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Oil Level Status</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="normal">Normal</SelectItem>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="dirty">Dirty</SelectItem>
-                    <SelectItem value="NA">N/A</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+const ChillerMaintenanceFields = ({ form, isQuickCheck = false }: ChillerMaintenanceFieldsProps) => {
+  // Daily quick check fields - only essential readings
+  if (isQuickCheck) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+        <div className="col-span-full">
+          <h4 className="font-medium text-gray-900 mb-3">Essential Daily Readings</h4>
         </div>
-      </FormSection>
-
-      <FormSection title="Electrical System">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="compressor_amp_draw"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Compressor Amp Draw</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="Enter amps" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="voltage_reading"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Voltage Reading (V)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="Enter voltage" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="power_factor"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Power Factor</FormLabel>
-                <FormControl>
-                  <Input type="number" step="0.01" placeholder="Enter power factor" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="control_panel_status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Control Panel Status</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="operational">Operational</SelectItem>
-                    <SelectItem value="minor_issues">Minor Issues</SelectItem>
-                    <SelectItem value="major_issues">Major Issues</SelectItem>
-                    <SelectItem value="NA">N/A</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-      </FormSection>
-
-      <FormSection title="Water System">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="chilled_water_flow_rate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Chilled Water Flow Rate (GPM)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="Enter flow rate" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="condenser_water_flow_rate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Condenser Water Flow Rate (GPM)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="Enter flow rate" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="water_quality_status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Water Quality Status</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="good">Good</SelectItem>
-                    <SelectItem value="fair">Fair</SelectItem>
-                    <SelectItem value="poor">Poor</SelectItem>
-                    <SelectItem value="NA">N/A</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="strainer_condition"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Strainer Condition</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select condition" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="clean">Clean</SelectItem>
-                    <SelectItem value="dirty">Dirty</SelectItem>
-                    <SelectItem value="clogged">Clogged</SelectItem>
-                    <SelectItem value="NA">N/A</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="water_treatment_levels"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Water Treatment Chemical Levels</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="optimal">Optimal</SelectItem>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="NA">N/A</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-      </FormSection>
-
-      <FormSection title="Mechanical Components">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="compressor_vibration_level"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Compressor Vibration Level</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select level" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="normal">Normal</SelectItem>
-                    <SelectItem value="elevated">Elevated</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="critical">Critical</SelectItem>
-                    <SelectItem value="NA">N/A</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="bearing_temperature"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Bearing Temperature (°F)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="Enter temperature" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="belt_condition"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Belt Condition</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select condition" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="good">Good</SelectItem>
-                    <SelectItem value="worn">Worn</SelectItem>
-                    <SelectItem value="cracked">Cracked</SelectItem>
-                    <SelectItem value="needs_replacement">Needs Replacement</SelectItem>
-                    <SelectItem value="NA">N/A</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="coupling_alignment_status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Coupling Alignment Status</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="aligned">Aligned</SelectItem>
-                    <SelectItem value="misaligned">Misaligned</SelectItem>
-                    <SelectItem value="needs_adjustment">Needs Adjustment</SelectItem>
-                    <SelectItem value="NA">N/A</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-      </FormSection>
-
-      <FormSection title="Safety and Controls">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="safety_switches_operation"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Safety Switches Operation</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="operational">Operational</SelectItem>
-                    <SelectItem value="issues">Issues</SelectItem>
-                    <SelectItem value="needs_testing">Needs Testing</SelectItem>
-                    <SelectItem value="NA">N/A</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="alarm_system_status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Alarm System Status</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="functional">Functional</SelectItem>
-                    <SelectItem value="minor_issues">Minor Issues</SelectItem>
-                    <SelectItem value="major_issues">Major Issues</SelectItem>
-                    <SelectItem value="NA">N/A</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="sensor_calibration_status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Sensor Calibration Status</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="calibrated">Calibrated</SelectItem>
-                    <SelectItem value="needs_calibration">Needs Calibration</SelectItem>
-                    <SelectItem value="drift_detected">Drift Detected</SelectItem>
-                    <SelectItem value="NA">N/A</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="emergency_shutdown_tested"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>Emergency Shutdown System Tested</FormLabel>
-                </div>
-              </FormItem>
-            )}
-          />
-        </div>
-      </FormSection>
-
-      <FormSection title="Additional Notes">
+        
         <FormField
           control={form.control}
-          name="chiller_notes"
+          name="evaporator_entering_temp"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Chiller Maintenance Notes</FormLabel>
+              <FormLabel>Evaporator Entering Temp (°F)</FormLabel>
               <FormControl>
-                <Textarea 
-                  placeholder="Enter any additional observations or recommendations..."
-                  className="resize-none"
-                  {...field}
-                />
+                <Input type="number" step="0.1" placeholder="54-58" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-      </FormSection>
-    </>
+
+        <FormField
+          control={form.control}
+          name="evaporator_leaving_temp"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Evaporator Leaving Temp (°F)</FormLabel>
+              <FormControl>
+                <Input type="number" step="0.1" placeholder="42-48" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="compressor_current"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Compressor Current (Amps)</FormLabel>
+              <FormControl>
+                <Input type="number" step="0.1" placeholder="50-150" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="visual_inspection_status"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Visual Status</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="normal">Normal - No issues</SelectItem>
+                  <SelectItem value="minor_concern">Minor Concern</SelectItem>
+                  <SelectItem value="needs_attention">Needs Attention</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+    );
+  }
+
+  // Full comprehensive fields for weekly/monthly maintenance
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="col-span-full">
+          <h4 className="font-medium text-gray-900 mb-3">Temperature Readings</h4>
+        </div>
+        
+        <FormField
+          control={form.control}
+          name="evaporator_entering_temp"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Evaporator Entering Water Temp (°F)</FormLabel>
+              <FormControl>
+                <Input type="number" step="0.1" placeholder="54-58" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="evaporator_leaving_temp"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Evaporator Leaving Water Temp (°F)</FormLabel>
+              <FormControl>
+                <Input type="number" step="0.1" placeholder="42-48" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="condenser_entering_temp"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Condenser Entering Water Temp (°F)</FormLabel>
+              <FormControl>
+                <Input type="number" step="0.1" placeholder="75-85" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="condenser_leaving_temp"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Condenser Leaving Water Temp (°F)</FormLabel>
+              <FormControl>
+                <Input type="number" step="0.1" placeholder="85-95" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="col-span-full">
+          <h4 className="font-medium text-gray-900 mb-3">Pressure & Current Readings</h4>
+        </div>
+
+        <FormField
+          control={form.control}
+          name="compressor_current"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Compressor Current (Amps)</FormLabel>
+              <FormControl>
+                <Input type="number" step="0.1" placeholder="50-150" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="suction_pressure"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Suction Pressure (PSIG)</FormLabel>
+              <FormControl>
+                <Input type="number" step="0.1" placeholder="35-50" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="discharge_pressure"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Discharge Pressure (PSIG)</FormLabel>
+              <FormControl>
+                <Input type="number" step="0.1" placeholder="150-250" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="oil_pressure"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Oil Pressure (PSIG)</FormLabel>
+              <FormControl>
+                <Input type="number" step="0.1" placeholder="45-65" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="col-span-full">
+          <h4 className="font-medium text-gray-900 mb-3">System Status Checks</h4>
+        </div>
+
+        <FormField
+          control={form.control}
+          name="refrigerant_level"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Refrigerant Level</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select condition" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="adequate">Adequate</SelectItem>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="needs_attention">Needs Attention</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="condenser_condition"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Condenser Condition</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select condition" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="clean">Clean</SelectItem>
+                  <SelectItem value="dirty">Dirty</SelectItem>
+                  <SelectItem value="needs_cleaning">Needs Cleaning</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="unusual_noise"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel>Unusual Noise Detected</FormLabel>
+              </div>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="vibration_observed"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel>Excessive Vibration</FormLabel>
+              </div>
+            </FormItem>
+          )}
+        />
+      </div>
+    </div>
   );
 };
 

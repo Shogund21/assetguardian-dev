@@ -1,12 +1,12 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { getReadingStandards, getEquipmentReadingTemplate } from "@/utils/equipmentTemplates";
+import { getMaintenanceTemplate } from "@/utils/tieredMaintenanceTemplates";
 import type { AssetGuardianAIRequest, AssetGuardianAIResponse } from "@/types/predictive";
 
 export class EnhancedPredictiveService {
   
   /**
-   * Enhanced AI analysis that includes industry standards and baselines
+   * Enhanced AI analysis with tiered maintenance support
    */
   static async processEnhancedAIAnalysis(equipmentId: string): Promise<AssetGuardianAIResponse | null> {
     try {
@@ -26,27 +26,20 @@ export class EnhancedPredictiveService {
       const equipmentType = this.detectEquipmentType(equipment.name);
       console.log('Detected equipment type:', equipmentType);
 
-      // Get reading templates with industry standards
-      const readingTemplates = getEquipmentReadingTemplate(equipmentType);
-      console.log('Available reading templates:', readingTemplates.length);
-
-      // Get recent manual readings
+      // Get recent maintenance checks with frequency data
+      const maintenanceHistory = await this.getMaintenanceHistoryWithFrequency(equipmentId);
       const sensorReadings = await this.getRecentSensorReadings(equipmentId, 168); // 7 days
       
       if (!sensorReadings || sensorReadings.length === 0) {
-        console.log('No sensor data available for analysis');
         return this.createNoDataResponse(equipmentId);
       }
 
-      // Get maintenance history
-      const maintenanceHistory = await this.getMaintenanceHistory(equipmentId);
-
-      // Analyze readings against industry standards
-      const analysisResult = await this.analyzeWithIndustryStandards(
+      // Enhanced analysis considering maintenance frequency patterns
+      const analysisResult = await this.analyzeTieredMaintenanceData(
         equipment,
         sensorReadings,
-        readingTemplates,
-        maintenanceHistory
+        maintenanceHistory,
+        equipmentType
       );
 
       return analysisResult;
@@ -54,6 +47,192 @@ export class EnhancedPredictiveService {
       console.error('Error processing enhanced AI analysis:', error);
       return null;
     }
+  }
+
+  /**
+   * Analyze maintenance data considering frequency and completeness
+   */
+  private static async analyzeTieredMaintenanceData(
+    equipment: any,
+    sensorReadings: any[],
+    maintenanceHistory: any[],
+    equipmentType: string
+  ): Promise<AssetGuardianAIResponse> {
+    // Analyze maintenance frequency patterns
+    const frequencyAnalysis = this.analyzeMaintenanceFrequencyPatterns(maintenanceHistory);
+    
+    // Get reading templates for comparison
+    const readingTemplates = getEquipmentReadingTemplate(equipmentType);
+    
+    // Analyze current readings against standards
+    const readingAnalysis = this.analyzeReadingsWithFrequencyContext(sensorReadings, readingTemplates, frequencyAnalysis);
+    
+    // Determine if more detailed inspection is needed
+    const recommendedAction = this.determineRecommendedAction(readingAnalysis, frequencyAnalysis);
+    
+    return this.createTieredMaintenanceResponse(equipment.id, readingAnalysis, recommendedAction, frequencyAnalysis);
+  }
+
+  /**
+   * Analyze maintenance frequency patterns
+   */
+  private static analyzeMaintenanceFrequencyPatterns(maintenanceHistory: any[]) {
+    const recentChecks = maintenanceHistory.slice(0, 10);
+    const dailyChecks = recentChecks.filter(check => check.maintenance_frequency === 'daily');
+    const weeklyChecks = recentChecks.filter(check => check.maintenance_frequency === 'weekly');
+    const monthlyChecks = recentChecks.filter(check => check.maintenance_frequency === 'monthly');
+    
+    const lastDailyCheck = dailyChecks[0];
+    const lastWeeklyCheck = weeklyChecks[0];
+    const lastMonthlyCheck = monthlyChecks[0];
+    
+    const daysSinceDaily = lastDailyCheck ? 
+      Math.floor((Date.now() - new Date(lastDailyCheck.check_date).getTime()) / (1000 * 60 * 60 * 24)) : 999;
+    const daysSinceWeekly = lastWeeklyCheck ?
+      Math.floor((Date.now() - new Date(lastWeeklyCheck.check_date).getTime()) / (1000 * 60 * 60 * 24)) : 999;
+    const daysSinceMonthly = lastMonthlyCheck ?
+      Math.floor((Date.now() - new Date(lastMonthlyCheck.check_date).getTime()) / (1000 * 60 * 60 * 24)) : 999;
+
+    return {
+      daysSinceDaily,
+      daysSinceWeekly,
+      daysSinceMonthly,
+      dailyCheckCount: dailyChecks.length,
+      weeklyCheckCount: weeklyChecks.length,
+      monthlyCheckCount: monthlyChecks.length,
+      isOverdueDaily: daysSinceDaily > 2,
+      isOverdueWeekly: daysSinceWeekly > 8,
+      isOverdueMonthly: daysSinceMonthly > 35
+    };
+  }
+
+  /**
+   * Analyze readings with frequency context
+   */
+  private static analyzeReadingsWithFrequencyContext(sensorReadings: any[], templates: any[], frequencyAnalysis: any) {
+    const readingsByType = this.groupReadingsByType(sensorReadings);
+    const violations = [];
+    const insights = [];
+    let overallRisk = 'low';
+
+    // If we have limited data due to infrequent checks, adjust analysis
+    const hasLimitedData = frequencyAnalysis.dailyCheckCount < 3 && frequencyAnalysis.weeklyCheckCount < 2;
+
+    for (const template of templates) {
+      const readings = readingsByType[template.type] || [];
+      if (readings.length === 0) continue;
+
+      const latestReading = readings[readings.length - 1];
+      const analysis = this.analyzeReadingAgainstStandards(latestReading.value, template, readings);
+      
+      // Adjust severity based on data availability
+      if (hasLimitedData && analysis.violation) {
+        analysis.severity = analysis.severity === 'critical' ? 'warning' : 'normal';
+        analysis.message += ' (Limited data - recommend more frequent monitoring)';
+      }
+      
+      if (analysis.violation) {
+        violations.push(analysis);
+        if (analysis.severity === 'critical') overallRisk = 'high';
+        else if (analysis.severity === 'warning' && overallRisk !== 'high') overallRisk = 'medium';
+      }
+
+      if (analysis.insight) {
+        insights.push(analysis.insight);
+      }
+    }
+
+    return { violations, insights, overallRisk, hasLimitedData };
+  }
+
+  /**
+   * Determine recommended maintenance action
+   */
+  private static determineRecommendedAction(readingAnalysis: any, frequencyAnalysis: any) {
+    // Check if more detailed inspection is needed
+    if (readingAnalysis.violations.some((v: any) => v.severity === 'critical')) {
+      return {
+        type: 'immediate_detailed_inspection',
+        message: 'Critical readings detected - perform comprehensive inspection immediately'
+      };
+    }
+
+    if (readingAnalysis.violations.some((v: any) => v.severity === 'warning')) {
+      return {
+        type: 'weekly_inspection_recommended',
+        message: 'Warning conditions detected - schedule weekly detailed inspection'
+      };
+    }
+
+    if (frequencyAnalysis.isOverdueWeekly && readingAnalysis.hasLimitedData) {
+      return {
+        type: 'increase_monitoring_frequency',
+        message: 'Limited recent data - increase to weekly monitoring for better trend analysis'
+      };
+    }
+
+    return {
+      type: 'continue_current_schedule',
+      message: 'Equipment operating normally - continue current maintenance schedule'
+    };
+  }
+
+  /**
+   * Create tiered maintenance response
+   */
+  private static createTieredMaintenanceResponse(
+    assetId: string, 
+    readingAnalysis: any, 
+    recommendedAction: any,
+    frequencyAnalysis: any
+  ): AssetGuardianAIResponse {
+    let finding = "Equipment operating within normal parameters";
+    let recommendation = recommendedAction.message;
+    let createWorkOrder = false;
+    let workOrder = undefined;
+
+    if (readingAnalysis.violations.length > 0) {
+      const criticalViolations = readingAnalysis.violations.filter((v: any) => v.severity === 'critical');
+      const warningViolations = readingAnalysis.violations.filter((v: any) => v.severity === 'warning');
+
+      if (criticalViolations.length > 0) {
+        finding = `Critical issues detected: ${criticalViolations.map((v: any) => v.message).join('; ')}`;
+        createWorkOrder = true;
+        workOrder = {
+          title: `Critical Alert - Equipment ${assetId}`,
+          description: `${finding}. Perform comprehensive inspection immediately.`,
+          priority: "high" as const,
+          due_hours: 4,
+          assigned_team: "maintenance"
+        };
+      } else if (warningViolations.length > 0) {
+        finding = `Warning conditions detected: ${warningViolations.map((v: any) => v.message).join('; ')}`;
+        createWorkOrder = recommendedAction.type === 'weekly_inspection_recommended';
+        if (createWorkOrder) {
+          workOrder = {
+            title: `Detailed Inspection Required - Equipment ${assetId}`,
+            description: `${finding}. Schedule weekly-level detailed inspection.`,
+            priority: "medium" as const,
+            due_hours: 48,
+            assigned_team: "maintenance"
+          };
+        }
+      }
+    }
+
+    // Add frequency-based insights
+    if (frequencyAnalysis.isOverdueMonthly) {
+      finding += ` Monthly comprehensive inspection overdue (${frequencyAnalysis.daysSinceMonthly} days).`;
+    }
+
+    return {
+      asset_id: assetId,
+      risk_level: readingAnalysis.overallRisk,
+      finding,
+      recommendation,
+      create_work_order: createWorkOrder,
+      work_order: workOrder
+    };
   }
 
   /**
@@ -88,15 +267,15 @@ export class EnhancedPredictiveService {
   }
 
   /**
-   * Get maintenance history
+   * Get maintenance history with frequency data
    */
-  private static async getMaintenanceHistory(equipmentId: string) {
+  private static async getMaintenanceHistoryWithFrequency(equipmentId: string) {
     const { data, error } = await supabase
       .from('hvac_maintenance_checks')
-      .select('check_date, notes, status')
+      .select('check_date, notes, status, maintenance_frequency')
       .eq('equipment_id', equipmentId)
       .order('check_date', { ascending: false })
-      .limit(10);
+      .limit(20);
 
     if (error) {
       console.error('Error fetching maintenance history:', error);
@@ -104,45 +283,6 @@ export class EnhancedPredictiveService {
     }
 
     return data || [];
-  }
-
-  /**
-   * Analyze readings against industry standards
-   */
-  private static async analyzeWithIndustryStandards(
-    equipment: any,
-    sensorReadings: any[],
-    readingTemplates: any[],
-    maintenanceHistory: any[]
-  ): Promise<AssetGuardianAIResponse> {
-    // Group readings by sensor type
-    const readingsByType = this.groupReadingsByType(sensorReadings);
-    
-    // Analyze each reading type against standards
-    const violations = [];
-    const insights = [];
-    let overallRisk = 'low';
-
-    for (const template of readingTemplates) {
-      const readings = readingsByType[template.type] || [];
-      if (readings.length === 0) continue;
-
-      const latestReading = readings[readings.length - 1];
-      const analysis = this.analyzeReadingAgainstStandards(latestReading.value, template, readings);
-      
-      if (analysis.violation) {
-        violations.push(analysis);
-        if (analysis.severity === 'critical') overallRisk = 'high';
-        else if (analysis.severity === 'warning' && overallRisk !== 'high') overallRisk = 'medium';
-      }
-
-      if (analysis.insight) {
-        insights.push(analysis.insight);
-      }
-    }
-
-    // Create comprehensive AI response
-    return this.createAIResponse(equipment.id, violations, insights, overallRisk, readingTemplates);
   }
 
   /**
@@ -164,20 +304,15 @@ export class EnhancedPredictiveService {
   private static analyzeReadingAgainstStandards(value: number, template: any, historicalReadings: any[]) {
     const analysis: any = { violation: false, insight: null, severity: 'normal' };
 
-    // Check critical threshold
     if (template.criticalThreshold && value >= template.criticalThreshold) {
       analysis.violation = true;
       analysis.severity = 'critical';
       analysis.message = `${template.label} is at critical level (${value} ${template.unit})`;
-    }
-    // Check warning threshold  
-    else if (template.warningThreshold && value >= template.warningThreshold) {
+    } else if (template.warningThreshold && value >= template.warningThreshold) {
       analysis.violation = true;
       analysis.severity = 'warning';
       analysis.message = `${template.label} is approaching limits (${value} ${template.unit})`;
-    }
-    // Check normal range
-    else if (template.normalRange) {
+    } else if (template.normalRange) {
       const { min, max } = template.normalRange;
       if (value < min || value > max) {
         analysis.violation = true;
@@ -186,7 +321,6 @@ export class EnhancedPredictiveService {
       }
     }
 
-    // Trend analysis if we have enough historical data
     if (historicalReadings.length >= 3) {
       const trend = this.calculateTrend(historicalReadings.slice(-5));
       if (trend.direction === 'increasing' && trend.rate > 0.1) {
@@ -282,7 +416,7 @@ export class EnhancedPredictiveService {
       asset_id: assetId,
       risk_level: "low",
       finding: "No recent readings available for analysis",
-      recommendation: "Begin recording equipment readings to establish baseline and enable predictive maintenance",
+      recommendation: "Begin with daily quick checks to establish baseline and enable predictive maintenance",
       create_work_order: false
     };
   }
