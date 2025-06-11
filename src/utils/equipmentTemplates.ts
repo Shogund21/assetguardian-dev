@@ -82,67 +82,103 @@ export const equipmentTemplates: EquipmentTemplate[] = [
     equipmentType: 'chiller',
     readings: [
       {
-        type: 'evaporator_temp_in',
+        type: 'evaporator_entering_temp',
         label: 'Evaporator Entering Water Temp',
         unit: '°F',
         normalRange: { min: 54, max: 58 },
         warningThreshold: 60,
         criticalThreshold: 65,
-        description: 'Temperature of water entering evaporator'
+        description: 'Temperature of water entering evaporator (Trane RTAC 250)'
       },
       {
-        type: 'evaporator_temp_out',
+        type: 'evaporator_leaving_temp',
         label: 'Evaporator Leaving Water Temp',
         unit: '°F',
         normalRange: { min: 42, max: 48 },
         warningThreshold: 50,
         criticalThreshold: 55,
-        description: 'Temperature of water leaving evaporator'
+        description: 'Temperature of water leaving evaporator (Trane RTAC 250)'
       },
       {
-        type: 'condenser_temp_in',
-        label: 'Condenser Entering Water Temp',
+        type: 'condenser_entering_temp',
+        label: 'Condenser Entering Air Temp',
         unit: '°F',
         normalRange: { min: 75, max: 85 },
         warningThreshold: 90,
         criticalThreshold: 95,
-        description: 'Temperature of water entering condenser'
+        description: 'Ambient air temperature entering condenser (Trane RTAC 250)'
       },
       {
-        type: 'compressor_current',
-        label: 'Compressor Current',
+        type: 'compressor_1_current',
+        label: 'Compressor 1 Current',
         unit: 'Amps',
-        normalRange: { min: 50, max: 150 },
-        warningThreshold: 170,
-        criticalThreshold: 180,
-        description: 'Current draw of compressor motor'
+        normalRange: { min: 45, max: 145 },
+        warningThreshold: 160,
+        criticalThreshold: 175,
+        description: 'Current draw of compressor 1 motor (Trane RTAC 250)'
       },
       {
-        type: 'refrigerant_pressure_suction',
+        type: 'compressor_2_current',
+        label: 'Compressor 2 Current',
+        unit: 'Amps',
+        normalRange: { min: 45, max: 145 },
+        warningThreshold: 160,
+        criticalThreshold: 175,
+        description: 'Current draw of compressor 2 motor (Trane RTAC 250)'
+      },
+      {
+        type: 'suction_pressure',
         label: 'Suction Pressure',
         unit: 'PSIG',
-        normalRange: { min: 35, max: 50 },
-        warningThreshold: 30,
-        criticalThreshold: 25,
-        description: 'Refrigerant suction pressure'
+        normalRange: { min: 38, max: 45 },
+        warningThreshold: 35,
+        criticalThreshold: 30,
+        description: 'Refrigerant suction pressure (Trane RTAC 250)'
       },
       {
-        type: 'refrigerant_pressure_discharge',
+        type: 'discharge_pressure',
         label: 'Discharge Pressure',
         unit: 'PSIG',
-        normalRange: { min: 150, max: 250 },
-        warningThreshold: 280,
-        criticalThreshold: 300,
-        description: 'Refrigerant discharge pressure'
+        normalRange: { min: 180, max: 220 },
+        warningThreshold: 240,
+        criticalThreshold: 260,
+        description: 'Refrigerant discharge pressure (Trane RTAC 250)'
       },
       {
-        type: 'oil_pressure',
-        label: 'Oil Pressure',
+        type: 'oil_pressure_1',
+        label: 'Oil Pressure 1',
         unit: 'PSIG',
         normalRange: { min: 45, max: 65 },
         warningThreshold: 40,
         criticalThreshold: 35,
-        description: 'Compressor oil pressure'
+        description: 'Compressor 1 oil pressure (Trane RTAC 250)'
+      },
+      {
+        type: 'oil_pressure_2',
+        label: 'Oil Pressure 2',
+        unit: 'PSIG',
+        normalRange: { min: 45, max: 65 },
+        warningThreshold: 40,
+        criticalThreshold: 35,
+        description: 'Compressor 2 oil pressure (Trane RTAC 250)'
+      },
+      {
+        type: 'approach_temperature',
+        label: 'Approach Temperature',
+        unit: '°F',
+        normalRange: { min: 6, max: 10 },
+        warningThreshold: 12,
+        criticalThreshold: 15,
+        description: 'Condenser approach temperature (Trane RTAC 250)'
+      },
+      {
+        type: 'vfd_frequency',
+        label: 'VFD Frequency',
+        unit: 'Hz',
+        normalRange: { min: 30, max: 60 },
+        warningThreshold: 65,
+        criticalThreshold: 70,
+        description: 'Variable frequency drive operating frequency (Trane RTAC 250)'
       }
     ]
   },

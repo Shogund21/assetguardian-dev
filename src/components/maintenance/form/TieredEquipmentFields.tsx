@@ -7,7 +7,7 @@ import MaintenanceReadings from "./MaintenanceReadings";
 import MaintenanceStatus from "./MaintenanceStatus";
 import MaintenanceObservations from "./MaintenanceObservations";
 import AHUMaintenanceFields from "./AHUMaintenanceFields";
-import ChillerMaintenanceFields from "./ChillerMaintenanceFields";
+import TraneRTACFields from "./TraneRTACFields";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, CheckCircle } from "lucide-react";
 
@@ -46,7 +46,7 @@ const TieredEquipmentFields = ({ form, equipmentType }: TieredEquipmentFieldsPro
           </p>
         </div>
         
-        {equipmentType === 'chiller' && <ChillerMaintenanceFields form={form} isQuickCheck={true} />}
+        {equipmentType === 'chiller' && <TraneRTACFields form={form} isQuickCheck={true} />}
         {equipmentType === 'ahu' && <AHUMaintenanceFields form={form} isQuickCheck={true} />}
         
         <MaintenanceObservations form={form} />
@@ -70,7 +70,7 @@ const TieredEquipmentFields = ({ form, equipmentType }: TieredEquipmentFieldsPro
         </p>
       </div>
 
-      {equipmentType === 'chiller' && <ChillerMaintenanceFields form={form} />}
+      {equipmentType === 'chiller' && <TraneRTACFields form={form} />}
       {equipmentType === 'ahu' && <AHUMaintenanceFields form={form} />}
       
       <MaintenanceReadings form={form} />

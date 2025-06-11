@@ -83,6 +83,16 @@ export const maintenanceFormSchema = z.object({
   bearing_lubrication_status: z.string().optional(),
   rtu_notes: z.string().optional(),
   
+  // Trane RTAC specific fields
+  compressor_1_current: z.string().optional(),
+  compressor_2_current: z.string().optional(),
+  oil_pressure_1: z.string().optional(),
+  oil_pressure_2: z.string().optional(),
+  approach_temperature: z.string().optional(),
+  vfd_frequency: z.string().optional(),
+  staging_status: z.string().optional(),
+  control_mode: z.string().optional(),
+  
   // New tiered maintenance fields
   evaporator_entering_temp: z.string().optional(),
   evaporator_leaving_temp: z.string().optional(),
