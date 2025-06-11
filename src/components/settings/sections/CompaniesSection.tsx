@@ -28,7 +28,10 @@ export const CompaniesSection = () => {
             </CardDescription>
           </div>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <Button className="flex items-center gap-2" onClick={() => setIsAddDialogOpen(true)}>
+            <Button 
+              className="flex items-center gap-2 bg-blue-900 hover:bg-blue-800 text-white" 
+              onClick={() => setIsAddDialogOpen(true)}
+            >
               <PlusCircle className="h-4 w-4" />
               Add Company
             </Button>
