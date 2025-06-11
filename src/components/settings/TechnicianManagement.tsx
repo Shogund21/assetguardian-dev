@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -69,6 +70,33 @@ const TechnicianManagement = () => {
     },
   });
 
+  const updateTechnicianMutation = useMutation({
+    mutationFn: async ({ id, updatedData }: { id: string; updatedData: TechnicianFormData }) => {
+      const { data, error } = await supabase
+        .from("technicians")
+        .update(updatedData)
+        .eq("id", id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["technicians"] });
+      toast({
+        title: "Success",
+        description: "Technician updated successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update technician: " + error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const deleteTechnicianMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
@@ -103,6 +131,10 @@ const TechnicianManagement = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleUpdate = (id: string, updatedData: TechnicianFormData) => {
+    updateTechnicianMutation.mutate({ id, updatedData });
+  };
+
   const handleDelete = async (id: string) => {
     if (window.confirm("Are you sure you want to remove this technician?")) {
       deleteTechnicianMutation.mutate(id);
@@ -123,6 +155,7 @@ const TechnicianManagement = () => {
       <TechnicianList
         technicians={technicians || []}
         onDelete={handleDelete}
+        onUpdate={handleUpdate}
       />
     </div>
   );
