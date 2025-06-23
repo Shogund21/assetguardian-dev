@@ -12,7 +12,8 @@ import {
   Building2, 
   ClipboardList, 
   BarChart4, 
-  Settings 
+  Settings,
+  Brain
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
@@ -23,6 +24,7 @@ export const SidebarWrapper = () => {
     { title: "Equipment", icon: Wrench, path: "/equipment" },
     { title: "Projects", icon: Building2, path: "/projects" },
     { title: "Maintenance", icon: ClipboardList, path: "/maintenance-checks" },
+    { title: "Predictive Maintenance", icon: Brain, path: "/predictive-maintenance" },
     { title: "Analytics", icon: BarChart4, path: "/analytics" },
     { title: "Settings", icon: Settings, path: "/settings" },
   ];

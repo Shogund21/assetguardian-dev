@@ -18,6 +18,7 @@ import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import CustomerManual from "./pages/CustomerManual";
 import Landing from "./pages/Landing";
+import PredictiveMaintenance from "./pages/PredictiveMaintenance";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ const App = () => (
                 <Route path="/add-equipment" element={<AddEquipment />} />
                 <Route path="/projects" element={<Projects />} />
                 <Route path="/maintenance-checks" element={<MaintenanceChecks />} />
+                <Route path="/predictive-maintenance" element={<PredictiveMaintenance />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/customer-manual" element={<CustomerManual />} />
