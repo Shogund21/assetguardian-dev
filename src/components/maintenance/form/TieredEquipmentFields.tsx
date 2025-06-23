@@ -8,6 +8,8 @@ import MaintenanceStatus from "./MaintenanceStatus";
 import MaintenanceObservations from "./MaintenanceObservations";
 import AHUMaintenanceFields from "./AHUMaintenanceFields";
 import TraneRTACFields from "./TraneRTACFields";
+import ReadingModeSelector from "./ReadingModeSelector";
+import ManualReadingFields from "./ManualReadingFields";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, CheckCircle } from "lucide-react";
 
@@ -18,6 +20,7 @@ interface TieredEquipmentFieldsProps {
 
 const TieredEquipmentFields = ({ form, equipmentType }: TieredEquipmentFieldsProps) => {
   const frequency = form.watch('maintenance_frequency') || 'daily';
+  const readingMode = form.watch('reading_mode') || 'standard';
   const template = equipmentType ? getMaintenanceTemplate(equipmentType, frequency) : null;
 
   if (!equipmentType || !template) {
@@ -46,8 +49,16 @@ const TieredEquipmentFields = ({ form, equipmentType }: TieredEquipmentFieldsPro
           </p>
         </div>
         
-        {equipmentType === 'chiller' && <TraneRTACFields form={form} isQuickCheck={true} />}
-        {equipmentType === 'ahu' && <AHUMaintenanceFields form={form} isQuickCheck={true} />}
+        <ReadingModeSelector form={form} equipmentType={equipmentType} />
+        
+        {readingMode === 'manual' ? (
+          <ManualReadingFields form={form} equipmentType={equipmentType} />
+        ) : (
+          <>
+            {equipmentType === 'chiller' && <TraneRTACFields form={form} isQuickCheck={true} />}
+            {equipmentType === 'ahu' && <AHUMaintenanceFields form={form} isQuickCheck={true} />}
+          </>
+        )}
         
         <MaintenanceObservations form={form} />
       </div>
@@ -70,10 +81,19 @@ const TieredEquipmentFields = ({ form, equipmentType }: TieredEquipmentFieldsPro
         </p>
       </div>
 
-      {equipmentType === 'chiller' && <TraneRTACFields form={form} />}
-      {equipmentType === 'ahu' && <AHUMaintenanceFields form={form} />}
+      <ReadingModeSelector form={form} equipmentType={equipmentType} />
+
+      {readingMode === 'manual' ? (
+        <ManualReadingFields form={form} equipmentType={equipmentType} />
+      ) : (
+        <>
+          {equipmentType === 'chiller' && <TraneRTACFields form={form} />}
+          {equipmentType === 'ahu' && <AHUMaintenanceFields form={form} />}
+          
+          <MaintenanceReadings form={form} equipmentType={equipmentType} />
+        </>
+      )}
       
-      <MaintenanceReadings form={form} />
       <MaintenanceStatus form={form} />
       <MaintenanceObservations form={form} />
     </div>

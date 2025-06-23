@@ -1,11 +1,22 @@
 
 import { z } from "zod";
 
+const manualReadingSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+  label: z.string(),
+  value: z.string(),
+  unit: z.string(),
+  notes: z.string().optional(),
+});
+
 export const maintenanceFormSchema = z.object({
   location_id: z.string().min(1, "Location is required"),
   equipment_id: z.string().min(1, "Equipment is required"), 
   technician_id: z.string().min(1, "Technician is required"),
   maintenance_frequency: z.string().optional().default("daily"),
+  reading_mode: z.string().optional().default("standard"),
+  manual_readings: z.array(manualReadingSchema).optional(),
   
   notes: z.string().optional(),
   
