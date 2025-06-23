@@ -56,7 +56,11 @@ const MaintenanceReadings = ({ form, equipmentType }: MaintenanceReadingsProps) 
                       type="number"
                       step="0.01"
                       placeholder={`Enter ${template.label.toLowerCase()}`}
-                      {...field}
+                      value={typeof field.value === 'string' ? field.value : ''}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
                     />
                   </FormControl>
                   {template.description && (
