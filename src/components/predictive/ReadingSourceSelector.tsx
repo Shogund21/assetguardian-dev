@@ -5,7 +5,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Database, Activity, Brain, ExternalLink } from "lucide-react";
+import { Database, Activity, Brain, ExternalLink, HelpCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export type ReadingSource = 'auto' | 'manual' | 'standard';
@@ -29,13 +29,27 @@ const ReadingSourceSelector = ({
     navigate('/maintenance-checks');
   };
 
+  const handleOpenHelp = () => {
+    window.open('/docs/predictive-maintenance.md#analysis-data-source-selection', '_blank');
+  };
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-sm">
-          <Brain className="h-4 w-4" />
-          Analysis Data Source
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-sm">
+            <Brain className="h-4 w-4" />
+            Analysis Data Source
+          </CardTitle>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleOpenHelp}
+            className="h-6 w-6 p-0"
+          >
+            <HelpCircle className="h-4 w-4 text-muted-foreground" />
+          </Button>
+        </div>
         <p className="text-xs text-muted-foreground">
           Choose which historical data to use for predictive analysis
         </p>

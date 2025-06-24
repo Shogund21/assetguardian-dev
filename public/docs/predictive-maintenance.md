@@ -7,9 +7,10 @@
 3. [Recording Manual Readings](#recording-manual-readings)
 4. [Understanding Reading History & Trends](#understanding-reading-history--trends)
 5. [AI Analysis & Diagnostics](#ai-analysis--diagnostics)
-6. [Equipment-Specific Guidelines](#equipment-specific-guidelines)
-7. [Mobile Usage & Field Operations](#mobile-usage--field-operations)
-8. [Troubleshooting & FAQ](#troubleshooting--faq)
+6. [Analysis Data Source Selection](#analysis-data-source-selection)
+7. [Equipment-Specific Guidelines](#equipment-specific-guidelines)
+8. [Mobile Usage & Field Operations](#mobile-usage--field-operations)
+9. [Troubleshooting & FAQ](#troubleshooting--faq)
 
 ---
 
@@ -197,6 +198,116 @@ When critical issues are detected, the system can automatically:
 
 ---
 
+## Analysis Data Source Selection
+
+### Understanding Data Sources
+
+When running AI analysis, you can choose which historical data to use. This selection affects the quality and accuracy of the predictive insights.
+
+#### Auto (Recommended)
+- **What it uses**: Combines both manual sensor data and maintenance check data
+- **Best for**: Most situations - provides comprehensive analysis
+- **How it works**: Uses manual sensor readings when available, supplements with maintenance check data
+- **Advantages**: 
+  - Most complete picture of equipment health
+  - Balances real-time data with maintenance history
+  - Highest confidence scores for predictions
+- **When to use**: Default choice for most analysis
+
+#### Manual Sensor Data Only
+- **What it uses**: Only direct sensor readings from equipment monitoring
+- **Best for**: Equipment with frequent manual readings or real-time monitoring needs
+- **How it works**: Analyzes only data from the "Record Readings" section
+- **Advantages**:
+  - Most current and accurate equipment conditions
+  - Higher frequency data points
+  - Real-time performance insights
+- **When to use**: 
+  - When you have regular manual readings (daily/weekly)
+  - For critical equipment requiring frequent monitoring
+  - When maintenance check data is outdated
+
+#### Maintenance Check Data Only
+- **What it uses**: Only readings from completed maintenance check forms
+- **Best for**: Equipment with thorough maintenance documentation but limited manual readings
+- **How it works**: Analyzes data collected during formal maintenance inspections
+- **Advantages**:
+  - Comprehensive equipment assessments
+  - Includes technician observations and notes
+  - Standardized measurement procedures
+- **When to use**:
+  - When manual sensor readings are not available
+  - For equipment with regular maintenance schedules
+  - To analyze long-term maintenance trends
+
+### Choosing the Right Data Source
+
+#### Decision Matrix
+
+| Situation | Recommended Source | Why |
+|-----------|-------------------|-----|
+| Equipment has both manual readings and maintenance checks | **Auto** | Most comprehensive analysis |
+| Daily/weekly manual readings available | **Manual Sensor Data Only** | Most current information |
+| Only maintenance checks performed | **Maintenance Check Data Only** | Use available data |
+| New equipment with limited history | **Auto** | Makes best use of available data |
+| Critical equipment monitoring | **Manual Sensor Data Only** | Most frequent, accurate data |
+
+#### Data Quality Indicators
+
+The system shows data quality badges to help you understand your analysis:
+
+- **Comprehensive Data**: Both manual and maintenance check data available
+- **Manual Sensor Data**: Only manual readings available
+- **Maintenance Check Data**: Only maintenance check readings available
+- **Limited Data**: Insufficient data for reliable analysis
+
+### Troubleshooting Data Source Issues
+
+#### "No manual sensor data available"
+- **Problem**: No readings recorded in the "Record Readings" section
+- **Solution**: Start recording manual readings for this equipment
+- **Next steps**: 
+  1. Go to the "Record Readings" tab
+  2. Select your equipment
+  3. Begin taking regular measurements
+  4. Return to analysis after collecting some data
+
+#### "No maintenance check data available"
+- **Problem**: No completed maintenance checks for this equipment
+- **Solution**: Perform maintenance checks using the maintenance check forms
+- **Next steps**:
+  1. Click "Go to Maintenance Checks" button
+  2. Complete a maintenance check for your equipment
+  3. Return to predictive analysis
+  4. Use "Maintenance Check Data Only" or "Auto" source
+
+#### "Limited data for analysis"
+- **Problem**: Not enough historical data for reliable predictions
+- **Solution**: Collect more data over time
+- **Recommendations**:
+  - Take readings more frequently (weekly instead of monthly)
+  - Ensure maintenance checks include all required measurements
+  - Allow 2-4 weeks of data collection before expecting high confidence scores
+
+### Best Practices for Data Source Selection
+
+#### For New Implementations
+1. Start with **Auto** setting
+2. Focus on building both manual and maintenance check data
+3. Switch to specific sources once patterns emerge
+
+#### For Established Equipment
+1. Use **Manual Sensor Data Only** for critical equipment with frequent readings
+2. Use **Maintenance Check Data Only** for equipment with thorough maintenance programs
+3. Use **Auto** for balanced analysis
+
+#### For Troubleshooting
+1. Try different data sources to compare results
+2. Manual sensor data is best for recent issues
+3. Maintenance check data is best for long-term trends
+
+---
+
 ## Equipment-Specific Guidelines
 
 ### Air Handling Units (AHU)
@@ -303,6 +414,12 @@ When critical issues are detected, the system can automatically:
 #### Q: Can I export the reading data?
 **A**: Yes, data can be exported through the analytics section for further analysis.
 
+#### Q: Which data source should I choose for AI analysis?
+**A**: Use "Auto" for most situations. Choose "Manual Sensor Data Only" if you have frequent manual readings, or "Maintenance Check Data Only" if you only have maintenance check records.
+
+#### Q: Why does my analysis show low confidence?
+**A**: Low confidence usually means insufficient data. Collect more readings over time, ensure both manual and maintenance check data are available, and verify readings are accurate.
+
 ### Getting Help
 
 - **Technical Support**: Contact your system administrator
@@ -323,3 +440,4 @@ Regular use of the predictive maintenance system will:
 Remember: The system is only as good as the data provided. Consistent, accurate readings combined with proper follow-up on recommendations will maximize the benefits of predictive maintenance.
 
 For additional support or training, contact your facility management team or system administrator.
+
