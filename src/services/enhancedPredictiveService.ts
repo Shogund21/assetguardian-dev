@@ -402,10 +402,10 @@ export class EnhancedPredictiveService {
       };
     }
 
-    if (frequencyAnalysis.isOverdueWeekly && readingAnalysis.hasLimitedData) {
+    if (frequencyAnalysis.isOverdueMonthly && readingAnalysis.hasLimitedData) {
       return {
         type: 'increase_monitoring_frequency',
-        message: 'Limited recent data - increase to weekly monitoring for better trend analysis'
+        message: 'Limited recent data - increase to monthly monitoring for better trend analysis'
       };
     }
 
@@ -517,9 +517,9 @@ export class EnhancedPredictiveService {
   }
 
   /**
-   * Get maintenance history with frequency data and reading values
+   * Get maintenance history with frequency data and reading values - Made public for external access
    */
-  private static async getMaintenanceHistoryWithFrequency(equipmentId: string) {
+  static async getMaintenanceHistoryWithFrequency(equipmentId: string) {
     const { data, error } = await supabase
       .from('hvac_maintenance_checks')
       .select(`
