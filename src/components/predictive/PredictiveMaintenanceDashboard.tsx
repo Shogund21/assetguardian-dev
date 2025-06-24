@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -95,7 +94,7 @@ const PredictiveMaintenanceDashboard = () => {
                   <CardTitle>{selectedEquipment.name}</CardTitle>
                   <div className="text-sm text-muted-foreground">
                     <p>Location: {selectedEquipment.location}</p>
-                    <p>Type: {selectedEquipment.type}</p>
+                    <p>Status: {selectedEquipment.status || 'Active'}</p>
                     {readingTemplates.length > 0 && (
                       <p className="mt-2 text-blue-600">
                         {readingTemplates.length} standard readings available for this equipment type

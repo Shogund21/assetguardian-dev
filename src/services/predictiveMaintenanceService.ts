@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { SensorReading, PredictiveAlert, EquipmentThreshold, AutomatedWorkOrder } from '@/types/predictive';
 
@@ -49,7 +50,13 @@ export class PredictiveMaintenanceService {
 
           return {
             ...alert,
-            equipment: equipment || null
+            equipment: equipment || null,
+            // Cast JSONB fields to appropriate types
+            data_quality: alert.data_quality as any,
+            predictive_timeline: alert.predictive_timeline as any,
+            degradation_analysis: alert.degradation_analysis as any,
+            maintenance_windows: alert.maintenance_windows as any,
+            performance_trends: alert.performance_trends as any,
           } as PredictiveAlert;
         })
       );
@@ -77,7 +84,12 @@ export class PredictiveMaintenanceService {
         console.error('Error fetching sensor readings:', error);
         return [];
       }
-      return data || [];
+      
+      // Map database records to SensorReading interface
+      return (data || []).map(record => ({
+        ...record,
+        source: (record.source || 'manual') as 'manual' | 'maintenance_check'
+      }));
     } catch (error) {
       console.error('Error in getRecentSensorReadings:', error);
       return [];
@@ -92,7 +104,11 @@ export class PredictiveMaintenanceService {
       .single();
 
     if (error) throw error;
-    return data;
+    
+    return {
+      ...data,
+      source: (data.source || 'manual') as 'manual' | 'maintenance_check'
+    };
   }
 
   static async getEquipmentThresholds(equipmentId: string): Promise<EquipmentThreshold[]> {
@@ -106,25 +122,58 @@ export class PredictiveMaintenanceService {
   }
 
   static async createPredictiveAlert(alert: Omit<PredictiveAlert, 'id' | 'created_at'>): Promise<PredictiveAlert> {
+    // Prepare the alert data for database insertion
+    const alertData = {
+      asset_id: alert.asset_id,
+      risk_level: alert.risk_level,
+      finding: alert.finding,
+      recommendation: alert.recommendation,
+      confidence_score: alert.confidence_score,
+      resolved_at: alert.resolved_at,
+      work_order_id: alert.work_order_id,
+      data_quality: alert.data_quality as any,
+      predictive_timeline: alert.predictive_timeline as any,
+      degradation_analysis: alert.degradation_analysis as any,
+      maintenance_windows: alert.maintenance_windows as any,
+      performance_trends: alert.performance_trends as any,
+    };
+
     const { data, error } = await supabase
       .from('predictive_alerts')
-      .insert([alert])
+      .insert([alertData])
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    
+    return {
+      ...data,
+      data_quality: data.data_quality as any,
+      predictive_timeline: data.predictive_timeline as any,
+      degradation_analysis: data.degradation_analysis as any,
+      maintenance_windows: data.maintenance_windows as any,
+      performance_trends: data.performance_trends as any,
+    } as PredictiveAlert;
   }
 
   static async createAutomatedWorkOrder(workOrder: Omit<AutomatedWorkOrder, 'id' | 'created_at'>): Promise<AutomatedWorkOrder> {
     const { data, error } = await supabase
       .from('automated_work_orders')
-      .insert([workOrder])
+      .insert([{
+        asset_id: workOrder.equipment_id,
+        title: workOrder.title,
+        description: workOrder.description,
+        priority: workOrder.priority,
+        status: workOrder.status,
+        due_hours: 24, // Default value
+        assigned_team: workOrder.technician?.firstName + ' ' + workOrder.technician?.lastName,
+        alert_id: workOrder.alert_id,
+      }])
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return data as AutomatedWorkOrder;
   }
 
   static async resolveAlert(alertId: string): Promise<void> {

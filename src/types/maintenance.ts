@@ -79,6 +79,32 @@ export interface MaintenanceCheck {
   [key: string]: any;
 }
 
+export interface Equipment {
+  id: string;
+  name: string;
+  location: string;
+  type?: string;
+  status?: string;
+  serialNumber?: string;
+  model?: string;
+  company_id?: string;
+  lastMaintenance?: string;
+  nextMaintenance?: string;
+}
+
+export interface Technician {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  specialization?: string;
+  isAvailable?: boolean;
+  company_id?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface MaintenanceLocation {
   name: string;
   store_number?: string;
@@ -102,5 +128,15 @@ export interface MaintenanceDocument {
   file_name: string;
   file_url: string;
   file_type: string;
+  file_size?: number;
+  file_path?: string;
   uploaded_at: string;
+  category?: string;
+  tags?: string[];
+  comments?: string;
+  equipment_id?: string;
+  maintenance_check_id?: string;
+  project_id?: string;
+  company_id?: string;
+  uploaded_by?: string;
 }
