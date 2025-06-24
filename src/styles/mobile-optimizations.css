@@ -1,0 +1,155 @@
+
+@layer components {
+  /* Mobile-first touch optimizations */
+  .touch-manipulation {
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+  
+  /* Minimum touch targets for mobile */
+  .mobile-touch-target {
+    min-height: 44px !important;
+    min-width: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  /* Mobile form optimizations */
+  .mobile-form-field input,
+  .mobile-form-field select,
+  .mobile-form-field textarea {
+    min-height: 44px !important;
+    font-size: 16px !important; /* Prevents zoom on iOS */
+  }
+  
+  /* Mobile table optimizations */
+  @media (max-width: 768px) {
+    .mobile-table {
+      display: block !important;
+      overflow-x: auto !important;
+      white-space: nowrap !important;
+    }
+    
+    .mobile-table-row {
+      display: flex !important;
+      flex-direction: column !important;
+      border: 1px solid #e5e7eb !important;
+      margin-bottom: 8px !important;
+      padding: 12px !important;
+      border-radius: 8px !important;
+    }
+    
+    .mobile-table-cell {
+      display: flex !important;
+      justify-content: space-between !important;
+      padding: 4px 0 !important;
+      border-bottom: 1px solid #f3f4f6 !important;
+    }
+    
+    .mobile-table-cell:last-child {
+      border-bottom: none !important;
+    }
+  }
+  
+  /* Mobile navigation improvements */
+  .mobile-nav-tabs {
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  
+  .mobile-nav-tabs::-webkit-scrollbar {
+    display: none !important;
+  }
+  
+  /* Offline indicator mobile styling */
+  .offline-indicator-mobile {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+    background: white !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    padding: 8px 16px !important;
+    margin: -16px -16px 16px -16px !important;
+  }
+  
+  /* Mobile button improvements */
+  .mobile-button {
+    min-height: 48px !important;
+    font-size: 16px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+  }
+  
+  /* Loading states for mobile */
+  .mobile-loading {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 200px !important;
+    gap: 16px !important;
+  }
+  
+  /* Mobile card optimizations */
+  .mobile-card {
+    margin: 0 -4px !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  /* Improved mobile select dropdowns */
+  @media (max-width: 768px) {
+    [data-radix-select-content] {
+      max-height: 60vh !important;
+      position: fixed !important;
+      bottom: 10% !important;
+      left: 5% !important;
+      right: 5% !important;
+      top: auto !important;
+      transform: none !important;
+      width: 90% !important;
+      max-width: none !important;
+      border-radius: 12px !important;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1) !important;
+    }
+  }
+}
+
+/* PWA and mobile app specific styles */
+@media (display-mode: standalone) {
+  /* PWA specific styles when app is installed */
+  body {
+    padding-top: env(safe-area-inset-top) !important;
+    padding-bottom: env(safe-area-inset-bottom) !important;
+  }
+  
+  .pwa-header {
+    padding-top: env(safe-area-inset-top) !important;
+  }
+}
+
+/* Dark mode mobile optimizations */
+@media (prefers-color-scheme: dark) {
+  .mobile-card {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+  }
+  
+  .offline-indicator-mobile {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+  }
+}
+
+/* High contrast mode for accessibility */
+@media (prefers-contrast: high) {
+  .mobile-button {
+    border: 2px solid currentColor !important;
+  }
+  
+  .mobile-card {
+    border: 2px solid currentColor !important;
+  }
+}

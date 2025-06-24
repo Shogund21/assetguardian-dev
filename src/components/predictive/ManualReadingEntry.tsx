@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,6 +11,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { getEquipmentReadingTemplate } from "@/utils/equipmentTemplates";
+import { useOfflineSync } from "@/hooks/useOfflineSync";
+import { offlineStorage } from "@/services/offlineStorageService";
+import { OfflineIndicator } from "@/components/ui/OfflineIndicator";
 
 const readingSchema = z.object({
   equipment_id: z.string().min(1, "Equipment is required"),
@@ -33,6 +35,7 @@ interface ManualReadingEntryProps {
 const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualReadingEntryProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { isOnline, updateUnsyncedCount } = useOfflineSync();
   
   const form = useForm<ReadingFormValues>({
     resolver: zodResolver(readingSchema),
@@ -63,39 +66,62 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
   const onSubmit = async (values: ReadingFormValues) => {
     setIsSubmitting(true);
     try {
-      // Store the manual reading in sensor_readings table
-      const { error } = await supabase
-        .from('sensor_readings')
-        .insert({
-          equipment_id: values.equipment_id,
-          sensor_type: values.reading_type,
-          value: parseFloat(values.value),
-          unit: values.unit,
-          timestamp_utc: new Date().toISOString(),
-        });
-
-      if (error) throw error;
-
-      // Store additional notes if provided
-      if (values.notes || values.location_notes) {
-        await supabase
-          .from('maintenance_documents')
+      const timestamp = new Date().toISOString();
+      
+      if (isOnline) {
+        // Online mode - save directly to Supabase
+        const { error } = await supabase
+          .from('sensor_readings')
           .insert({
             equipment_id: values.equipment_id,
-            file_name: `Manual Reading - ${values.reading_type}`,
-            file_path: 'manual_entry',
-            file_type: 'text/plain',
-            file_size: 0,
-            category: 'manual_reading',
-            comments: `${values.notes || ''}\nLocation Notes: ${values.location_notes || ''}`,
-            tags: ['manual_reading', values.reading_type],
+            sensor_type: values.reading_type,
+            value: parseFloat(values.value),
+            unit: values.unit,
+            timestamp_utc: timestamp,
+            source: 'manual'
           });
-      }
 
-      toast({
-        title: "Success",
-        description: "Reading recorded successfully",
-      });
+        if (error) throw error;
+
+        // Store additional notes if provided
+        if (values.notes || values.location_notes) {
+          await supabase
+            .from('maintenance_documents')
+            .insert({
+              equipment_id: values.equipment_id,
+              file_name: `Manual Reading - ${values.reading_type}`,
+              file_path: 'manual_entry',
+              file_type: 'text/plain',
+              file_size: 0,
+              category: 'manual_reading',
+              comments: `${values.notes || ''}\nLocation Notes: ${values.location_notes || ''}`,
+              tags: ['manual_reading', values.reading_type],
+            });
+        }
+
+        toast({
+          title: "Success",
+          description: "Reading recorded successfully",
+        });
+      } else {
+        // Offline mode - save to local storage
+        await offlineStorage.storeReading({
+          equipment_id: values.equipment_id,
+          reading_type: values.reading_type,
+          value: parseFloat(values.value),
+          unit: values.unit,
+          notes: values.notes,
+          location_notes: values.location_notes,
+          timestamp,
+        });
+
+        await updateUnsyncedCount();
+
+        toast({
+          title: "Saved Offline",
+          description: "Reading saved locally. Will sync when connection is restored.",
+        });
+      }
 
       form.reset();
       onSuccess?.();
@@ -103,7 +129,7 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
       console.error('Error saving reading:', error);
       toast({
         title: "Error",
-        description: "Failed to save reading",
+        description: isOnline ? "Failed to save reading" : "Failed to save reading offline",
         variant: "destructive",
       });
     } finally {
@@ -112,113 +138,130 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Record Manual Reading</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="reading_type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Reading Type</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+    <div className="space-y-4">
+      <OfflineIndicator />
+      
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            Record Manual Reading
+            <div className="text-sm font-normal">
+              {isOnline ? (
+                <span className="text-green-600">● Online</span>
+              ) : (
+                <span className="text-orange-600">● Offline</span>
+              )}
+            </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="reading_type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Reading Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select reading type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {readingTemplate.map((template) => (
+                          <SelectItem key={template.type} value={template.type}>
+                            {template.label} ({template.unit})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="value"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Reading Value</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select reading type" />
-                      </SelectTrigger>
+                      <Input type="number" step="0.01" placeholder="Enter reading value" {...field} />
                     </FormControl>
-                    <SelectContent>
-                      {readingTemplate.map((template) => (
-                        <SelectItem key={template.type} value={template.type}>
-                          {template.label} ({template.unit})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="value"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Reading Value</FormLabel>
-                  <FormControl>
-                    <Input type="number" step="0.01" placeholder="Enter reading value" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="unit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Unit</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder={selectedReading?.unit ? `e.g., ${selectedReading.unit}` : "Unit of measurement"}
+                        {...field}
+                      />
+                    </FormControl>
+                    {selectedReading?.unit && (
+                      <p className="text-xs text-muted-foreground">
+                        Suggested: {selectedReading.unit} (you can edit this)
+                      </p>
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="unit"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Unit</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder={selectedReading?.unit ? `e.g., ${selectedReading.unit}` : "Unit of measurement"}
-                      {...field}
-                    />
-                  </FormControl>
-                  {selectedReading?.unit && (
-                    <p className="text-xs text-muted-foreground">
-                      Suggested: {selectedReading.unit} (you can edit this)
-                    </p>
-                  )}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Notes (Optional)</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Additional observations or notes" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Notes (Optional)</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Additional observations or notes" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="location_notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Location/Access Notes (Optional)</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Notes about where the reading was taken" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="location_notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Location/Access Notes (Optional)</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Notes about where the reading was taken" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <Button 
-              type="submit" 
-              disabled={isSubmitting}
-              className="w-full bg-blue-900 hover:bg-blue-800 text-white"
-            >
-              {isSubmitting ? "Recording..." : "Record Reading"}
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+              <Button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="w-full bg-blue-900 hover:bg-blue-800 text-white touch-manipulation"
+                style={{ minHeight: '44px' }} // Mobile-friendly touch target
+              >
+                {isSubmitting 
+                  ? (isOnline ? "Recording..." : "Saving Offline...") 
+                  : (isOnline ? "Record Reading" : "Save Reading (Offline)")
+                }
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
