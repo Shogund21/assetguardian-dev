@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, CheckCircle, XCircle, Brain, Loader2 } from "lucide-react";
+import { AlertTriangle, CheckCircle, XCircle, Brain, Loader2, Database, Activity } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import usePredictiveMaintenance from "@/hooks/usePredictiveMaintenance";
 import { getEquipmentReadingTemplate } from "@/utils/equipmentTemplates";
@@ -34,7 +34,7 @@ const EnhancedAIAnalysis = ({ equipmentId, equipmentType, equipmentName }: Enhan
       // Show immediate feedback
       toast({
         title: "Analysis Started",
-        description: `Running predictive analysis for ${equipmentName}`,
+        description: `Running predictive analysis for ${equipmentName} using both manual and standard readings`,
       });
       
     } catch (error) {
@@ -73,6 +73,24 @@ const EnhancedAIAnalysis = ({ equipmentId, equipmentType, equipmentName }: Enhan
     }
   };
 
+  const getDataQualityBadge = (dataQuality: any) => {
+    if (!dataQuality) return null;
+    
+    const { manual_readings_count, standard_readings_count } = dataQuality;
+    const hasManual = manual_readings_count > 0;
+    const hasStandard = standard_readings_count > 0;
+    
+    if (hasManual && hasStandard) {
+      return <Badge variant="default" className="bg-blue-600">Comprehensive Data</Badge>;
+    } else if (hasManual) {
+      return <Badge variant="default" className="bg-green-600">Manual Readings</Badge>;
+    } else if (hasStandard) {
+      return <Badge variant="outline" className="border-orange-500 text-orange-600">Standard Readings Only</Badge>;
+    }
+    
+    return <Badge variant="secondary">Limited Data</Badge>;
+  };
+
   // Get relevant alerts for this equipment
   const equipmentAlerts = alerts.filter(alert => alert.asset_id === equipmentId);
   const latestAlert = equipmentAlerts[0]; // Most recent alert
@@ -107,7 +125,7 @@ const EnhancedAIAnalysis = ({ equipmentId, equipmentType, equipmentName }: Enhan
             <div className="text-center py-8">
               <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
               <p className="text-muted-foreground">
-                Analyzing equipment readings against industry standards...
+                Analyzing equipment readings from manual sensors and maintenance checks...
               </p>
             </div>
           )}
@@ -119,8 +137,33 @@ const EnhancedAIAnalysis = ({ equipmentId, equipmentType, equipmentName }: Enhan
                   {getRiskIcon(latestAlert.risk_level)}
                   <span className="font-medium">Latest Analysis Result</span>
                 </div>
-                {getRiskBadge(latestAlert.risk_level)}
+                <div className="flex gap-2">
+                  {getRiskBadge(latestAlert.risk_level)}
+                  {latestAlert.data_quality && getDataQualityBadge(latestAlert.data_quality)}
+                </div>
               </div>
+              
+              {latestAlert.data_quality && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Database className="h-4 w-4 text-blue-600" />
+                    <span className="font-medium text-blue-900">Data Sources Used</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Activity className="h-3 w-3 text-green-600" />
+                      <span>Manual Readings: {latestAlert.data_quality.manual_readings_count}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Database className="h-3 w-3 text-blue-600" />
+                      <span>Standard Readings: {latestAlert.data_quality.standard_readings_count}</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-blue-700 mt-2">
+                    {latestAlert.data_quality.coverage_assessment}
+                  </p>
+                </div>
+              )}
               
               <div className="grid gap-4">
                 <div>
@@ -162,9 +205,10 @@ const EnhancedAIAnalysis = ({ equipmentId, equipmentType, equipmentName }: Enhan
                 No analysis results yet. Run an analysis to get AI-powered insights.
               </p>
               <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
-                <li>Analyzes readings against industry standards</li>
-                <li>Identifies potential issues early</li>
-                <li>Provides maintenance recommendations</li>
+                <li>Analyzes both manual sensor readings and standard maintenance readings</li>
+                <li>Prioritizes manual readings when available</li>
+                <li>Identifies potential issues early with trend analysis</li>
+                <li>Provides maintenance recommendations based on data completeness</li>
                 <li>Creates work orders for critical issues</li>
               </ul>
             </div>
@@ -187,10 +231,18 @@ const EnhancedAIAnalysis = ({ equipmentId, equipmentType, equipmentName }: Enhan
                       <p className="text-sm font-medium">{alert.finding}</p>
                       <p className="text-xs text-muted-foreground">
                         {new Date(alert.created_at).toLocaleDateString()}
+                        {alert.data_quality && (
+                          <span className="ml-2">
+                            • {alert.data_quality.manual_readings_count}M + {alert.data_quality.standard_readings_count}S readings
+                          </span>
+                        )}
                       </p>
                     </div>
                   </div>
-                  {getRiskBadge(alert.risk_level)}
+                  <div className="flex gap-2">
+                    {getRiskBadge(alert.risk_level)}
+                    {alert.data_quality && getDataQualityBadge(alert.data_quality)}
+                  </div>
                 </div>
               ))}
             </div>

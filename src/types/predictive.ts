@@ -7,6 +7,8 @@ export interface SensorReading {
   value: number;
   unit: string;
   created_at: string;
+  source?: 'manual' | 'maintenance_check';
+  reading_mode?: string;
 }
 
 export interface PredictiveAlert {
@@ -19,6 +21,11 @@ export interface PredictiveAlert {
   created_at: string;
   resolved_at: string | null;
   work_order_id: string | null;
+  data_quality?: {
+    manual_readings_count: number;
+    standard_readings_count: number;
+    coverage_assessment: string;
+  };
   equipment?: {
     name: string;
     location: string;
@@ -74,6 +81,7 @@ export interface AssetGuardianAIRequest {
     date: string;
     type: string;
     notes: string;
+    reading_mode?: string;
   }>;
 }
 
@@ -83,6 +91,12 @@ export interface AssetGuardianAIResponse {
   finding: string;
   recommendation: string;
   create_work_order: boolean;
+  confidence_score?: number;
+  data_quality?: {
+    manual_readings_count: number;
+    standard_readings_count: number;
+    coverage_assessment: string;
+  };
   work_order?: {
     title: string;
     description: string;

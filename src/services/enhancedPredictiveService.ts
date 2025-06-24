@@ -26,18 +26,21 @@ export class EnhancedPredictiveService {
       const equipmentType = this.detectEquipmentType(equipment.name);
       console.log('Detected equipment type:', equipmentType);
 
-      // Get recent maintenance checks with frequency data
+      // Get recent maintenance checks with frequency data and standard readings
       const maintenanceHistory = await this.getMaintenanceHistoryWithFrequency(equipmentId);
-      const sensorReadings = await this.getRecentSensorReadings(equipmentId, 168); // 7 days
+      const manualReadings = await this.getRecentSensorReadings(equipmentId, 168); // 7 days
       
-      if (!sensorReadings || sensorReadings.length === 0) {
+      // Merge manual and standard readings
+      const allReadings = await this.mergeReadingSources(manualReadings, maintenanceHistory, equipmentType);
+      
+      if (!allReadings || allReadings.length === 0) {
         return this.createNoDataResponse(equipmentId);
       }
 
       // Enhanced analysis considering maintenance frequency patterns
       const analysisResult = await this.analyzeTieredMaintenanceData(
         equipment,
-        sensorReadings,
+        allReadings,
         maintenanceHistory,
         equipmentType
       );
@@ -50,11 +53,123 @@ export class EnhancedPredictiveService {
   }
 
   /**
+   * Merge manual sensor readings with standard maintenance check readings
+   */
+  private static async mergeReadingSources(manualReadings: any[], maintenanceHistory: any[], equipmentType: string) {
+    const mergedReadings = [...manualReadings];
+    const readingTemplates = getEquipmentReadingTemplate(equipmentType);
+    
+    // Create a set of existing manual reading timestamps to avoid duplicates
+    const manualTimestamps = new Set(manualReadings.map(r => r.timestamp_utc));
+    
+    // Process maintenance checks to extract standard readings
+    for (const check of maintenanceHistory) {
+      const checkTimestamp = new Date(check.check_date).toISOString();
+      
+      // Skip if we already have manual readings for this timestamp
+      if (manualTimestamps.has(checkTimestamp)) continue;
+      
+      // Extract standard readings from maintenance check
+      const standardReadings = this.extractStandardReadings(check, checkTimestamp, equipmentType);
+      mergedReadings.push(...standardReadings);
+    }
+    
+    // Sort by timestamp
+    return mergedReadings.sort((a, b) => new Date(a.timestamp_utc).getTime() - new Date(b.timestamp_utc).getTime());
+  }
+
+  /**
+   * Extract standard readings from maintenance check data
+   */
+  private static extractStandardReadings(check: any, timestamp: string, equipmentType: string) {
+    const readings = [];
+    const readingTemplates = getEquipmentReadingTemplate(equipmentType);
+    
+    // Map maintenance check fields to sensor readings
+    const fieldMappings = this.getFieldMappings(equipmentType);
+    
+    for (const [checkField, sensorType] of Object.entries(fieldMappings)) {
+      if (check[checkField] && check[checkField] !== 'NA') {
+        const template = readingTemplates.find(t => t.type === sensorType);
+        const numericValue = this.parseNumericValue(check[checkField]);
+        
+        if (numericValue !== null && template) {
+          readings.push({
+            id: `check_${check.id}_${sensorType}`,
+            equipment_id: check.equipment_id,
+            timestamp_utc: timestamp,
+            sensor_type: sensorType,
+            value: numericValue,
+            unit: template.unit || '',
+            created_at: timestamp,
+            source: 'maintenance_check',
+            reading_mode: check.reading_mode || 'standard'
+          });
+        }
+      }
+    }
+    
+    return readings;
+  }
+
+  /**
+   * Get field mappings for different equipment types
+   */
+  private static getFieldMappings(equipmentType: string): Record<string, string> {
+    const baseMappings = {
+      'chiller_pressure_reading': 'pressure',
+      'chiller_temperature_reading': 'temperature',
+      'airflow_reading': 'airflow',
+      'supply_air_temperature': 'supply_air_temp',
+      'return_air_temperature': 'return_air_temp',
+      'static_pressure_reading': 'static_pressure',
+      'compressor_current': 'current',
+      'suction_pressure': 'suction_pressure',
+      'discharge_pressure': 'discharge_pressure',
+      'oil_pressure': 'oil_pressure'
+    };
+
+    // Add equipment-specific mappings
+    switch (equipmentType) {
+      case 'ahu':
+        return {
+          ...baseMappings,
+          'fan_motor_current': 'fan_current',
+          'filter_pressure_drop': 'filter_pressure'
+        };
+      case 'chiller':
+        return {
+          ...baseMappings,
+          'evaporator_entering_temp': 'evap_entering_temp',
+          'evaporator_leaving_temp': 'evap_leaving_temp',
+          'condenser_entering_temp': 'cond_entering_temp',
+          'condenser_leaving_temp': 'cond_leaving_temp'
+        };
+      default:
+        return baseMappings;
+    }
+  }
+
+  /**
+   * Parse numeric value from maintenance check field
+   */
+  private static parseNumericValue(value: any): number | null {
+    if (typeof value === 'number') return value;
+    if (typeof value === 'string') {
+      // Remove units and parse number
+      const numStr = value.replace(/[^\d.-]/g, '');
+      const num = parseFloat(numStr);
+      return isNaN(num) ? null : num;
+    }
+    return null;
+  }
+
+  /**
    * Analyze maintenance data considering frequency and completeness
    */
   private static async analyzeTieredMaintenanceData(
     equipment: any,
-    sensorReadings: any[],
+    allReadings: any[],
     maintenanceHistory: any[],
     equipmentType: string
   ): Promise<AssetGuardianAIResponse> {
@@ -64,8 +179,8 @@ export class EnhancedPredictiveService {
     // Get reading templates for comparison
     const readingTemplates = getEquipmentReadingTemplate(equipmentType);
     
-    // Analyze current readings against standards
-    const readingAnalysis = this.analyzeReadingsWithFrequencyContext(sensorReadings, readingTemplates, frequencyAnalysis);
+    // Analyze current readings against standards with data source info
+    const readingAnalysis = this.analyzeReadingsWithFrequencyContext(allReadings, readingTemplates, frequencyAnalysis);
     
     // Determine if more detailed inspection is needed
     const recommendedAction = this.determineRecommendedAction(readingAnalysis, frequencyAnalysis);
@@ -107,13 +222,19 @@ export class EnhancedPredictiveService {
   }
 
   /**
-   * Analyze readings with frequency context
+   * Analyze readings with frequency context and data source tracking
    */
-  private static analyzeReadingsWithFrequencyContext(sensorReadings: any[], templates: any[], frequencyAnalysis: any) {
-    const readingsByType = this.groupReadingsByType(sensorReadings);
+  private static analyzeReadingsWithFrequencyContext(allReadings: any[], templates: any[], frequencyAnalysis: any) {
+    const readingsByType = this.groupReadingsByType(allReadings);
     const violations = [];
     const insights = [];
     let overallRisk = 'low';
+
+    // Track data sources
+    const dataSources = {
+      manual: allReadings.filter(r => r.source !== 'maintenance_check').length,
+      standard: allReadings.filter(r => r.source === 'maintenance_check').length
+    };
 
     // If we have limited data due to infrequent checks, adjust analysis
     const hasLimitedData = frequencyAnalysis.dailyCheckCount < 3 && frequencyAnalysis.weeklyCheckCount < 2;
@@ -124,6 +245,9 @@ export class EnhancedPredictiveService {
 
       const latestReading = readings[readings.length - 1];
       const analysis = this.analyzeReadingAgainstStandards(latestReading.value, template, readings);
+      
+      // Add data source information
+      analysis.dataSource = latestReading.source || 'manual';
       
       // Adjust severity based on data availability
       if (hasLimitedData && analysis.violation) {
@@ -142,7 +266,7 @@ export class EnhancedPredictiveService {
       }
     }
 
-    return { violations, insights, overallRisk, hasLimitedData };
+    return { violations, insights, overallRisk, hasLimitedData, dataSources };
   }
 
   /**
@@ -225,6 +349,18 @@ export class EnhancedPredictiveService {
       finding += ` Monthly comprehensive inspection overdue (${frequencyAnalysis.daysSinceMonthly} days).`;
     }
 
+    // Add data source information
+    const { dataSources } = readingAnalysis;
+    if (dataSources) {
+      const dataSourceInfo = dataSources.manual > 0 && dataSources.standard > 0 
+        ? `Analysis based on ${dataSources.manual} manual readings and ${dataSources.standard} standard readings.`
+        : dataSources.manual > 0 
+          ? `Analysis based on ${dataSources.manual} manual readings.`
+          : `Analysis based on ${dataSources.standard} standard maintenance check readings.`;
+      
+      recommendation += ` ${dataSourceInfo}`;
+    }
+
     return {
       asset_id: assetId,
       risk_level: readingAnalysis.overallRisk,
@@ -263,16 +399,24 @@ export class EnhancedPredictiveService {
       return [];
     }
 
-    return data || [];
+    return (data || []).map(reading => ({ ...reading, source: 'manual' }));
   }
 
   /**
-   * Get maintenance history with frequency data
+   * Get maintenance history with frequency data and reading values
    */
   private static async getMaintenanceHistoryWithFrequency(equipmentId: string) {
     const { data, error } = await supabase
       .from('hvac_maintenance_checks')
-      .select('check_date, notes, status, maintenance_frequency')
+      .select(`
+        id, check_date, notes, status, maintenance_frequency, reading_mode, equipment_id,
+        chiller_pressure_reading, chiller_temperature_reading, airflow_reading,
+        supply_air_temperature, return_air_temperature, static_pressure_reading,
+        compressor_current, suction_pressure, discharge_pressure, oil_pressure,
+        evaporator_entering_temp, evaporator_leaving_temp, 
+        condenser_entering_temp, condenser_leaving_temp,
+        fan_motor_current, filter_pressure_drop
+      `)
       .eq('equipment_id', equipmentId)
       .order('check_date', { ascending: false })
       .limit(20);
