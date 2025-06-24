@@ -189,7 +189,11 @@ export class EnhancedPredictiveService {
           manual_readings_count: 0,
           standard_readings_count: 0,
           coverage_assessment: 'insufficient'
-        }
+        },
+        predictive_timeline: (alert.predictive_timeline as any) || [],
+        degradation_analysis: (alert.degradation_analysis as any) || [],
+        maintenance_windows: (alert.maintenance_windows as any) || [],
+        performance_trends: (alert.performance_trends as any) || undefined
       }));
     } catch (error) {
       console.error('Failed to get analysis history:', error);
