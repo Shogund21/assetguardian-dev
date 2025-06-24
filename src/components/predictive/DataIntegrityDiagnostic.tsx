@@ -119,7 +119,10 @@ const DataIntegrityDiagnostic = ({ equipmentId, equipmentName }: DataIntegrityDi
               </div>
               <div className="flex justify-between">
                 <span>Maintenance Checks:</span>
-                <Badge variant={readingCounts.standard > 0 ? "default" : "secondary"}>
+                <Badge 
+                  variant={readingCounts.standard > 0 ? "outline" : "secondary"}
+                  className={readingCounts.standard > 0 ? "border-blue-500 text-blue-600 bg-white" : ""}
+                >
                   {readingCounts.standard}
                 </Badge>
               </div>
