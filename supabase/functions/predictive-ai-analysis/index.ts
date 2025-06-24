@@ -26,8 +26,8 @@ serve(async (req) => {
     const standardReadings = sensorReadings.filter((r: any) => r.source === 'maintenance_check');
     const dataSourceSummary = `Data includes ${manualReadings.length} manual readings and ${standardReadings.length} standard maintenance check readings.`;
 
-    // Prepare the AI prompt with enhanced context
-    const prompt = `You are AssetGuardian AI, an expert in predictive maintenance analysis. Analyze the following equipment data and provide a risk assessment.
+    // Prepare the enhanced AI prompt with predictive timeline focus
+    const prompt = `You are AssetGuardian AI, an expert in predictive maintenance analysis with advanced timeline forecasting capabilities. Analyze the following equipment data and provide a comprehensive risk assessment with detailed predictive timeline.
 
 Equipment Information:
 - Asset ID: ${equipmentData.asset_id}
@@ -61,6 +61,43 @@ Please analyze this data and respond with a JSON object containing:
     "standard_readings_count": number,
     "coverage_assessment": "string"
   },
+  "predictive_timeline": [
+    {
+      "timeframe": "string (e.g., '7 days', '30 days', '90 days', '1 year')",
+      "failure_probability": number (0-100),
+      "predicted_date": "ISO date string",
+      "component": "string (e.g., 'bearing', 'motor', 'filter')",
+      "failure_type": "string (e.g., 'wear failure', 'overheating', 'clogging')",
+      "severity": "low" | "medium" | "high" | "critical",
+      "intervention_cost": number (estimated USD),
+      "downtime_hours": number
+    }
+  ],
+  "degradation_analysis": [
+    {
+      "component": "string",
+      "current_condition": number (0-100 percentage),
+      "degradation_rate": number (percentage per month),
+      "expected_life_remaining": number (months),
+      "replacement_threshold": number (percentage)
+    }
+  ],
+  "maintenance_windows": [
+    {
+      "window_start": "ISO date string",
+      "window_end": "ISO date string", 
+      "window_type": "optimal" | "acceptable" | "critical",
+      "intervention_type": "string (e.g., 'bearing replacement', 'filter change')",
+      "estimated_cost": number (USD),
+      "estimated_hours": number,
+      "priority": number (1-10)
+    }
+  ],
+  "performance_trends": {
+    "efficiency_decline_rate": number (percentage per month),
+    "energy_consumption_increase": number (percentage vs baseline),
+    "projected_failure_date": "ISO date string"
+  },
   "work_order": {
     "title": "string",
     "description": "string", 
@@ -71,12 +108,16 @@ Please analyze this data and respond with a JSON object containing:
 }
 
 Focus on:
-1. Trend analysis using both manual and standard readings
-2. Threshold violations or approaching limits
-3. Historical maintenance patterns and reading modes
-4. Early warning signs of potential failures
-5. Data completeness and recommendation for optimal reading collection
-6. Prioritize manual readings when available, use standard readings as backup`
+1. **Predictive Timeline Analysis**: Create detailed failure probability predictions for multiple timeframes (7 days, 30 days, 90 days, 1 year)
+2. **Component-Level Predictions**: Break down analysis by individual components (bearings, motors, filters, belts, etc.)
+3. **Degradation Modeling**: Calculate current condition percentages and degradation rates for each component
+4. **Optimal Maintenance Windows**: Identify best timing for interventions based on cost-benefit analysis
+5. **Performance Trend Forecasting**: Project efficiency decline and energy consumption increases
+6. **Cost-Impact Analysis**: Provide realistic cost estimates for interventions vs failure scenarios
+7. **Time-to-Failure Calculations**: Use sensor trends to calculate specific failure probability dates
+8. **Multi-Scenario Planning**: Consider different failure modes and their timelines
+
+Provide specific dates, percentages, and dollar amounts. Use realistic industry standards for HVAC equipment lifecycle and maintenance costs.`
 
     // Call OpenAI API
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -90,7 +131,7 @@ Focus on:
         messages: [
           {
             role: 'system',
-            content: 'You are AssetGuardian AI, an expert predictive maintenance analyst. Always respond with valid JSON matching the specified schema. Consider both manual sensor readings and standard maintenance check readings, prioritizing manual readings when available.'
+            content: 'You are AssetGuardian AI, an expert predictive maintenance analyst with advanced timeline forecasting capabilities. Always respond with valid JSON matching the specified schema. Focus on providing detailed predictive timelines with specific dates, probabilities, and cost estimates. Consider both manual sensor readings and standard maintenance check readings, prioritizing manual readings when available.'
           },
           {
             role: 'user',
@@ -98,7 +139,7 @@ Focus on:
           }
         ],
         temperature: 0.3,
-        max_tokens: 1200,
+        max_tokens: 2000,
         response_format: { type: "json_object" }
       }),
     })
@@ -122,6 +163,19 @@ Focus on:
     // Ensure confidence score is included
     if (!analysis.confidence_score) {
       analysis.confidence_score = manualReadings.length > 0 ? 85 : 65; // Higher confidence with manual readings
+    }
+
+    // Ensure predictive timeline has default structure if missing
+    if (!analysis.predictive_timeline) {
+      analysis.predictive_timeline = [];
+    }
+
+    if (!analysis.degradation_analysis) {
+      analysis.degradation_analysis = [];
+    }
+
+    if (!analysis.maintenance_windows) {
+      analysis.maintenance_windows = [];
     }
 
     return new Response(
@@ -149,7 +203,11 @@ Focus on:
           manual_readings_count: 0,
           standard_readings_count: 0,
           coverage_assessment: 'No data available'
-        }
+        },
+        predictive_timeline: [],
+        degradation_analysis: [],
+        maintenance_windows: [],
+        performance_trends: null
       }),
       { 
         status: 500, 

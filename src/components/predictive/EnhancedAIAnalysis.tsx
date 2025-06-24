@@ -1,13 +1,16 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, CheckCircle, XCircle, Brain, Loader2, Database, Activity } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AlertTriangle, CheckCircle, XCircle, Brain, Loader2, Database, Activity, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import usePredictiveMaintenance from "@/hooks/usePredictiveMaintenance";
 import { getEquipmentReadingTemplate } from "@/utils/equipmentTemplates";
 import ReadingSourceSelector, { ReadingSource } from "./ReadingSourceSelector";
 import DataIntegrityDiagnostic from "./DataIntegrityDiagnostic";
+import PredictiveTimeline from "./PredictiveTimeline";
 
 interface EnhancedAIAnalysisProps {
   equipmentId: string;
@@ -155,87 +158,106 @@ const EnhancedAIAnalysis = ({ equipmentId, equipmentType, equipmentName }: Enhan
           )}
           
           {latestAlert && !isAnalyzing && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {getRiskIcon(latestAlert.risk_level)}
-                  <span className="font-medium">Latest Analysis Result</span>
-                </div>
-                <div className="flex gap-2">
-                  {getRiskBadge(latestAlert.risk_level)}
-                  {latestAlert.data_quality && getDataQualityBadge(latestAlert.data_quality)}
-                </div>
-              </div>
+            <Tabs defaultValue="summary" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="summary">Analysis Summary</TabsTrigger>
+                <TabsTrigger value="timeline" className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Predictive Timeline
+                </TabsTrigger>
+              </TabsList>
               
-              {latestAlert.data_quality && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Database className="h-4 w-4 text-blue-600" />
-                    <span className="font-medium text-blue-900">Data Sources Used</span>
+              <TabsContent value="summary" className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {getRiskIcon(latestAlert.risk_level)}
+                    <span className="font-medium">Latest Analysis Result</span>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="flex items-center gap-2">
-                      <Activity className="h-3 w-3 text-green-600" />
-                      <span>Manual Sensor Data: {latestAlert.data_quality.manual_readings_count}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Database className="h-3 w-3 text-blue-600" />
-                      <span>Maintenance Check Data: {latestAlert.data_quality.standard_readings_count}</span>
-                    </div>
+                  <div className="flex gap-2">
+                    {getRiskBadge(latestAlert.risk_level)}
+                    {latestAlert.data_quality && getDataQualityBadge(latestAlert.data_quality)}
                   </div>
-                  <p className="text-xs text-blue-700 mt-2">
-                    {latestAlert.data_quality.coverage_assessment}
-                  </p>
-                </div>
-              )}
-              
-              <div className="grid gap-4">
-                <div>
-                  <h4 className="font-medium mb-2">Finding:</h4>
-                  <p className="text-sm text-muted-foreground">{latestAlert.finding}</p>
                 </div>
                 
-                <div>
-                  <h4 className="font-medium mb-2">Recommendation:</h4>
-                  <p className="text-sm text-muted-foreground">{latestAlert.recommendation}</p>
-                </div>
-                
-                {latestAlert.confidence_score && (
-                  <div>
-                    <h4 className="font-medium mb-2">Confidence Score:</h4>
-                    <div className="flex items-center gap-2">
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-blue-600 h-2 rounded-full" 
-                          style={{ width: `${latestAlert.confidence_score}%` }}
-                        ></div>
+                {latestAlert.data_quality && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Database className="h-4 w-4 text-blue-600" />
+                      <span className="font-medium text-blue-900">Data Sources Used</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="flex items-center gap-2">
+                        <Activity className="h-3 w-3 text-green-600" />
+                        <span>Manual Sensor Data: {latestAlert.data_quality.manual_readings_count}</span>
                       </div>
-                      <span className="text-sm">{latestAlert.confidence_score}%</span>
+                      <div className="flex items-center gap-2">
+                        <Database className="h-3 w-3 text-blue-600" />
+                        <span>Maintenance Check Data: {latestAlert.data_quality.standard_readings_count}</span>
+                      </div>
                     </div>
+                    <p className="text-xs text-blue-700 mt-2">
+                      {latestAlert.data_quality.coverage_assessment}
+                    </p>
                   </div>
                 )}
                 
-                <div className="text-xs text-muted-foreground">
-                  Analysis completed: {new Date(latestAlert.created_at).toLocaleString()}
+                <div className="grid gap-4">
+                  <div>
+                    <h4 className="font-medium mb-2">Finding:</h4>
+                    <p className="text-sm text-muted-foreground">{latestAlert.finding}</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-medium mb-2">Recommendation:</h4>
+                    <p className="text-sm text-muted-foreground">{latestAlert.recommendation}</p>
+                  </div>
+                  
+                  {latestAlert.confidence_score && (
+                    <div>
+                      <h4 className="font-medium mb-2">Confidence Score:</h4>
+                      <div className="flex items-center gap-2">
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-blue-600 h-2 rounded-full" 
+                            style={{ width: `${latestAlert.confidence_score}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-sm">{latestAlert.confidence_score}%</span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="text-xs text-muted-foreground">
+                    Analysis completed: {new Date(latestAlert.created_at).toLocaleString()}
+                  </div>
                 </div>
-              </div>
-            </div>
+              </TabsContent>
+              
+              <TabsContent value="timeline" className="space-y-4">
+                <PredictiveTimeline
+                  timelineEvents={latestAlert.predictive_timeline}
+                  maintenanceWindows={latestAlert.maintenance_windows}
+                  degradationAnalysis={latestAlert.degradation_analysis}
+                  performanceTrends={latestAlert.performance_trends}
+                />
+              </TabsContent>
+            </Tabs>
           )}
           
           {!latestAlert && !isAnalyzing && (
             <div className="text-center py-8">
               <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground mb-4">
-                No analysis results yet. Run an analysis to get AI-powered insights.
+                No analysis results yet. Run an analysis to get AI-powered insights with predictive timeline.
               </p>
               <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
                 <li>Choose your preferred data source above</li>
-                <li>Manual: Uses direct sensor readings for real-time analysis</li>
-                <li>Standard: Uses maintenance check form data for trend analysis</li>
-                <li>Auto: Combines both sources for comprehensive insights</li>
-                <li>Identifies potential issues early with predictive algorithms</li>
-                <li>Provides maintenance recommendations based on data quality</li>
-                <li>Creates work orders for critical issues automatically</li>
+                <li>Get failure probability predictions with specific dates</li>
+                <li>See component degradation analysis and life remaining</li>
+                <li>Discover optimal maintenance windows with cost estimates</li>
+                <li>View performance trends and efficiency decline rates</li>
+                <li>Receive timeline-based maintenance recommendations</li>
+                <li>Generate automated work orders for critical issues</li>
               </ul>
             </div>
           )}
