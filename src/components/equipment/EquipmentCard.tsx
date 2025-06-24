@@ -44,7 +44,7 @@ export const EquipmentCard = ({ equipment, onStatusChange, onDelete }: Equipment
           onClick={() => navigate(`/equipment/${equipment.id}`)}
         >
           <p><span className="font-medium">Model:</span> {equipment.model || "N/A"}</p>
-          <p><span className="font-medium">Serial Number:</span> {equipment.serialNumber || "N/A"}</p>
+          <p><span className="font-medium">Serial Number:</span> {equipment.serial_number || "N/A"}</p>
         </div>
         
         {/* Action buttons */}

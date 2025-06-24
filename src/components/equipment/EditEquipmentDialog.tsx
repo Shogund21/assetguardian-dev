@@ -29,11 +29,11 @@ export const EditEquipmentDialog = ({ equipment, children }: EditEquipmentDialog
     defaultValues: {
       name: equipment.name,
       model: equipment.model || "",
-      serialNumber: equipment.serialNumber || "",
+      serialNumber: equipment.serial_number || "",
       location: equipment.location,
       status: equipment.status || "",
-      lastMaintenance: equipment.lastMaintenance || null,
-      nextMaintenance: equipment.nextMaintenance || null,
+      lastMaintenance: null,
+      nextMaintenance: null,
     },
   });
 
@@ -45,11 +45,9 @@ export const EditEquipmentDialog = ({ equipment, children }: EditEquipmentDialog
         .update({
           name: values.name,
           model: values.model,
-          serialNumber: values.serialNumber,
+          serial_number: values.serialNumber,
           location: values.location,
           status: values.status,
-          lastMaintenance: values.lastMaintenance,
-          nextMaintenance: values.nextMaintenance,
         })
         .eq("id", equipment.id);
       

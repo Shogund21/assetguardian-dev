@@ -1,3 +1,4 @@
+
 import { Equipment } from "@/types/equipment";
 import { StatusDropdown } from "./StatusDropdown";
 import { useQueryClient } from "@tanstack/react-query";
@@ -52,23 +53,11 @@ export const EquipmentItem = ({ equipment }: EquipmentItemProps) => {
       </div>
       <div className="space-y-2">
         <p className="text-sm">
-          <span className="font-medium">Serial Number:</span> {equipment.serialNumber}
+          <span className="font-medium">Serial Number:</span> {equipment.serial_number}
         </p>
         <p className="text-sm">
           <span className="font-medium">Location:</span> {equipment.location}
         </p>
-        {equipment.lastMaintenance && (
-          <p className="text-sm">
-            <span className="font-medium">Last Maintenance:</span>{" "}
-            {new Date(equipment.lastMaintenance).toLocaleDateString()}
-          </p>
-        )}
-        {equipment.nextMaintenance && (
-          <p className="text-sm">
-            <span className="font-medium">Next Maintenance:</span>{" "}
-            {new Date(equipment.nextMaintenance).toLocaleDateString()}
-          </p>
-        )}
       </div>
     </div>
   );

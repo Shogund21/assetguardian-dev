@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
@@ -17,7 +18,7 @@ const Equipment = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('equipment')
-        .select('*')
+        .select('id, name, model, serial_number, location, status, company_id, created_at, updated_at')
         .order('name', { ascending: true }); // Sort by name (equipment type) alphabetically
       
       if (error) {

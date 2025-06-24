@@ -10,6 +10,7 @@ export interface Equipment {
   year?: number | null;
   created_at: string;
   updated_at: string;
+  company_id?: string | null;
   // Additional properties for UI functionality
   isSpecialLocation?: boolean;
   originalLocationId?: string;

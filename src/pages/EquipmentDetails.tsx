@@ -1,3 +1,4 @@
+
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,7 +24,7 @@ const EquipmentDetails = () => {
 
       const { data, error } = await supabase
         .from('equipment')
-        .select('*')
+        .select('id, name, model, serial_number, location, status, company_id, created_at, updated_at')
         .eq('id', id)
         .single();
       
@@ -78,7 +79,7 @@ const EquipmentDetails = () => {
                             </div>
                             <div className="flex justify-between border-b pb-2">
                               <span className="font-medium">Serial Number:</span>
-                              <span>{equipment.serialNumber || 'N/A'}</span>
+                              <span>{equipment.serial_number || 'N/A'}</span>
                             </div>
                             <div className="flex justify-between border-b pb-2">
                               <span className="font-medium">Location:</span>
@@ -102,20 +103,12 @@ const EquipmentDetails = () => {
                             <div className="flex items-center border-b pb-2">
                               <Clock className="h-4 w-4 mr-2 text-gray-500" />
                               <span className="font-medium mr-2">Last Maintenance:</span>
-                              <span>
-                                {equipment.lastMaintenance 
-                                  ? new Date(equipment.lastMaintenance).toLocaleDateString() 
-                                  : 'No record'}
-                              </span>
+                              <span>No record</span>
                             </div>
                             <div className="flex items-center pt-2">
                               <Clock className="h-4 w-4 mr-2 text-gray-500" />
                               <span className="font-medium mr-2">Next Maintenance:</span>
-                              <span>
-                                {equipment.nextMaintenance 
-                                  ? new Date(equipment.nextMaintenance).toLocaleDateString() 
-                                  : 'Not scheduled'}
-                              </span>
+                              <span>Not scheduled</span>
                             </div>
                           </div>
                         </div>

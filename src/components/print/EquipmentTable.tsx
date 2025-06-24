@@ -1,3 +1,4 @@
+
 import { Equipment } from "@/types/equipment";
 import {
   Table,
@@ -23,7 +24,9 @@ export const EquipmentTable = ({ data }: EquipmentTableProps) => {
             <TableHead>Model</TableHead>
             <TableHead>Serial Number</TableHead>
             <TableHead>Location</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead>Status</Table
+
+</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -31,7 +34,7 @@ export const EquipmentTable = ({ data }: EquipmentTableProps) => {
             <TableRow key={equipment.id}>
               <TableCell>{equipment.name}</TableCell>
               <TableCell>{equipment.model}</TableCell>
-              <TableCell>{equipment.serialNumber}</TableCell>
+              <TableCell>{equipment.serial_number}</TableCell>
               <TableCell>{equipment.location}</TableCell>
               <TableCell>{equipment.status}</TableCell>
             </TableRow>

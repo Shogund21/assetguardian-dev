@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
@@ -15,7 +16,7 @@ export const PrintView = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("equipment")
-        .select("*")
+        .select("id, name, model, serial_number, location, status, company_id, created_at, updated_at")
         .order("name");
       
       if (error) throw error;

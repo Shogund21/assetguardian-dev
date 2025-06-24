@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { FormFields } from "./FormFields";
-import { FormActions } from "./FormActions";
+import FormFields from "./FormFields";
+import FormActions from "./FormActions";
 import { EquipmentFormData } from "@/types/equipment";
 
 interface EquipmentFormProps {

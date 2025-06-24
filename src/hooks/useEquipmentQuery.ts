@@ -50,7 +50,7 @@ export const useEquipmentQuery = (locationId: string) => {
         // Fetch all equipment - NO FILTERING BY LOCATION
         const { data: equipment, error: equipmentError } = await supabase
           .from('equipment')
-          .select('*')
+          .select('id, name, model, serial_number, location, status, company_id, created_at, updated_at')
           .order('name');
         
         if (equipmentError) {
@@ -77,12 +77,12 @@ export const useEquipmentQuery = (locationId: string) => {
           const isElevator = e.name.toLowerCase().includes('elevator');
           
           // Add internal tracking properties but don't display warnings
-          const equipmentWithMeta = {
+          const equipmentWithMeta: Equipment = {
             ...e,
             // Ensure status field exists
             status: e.status || 'Active',
             // Ensure type field exists  
-            type: e.type || 'General',
+            type: 'General',
             isSpecialLocation: isRestroom || isElevator,
             originalLocationId: e.location,
             displayWarning: false // Never show warnings
@@ -92,7 +92,7 @@ export const useEquipmentQuery = (locationId: string) => {
             console.log(`Special equipment "${e.name}" has database location "${e.location}" but will be available for all locations`);
           }
           
-          return equipmentWithMeta as Equipment;
+          return equipmentWithMeta;
         });
 
         console.log(`Returning all ${processedEquipment.length} equipment items for location ${locationData.name}`);

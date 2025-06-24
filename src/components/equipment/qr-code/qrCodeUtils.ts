@@ -37,7 +37,7 @@ export const generatePrintableHtml = (equipment: Equipment, qrCodeHtml: string):
               </tr>
               <tr>
                 <th>Serial Number</th>
-                <td>${equipment.serialNumber || 'N/A'}</td>
+                <td>${equipment.serial_number || 'N/A'}</td>
               </tr>
               <tr>
                 <th>Location</th>
