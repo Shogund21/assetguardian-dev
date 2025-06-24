@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +6,7 @@ import { AlertTriangle, CheckCircle, XCircle, Brain, Loader2, Database, Activity
 import { useToast } from "@/hooks/use-toast";
 import usePredictiveMaintenance from "@/hooks/usePredictiveMaintenance";
 import { getEquipmentReadingTemplate } from "@/utils/equipmentTemplates";
+import ReadingSourceSelector, { ReadingSource } from "./ReadingSourceSelector";
 
 interface EnhancedAIAnalysisProps {
   equipmentId: string;
@@ -15,26 +15,33 @@ interface EnhancedAIAnalysisProps {
 }
 
 const EnhancedAIAnalysis = ({ equipmentId, equipmentType, equipmentName }: EnhancedAIAnalysisProps) => {
-  const [analysisResult, setAnalysisResult] = useState<any>(null);
-  const { analyzeEquipment, isAnalyzing, alerts } = usePredictiveMaintenance();
+  const [readingSource, setReadingSource] = useState<ReadingSource>('auto');
+  const { analyzeEquipment, isAnalyzing, alerts, useReadingCounts } = usePredictiveMaintenance();
   const { toast } = useToast();
+
+  // Get reading counts for the selector
+  const { data: readingCounts } = useReadingCounts(equipmentId);
 
   const handleAnalyze = async () => {
     try {
-      setAnalysisResult(null);
+      console.log(`Starting AI analysis for ${equipmentName} (${equipmentType}) with reading source: ${readingSource}`);
       
       // Get equipment reading standards
       const readingTemplates = getEquipmentReadingTemplate(equipmentType);
-      
-      console.log(`Starting AI analysis for ${equipmentName} (${equipmentType})`);
       console.log('Available reading templates:', readingTemplates);
       
-      analyzeEquipment(equipmentId);
+      analyzeEquipment({ equipmentId, readingSource });
       
       // Show immediate feedback
+      const sourceDescription = readingSource === 'manual' 
+        ? 'manual readings only'
+        : readingSource === 'standard'
+          ? 'standard readings only'
+          : 'all available readings';
+      
       toast({
         title: "Analysis Started",
-        description: `Running predictive analysis for ${equipmentName} using both manual and standard readings`,
+        description: `Running predictive analysis for ${equipmentName} using ${sourceDescription}`,
       });
       
     } catch (error) {
@@ -121,11 +128,21 @@ const EnhancedAIAnalysis = ({ equipmentId, equipmentType, equipmentName }: Enhan
           </div>
         </CardHeader>
         <CardContent>
+          {/* Reading Source Selector */}
+          <div className="mb-6">
+            <ReadingSourceSelector
+              value={readingSource}
+              onChange={setReadingSource}
+              manualCount={readingCounts?.manual || 0}
+              standardCount={readingCounts?.standard || 0}
+            />
+          </div>
+
           {isAnalyzing && (
             <div className="text-center py-8">
               <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
               <p className="text-muted-foreground">
-                Analyzing equipment readings from manual sensors and maintenance checks...
+                Analyzing equipment readings from {readingSource === 'manual' ? 'manual sensors' : readingSource === 'standard' ? 'maintenance checks' : 'all available sources'}...
               </p>
             </div>
           )}
@@ -205,8 +222,9 @@ const EnhancedAIAnalysis = ({ equipmentId, equipmentType, equipmentName }: Enhan
                 No analysis results yet. Run an analysis to get AI-powered insights.
               </p>
               <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <li>Choose your preferred data source above</li>
                 <li>Analyzes both manual sensor readings and standard maintenance readings</li>
-                <li>Prioritizes manual readings when available</li>
+                <li>Prioritizes manual readings when available (Auto mode)</li>
                 <li>Identifies potential issues early with trend analysis</li>
                 <li>Provides maintenance recommendations based on data completeness</li>
                 <li>Creates work orders for critical issues</li>

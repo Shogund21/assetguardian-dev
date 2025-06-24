@@ -3,12 +3,17 @@ import { getReadingStandards, getEquipmentReadingTemplate } from "@/utils/equipm
 import { getMaintenanceTemplate } from "@/utils/tieredMaintenanceTemplates";
 import type { AssetGuardianAIRequest, AssetGuardianAIResponse } from "@/types/predictive";
 
+export type ReadingSource = 'auto' | 'manual' | 'standard';
+
 export class EnhancedPredictiveService {
   
   /**
-   * Enhanced AI analysis with tiered maintenance support
+   * Enhanced AI analysis with tiered maintenance support and reading source selection
    */
-  static async processEnhancedAIAnalysis(equipmentId: string): Promise<AssetGuardianAIResponse | null> {
+  static async processEnhancedAIAnalysis(
+    equipmentId: string, 
+    readingSourcePreference: ReadingSource = 'auto'
+  ): Promise<AssetGuardianAIResponse | null> {
     try {
       // Get equipment details
       const { data: equipment, error: equipmentError } = await supabase
@@ -30,11 +35,16 @@ export class EnhancedPredictiveService {
       const maintenanceHistory = await this.getMaintenanceHistoryWithFrequency(equipmentId);
       const manualReadings = await this.getRecentSensorReadings(equipmentId, 168); // 7 days
       
-      // Merge manual and standard readings
-      const allReadings = await this.mergeReadingSources(manualReadings, maintenanceHistory, equipmentType);
+      // Merge manual and standard readings based on user preference
+      const allReadings = await this.mergeReadingSourcesWithPreference(
+        manualReadings, 
+        maintenanceHistory, 
+        equipmentType,
+        readingSourcePreference
+      );
       
       if (!allReadings || allReadings.length === 0) {
-        return this.createNoDataResponse(equipmentId);
+        return this.createNoDataResponse(equipmentId, readingSourcePreference);
       }
 
       // Enhanced analysis considering maintenance frequency patterns
@@ -45,10 +55,114 @@ export class EnhancedPredictiveService {
         equipmentType
       );
 
+      // Add reading source information to response
+      if (analysisResult) {
+        analysisResult.data_quality = {
+          ...analysisResult.data_quality,
+          manual_readings_count: manualReadings.length,
+          standard_readings_count: maintenanceHistory.length,
+          reading_source_used: readingSourcePreference,
+          coverage_assessment: this.getSourceCoverageAssessment(
+            manualReadings.length, 
+            maintenanceHistory.length, 
+            readingSourcePreference
+          )
+        };
+      }
+
       return analysisResult;
     } catch (error) {
       console.error('Error processing enhanced AI analysis:', error);
       return null;
+    }
+  }
+
+  /**
+   * Merge manual sensor readings with standard maintenance check readings based on user preference
+   */
+  private static async mergeReadingSourcesWithPreference(
+    manualReadings: any[], 
+    maintenanceHistory: any[], 
+    equipmentType: string,
+    preference: ReadingSource
+  ) {
+    console.log(`Merging readings with preference: ${preference}`);
+    console.log(`Manual readings available: ${manualReadings.length}, Standard readings: ${maintenanceHistory.length}`);
+
+    switch (preference) {
+      case 'manual':
+        if (manualReadings.length > 0) {
+          return manualReadings;
+        } else {
+          console.log('No manual readings available, falling back to standard readings');
+          return this.extractAllStandardReadings(maintenanceHistory, equipmentType);
+        }
+      
+      case 'standard':
+        const standardReadings = this.extractAllStandardReadings(maintenanceHistory, equipmentType);
+        if (standardReadings.length > 0) {
+          return standardReadings;
+        } else {
+          console.log('No standard readings available, falling back to manual readings');
+          return manualReadings;
+        }
+      
+      case 'auto':
+      default:
+        // Original auto behavior - prioritize manual, include standard
+        return this.mergeReadingSources(manualReadings, maintenanceHistory, equipmentType);
+    }
+  }
+
+  /**
+   * Extract all standard readings from maintenance history
+   */
+  private static extractAllStandardReadings(maintenanceHistory: any[], equipmentType: string) {
+    const readings = [];
+    
+    for (const check of maintenanceHistory) {
+      const checkTimestamp = new Date(check.check_date).toISOString();
+      const standardReadings = this.extractStandardReadings(check, checkTimestamp, equipmentType);
+      readings.push(...standardReadings);
+    }
+    
+    return readings.sort((a, b) => new Date(a.timestamp_utc).getTime() - new Date(b.timestamp_utc).getTime());
+  }
+
+  /**
+   * Get coverage assessment based on source preference and data availability
+   */
+  private static getSourceCoverageAssessment(
+    manualCount: number, 
+    standardCount: number, 
+    preference: ReadingSource
+  ): string {
+    switch (preference) {
+      case 'manual':
+        if (manualCount > 0) {
+          return `Manual readings prioritized (${manualCount} readings)`;
+        } else {
+          return `No manual readings - used ${standardCount} standard readings as fallback`;
+        }
+      
+      case 'standard':
+        if (standardCount > 0) {
+          return `Standard readings only (${standardCount} readings)`;
+        } else {
+          return `No standard readings - used ${manualCount} manual readings as fallback`;
+        }
+      
+      case 'auto':
+      default:
+        if (manualCount > 0 && standardCount > 0) {
+          return `Comprehensive data - ${manualCount} manual + ${standardCount} standard readings`;
+        } else if (manualCount > 0) {
+          return `Manual readings only (${manualCount} readings)`;
+        } else if (standardCount > 0) {
+          return `Standard readings only (${standardCount} readings)`;
+        } else {
+          return 'No readings available';
+        }
     }
   }
 
@@ -494,73 +608,26 @@ export class EnhancedPredictiveService {
   }
 
   /**
-   * Create AI response with comprehensive analysis
-   */
-  private static createAIResponse(
-    assetId: string, 
-    violations: any[], 
-    insights: string[], 
-    overallRisk: string,
-    templates: any[]
-  ): AssetGuardianAIResponse {
-    let finding = "Equipment operating within normal parameters";
-    let recommendation = "Continue routine maintenance schedule";
-    let createWorkOrder = false;
-    let workOrder = undefined;
-
-    if (violations.length > 0) {
-      const criticalViolations = violations.filter(v => v.severity === 'critical');
-      const warningViolations = violations.filter(v => v.severity === 'warning');
-
-      if (criticalViolations.length > 0) {
-        finding = `Critical issues detected: ${criticalViolations.map(v => v.message).join('; ')}`;
-        recommendation = "Immediate attention required. Schedule emergency maintenance.";
-        createWorkOrder = true;
-        workOrder = {
-          title: `Critical Alert - ${assetId}`,
-          description: `Critical readings detected: ${criticalViolations.map(v => v.message).join('; ')}`,
-          priority: "high" as const,
-          due_hours: 4,
-          assigned_team: "maintenance"
-        };
-      } else if (warningViolations.length > 0) {
-        finding = `Warning conditions detected: ${warningViolations.map(v => v.message).join('; ')}`;
-        recommendation = "Schedule preventive maintenance to address trending issues.";
-        createWorkOrder = true;
-        workOrder = {
-          title: `Preventive Maintenance - ${assetId}`,
-          description: `Warning conditions detected: ${warningViolations.map(v => v.message).join('; ')}`,
-          priority: "medium" as const,
-          due_hours: 48,
-          assigned_team: "maintenance"
-        };
-      }
-    }
-
-    // Add insights to findings
-    if (insights.length > 0) {
-      finding += ` Additional insights: ${insights.join('; ')}`;
-    }
-
-    return {
-      asset_id: assetId,
-      risk_level: overallRisk as any,
-      finding,
-      recommendation,
-      create_work_order: createWorkOrder,
-      work_order: workOrder
-    };
-  }
-
-  /**
    * Create response when no data is available
    */
-  private static createNoDataResponse(assetId: string): AssetGuardianAIResponse {
+  private static createNoDataResponse(assetId: string, readingSource: ReadingSource): AssetGuardianAIResponse {
+    const sourceMessage = readingSource === 'manual' 
+      ? "No manual readings available for analysis"
+      : readingSource === 'standard'
+        ? "No standard readings from maintenance checks available"
+        : "No recent readings available for analysis";
+
+    const recommendation = readingSource === 'manual'
+      ? "Record manual sensor readings to enable predictive maintenance analysis"
+      : readingSource === 'standard'
+        ? "Perform maintenance checks with standard readings to enable analysis"
+        : "Begin with daily quick checks to establish baseline and enable predictive maintenance";
+
     return {
       asset_id: assetId,
       risk_level: "low",
-      finding: "No recent readings available for analysis",
-      recommendation: "Begin with daily quick checks to establish baseline and enable predictive maintenance",
+      finding: sourceMessage,
+      recommendation,
       create_work_order: false
     };
   }

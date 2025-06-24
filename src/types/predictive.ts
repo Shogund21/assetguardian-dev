@@ -25,6 +25,7 @@ export interface PredictiveAlert {
     manual_readings_count: number;
     standard_readings_count: number;
     coverage_assessment: string;
+    reading_source_used?: 'auto' | 'manual' | 'standard';
   };
   equipment?: {
     name: string;
@@ -96,6 +97,7 @@ export interface AssetGuardianAIResponse {
     manual_readings_count: number;
     standard_readings_count: number;
     coverage_assessment: string;
+    reading_source_used?: 'auto' | 'manual' | 'standard';
   };
   work_order?: {
     title: string;
