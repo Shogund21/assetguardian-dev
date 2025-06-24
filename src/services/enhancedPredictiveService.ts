@@ -86,12 +86,27 @@ export class EnhancedPredictiveService {
         throw new Error('Insufficient data for predictive analysis');
       }
 
+      // Transform equipment data to match Edge Function expectations
+      const equipmentData = {
+        asset_id: equipment.id,
+        asset_type: equipment.name || 'Unknown Equipment',
+        location: equipment.location || 'Unknown Location'
+      };
+
+      console.log('Calling Edge Function with transformed data:', {
+        equipmentData,
+        sensorReadingsCount: sensorReadings?.length || 0,
+        maintenanceHistoryCount: maintenanceHistory?.length || 0,
+        thresholdsCount: thresholds?.length || 0,
+        readingSource
+      });
+
       // Call the Edge Function for AI analysis
       const { data: analysisResult, error: analysisError } = await supabase.functions.invoke(
         'predictive-ai-analysis',
         {
           body: {
-            equipment,
+            equipmentData,
             sensorReadings: sensorReadings || [],
             maintenanceHistory: maintenanceHistory || [],
             thresholds: thresholds || [],
@@ -105,10 +120,12 @@ export class EnhancedPredictiveService {
         throw new Error(`AI analysis failed: ${analysisError.message}`);
       }
 
-      if (!analysisResult || !analysisResult.success) {
+      if (!analysisResult || !analysisResult.asset_id) {
         console.error('AI analysis failed:', analysisResult);
         throw new Error(analysisResult?.error || 'AI analysis failed');
       }
+
+      console.log('AI analysis completed successfully:', analysisResult);
 
       // Count manual and standard readings separately
       const manualReadingsCount = sensorReadings?.filter(r => r.source === 'manual').length || 0;

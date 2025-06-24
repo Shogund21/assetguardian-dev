@@ -13,7 +13,15 @@ serve(async (req) => {
   }
 
   try {
-    const { equipmentData, sensorReadings, thresholds, maintenanceHistory } = await req.json()
+    const { equipmentData, sensorReadings, thresholds, maintenanceHistory, readingSource } = await req.json()
+    
+    console.log('Received data:', {
+      equipmentData,
+      sensorReadingsCount: sensorReadings?.length || 0,
+      maintenanceHistoryCount: maintenanceHistory?.length || 0,
+      thresholdsCount: thresholds?.length || 0,
+      readingSource
+    });
     
     // Get OpenAI API key from Supabase secrets
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
@@ -50,15 +58,15 @@ ${JSON.stringify(maintenanceHistory, null, 2)}
 
 Please analyze this data and respond with a JSON object containing:
 {
-  "asset_id": "string",
+  "asset_id": "${equipmentData.asset_id}",
   "risk_level": "low" | "medium" | "high",
   "finding": "string - describe what you found, mention data sources used",
   "recommendation": "string - what should be done, include data collection recommendations",
   "create_work_order": boolean,
-  "confidence_score": number (0-100),
+  "confidence_score": number (0-1),
   "data_quality": {
-    "manual_readings_count": number,
-    "standard_readings_count": number,
+    "manual_readings_count": ${manualReadings.length},
+    "standard_readings_count": ${standardReadings.length},
     "coverage_assessment": "string"
   },
   "predictive_timeline": [
@@ -107,17 +115,7 @@ Please analyze this data and respond with a JSON object containing:
   } (only if create_work_order is true)
 }
 
-Focus on:
-1. **Predictive Timeline Analysis**: Create detailed failure probability predictions for multiple timeframes (7 days, 30 days, 90 days, 1 year)
-2. **Component-Level Predictions**: Break down analysis by individual components (bearings, motors, filters, belts, etc.)
-3. **Degradation Modeling**: Calculate current condition percentages and degradation rates for each component
-4. **Optimal Maintenance Windows**: Identify best timing for interventions based on cost-benefit analysis
-5. **Performance Trend Forecasting**: Project efficiency decline and energy consumption increases
-6. **Cost-Impact Analysis**: Provide realistic cost estimates for interventions vs failure scenarios
-7. **Time-to-Failure Calculations**: Use sensor trends to calculate specific failure probability dates
-8. **Multi-Scenario Planning**: Consider different failure modes and their timelines
-
-Provide specific dates, percentages, and dollar amounts. Use realistic industry standards for HVAC equipment lifecycle and maintenance costs.`
+Focus on providing detailed predictive timelines with specific dates, probabilities, and cost estimates. Use realistic industry standards for HVAC equipment lifecycle and maintenance costs.`
 
     // Call OpenAI API
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -145,11 +143,19 @@ Provide specific dates, percentages, and dollar amounts. Use realistic industry 
     })
 
     if (!response.ok) {
+      console.error('OpenAI API error:', response.statusText);
       throw new Error(`OpenAI API error: ${response.statusText}`)
     }
 
     const aiResponse = await response.json()
     const analysis = JSON.parse(aiResponse.choices[0].message.content)
+
+    console.log('AI analysis result:', analysis);
+
+    // Ensure required fields are present
+    if (!analysis.asset_id) {
+      analysis.asset_id = equipmentData.asset_id;
+    }
 
     // Ensure data quality information is included
     if (!analysis.data_quality) {
@@ -160,9 +166,9 @@ Provide specific dates, percentages, and dollar amounts. Use realistic industry 
       };
     }
 
-    // Ensure confidence score is included
+    // Ensure confidence score is included and in correct range
     if (!analysis.confidence_score) {
-      analysis.confidence_score = manualReadings.length > 0 ? 85 : 65; // Higher confidence with manual readings
+      analysis.confidence_score = manualReadings.length > 0 ? 0.85 : 0.65; // Higher confidence with manual readings
     }
 
     // Ensure predictive timeline has default structure if missing
