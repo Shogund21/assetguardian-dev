@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -47,6 +48,17 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
 
   // Get reading template based on equipment type
   const readingTemplate = equipmentType ? getEquipmentReadingTemplate(equipmentType) : [];
+
+  // Watch for reading type changes to auto-populate unit
+  const selectedReadingType = form.watch('reading_type');
+  const selectedReading = readingTemplate.find(t => t.type === selectedReadingType);
+
+  // Auto-populate unit when reading type changes, but allow manual override
+  React.useEffect(() => {
+    if (selectedReading?.unit && !form.getValues('unit')) {
+      form.setValue('unit', selectedReading.unit);
+    }
+  }, [selectedReading, form]);
 
   const onSubmit = async (values: ReadingFormValues) => {
     setIsSubmitting(true);
@@ -149,23 +161,23 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
             <FormField
               control={form.control}
               name="unit"
-              render={({ field }) => {
-                const selectedReading = readingTemplate.find(t => t.type === form.watch('reading_type'));
-                return (
-                  <FormItem>
-                    <FormLabel>Unit</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="Unit of measurement" 
-                        value={selectedReading?.unit || field.value}
-                        onChange={field.onChange}
-                        readOnly={!!selectedReading?.unit}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                );
-              }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Unit</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder={selectedReading?.unit ? `e.g., ${selectedReading.unit}` : "Unit of measurement"}
+                      {...field}
+                    />
+                  </FormControl>
+                  {selectedReading?.unit && (
+                    <p className="text-xs text-muted-foreground">
+                      Suggested: {selectedReading.unit} (you can edit this)
+                    </p>
+                  )}
+                  <FormMessage />
+                </FormItem>
+              )}
             />
 
             <FormField
