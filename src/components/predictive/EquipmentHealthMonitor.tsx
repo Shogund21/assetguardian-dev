@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +15,6 @@ interface EquipmentHealthMonitorProps {
 export const EquipmentHealthMonitor: React.FC<EquipmentHealthMonitorProps> = ({ equipmentId }) => {
   const [alerts, setAlerts] = useState<PredictiveAlert[]>([]);
   const [loading, setLoading] = useState(true);
-  const [analyzing, setAnalyzing] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -25,7 +25,11 @@ export const EquipmentHealthMonitor: React.FC<EquipmentHealthMonitorProps> = ({ 
     try {
       setLoading(true);
       const data = await PredictiveMaintenanceService.getActivePredictiveAlerts();
-      setAlerts(data || []);
+      // Filter by equipmentId if provided
+      const filteredAlerts = equipmentId 
+        ? data.filter(alert => alert.asset_id === equipmentId)
+        : data;
+      setAlerts(filteredAlerts || []);
     } catch (error) {
       console.error('Error loading alerts:', error);
       toast({
@@ -35,65 +39,6 @@ export const EquipmentHealthMonitor: React.FC<EquipmentHealthMonitorProps> = ({ 
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const runPredictiveAnalysis = async (targetEquipmentId: string) => {
-    try {
-      setAnalyzing(true);
-      const result = await PredictiveMaintenanceService.processAIAnalysis(targetEquipmentId);
-      
-      if (result) {
-        // Create alert if risk is not low
-        if (result.risk_level !== 'low') {
-          await PredictiveMaintenanceService.createPredictiveAlert({
-            asset_id: result.asset_id,
-            risk_level: result.risk_level,
-            finding: result.finding,
-            recommendation: result.recommendation,
-            confidence_score: 0.85,
-            resolved_at: null,
-            work_order_id: null
-          });
-
-          // Create work order if recommended
-          if (result.create_work_order && result.work_order) {
-            const dueDate = new Date();
-            dueDate.setHours(dueDate.getHours() + result.work_order.due_hours);
-            
-            await PredictiveMaintenanceService.createAutomatedWorkOrder({
-              title: result.work_order.title,
-              description: result.work_order.description,
-              priority: result.work_order.priority,
-              equipment_id: result.asset_id,
-              due_date: dueDate.toISOString(),
-              status: 'pending'
-            });
-          }
-        }
-
-        toast({
-          title: "Analysis Complete",
-          description: `Equipment analysis completed. Risk level: ${result.risk_level}`,
-        });
-
-        loadAlerts(); // Refresh alerts
-      } else {
-        toast({
-          title: "Analysis Unavailable",
-          description: "No sensor data available for analysis",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error('Error running analysis:', error);
-      toast({
-        title: "Analysis Failed",
-        description: "Failed to run predictive analysis",
-        variant: "destructive",
-      });
-    } finally {
-      setAnalyzing(false);
     }
   };
 
@@ -143,15 +88,13 @@ export const EquipmentHealthMonitor: React.FC<EquipmentHealthMonitorProps> = ({ 
           <TrendingUp className="h-5 w-5" />
           Equipment Health Monitor
         </CardTitle>
-        {equipmentId && (
-          <Button 
-            onClick={() => runPredictiveAnalysis(equipmentId)}
-            disabled={analyzing}
-            size="sm"
-          >
-            {analyzing ? "Analyzing..." : "Run Analysis"}
-          </Button>
-        )}
+        <Button 
+          onClick={loadAlerts}
+          size="sm"
+          variant="outline"
+        >
+          Refresh
+        </Button>
       </CardHeader>
       <CardContent className="space-y-4">
         {alerts.length === 0 ? (
