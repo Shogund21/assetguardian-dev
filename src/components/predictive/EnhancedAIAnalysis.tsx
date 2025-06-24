@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import usePredictiveMaintenance from "@/hooks/usePredictiveMaintenance";
 import { getEquipmentReadingTemplate } from "@/utils/equipmentTemplates";
 import ReadingSourceSelector, { ReadingSource } from "./ReadingSourceSelector";
+import DataIntegrityDiagnostic from "./DataIntegrityDiagnostic";
 
 interface EnhancedAIAnalysisProps {
   equipmentId: string;
@@ -104,6 +105,12 @@ const EnhancedAIAnalysis = ({ equipmentId, equipmentType, equipmentName }: Enhan
 
   return (
     <div className="space-y-6">
+      {/* Data Integrity Diagnostic */}
+      <DataIntegrityDiagnostic 
+        equipmentId={equipmentId}
+        equipmentName={equipmentName}
+      />
+
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">

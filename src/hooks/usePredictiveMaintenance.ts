@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PredictiveMaintenanceService } from '@/services/predictiveMaintenanceService';
 import { EnhancedPredictiveService, ReadingSource } from '@/services/enhancedPredictiveService';
+import { equipmentDataIntegrityService } from '@/services/equipmentDataIntegrityService';
 import { PredictiveAlert, SensorReading } from '@/types/predictive';
 import { useToast } from '@/hooks/use-toast';
 
@@ -52,22 +53,31 @@ export const usePredictiveMaintenance = () => {
     });
   };
 
-  // Query for reading counts to show in the selector
+  // Enhanced query for reading counts with improved equipment matching
   const useReadingCounts = (equipmentId: string) => {
     return useQuery({
       queryKey: ['reading-counts', equipmentId],
       queryFn: async () => {
-        const [manualReadings, maintenanceChecks] = await Promise.all([
-          PredictiveMaintenanceService.getRecentSensorReadings(equipmentId, 168), // 7 days
-          EnhancedPredictiveService.getMaintenanceHistoryWithFrequency(equipmentId)
-        ]);
+        console.log('Fetching reading counts for equipment ID:', equipmentId);
         
-        return {
-          manual: manualReadings.length,
-          standard: maintenanceChecks.length
-        };
+        // Use the improved data integrity service
+        const counts = await equipmentDataIntegrityService.getReadingCountsWithFuzzyMatching(equipmentId);
+        
+        console.log('Reading counts result:', counts);
+        return counts;
       },
       enabled: !!equipmentId,
+      staleTime: 30000, // Cache for 30 seconds to reduce API calls
+    });
+  };
+
+  // Query for data integrity check
+  const useDataIntegrityCheck = () => {
+    return useQuery({
+      queryKey: ['data-integrity-check'],
+      queryFn: equipmentDataIntegrityService.findNamingInconsistencies,
+      staleTime: 300000, // Cache for 5 minutes
+      refetchOnWindowFocus: false,
     });
   };
 
@@ -94,6 +104,7 @@ export const usePredictiveMaintenance = () => {
     // Hooks
     useSensorReadings,
     useReadingCounts,
+    useDataIntegrityCheck,
   };
 };
 
