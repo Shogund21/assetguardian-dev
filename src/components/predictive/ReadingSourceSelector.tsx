@@ -13,15 +13,11 @@ export type ReadingSource = 'auto' | 'manual' | 'standard';
 interface ReadingSourceSelectorProps {
   value: ReadingSource;
   onChange: (value: ReadingSource) => void;
-  manualCount: number;
-  standardCount: number;
 }
 
 const ReadingSourceSelector = ({ 
   value, 
-  onChange, 
-  manualCount, 
-  standardCount 
+  onChange
 }: ReadingSourceSelectorProps) => {
   const navigate = useNavigate();
 
@@ -72,49 +68,34 @@ const ReadingSourceSelector = ({
             <Label htmlFor="manual" className="flex items-center gap-2 cursor-pointer">
               <Activity className="h-3 w-3 text-green-600" />
               <span>Manual Sensor Data Only</span>
-              <Badge variant={manualCount > 0 ? "default" : "secondary"} className={manualCount > 0 ? "bg-green-600" : ""}>
-                {manualCount} records
-              </Badge>
             </Label>
           </div>
           <p className="text-xs text-muted-foreground ml-6">
             Uses only manual sensor readings from direct equipment monitoring
           </p>
-          {manualCount === 0 && (
-            <p className="text-xs text-orange-600 ml-6">
-              No manual sensor data available - use manual reading entry to add data
-            </p>
-          )}
           
           <div className="flex items-center space-x-2 mt-3">
             <RadioGroupItem value="standard" id="standard" />
             <Label htmlFor="standard" className="flex items-center gap-2 cursor-pointer">
               <Database className="h-3 w-3 text-blue-600" />
               <span>Maintenance Check Data Only</span>
-              <Badge variant={standardCount > 0 ? "outline" : "secondary"} className={standardCount > 0 ? "border-blue-500 text-blue-600" : ""}>
-                {standardCount} checks
-              </Badge>
             </Label>
           </div>
           <p className="text-xs text-muted-foreground ml-6">
             Uses only readings from completed maintenance check forms
           </p>
-          {standardCount === 0 && (
-            <div className="ml-6 space-y-2">
-              <p className="text-xs text-orange-600">
-                No maintenance check data available for this equipment
-              </p>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleGoToMaintenanceChecks}
-                className="flex items-center gap-1 text-xs h-6"
-              >
-                <ExternalLink className="h-3 w-3" />
-                Go to Maintenance Checks
-              </Button>
-            </div>
-          )}
+          
+          <div className="ml-6 space-y-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleGoToMaintenanceChecks}
+              className="flex items-center gap-1 text-xs h-6"
+            >
+              <ExternalLink className="h-3 w-3" />
+              Go to Maintenance Checks
+            </Button>
+          </div>
         </RadioGroup>
       </CardContent>
     </Card>

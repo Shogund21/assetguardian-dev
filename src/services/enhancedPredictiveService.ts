@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { PredictiveMaintenanceService } from './predictiveMaintenanceService';
 import { PredictiveAlert } from '@/types/predictive';
 
-export type ReadingSource = 'manual' | 'maintenance_check' | 'auto';
+export type ReadingSource = 'manual' | 'standard' | 'auto';
 
 export class EnhancedPredictiveService {
   static async processEnhancedAIAnalysis(
@@ -46,7 +46,7 @@ export class EnhancedPredictiveService {
         throw new Error('Failed to fetch sensor readings');
       }
 
-      // Get maintenance history with the now-existing reading_mode column
+      // Get maintenance history with the reading_mode column
       const { data: maintenanceHistory, error: maintenanceError } = await supabase
         .from('hvac_maintenance_checks')
         .select(`
@@ -117,6 +117,8 @@ export class EnhancedPredictiveService {
         finding: analysisResult.finding,
         recommendation: analysisResult.recommendation,
         confidence_score: analysisResult.confidence_score,
+        resolved_at: null,
+        work_order_id: null,
         data_quality: {
           sensor_readings_count: sensorReadings?.length || 0,
           maintenance_checks_count: maintenanceHistory?.length || 0,
@@ -165,7 +167,10 @@ export class EnhancedPredictiveService {
         throw error;
       }
 
-      return data || [];
+      return (data || []).map(alert => ({
+        ...alert,
+        risk_level: alert.risk_level as 'low' | 'medium' | 'high'
+      }));
     } catch (error) {
       console.error('Failed to get analysis history:', error);
       return [];

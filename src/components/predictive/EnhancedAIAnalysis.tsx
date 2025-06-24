@@ -7,9 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Brain, Loader2, CheckCircle, AlertTriangle, TrendingUp, Calendar, Wrench } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { EnhancedPredictiveService, ReadingSource } from "@/services/enhancedPredictiveService";
+import { EnhancedPredictiveService } from "@/services/enhancedPredictiveService";
 import { PredictiveAlert } from "@/types/predictive";
-import ReadingSourceSelector from "./ReadingSourceSelector";
+import ReadingSourceSelector, { ReadingSource } from "./ReadingSourceSelector";
 import DataIntegrityDiagnostic from "./DataIntegrityDiagnostic";
 
 interface EnhancedAIAnalysisProps {
