@@ -222,6 +222,9 @@ export interface Database {
           notes: string | null;
           created_at: string;
           updated_at: string;
+          maintenance_frequency: string | null;
+          unusual_noise_elevator: boolean | null;
+          vibration_elevator: boolean | null;
         };
         Insert: {
           id?: string;
@@ -232,6 +235,9 @@ export interface Database {
           notes?: string | null;
           created_at?: string;
           updated_at?: string;
+          maintenance_frequency?: string | null;
+          unusual_noise_elevator?: boolean | null;
+          vibration_elevator?: boolean | null;
         };
         Update: {
           id?: string;
@@ -242,6 +248,9 @@ export interface Database {
           notes?: string | null;
           created_at?: string;
           updated_at?: string;
+          maintenance_frequency?: string | null;
+          unusual_noise_elevator?: boolean | null;
+          vibration_elevator?: boolean | null;
         };
         Relationships: [];
       };
@@ -310,6 +319,11 @@ export interface Database {
           created_at: string;
           resolved_at: string | null;
           work_order_id: string | null;
+          data_quality: any | null;
+          predictive_timeline: any | null;
+          degradation_analysis: any | null;
+          maintenance_windows: any | null;
+          performance_trends: any | null;
         };
         Insert: {
           id?: string;
@@ -321,6 +335,11 @@ export interface Database {
           created_at?: string;
           resolved_at?: string | null;
           work_order_id?: string | null;
+          data_quality?: any | null;
+          predictive_timeline?: any | null;
+          degradation_analysis?: any | null;
+          maintenance_windows?: any | null;
+          performance_trends?: any | null;
         };
         Update: {
           id?: string;
@@ -332,6 +351,11 @@ export interface Database {
           created_at?: string;
           resolved_at?: string | null;
           work_order_id?: string | null;
+          data_quality?: any | null;
+          predictive_timeline?: any | null;
+          degradation_analysis?: any | null;
+          maintenance_windows?: any | null;
+          performance_trends?: any | null;
         };
         Relationships: [];
       };
@@ -401,15 +425,19 @@ export interface Database {
           value: number;
           unit: string;
           created_at: string;
+          source: string | null;
+          reading_mode: string | null;
         };
         Insert: {
           id?: string;
           equipment_id: string;
-          timestamp_utc: string;
+          timestamp_utc?: string;
           sensor_type: string;
           value: number;
           unit: string;
           created_at?: string;
+          source?: string | null;
+          reading_mode?: string | null;
         };
         Update: {
           id?: string;
@@ -419,6 +447,8 @@ export interface Database {
           value?: number;
           unit?: string;
           created_at?: string;
+          source?: string | null;
+          reading_mode?: string | null;
         };
         Relationships: [];
       };

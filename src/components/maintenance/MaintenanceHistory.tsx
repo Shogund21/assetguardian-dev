@@ -70,21 +70,26 @@ const MaintenanceHistory = () => {
             
             // Enrich maintenance checks with properly structured location data
             const enrichedData = data.map(check => {
+              const result: MaintenanceCheck = {
+                ...check,
+                // Ensure required elevator fields are present with default values
+                unusual_noise_elevator: check.unusual_noise_elevator ?? false,
+                vibration_elevator: check.vibration_elevator ?? false,
+              };
+              
               if (check.location_id && locationMap[check.location_id]) {
                 const locationData = locationMap[check.location_id];
-                return {
-                  ...check,
-                  location: {
-                    name: locationData.name || "",
-                    store_number: locationData.store_number
-                  }
+                result.location = {
+                  name: locationData.name || "",
+                  store_number: locationData.store_number
                 };
               }
-              return check;
+              
+              return result;
             });
             
             console.log("Enriched maintenance checks with locations:", enrichedData);
-            setMaintenanceChecks(enrichedData as MaintenanceCheck[]);
+            setMaintenanceChecks(enrichedData);
             setLoading(false);
             return;
           }
@@ -93,7 +98,14 @@ const MaintenanceHistory = () => {
       
       // If we didn't have any location_ids or the location fetching failed
       console.log("Maintenance checks without location enrichment:", data);
-      setMaintenanceChecks(data || []);
+      const processedData = (data || []).map(check => ({
+        ...check,
+        // Ensure required elevator fields are present with default values
+        unusual_noise_elevator: check.unusual_noise_elevator ?? false,
+        vibration_elevator: check.vibration_elevator ?? false,
+      })) as MaintenanceCheck[];
+      
+      setMaintenanceChecks(processedData);
     } catch (error) {
       console.error("Error in fetchMaintenanceChecks:", error);
       toast({

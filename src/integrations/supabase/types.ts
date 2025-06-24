@@ -27,6 +27,51 @@ export type Database = {
         }
         Relationships: []
       }
+      automated_work_orders: {
+        Row: {
+          alert_id: string | null
+          asset_id: string
+          assigned_at: string | null
+          assigned_team: string | null
+          completed_at: string | null
+          created_at: string
+          description: string
+          due_hours: number
+          id: string
+          priority: string
+          status: string
+          title: string
+        }
+        Insert: {
+          alert_id?: string | null
+          asset_id: string
+          assigned_at?: string | null
+          assigned_team?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description: string
+          due_hours: number
+          id?: string
+          priority: string
+          status?: string
+          title: string
+        }
+        Update: {
+          alert_id?: string | null
+          asset_id?: string
+          assigned_at?: string | null
+          assigned_team?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string
+          due_hours?: number
+          id?: string
+          priority?: string
+          status?: string
+          title?: string
+        }
+        Relationships: []
+      }
       companies: {
         Row: {
           address: string | null
@@ -139,6 +184,39 @@ export type Database = {
           },
         ]
       }
+      equipment_thresholds: {
+        Row: {
+          created_at: string
+          critical_threshold: number
+          equipment_id: string
+          id: string
+          sensor_type: string
+          unit: string
+          updated_at: string
+          warning_threshold: number
+        }
+        Insert: {
+          created_at?: string
+          critical_threshold: number
+          equipment_id: string
+          id?: string
+          sensor_type: string
+          unit: string
+          updated_at?: string
+          warning_threshold: number
+        }
+        Update: {
+          created_at?: string
+          critical_threshold?: number
+          equipment_id?: string
+          id?: string
+          sensor_type?: string
+          unit?: string
+          updated_at?: string
+          warning_threshold?: number
+        }
+        Relationships: []
+      }
       filter_changes: {
         Row: {
           created_at: string
@@ -239,6 +317,7 @@ export type Database = {
           id: string
           images: string[] | null
           location_id: string | null
+          maintenance_frequency: string | null
           maintenance_recommendations: string | null
           motor_condition: string | null
           motor_lubrication_status: string | null
@@ -262,9 +341,11 @@ export type Database = {
           troubleshooting_notes: string | null
           unusual_noise: boolean | null
           unusual_noise_description: string | null
+          unusual_noise_elevator: boolean | null
           updated_at: string | null
           urinal_status: string | null
           vibration_description: string | null
+          vibration_elevator: boolean | null
           vibration_monitoring: string | null
           vibration_observed: boolean | null
           water_system_status: string | null
@@ -308,6 +389,7 @@ export type Database = {
           id?: string
           images?: string[] | null
           location_id?: string | null
+          maintenance_frequency?: string | null
           maintenance_recommendations?: string | null
           motor_condition?: string | null
           motor_lubrication_status?: string | null
@@ -333,9 +415,11 @@ export type Database = {
           troubleshooting_notes?: string | null
           unusual_noise?: boolean | null
           unusual_noise_description?: string | null
+          unusual_noise_elevator?: boolean | null
           updated_at?: string | null
           urinal_status?: string | null
           vibration_description?: string | null
+          vibration_elevator?: boolean | null
           vibration_monitoring?: string | null
           vibration_observed?: boolean | null
           water_system_status?: string | null
@@ -379,6 +463,7 @@ export type Database = {
           id?: string
           images?: string[] | null
           location_id?: string | null
+          maintenance_frequency?: string | null
           maintenance_recommendations?: string | null
           motor_condition?: string | null
           motor_lubrication_status?: string | null
@@ -404,9 +489,11 @@ export type Database = {
           troubleshooting_notes?: string | null
           unusual_noise?: boolean | null
           unusual_noise_description?: string | null
+          unusual_noise_elevator?: boolean | null
           updated_at?: string | null
           urinal_status?: string | null
           vibration_description?: string | null
+          vibration_elevator?: boolean | null
           vibration_monitoring?: string | null
           vibration_observed?: boolean | null
           water_system_status?: string | null
@@ -553,6 +640,57 @@ export type Database = {
           },
         ]
       }
+      predictive_alerts: {
+        Row: {
+          asset_id: string
+          confidence_score: number | null
+          created_at: string
+          data_quality: Json | null
+          degradation_analysis: Json | null
+          finding: string
+          id: string
+          maintenance_windows: Json | null
+          performance_trends: Json | null
+          predictive_timeline: Json | null
+          recommendation: string
+          resolved_at: string | null
+          risk_level: string
+          work_order_id: string | null
+        }
+        Insert: {
+          asset_id: string
+          confidence_score?: number | null
+          created_at?: string
+          data_quality?: Json | null
+          degradation_analysis?: Json | null
+          finding: string
+          id?: string
+          maintenance_windows?: Json | null
+          performance_trends?: Json | null
+          predictive_timeline?: Json | null
+          recommendation: string
+          resolved_at?: string | null
+          risk_level: string
+          work_order_id?: string | null
+        }
+        Update: {
+          asset_id?: string
+          confidence_score?: number | null
+          created_at?: string
+          data_quality?: Json | null
+          degradation_analysis?: Json | null
+          finding?: string
+          id?: string
+          maintenance_windows?: Json | null
+          performance_trends?: Json | null
+          predictive_timeline?: Json | null
+          recommendation?: string
+          resolved_at?: string | null
+          risk_level?: string
+          work_order_id?: string | null
+        }
+        Relationships: []
+      }
       projects: {
         Row: {
           company_id: string | null
@@ -636,6 +774,42 @@ export type Database = {
           pattern?: string
           replacement?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      sensor_readings: {
+        Row: {
+          created_at: string
+          equipment_id: string
+          id: string
+          reading_mode: string | null
+          sensor_type: string
+          source: string | null
+          timestamp_utc: string
+          unit: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          equipment_id: string
+          id?: string
+          reading_mode?: string | null
+          sensor_type: string
+          source?: string | null
+          timestamp_utc?: string
+          unit: string
+          value: number
+        }
+        Update: {
+          created_at?: string
+          equipment_id?: string
+          id?: string
+          reading_mode?: string | null
+          sensor_type?: string
+          source?: string | null
+          timestamp_utc?: string
+          unit?: string
+          value?: number
         }
         Relationships: []
       }
@@ -756,6 +930,30 @@ export type Database = {
       calculate_filter_status: {
         Args: { p_due: string }
         Returns: string
+      }
+      check_threshold_violations: {
+        Args: { p_equipment_id: string }
+        Returns: {
+          sensor_type: string
+          current_value: number
+          warning_threshold: number
+          critical_threshold: number
+          violation_level: string
+          unit: string
+        }[]
+      }
+      get_sensor_analysis: {
+        Args: { p_equipment_id: string; p_hours?: number }
+        Returns: {
+          sensor_type: string
+          latest_value: number
+          avg_value: number
+          min_value: number
+          max_value: number
+          reading_count: number
+          trend_direction: string
+          unit: string
+        }[]
       }
       get_user_company: {
         Args: Record<PropertyKey, never>
