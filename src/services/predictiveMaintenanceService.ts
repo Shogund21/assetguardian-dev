@@ -6,6 +6,18 @@ export class PredictiveMaintenanceService {
     try {
       console.log('Fetching active predictive alerts');
       
+      // Check if predictive_alerts table exists
+      const { data: tableExists } = await supabase
+        .from('predictive_alerts')
+        .select('id')
+        .limit(1);
+
+      // If table doesn't exist or is empty, return empty array
+      if (!tableExists) {
+        console.log('Predictive alerts table not found or empty');
+        return [];
+      }
+
       // First, get the alerts
       const { data: alerts, error: alertsError } = await supabase
         .from('predictive_alerts')
@@ -45,22 +57,31 @@ export class PredictiveMaintenanceService {
       return alertsWithEquipment;
     } catch (error) {
       console.error('Error fetching predictive alerts:', error);
-      throw error;
+      // Return empty array instead of throwing to prevent dashboard crashes
+      return [];
     }
   }
 
   static async getRecentSensorReadings(equipmentId: string, hours: number = 24): Promise<SensorReading[]> {
-    const cutoffTime = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
-    
-    const { data, error } = await supabase
-      .from('sensor_readings')
-      .select('*')
-      .eq('equipment_id', equipmentId)
-      .gte('timestamp_utc', cutoffTime)
-      .order('timestamp_utc', { ascending: false });
+    try {
+      const cutoffTime = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
+      
+      const { data, error } = await supabase
+        .from('sensor_readings')
+        .select('*')
+        .eq('equipment_id', equipmentId)
+        .gte('timestamp_utc', cutoffTime)
+        .order('timestamp_utc', { ascending: false });
 
-    if (error) throw error;
-    return data || [];
+      if (error) {
+        console.error('Error fetching sensor readings:', error);
+        return [];
+      }
+      return data || [];
+    } catch (error) {
+      console.error('Error in getRecentSensorReadings:', error);
+      return [];
+    }
   }
 
   static async storeSensorReading(reading: Omit<SensorReading, 'id' | 'created_at'>): Promise<SensorReading> {

@@ -9,6 +9,7 @@ import ManualReadingEntry from "./ManualReadingEntry";
 import ReadingHistory from "./ReadingHistory";
 import EnhancedAIAnalysis from "./EnhancedAIAnalysis";
 import AnalysisResultsHistory from "./AnalysisResultsHistory";
+import DatabaseStatus from "./DatabaseStatus";
 import { getEquipmentReadingTemplate } from "@/utils/equipmentTemplates";
 
 const PredictiveMaintenanceDashboard = () => {
@@ -54,13 +55,18 @@ const PredictiveMaintenanceDashboard = () => {
         </p>
       </div>
 
-      <Tabs defaultValue="results" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+      <Tabs defaultValue="database" className="w-full">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="database">Database</TabsTrigger>
           <TabsTrigger value="results">Analysis Results</TabsTrigger>
           <TabsTrigger value="readings">Record Readings</TabsTrigger>
           <TabsTrigger value="history">Reading History</TabsTrigger>
           <TabsTrigger value="analysis">AI Analysis</TabsTrigger>
         </TabsList>
+        
+        <TabsContent value="database">
+          <DatabaseStatus />
+        </TabsContent>
         
         <TabsContent value="results">
           <AnalysisResultsHistory />
