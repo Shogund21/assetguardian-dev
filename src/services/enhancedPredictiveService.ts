@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { PredictiveMaintenanceService } from './predictiveMaintenanceService';
-import { PredictiveAlert } from '@/types/predictive';
+import { PredictiveAlert, PredictiveTimelineEvent, DegradationAnalysis, MaintenanceWindow } from '@/types/predictive';
 
 export type ReadingSource = 'manual' | 'standard' | 'auto';
 
@@ -190,10 +190,20 @@ export class EnhancedPredictiveService {
           standard_readings_count: 0,
           coverage_assessment: 'insufficient'
         },
-        predictive_timeline: (alert.predictive_timeline as any) || [],
-        degradation_analysis: (alert.degradation_analysis as any) || [],
-        maintenance_windows: (alert.maintenance_windows as any) || [],
-        performance_trends: (alert.performance_trends as any) || undefined
+        predictive_timeline: Array.isArray(alert.predictive_timeline) 
+          ? alert.predictive_timeline as PredictiveTimelineEvent[]
+          : (alert.predictive_timeline ? JSON.parse(alert.predictive_timeline as string) : []) as PredictiveTimelineEvent[],
+        degradation_analysis: Array.isArray(alert.degradation_analysis)
+          ? alert.degradation_analysis as DegradationAnalysis[]
+          : (alert.degradation_analysis ? JSON.parse(alert.degradation_analysis as string) : []) as DegradationAnalysis[],
+        maintenance_windows: Array.isArray(alert.maintenance_windows)
+          ? alert.maintenance_windows as MaintenanceWindow[]
+          : (alert.maintenance_windows ? JSON.parse(alert.maintenance_windows as string) : []) as MaintenanceWindow[],
+        performance_trends: alert.performance_trends 
+          ? (typeof alert.performance_trends === 'object' 
+              ? alert.performance_trends as any
+              : JSON.parse(alert.performance_trends as string))
+          : undefined
       }));
     } catch (error) {
       console.error('Failed to get analysis history:', error);
