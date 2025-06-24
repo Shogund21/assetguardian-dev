@@ -24,9 +24,7 @@ export const EquipmentTable = ({ data }: EquipmentTableProps) => {
             <TableHead>Model</TableHead>
             <TableHead>Serial Number</TableHead>
             <TableHead>Location</TableHead>
-            <TableHead>Status</Table
-
-</TableHead>
+            <TableHead>Status</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
