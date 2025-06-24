@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import ManualReadingEntry from "./ManualReadingEntry";
 import ReadingHistory from "./ReadingHistory";
 import EnhancedAIAnalysis from "./EnhancedAIAnalysis";
+import AnalysisResultsHistory from "./AnalysisResultsHistory";
 import { getEquipmentReadingTemplate } from "@/utils/equipmentTemplates";
 
 const PredictiveMaintenanceDashboard = () => {
@@ -53,46 +54,51 @@ const PredictiveMaintenanceDashboard = () => {
         </p>
       </div>
 
-      <div className="mb-6">
-        <Select value={selectedEquipmentId} onValueChange={setSelectedEquipmentId}>
-          <SelectTrigger className="w-full max-w-md">
-            <SelectValue placeholder="Select equipment to monitor" />
-          </SelectTrigger>
-          <SelectContent>
-            {equipment.map((eq) => (
-              <SelectItem key={eq.id} value={eq.id}>
-                {eq.name} - {eq.location}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <Tabs defaultValue="results" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="results">Analysis Results</TabsTrigger>
+          <TabsTrigger value="readings">Record Readings</TabsTrigger>
+          <TabsTrigger value="history">Reading History</TabsTrigger>
+          <TabsTrigger value="analysis">AI Analysis</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="results">
+          <AnalysisResultsHistory />
+        </TabsContent>
+        
+        <TabsContent value="readings">
+          <div className="mb-6">
+            <Select value={selectedEquipmentId} onValueChange={setSelectedEquipmentId}>
+              <SelectTrigger className="w-full max-w-md">
+                <SelectValue placeholder="Select equipment to monitor" />
+              </SelectTrigger>
+              <SelectContent>
+                {equipment.map((eq) => (
+                  <SelectItem key={eq.id} value={eq.id}>
+                    {eq.name} - {eq.location}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-      {selectedEquipment && (
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>{selectedEquipment.name}</CardTitle>
-              <div className="text-sm text-muted-foreground">
-                <p>Location: {selectedEquipment.location}</p>
-                <p>Type: {selectedEquipment.type}</p>
-                {readingTemplates.length > 0 && (
-                  <p className="mt-2 text-blue-600">
-                    {readingTemplates.length} standard readings available for this equipment type
-                  </p>
-                )}
-              </div>
-            </CardHeader>
-          </Card>
+          {selectedEquipment ? (
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>{selectedEquipment.name}</CardTitle>
+                  <div className="text-sm text-muted-foreground">
+                    <p>Location: {selectedEquipment.location}</p>
+                    <p>Type: {selectedEquipment.type}</p>
+                    {readingTemplates.length > 0 && (
+                      <p className="mt-2 text-blue-600">
+                        {readingTemplates.length} standard readings available for this equipment type
+                      </p>
+                    )}
+                  </div>
+                </CardHeader>
+              </Card>
 
-          <Tabs defaultValue="readings" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="readings">Record Readings</TabsTrigger>
-              <TabsTrigger value="history">Reading History</TabsTrigger>
-              <TabsTrigger value="analysis">AI Analysis</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="readings">
               <ManualReadingEntry 
                 equipmentId={selectedEquipmentId}
                 equipmentType={equipmentType}
@@ -100,43 +106,86 @@ const PredictiveMaintenanceDashboard = () => {
                   console.log('Reading recorded successfully');
                 }}
               />
-            </TabsContent>
-            
-            <TabsContent value="history">
-              <ReadingHistory 
-                equipmentId={selectedEquipmentId}
-                equipmentType={equipmentType}
-              />
-            </TabsContent>
-            
-            <TabsContent value="analysis">
-              <EnhancedAIAnalysis 
-                equipmentId={selectedEquipmentId}
-                equipmentType={equipmentType}
-                equipmentName={selectedEquipment.name}
-              />
-            </TabsContent>
-          </Tabs>
-        </div>
-      )}
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <h3 className="text-lg font-medium mb-2">Select Equipment</h3>
+                <p className="text-muted-foreground">
+                  Choose equipment above to start recording readings
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="history">
+          <div className="mb-6">
+            <Select value={selectedEquipmentId} onValueChange={setSelectedEquipmentId}>
+              <SelectTrigger className="w-full max-w-md">
+                <SelectValue placeholder="Select equipment to view history" />
+              </SelectTrigger>
+              <SelectContent>
+                {equipment.map((eq) => (
+                  <SelectItem key={eq.id} value={eq.id}>
+                    {eq.name} - {eq.location}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-      {!selectedEquipment && (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <h3 className="text-lg font-medium mb-2">Get Started</h3>
-            <p className="text-muted-foreground mb-4">
-              Select equipment above to start recording readings and monitoring performance
-            </p>
-            <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1 max-w-md mx-auto">
-              <li>Record manual equipment readings</li>
-              <li>View historical trends and patterns</li>
-              <li>Get AI-powered maintenance insights</li>
-              <li>Receive early warning alerts</li>
-              <li>Create automated work orders</li>
-            </ul>
-          </CardContent>
-        </Card>
-      )}
+          {selectedEquipment ? (
+            <ReadingHistory 
+              equipmentId={selectedEquipmentId}
+              equipmentType={equipmentType}
+            />
+          ) : (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <h3 className="text-lg font-medium mb-2">Select Equipment</h3>
+                <p className="text-muted-foreground">
+                  Choose equipment above to view reading history
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="analysis">
+          <div className="mb-6">
+            <Select value={selectedEquipmentId} onValueChange={setSelectedEquipmentId}>
+              <SelectTrigger className="w-full max-w-md">
+                <SelectValue placeholder="Select equipment to analyze" />
+              </SelectTrigger>
+              <SelectContent>
+                {equipment.map((eq) => (
+                  <SelectItem key={eq.id} value={eq.id}>
+                    {eq.name} - {eq.location}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {selectedEquipment ? (
+            <EnhancedAIAnalysis 
+              equipmentId={selectedEquipmentId}
+              equipmentType={equipmentType}
+              equipmentName={selectedEquipment.name}
+            />
+          ) : (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <h3 className="text-lg font-medium mb-2">Select Equipment</h3>
+                <p className="text-muted-foreground">
+                  Choose equipment above to run AI analysis
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
