@@ -143,36 +143,45 @@ export type Database = {
       equipment: {
         Row: {
           company_id: string | null
+          created_at: string | null
           id: string
           lastMaintenance: string | null
           location: string
           model: string | null
           name: string
           nextMaintenance: string | null
-          serialNumber: string | null
+          serial_number: string | null
           status: string | null
+          type: string | null
+          updated_at: string | null
         }
         Insert: {
           company_id?: string | null
+          created_at?: string | null
           id?: string
           lastMaintenance?: string | null
           location: string
           model?: string | null
           name: string
           nextMaintenance?: string | null
-          serialNumber?: string | null
+          serial_number?: string | null
           status?: string | null
+          type?: string | null
+          updated_at?: string | null
         }
         Update: {
           company_id?: string | null
+          created_at?: string | null
           id?: string
           lastMaintenance?: string | null
           location?: string
           model?: string | null
           name?: string
           nextMaintenance?: string | null
-          serialNumber?: string | null
+          serial_number?: string | null
           status?: string | null
+          type?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {

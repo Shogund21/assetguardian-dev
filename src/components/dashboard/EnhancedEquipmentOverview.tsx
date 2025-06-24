@@ -20,7 +20,7 @@ const EnhancedEquipmentOverview = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('equipment')
-        .select('id, name, model, serial_number, location, status, company_id, created_at, updated_at')
+        .select('id, name, model, serial_number, location, status, type, company_id, created_at, updated_at')
         .order('location', { ascending: true })
         .order('name');
       
