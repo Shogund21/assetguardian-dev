@@ -110,6 +110,21 @@ export class EnhancedPredictiveService {
         throw new Error(analysisResult?.error || 'AI analysis failed');
       }
 
+      // Count manual and standard readings separately
+      const manualReadingsCount = sensorReadings?.filter(r => r.source === 'manual').length || 0;
+      const standardReadingsCount = maintenanceHistory?.filter(h => h.reading_mode === 'standard').length || 0;
+      
+      // Calculate coverage assessment
+      const totalDataPoints = manualReadingsCount + standardReadingsCount;
+      let coverageAssessment = 'insufficient';
+      if (totalDataPoints >= 10) {
+        coverageAssessment = 'excellent';
+      } else if (totalDataPoints >= 5) {
+        coverageAssessment = 'good';
+      } else if (totalDataPoints >= 2) {
+        coverageAssessment = 'fair';
+      }
+
       // Store the alert in the database
       const alertData = {
         asset_id: equipmentId,
@@ -120,10 +135,10 @@ export class EnhancedPredictiveService {
         resolved_at: null,
         work_order_id: null,
         data_quality: {
-          sensor_readings_count: sensorReadings?.length || 0,
-          maintenance_checks_count: maintenanceHistory?.length || 0,
-          data_completeness: this.calculateDataCompleteness(sensorReadings, maintenanceHistory),
-          reading_source: readingSource
+          manual_readings_count: manualReadingsCount,
+          standard_readings_count: standardReadingsCount,
+          coverage_assessment: coverageAssessment,
+          reading_source_used: readingSource
         },
         predictive_timeline: analysisResult.predictive_timeline,
         degradation_analysis: analysisResult.degradation_analysis,
@@ -169,7 +184,12 @@ export class EnhancedPredictiveService {
 
       return (data || []).map(alert => ({
         ...alert,
-        risk_level: alert.risk_level as 'low' | 'medium' | 'high'
+        risk_level: alert.risk_level as 'low' | 'medium' | 'high',
+        data_quality: alert.data_quality as any || {
+          manual_readings_count: 0,
+          standard_readings_count: 0,
+          coverage_assessment: 'insufficient'
+        }
       }));
     } catch (error) {
       console.error('Failed to get analysis history:', error);
