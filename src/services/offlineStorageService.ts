@@ -1,3 +1,4 @@
+
 interface OfflineReading {
   id: string;
   equipment_id: string;
@@ -85,7 +86,7 @@ export class OfflineStorageService {
       const transaction = this.db!.transaction(['readings'], 'readonly');
       const store = transaction.objectStore('readings');
       const index = store.index('synced');
-      const request = index.getAll(IDBKeyRange.only(false));
+      const request = index.getAll(false);
       
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
@@ -201,7 +202,7 @@ export class OfflineStorageService {
       const transaction = this.db!.transaction(['readings'], 'readonly');
       const store = transaction.objectStore('readings');
       const index = store.index('synced');
-      const request = index.count(IDBKeyRange.only(false));
+      const request = index.count(false);
       
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
