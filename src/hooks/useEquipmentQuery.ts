@@ -1,7 +1,6 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { normalizeString } from "@/utils/locationMatching";
 import { useToast } from "@/hooks/use-toast";
 import { Equipment } from "@/types/equipment";
 
@@ -80,6 +79,10 @@ export const useEquipmentQuery = (locationId: string) => {
           // Add internal tracking properties but don't display warnings
           const equipmentWithMeta = {
             ...e,
+            // Ensure status field exists
+            status: e.status || 'Active',
+            // Ensure type field exists  
+            type: e.type || 'General',
             isSpecialLocation: isRestroom || isElevator,
             originalLocationId: e.location,
             displayWarning: false // Never show warnings

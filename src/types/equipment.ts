@@ -2,15 +2,26 @@
 export interface Equipment {
   id: string;
   name: string;
-  model: string;
-  serialNumber: string;
   location: string;
-  lastMaintenance?: string;
-  nextMaintenance?: string;
+  type?: string;
   status: string;
-  
-  // Properties for cross-location compatibility (internal tracking)
+  serial_number?: string | null;
+  model?: string | null;
+  year?: number | null;
+  created_at: string;
+  updated_at: string;
+  // Additional properties for UI functionality
   isSpecialLocation?: boolean;
-  originalLocationId?: string; 
-  displayWarning?: boolean; // Always false now - no warnings shown
+  originalLocationId?: string;
+  displayWarning?: boolean;
+}
+
+export interface EquipmentFormData {
+  name: string;
+  location: string;
+  type: string;
+  status: string;
+  serial_number?: string;
+  model?: string;
+  year?: number;
 }
