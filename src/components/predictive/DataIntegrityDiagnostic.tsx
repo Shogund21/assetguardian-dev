@@ -113,7 +113,10 @@ const DataIntegrityDiagnostic = ({ equipmentId, equipmentName }: DataIntegrityDi
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div className="flex justify-between">
                 <span>Manual Readings:</span>
-                <Badge variant={readingCounts.manual > 0 ? "default" : "secondary"}>
+                <Badge 
+                  variant={readingCounts.manual > 0 ? "outline" : "secondary"}
+                  className={readingCounts.manual > 0 ? "border-blue-500 text-blue-600 bg-blue-50" : ""}
+                >
                   {readingCounts.manual}
                 </Badge>
               </div>
@@ -121,7 +124,7 @@ const DataIntegrityDiagnostic = ({ equipmentId, equipmentName }: DataIntegrityDi
                 <span>Maintenance Checks:</span>
                 <Badge 
                   variant={readingCounts.standard > 0 ? "outline" : "secondary"}
-                  className={readingCounts.standard > 0 ? "border-blue-500 text-blue-600 bg-white" : ""}
+                  className={readingCounts.standard > 0 ? "border-blue-500 text-blue-600 bg-blue-50" : ""}
                 >
                   {readingCounts.standard}
                 </Badge>
