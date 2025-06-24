@@ -34,10 +34,10 @@ const EnhancedAIAnalysis = ({ equipmentId, equipmentType, equipmentName }: Enhan
       
       // Show immediate feedback
       const sourceDescription = readingSource === 'manual' 
-        ? 'manual readings only'
+        ? 'manual sensor data only'
         : readingSource === 'standard'
-          ? 'standard readings only'
-          : 'all available readings';
+          ? 'maintenance check data only'
+          : 'all available data sources';
       
       toast({
         title: "Analysis Started",
@@ -90,9 +90,9 @@ const EnhancedAIAnalysis = ({ equipmentId, equipmentType, equipmentName }: Enhan
     if (hasManual && hasStandard) {
       return <Badge variant="default" className="bg-blue-600">Comprehensive Data</Badge>;
     } else if (hasManual) {
-      return <Badge variant="default" className="bg-green-600">Manual Readings</Badge>;
+      return <Badge variant="default" className="bg-green-600">Manual Sensor Data</Badge>;
     } else if (hasStandard) {
-      return <Badge variant="outline" className="border-orange-500 text-orange-600">Standard Readings Only</Badge>;
+      return <Badge variant="outline" className="border-orange-500 text-orange-600">Maintenance Check Data</Badge>;
     }
     
     return <Badge variant="secondary">Limited Data</Badge>;
@@ -142,7 +142,7 @@ const EnhancedAIAnalysis = ({ equipmentId, equipmentType, equipmentName }: Enhan
             <div className="text-center py-8">
               <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
               <p className="text-muted-foreground">
-                Analyzing equipment readings from {readingSource === 'manual' ? 'manual sensors' : readingSource === 'standard' ? 'maintenance checks' : 'all available sources'}...
+                Analyzing equipment data from {readingSource === 'manual' ? 'manual sensors' : readingSource === 'standard' ? 'maintenance checks' : 'all available sources'}...
               </p>
             </div>
           )}
@@ -169,11 +169,11 @@ const EnhancedAIAnalysis = ({ equipmentId, equipmentType, equipmentName }: Enhan
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div className="flex items-center gap-2">
                       <Activity className="h-3 w-3 text-green-600" />
-                      <span>Manual Readings: {latestAlert.data_quality.manual_readings_count}</span>
+                      <span>Manual Sensor Data: {latestAlert.data_quality.manual_readings_count}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Database className="h-3 w-3 text-blue-600" />
-                      <span>Standard Readings: {latestAlert.data_quality.standard_readings_count}</span>
+                      <span>Maintenance Check Data: {latestAlert.data_quality.standard_readings_count}</span>
                     </div>
                   </div>
                   <p className="text-xs text-blue-700 mt-2">
@@ -223,11 +223,12 @@ const EnhancedAIAnalysis = ({ equipmentId, equipmentType, equipmentName }: Enhan
               </p>
               <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
                 <li>Choose your preferred data source above</li>
-                <li>Analyzes both manual sensor readings and standard maintenance readings</li>
-                <li>Prioritizes manual readings when available (Auto mode)</li>
-                <li>Identifies potential issues early with trend analysis</li>
-                <li>Provides maintenance recommendations based on data completeness</li>
-                <li>Creates work orders for critical issues</li>
+                <li>Manual: Uses direct sensor readings for real-time analysis</li>
+                <li>Standard: Uses maintenance check form data for trend analysis</li>
+                <li>Auto: Combines both sources for comprehensive insights</li>
+                <li>Identifies potential issues early with predictive algorithms</li>
+                <li>Provides maintenance recommendations based on data quality</li>
+                <li>Creates work orders for critical issues automatically</li>
               </ul>
             </div>
           )}
