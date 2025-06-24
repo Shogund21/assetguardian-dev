@@ -1,16 +1,16 @@
 
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, CheckCircle, XCircle, Brain, Loader2, Database, Activity, Calendar } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Brain, Loader2, CheckCircle, AlertTriangle, TrendingUp, Calendar, Wrench } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import usePredictiveMaintenance from "@/hooks/usePredictiveMaintenance";
-import { getEquipmentReadingTemplate } from "@/utils/equipmentTemplates";
-import ReadingSourceSelector, { ReadingSource } from "./ReadingSourceSelector";
+import { EnhancedPredictiveService, ReadingSource } from "@/services/enhancedPredictiveService";
+import { PredictiveAlert } from "@/types/predictive";
+import ReadingSourceSelector from "./ReadingSourceSelector";
 import DataIntegrityDiagnostic from "./DataIntegrityDiagnostic";
-import PredictiveTimeline from "./PredictiveTimeline";
 
 interface EnhancedAIAnalysisProps {
   equipmentId: string;
@@ -19,281 +19,269 @@ interface EnhancedAIAnalysisProps {
 }
 
 const EnhancedAIAnalysis = ({ equipmentId, equipmentType, equipmentName }: EnhancedAIAnalysisProps) => {
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<PredictiveAlert | null>(null);
   const [readingSource, setReadingSource] = useState<ReadingSource>('auto');
-  const { analyzeEquipment, isAnalyzing, alerts, useReadingCounts } = usePredictiveMaintenance();
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Get reading counts for the selector
-  const { data: readingCounts } = useReadingCounts(equipmentId);
-
-  const handleAnalyze = async () => {
-    try {
-      console.log(`Starting AI analysis for ${equipmentName} (${equipmentType}) with reading source: ${readingSource}`);
-      
-      // Get equipment reading standards
-      const readingTemplates = getEquipmentReadingTemplate(equipmentType);
-      console.log('Available reading templates:', readingTemplates);
-      
-      analyzeEquipment({ equipmentId, readingSource });
-      
-      // Show immediate feedback
-      const sourceDescription = readingSource === 'manual' 
-        ? 'manual sensor data only'
-        : readingSource === 'standard'
-          ? 'maintenance check data only'
-          : 'all available data sources';
-      
+  const handleRunAnalysis = async () => {
+    if (!equipmentId) {
       toast({
-        title: "Analysis Started",
-        description: `Running predictive analysis for ${equipmentName} using ${sourceDescription}`,
-      });
-      
-    } catch (error) {
-      console.error('Analysis error:', error);
-      toast({
-        title: "Analysis Failed",
-        description: "Failed to start predictive analysis",
+        title: "Error",
+        description: "Please select equipment first",
         variant: "destructive",
       });
+      return;
+    }
+
+    setIsAnalyzing(true);
+    setAnalysisError(null);
+    setAnalysisResult(null);
+
+    try {
+      console.log('Starting AI analysis for equipment:', equipmentId);
+      
+      const result = await EnhancedPredictiveService.processEnhancedAIAnalysis(
+        equipmentId,
+        readingSource
+      );
+
+      if (result) {
+        setAnalysisResult(result);
+        toast({
+          title: "Analysis Complete",
+          description: `Risk level: ${result.risk_level.toUpperCase()}`,
+        });
+      } else {
+        throw new Error('No analysis result received');
+      }
+
+    } catch (error: any) {
+      console.error('Analysis failed:', error);
+      const errorMessage = error?.message || 'Unknown error occurred';
+      setAnalysisError(errorMessage);
+      toast({
+        title: "Analysis Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
-  const getRiskIcon = (riskLevel: string) => {
-    switch (riskLevel) {
-      case 'high':
-        return <XCircle className="h-5 w-5 text-red-500" />;
-      case 'medium':
-        return <AlertTriangle className="h-5 w-5 text-yellow-500" />;
-      case 'low':
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
-      default:
-        return <CheckCircle className="h-5 w-5 text-gray-500" />;
+  const getRiskColor = (riskLevel: string) => {
+    switch (riskLevel.toLowerCase()) {
+      case 'high': return 'bg-red-500 text-white';
+      case 'medium': return 'bg-yellow-500 text-white';
+      case 'low': return 'bg-green-500 text-white';
+      default: return 'bg-blue-500 text-white';
     }
   };
 
-  const getRiskBadge = (riskLevel: string) => {
-    switch (riskLevel) {
-      case 'high':
-        return <Badge variant="destructive">High Risk</Badge>;
-      case 'medium':
-        return <Badge variant="outline" className="border-yellow-500 text-yellow-600">Medium Risk</Badge>;
-      case 'low':
-        return <Badge variant="default" className="bg-green-600">Low Risk</Badge>;
-      default:
-        return <Badge variant="secondary">Unknown</Badge>;
-    }
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString();
   };
-
-  const getDataQualityBadge = (dataQuality: any) => {
-    if (!dataQuality) return null;
-    
-    const { manual_readings_count, standard_readings_count } = dataQuality;
-    const hasManual = manual_readings_count > 0;
-    const hasStandard = standard_readings_count > 0;
-    
-    if (hasManual && hasStandard) {
-      return <Badge variant="default" className="bg-blue-600">Comprehensive Data</Badge>;
-    } else if (hasManual) {
-      return <Badge variant="default" className="bg-green-600">Manual Sensor Data</Badge>;
-    } else if (hasStandard) {
-      return <Badge variant="outline" className="border-orange-500 text-orange-600">Maintenance Check Data</Badge>;
-    }
-    
-    return <Badge variant="secondary">Limited Data</Badge>;
-  };
-
-  // Get relevant alerts for this equipment
-  const equipmentAlerts = alerts.filter(alert => alert.asset_id === equipmentId);
-  const latestAlert = equipmentAlerts[0]; // Most recent alert
 
   return (
     <div className="space-y-6">
-      {/* Data Integrity Diagnostic */}
+      {/* Data Integrity Check */}
       <DataIntegrityDiagnostic 
         equipmentId={equipmentId}
         equipmentName={equipmentName}
       />
 
+      {/* AI Analysis Controls */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Brain className="h-5 w-5" />
-              AI Predictive Analysis
-            </CardTitle>
-            <Button 
-              onClick={handleAnalyze}
-              disabled={isAnalyzing}
-              className="bg-blue-900 hover:bg-blue-800 text-white"
-            >
-              {isAnalyzing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Analyzing...
-                </>
-              ) : (
-                "Run Analysis"
-              )}
-            </Button>
-          </div>
+          <CardTitle className="flex items-center gap-2">
+            <Brain className="h-5 w-5 text-purple-500" />
+            AI-Powered Predictive Analysis
+          </CardTitle>
         </CardHeader>
-        <CardContent>
-          {/* Reading Source Selector */}
-          <div className="mb-6">
-            <ReadingSourceSelector
-              value={readingSource}
-              onChange={setReadingSource}
-              manualCount={readingCounts?.manual || 0}
-              standardCount={readingCounts?.standard || 0}
-            />
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium">Equipment:</label>
+              <p className="text-sm text-muted-foreground">{equipmentName}</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Type:</label>
+              <p className="text-sm text-muted-foreground">{equipmentType}</p>
+            </div>
           </div>
 
-          {isAnalyzing && (
-            <div className="text-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-              <p className="text-muted-foreground">
-                Analyzing equipment data from {readingSource === 'manual' ? 'manual sensors' : readingSource === 'standard' ? 'maintenance checks' : 'all available sources'}...
-              </p>
-            </div>
-          )}
-          
-          {latestAlert && !isAnalyzing && (
-            <Tabs defaultValue="summary" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="summary">Analysis Summary</TabsTrigger>
-                <TabsTrigger value="timeline" className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Predictive Timeline
-                </TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="summary" className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    {getRiskIcon(latestAlert.risk_level)}
-                    <span className="font-medium">Latest Analysis Result</span>
-                  </div>
-                  <div className="flex gap-2">
-                    {getRiskBadge(latestAlert.risk_level)}
-                    {latestAlert.data_quality && getDataQualityBadge(latestAlert.data_quality)}
-                  </div>
-                </div>
-                
-                {latestAlert.data_quality && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Database className="h-4 w-4 text-blue-600" />
-                      <span className="font-medium text-blue-900">Data Sources Used</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div className="flex items-center gap-2">
-                        <Activity className="h-3 w-3 text-green-600" />
-                        <span>Manual Sensor Data: {latestAlert.data_quality.manual_readings_count}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Database className="h-3 w-3 text-blue-600" />
-                        <span>Maintenance Check Data: {latestAlert.data_quality.standard_readings_count}</span>
-                      </div>
-                    </div>
-                    <p className="text-xs text-blue-700 mt-2">
-                      {latestAlert.data_quality.coverage_assessment}
-                    </p>
-                  </div>
-                )}
-                
-                <div className="grid gap-4">
-                  <div>
-                    <h4 className="font-medium mb-2">Finding:</h4>
-                    <p className="text-sm text-muted-foreground">{latestAlert.finding}</p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-medium mb-2">Recommendation:</h4>
-                    <p className="text-sm text-muted-foreground">{latestAlert.recommendation}</p>
-                  </div>
-                  
-                  {latestAlert.confidence_score && (
-                    <div>
-                      <h4 className="font-medium mb-2">Confidence Score:</h4>
-                      <div className="flex items-center gap-2">
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-blue-600 h-2 rounded-full" 
-                            style={{ width: `${latestAlert.confidence_score}%` }}
-                          ></div>
-                        </div>
-                        <span className="text-sm">{latestAlert.confidence_score}%</span>
-                      </div>
-                    </div>
-                  )}
-                  
-                  <div className="text-xs text-muted-foreground">
-                    Analysis completed: {new Date(latestAlert.created_at).toLocaleString()}
-                  </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="timeline" className="space-y-4">
-                <PredictiveTimeline
-                  timelineEvents={latestAlert.predictive_timeline}
-                  maintenanceWindows={latestAlert.maintenance_windows}
-                  degradationAnalysis={latestAlert.degradation_analysis}
-                  performanceTrends={latestAlert.performance_trends}
-                />
-              </TabsContent>
-            </Tabs>
-          )}
-          
-          {!latestAlert && !isAnalyzing && (
-            <div className="text-center py-8">
-              <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground mb-4">
-                No analysis results yet. Run an analysis to get AI-powered insights with predictive timeline.
-              </p>
-              <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
-                <li>Choose your preferred data source above</li>
-                <li>Get failure probability predictions with specific dates</li>
-                <li>See component degradation analysis and life remaining</li>
-                <li>Discover optimal maintenance windows with cost estimates</li>
-                <li>View performance trends and efficiency decline rates</li>
-                <li>Receive timeline-based maintenance recommendations</li>
-                <li>Generate automated work orders for critical issues</li>
-              </ul>
-            </div>
+          <ReadingSourceSelector
+            value={readingSource}
+            onChange={setReadingSource}
+          />
+
+          <Button
+            onClick={handleRunAnalysis}
+            disabled={isAnalyzing}
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+          >
+            {isAnalyzing ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Analyzing Equipment Data...
+              </>
+            ) : (
+              <>
+                <Brain className="mr-2 h-4 w-4" />
+                Run AI Analysis
+              </>
+            )}
+          </Button>
+
+          {analysisError && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                {analysisError}
+              </AlertDescription>
+            </Alert>
           )}
         </CardContent>
       </Card>
-      
-      {equipmentAlerts.length > 1 && (
+
+      {/* Analysis Results */}
+      {analysisResult && (
         <Card>
           <CardHeader>
-            <CardTitle>Analysis History</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-500" />
+              Analysis Results
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {equipmentAlerts.slice(1, 6).map((alert) => (
-                <div key={alert.id} className="flex items-center justify-between p-3 border rounded">
-                  <div className="flex items-center gap-2">
-                    {getRiskIcon(alert.risk_level)}
-                    <div>
-                      <p className="text-sm font-medium">{alert.finding}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(alert.created_at).toLocaleDateString()}
-                        {alert.data_quality && (
-                          <span className="ml-2">
-                            • {alert.data_quality.manual_readings_count}M + {alert.data_quality.standard_readings_count}S readings
-                          </span>
-                        )}
-                      </p>
+            <Tabs defaultValue="summary" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="summary">Analysis Summary</TabsTrigger>
+                <TabsTrigger value="timeline">Predictive Timeline</TabsTrigger>
+                <TabsTrigger value="technical">Technical Details</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="summary" className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">Risk Level:</span>
+                      <Badge className={getRiskColor(analysisResult.risk_level)}>
+                        {analysisResult.risk_level.toUpperCase()}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">Confidence:</span>
+                      <span className="text-sm">
+                        {analysisResult.confidence_score ? 
+                          `${(analysisResult.confidence_score * 100).toFixed(0)}%` : 
+                          'N/A'
+                        }
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      <span className="text-sm text-muted-foreground">
+                        {formatDate(analysisResult.created_at)}
+                      </span>
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    {getRiskBadge(alert.risk_level)}
-                    {alert.data_quality && getDataQualityBadge(alert.data_quality)}
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <h4 className="font-medium flex items-center gap-1">
+                      <AlertTriangle className="h-4 w-4 text-orange-500" />
+                      Key Finding
+                    </h4>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {analysisResult.finding}
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium flex items-center gap-1">
+                      <Wrench className="h-4 w-4 text-blue-500" />
+                      Recommendation
+                    </h4>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {analysisResult.recommendation}
+                    </p>
                   </div>
                 </div>
-              ))}
-            </div>
+              </TabsContent>
+
+              <TabsContent value="timeline" className="space-y-4">
+                <div className="space-y-3">
+                  <h4 className="font-medium flex items-center gap-1">
+                    <TrendingUp className="h-4 w-4 text-purple-500" />
+                    Predictive Timeline
+                  </h4>
+                  
+                  {analysisResult.predictive_timeline ? (
+                    <div className="bg-purple-50 p-4 rounded-lg">
+                      <pre className="text-sm whitespace-pre-wrap text-purple-800">
+                        {JSON.stringify(analysisResult.predictive_timeline, null, 2)}
+                      </pre>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No timeline data available for this analysis.
+                    </p>
+                  )}
+
+                  {analysisResult.maintenance_windows && (
+                    <div>
+                      <h5 className="font-medium text-sm mb-2">Recommended Maintenance Windows</h5>
+                      <div className="bg-blue-50 p-4 rounded-lg">
+                        <pre className="text-sm whitespace-pre-wrap text-blue-800">
+                          {JSON.stringify(analysisResult.maintenance_windows, null, 2)}
+                        </pre>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="technical" className="space-y-4">
+                <div className="space-y-4">
+                  {analysisResult.data_quality && (
+                    <div>
+                      <h4 className="font-medium text-sm mb-2">Data Quality Metrics</h4>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <pre className="text-sm whitespace-pre-wrap">
+                          {JSON.stringify(analysisResult.data_quality, null, 2)}
+                        </pre>
+                      </div>
+                    </div>
+                  )}
+
+                  {analysisResult.degradation_analysis && (
+                    <div>
+                      <h4 className="font-medium text-sm mb-2">Degradation Analysis</h4>
+                      <div className="bg-orange-50 p-4 rounded-lg">
+                        <pre className="text-sm whitespace-pre-wrap text-orange-800">
+                          {JSON.stringify(analysisResult.degradation_analysis, null, 2)}
+                        </pre>
+                      </div>
+                    </div>
+                  )}
+
+                  {analysisResult.performance_trends && (
+                    <div>
+                      <h4 className="font-medium text-sm mb-2">Performance Trends</h4>
+                      <div className="bg-green-50 p-4 rounded-lg">
+                        <pre className="text-sm whitespace-pre-wrap text-green-800">
+                          {JSON.stringify(analysisResult.performance_trends, null, 2)}
+                        </pre>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       )}

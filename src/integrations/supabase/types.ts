@@ -324,6 +324,7 @@ export type Database = {
           notes: string | null
           oil_level_status: string | null
           pump_seals_condition: string | null
+          reading_mode: string | null
           refrigerant_level: string | null
           restroom_notes: string | null
           safety_features_status: string | null
@@ -396,6 +397,7 @@ export type Database = {
           notes?: string | null
           oil_level_status?: string | null
           pump_seals_condition?: string | null
+          reading_mode?: string | null
           refrigerant_level?: string | null
           restroom_notes?: string | null
           safety_features_status?: string | null
@@ -470,6 +472,7 @@ export type Database = {
           notes?: string | null
           oil_level_status?: string | null
           pump_seals_condition?: string | null
+          reading_mode?: string | null
           refrigerant_level?: string | null
           restroom_notes?: string | null
           safety_features_status?: string | null
