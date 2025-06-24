@@ -14,13 +14,7 @@ const AnalysisResultsHistory = () => {
       
       const { data, error } = await supabase
         .from('predictive_alerts')
-        .select(`
-          *,
-          equipment:equipment!predictive_alerts_asset_id_fkey (
-            name,
-            location
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false })
         .limit(50);
 
@@ -31,17 +25,41 @@ const AnalysisResultsHistory = () => {
 
       console.log('Raw analysis results:', data);
 
-      // Map database records to PredictiveAlert interface
-      return (data || []).map(record => ({
-        ...record,
-        equipment: record.equipment || null,
-        // Cast JSONB fields safely
-        data_quality: record.data_quality as any,
-        predictive_timeline: record.predictive_timeline as any,
-        degradation_analysis: record.degradation_analysis as any,
-        maintenance_windows: record.maintenance_windows as any,
-        performance_trends: record.performance_trends as any,
-      })) as PredictiveAlert[];
+      // Get equipment details separately for each alert
+      const resultsWithEquipment = await Promise.all(
+        (data || []).map(async (record) => {
+          let equipment = null;
+          
+          if (record.asset_id) {
+            try {
+              const { data: equipmentData, error: equipmentError } = await supabase
+                .from('equipment')
+                .select('name, location')
+                .eq('id', record.asset_id)
+                .single();
+              
+              if (!equipmentError && equipmentData) {
+                equipment = equipmentData;
+              }
+            } catch (err) {
+              console.warn(`Could not fetch equipment for alert ${record.id}`);
+            }
+          }
+
+          return {
+            ...record,
+            equipment,
+            // Cast JSONB fields safely
+            data_quality: record.data_quality as any,
+            predictive_timeline: record.predictive_timeline as any,
+            degradation_analysis: record.degradation_analysis as any,
+            maintenance_windows: record.maintenance_windows as any,
+            performance_trends: record.performance_trends as any,
+          } as PredictiveAlert;
+        })
+      );
+
+      return resultsWithEquipment;
     },
     refetchInterval: 30000, // Refresh every 30 seconds
   });

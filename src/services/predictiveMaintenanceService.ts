@@ -38,19 +38,25 @@ export class PredictiveMaintenanceService {
       // Then, get equipment details separately for each alert
       const alertsWithEquipment = await Promise.all(
         alerts.map(async (alert) => {
-          const { data: equipment, error: equipmentError } = await supabase
-            .from('equipment')
-            .select('name, location')
-            .eq('id', alert.asset_id)
-            .single();
+          let equipment = null;
+          
+          try {
+            const { data: equipmentData, error: equipmentError } = await supabase
+              .from('equipment')
+              .select('name, location')
+              .eq('id', alert.asset_id)
+              .single();
 
-          if (equipmentError) {
-            console.warn(`Could not fetch equipment for alert ${alert.id}:`, equipmentError);
+            if (!equipmentError && equipmentData) {
+              equipment = equipmentData;
+            }
+          } catch (err) {
+            console.warn(`Could not fetch equipment for alert ${alert.id}:`, err);
           }
 
           return {
             ...alert,
-            equipment: equipment || null,
+            equipment,
             // Cast JSONB fields to appropriate types
             data_quality: alert.data_quality as any,
             predictive_timeline: alert.predictive_timeline as any,
@@ -85,10 +91,10 @@ export class PredictiveMaintenanceService {
         return [];
       }
       
-      // Map database records to SensorReading interface
+      // Map database records to SensorReading interface with proper type casting
       return (data || []).map(record => ({
         ...record,
-        source: (record.source || 'manual') as 'manual' | 'maintenance_check'
+        source: (record.source === 'maintenance_check' ? 'maintenance_check' : 'manual') as 'manual' | 'maintenance_check'
       }));
     } catch (error) {
       console.error('Error in getRecentSensorReadings:', error);
@@ -107,7 +113,7 @@ export class PredictiveMaintenanceService {
     
     return {
       ...data,
-      source: (data.source || 'manual') as 'manual' | 'maintenance_check'
+      source: (data.source === 'maintenance_check' ? 'maintenance_check' : 'manual') as 'manual' | 'maintenance_check'
     };
   }
 
@@ -148,6 +154,7 @@ export class PredictiveMaintenanceService {
     
     return {
       ...data,
+      equipment: null, // Will be populated separately if needed
       data_quality: data.data_quality as any,
       predictive_timeline: data.predictive_timeline as any,
       degradation_analysis: data.degradation_analysis as any,
@@ -157,23 +164,39 @@ export class PredictiveMaintenanceService {
   }
 
   static async createAutomatedWorkOrder(workOrder: Omit<AutomatedWorkOrder, 'id' | 'created_at'>): Promise<AutomatedWorkOrder> {
+    const workOrderData = {
+      asset_id: workOrder.equipment_id,
+      title: workOrder.title,
+      description: workOrder.description,
+      priority: workOrder.priority,
+      status: workOrder.status,
+      due_hours: 24, // Default value
+      assigned_team: workOrder.technician?.firstName + ' ' + workOrder.technician?.lastName,
+      alert_id: workOrder.alert_id,
+    };
+
     const { data, error } = await supabase
       .from('automated_work_orders')
-      .insert([{
-        asset_id: workOrder.equipment_id,
-        title: workOrder.title,
-        description: workOrder.description,
-        priority: workOrder.priority,
-        status: workOrder.status,
-        due_hours: 24, // Default value
-        assigned_team: workOrder.technician?.firstName + ' ' + workOrder.technician?.lastName,
-        alert_id: workOrder.alert_id,
-      }])
+      .insert([workOrderData])
       .select()
       .single();
 
     if (error) throw error;
-    return data as AutomatedWorkOrder;
+    
+    // Map the database response back to AutomatedWorkOrder interface
+    return {
+      id: data.id,
+      equipment_id: data.asset_id,
+      title: data.title,
+      description: data.description,
+      priority: data.priority as 'low' | 'medium' | 'high',
+      status: data.status as 'pending' | 'assigned' | 'in_progress' | 'completed' | 'cancelled',
+      due_date: new Date(Date.now() + data.due_hours * 60 * 60 * 1000).toISOString(),
+      assigned_technician_id: null, // Not implemented in database yet
+      technician: workOrder.technician || null,
+      created_at: data.created_at,
+      alert_id: data.alert_id,
+    } as AutomatedWorkOrder;
   }
 
   static async resolveAlert(alertId: string): Promise<void> {

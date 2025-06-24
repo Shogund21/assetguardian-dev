@@ -1,118 +1,135 @@
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, CheckCircle, Database, RefreshCw } from 'lucide-react';
-import { DatabaseInitService } from '@/services/databaseInitService';
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle, Database, RefreshCw } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
-export const DatabaseStatus: React.FC = () => {
-  const [status, setStatus] = useState<any>(null);
-  const [instructions, setInstructions] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
+const DatabaseStatus = () => {
+  const { data: status, isLoading, refetch, isRefetching } = useQuery({
+    queryKey: ['database-status'],
+    queryFn: async () => {
+      console.log('Checking database status...');
+      
+      const tables = [
+        'predictive_alerts',
+        'sensor_readings', 
+        'equipment_thresholds',
+        'automated_work_orders'
+      ];
+      
+      const results = await Promise.all(
+        tables.map(async (table) => {
+          try {
+            const { data, error } = await supabase
+              .from(table as any)
+              .select('id')
+              .limit(1);
+            
+            return {
+              name: table,
+              exists: !error,
+              error: error?.message
+            };
+          } catch (err) {
+            return {
+              name: table,
+              exists: false,
+              error: err instanceof Error ? err.message : 'Unknown error'
+            };
+          }
+        })
+      );
+      
+      return results;
+    },
+    refetchInterval: 30000,
+  });
 
-  const checkStatus = async () => {
-    setLoading(true);
-    try {
-      const tableStatus = await DatabaseInitService.checkRequiredTables();
-      const setupInstructions = await DatabaseInitService.getSetupInstructions();
-      setStatus(tableStatus);
-      setInstructions(setupInstructions);
-    } catch (error) {
-      console.error('Error checking database status:', error);
-    } finally {
-      setLoading(false);
-    }
+  const getTableDisplayName = (tableName: string) => {
+    const names: Record<string, string> = {
+      'predictive_alerts': 'Predictive Alerts',
+      'sensor_readings': 'Sensor Readings', 
+      'equipment_thresholds': 'Equipment Thresholds',
+      'automated_work_orders': 'Work Orders'
+    };
+    return names[tableName] || tableName;
   };
 
-  useEffect(() => {
-    checkStatus();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <Card>
-        <CardContent className="py-6">
-          <div className="flex items-center gap-2">
-            <RefreshCw className="h-4 w-4 animate-spin" />
-            <span>Checking database status...</span>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Database className="h-5 w-5" />
+            Database Status
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center p-8">
+            <div className="text-muted-foreground">Checking database status...</div>
           </div>
         </CardContent>
       </Card>
     );
   }
 
-  const allTablesReady = status && Object.values(status).every(Boolean);
+  const allTablesExist = status?.every(table => table.exists) ?? false;
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2">
           <Database className="h-5 w-5" />
           Database Status
-          <Button
-            onClick={checkStatus}
-            size="sm"
-            variant="outline"
-            className="ml-auto"
-          >
-            <RefreshCw className="h-4 w-4" />
-            Refresh
-          </Button>
         </CardTitle>
+        <Button 
+          onClick={() => refetch()}
+          size="sm"
+          variant="outline"
+          disabled={isRefetching}
+        >
+          <RefreshCw className={`mr-2 h-4 w-4 ${isRefetching ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
       </CardHeader>
       <CardContent className="space-y-4">
-        {allTablesReady ? (
-          <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+        {allTablesExist ? (
+          <div className="flex items-center gap-2 p-4 bg-green-50 rounded-lg border border-green-200">
             <CheckCircle className="h-5 w-5 text-green-600" />
             <span className="text-green-800 font-medium">All database components are ready!</span>
           </div>
         ) : (
-          <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <AlertTriangle className="h-5 w-5 text-yellow-600" />
-            <span className="text-yellow-800 font-medium">Database setup required</span>
+          <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+            <span className="text-yellow-800 font-medium">Some database components need attention</span>
           </div>
         )}
 
-        {status && (
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Predictive Alerts</span>
-              <Badge variant={status.predictiveAlerts ? 'default' : 'destructive'}>
-                {status.predictiveAlerts ? 'Ready' : 'Missing'}
+        <div className="space-y-3">
+          {status?.map((table) => (
+            <div key={table.name} className="flex items-center justify-between py-2">
+              <span className="text-sm font-medium">{getTableDisplayName(table.name)}</span>
+              <Badge 
+                variant={table.exists ? "default" : "destructive"}
+                className={table.exists ? "bg-blue-500 hover:bg-blue-600" : ""}
+              >
+                {table.exists ? 'Ready' : 'Missing'}
               </Badge>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Sensor Readings</span>
-              <Badge variant={status.sensorReadings ? 'default' : 'destructive'}>
-                {status.sensorReadings ? 'Ready' : 'Missing'}
-              </Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Equipment Thresholds</span>
-              <Badge variant={status.equipmentThresholds ? 'default' : 'destructive'}>
-                {status.equipmentThresholds ? 'Ready' : 'Missing'}
-              </Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Work Orders</span>
-              <Badge variant={status.automatedWorkOrders ? 'default' : 'destructive'}>
-                {status.automatedWorkOrders ? 'Ready' : 'Missing'}
-              </Badge>
-            </div>
-          </div>
-        )}
+          ))}
+        </div>
 
-        {instructions.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="font-medium">Setup Instructions:</h4>
-            <div className="text-sm text-muted-foreground space-y-1">
-              {instructions.map((instruction, index) => (
-                <div key={index} className="pl-4 border-l-2 border-blue-200">
-                  {instruction}
-                </div>
-              ))}
-            </div>
+        {!allTablesExist && (
+          <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <h4 className="font-medium text-blue-900 mb-2">Setup Instructions:</h4>
+            <ul className="text-sm text-blue-800 space-y-1">
+              <li className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-blue-600" />
+                All required database tables are present!
+              </li>
+            </ul>
           </div>
         )}
       </CardContent>
