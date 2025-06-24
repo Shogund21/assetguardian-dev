@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +12,7 @@ import {
   Clock,
   DollarSign,
   Settings,
-  Activity,
+  Heart,
   TrendingDown
 } from "lucide-react";
 import { PredictiveAlert } from "@/types/predictive";
@@ -296,7 +295,7 @@ const AnalysisResultsHistory = () => {
                 {result.degradation_analysis && result.degradation_analysis.length > 0 && (
                   <Collapsible>
                     <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium hover:text-primary">
-                      <Activity className="h-4 w-4" />
+                      <Heart className="h-4 w-4 text-red-500" />
                       Component Health ({result.degradation_analysis.length} components)
                       <ChevronDown className="h-4 w-4" />
                     </CollapsibleTrigger>
