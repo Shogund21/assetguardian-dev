@@ -191,13 +191,13 @@ export class EnhancedPredictiveService {
           coverage_assessment: 'insufficient'
         },
         predictive_timeline: Array.isArray(alert.predictive_timeline) 
-          ? alert.predictive_timeline as PredictiveTimelineEvent[]
+          ? (alert.predictive_timeline as unknown) as PredictiveTimelineEvent[]
           : (alert.predictive_timeline ? JSON.parse(alert.predictive_timeline as string) : []) as PredictiveTimelineEvent[],
         degradation_analysis: Array.isArray(alert.degradation_analysis)
-          ? alert.degradation_analysis as DegradationAnalysis[]
+          ? (alert.degradation_analysis as unknown) as DegradationAnalysis[]
           : (alert.degradation_analysis ? JSON.parse(alert.degradation_analysis as string) : []) as DegradationAnalysis[],
         maintenance_windows: Array.isArray(alert.maintenance_windows)
-          ? alert.maintenance_windows as MaintenanceWindow[]
+          ? (alert.maintenance_windows as unknown) as MaintenanceWindow[]
           : (alert.maintenance_windows ? JSON.parse(alert.maintenance_windows as string) : []) as MaintenanceWindow[],
         performance_trends: alert.performance_trends 
           ? (typeof alert.performance_trends === 'object' 
