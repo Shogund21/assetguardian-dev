@@ -42,6 +42,15 @@ const PredictiveTimeline = ({
     }
   };
 
+  const getWindowTypeBadgeVariant = (windowType: string) => {
+    switch (windowType) {
+      case 'optimal': return 'default';
+      case 'acceptable': return 'secondary';
+      case 'critical': return 'destructive';
+      default: return 'outline';
+    }
+  };
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -165,9 +174,7 @@ const PredictiveTimeline = ({
                 <div key={index} className={`border rounded-lg p-4 ${getWindowTypeColor(window.window_type)}`}>
                   <div className="flex items-center justify-between mb-2">
                     <div className="font-medium">{window.intervention_type}</div>
-                    <Badge 
-                      variant={window.window_type === 'optimal' ? 'default' : window.window_type === 'critical' ? 'destructive' : 'outline'}
-                    >
+                    <Badge variant={getWindowTypeBadgeVariant(window.window_type)}>
                       {window.window_type}
                     </Badge>
                   </div>
