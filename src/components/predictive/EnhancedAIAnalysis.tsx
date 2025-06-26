@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,7 @@ import { EnhancedPredictiveService } from "@/services/enhancedPredictiveService"
 import { PredictiveAlert } from "@/types/predictive";
 import ReadingSourceSelector, { ReadingSource } from "./ReadingSourceSelector";
 import DataIntegrityDiagnostic from "./DataIntegrityDiagnostic";
+import PredictiveTimeline from "./PredictiveTimeline";
 
 interface EnhancedAIAnalysisProps {
   equipmentId: string;
@@ -214,70 +214,123 @@ const EnhancedAIAnalysis = ({ equipmentId, equipmentType, equipmentName }: Enhan
               </TabsContent>
 
               <TabsContent value="timeline" className="space-y-4">
-                <div className="space-y-3">
-                  <h4 className="font-medium flex items-center gap-1">
-                    <TrendingUp className="h-4 w-4 text-purple-500" />
-                    Predictive Timeline
-                  </h4>
-                  
-                  {analysisResult.predictive_timeline ? (
-                    <div className="bg-purple-50 p-4 rounded-lg">
-                      <pre className="text-sm whitespace-pre-wrap text-purple-800">
-                        {JSON.stringify(analysisResult.predictive_timeline, null, 2)}
-                      </pre>
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      No timeline data available for this analysis.
-                    </p>
-                  )}
-
-                  {analysisResult.maintenance_windows && (
-                    <div>
-                      <h5 className="font-medium text-sm mb-2">Recommended Maintenance Windows</h5>
-                      <div className="bg-blue-50 p-4 rounded-lg">
-                        <pre className="text-sm whitespace-pre-wrap text-blue-800">
-                          {JSON.stringify(analysisResult.maintenance_windows, null, 2)}
-                        </pre>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <PredictiveTimeline 
+                  timelineEvents={analysisResult.predictive_timeline}
+                  maintenanceWindows={analysisResult.maintenance_windows}
+                  degradationAnalysis={analysisResult.degradation_analysis}
+                  performanceTrends={analysisResult.performance_trends}
+                />
               </TabsContent>
 
               <TabsContent value="technical" className="space-y-4">
                 <div className="space-y-4">
                   {analysisResult.data_quality && (
-                    <div>
-                      <h4 className="font-medium text-sm mb-2">Data Quality Metrics</h4>
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <pre className="text-sm whitespace-pre-wrap">
-                          {JSON.stringify(analysisResult.data_quality, null, 2)}
-                        </pre>
-                      </div>
-                    </div>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg">Data Quality Assessment</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-blue-600">
+                              {analysisResult.data_quality.manual_readings_count}
+                            </div>
+                            <div className="text-sm text-muted-foreground">Manual Readings</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-green-600">
+                              {analysisResult.data_quality.standard_readings_count}
+                            </div>
+                            <div className="text-sm text-muted-foreground">Standard Readings</div>
+                          </div>
+                          <div className="text-center">
+                            <Badge variant="outline" className="text-sm">
+                              {analysisResult.data_quality.reading_source_used || 'Auto'}
+                            </Badge>
+                            <div className="text-sm text-muted-foreground mt-1">Source Used</div>
+                          </div>
+                        </div>
+                        <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                          <h5 className="font-medium text-blue-900 mb-1">Coverage Assessment</h5>
+                          <p className="text-sm text-blue-800">
+                            {analysisResult.data_quality.coverage_assessment}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
                   )}
 
-                  {analysisResult.degradation_analysis && (
-                    <div>
-                      <h4 className="font-medium text-sm mb-2">Degradation Analysis</h4>
-                      <div className="bg-orange-50 p-4 rounded-lg">
-                        <pre className="text-sm whitespace-pre-wrap text-orange-800">
-                          {JSON.stringify(analysisResult.degradation_analysis, null, 2)}
-                        </pre>
-                      </div>
-                    </div>
+                  {analysisResult.degradation_analysis && analysisResult.degradation_analysis.length > 0 && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg">Component Health Analysis</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {analysisResult.degradation_analysis.map((analysis, index) => (
+                            <div key={index} className="border rounded-lg p-4">
+                              <h5 className="font-medium mb-3">{analysis.component}</h5>
+                              <div className="space-y-2">
+                                <div className="flex justify-between">
+                                  <span className="text-sm text-muted-foreground">Current Condition:</span>
+                                  <span className="font-medium">{analysis.current_condition}%</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-sm text-muted-foreground">Degradation Rate:</span>
+                                  <span className="font-medium text-orange-600">{analysis.degradation_rate}%/month</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-sm text-muted-foreground">Life Remaining:</span>
+                                  <span className="font-medium">{analysis.expected_life_remaining} months</span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                                  <div 
+                                    className={`h-2 rounded-full ${
+                                      analysis.current_condition > 70 ? 'bg-green-500' :
+                                      analysis.current_condition > 40 ? 'bg-yellow-500' : 'bg-red-500'
+                                    }`}
+                                    style={{ width: `${analysis.current_condition}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
                   )}
 
                   {analysisResult.performance_trends && (
-                    <div>
-                      <h4 className="font-medium text-sm mb-2">Performance Trends</h4>
-                      <div className="bg-green-50 p-4 rounded-lg">
-                        <pre className="text-sm whitespace-pre-wrap text-green-800">
-                          {JSON.stringify(analysisResult.performance_trends, null, 2)}
-                        </pre>
-                      </div>
-                    </div>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg">Performance Trends</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="text-center p-4 bg-orange-50 rounded-lg">
+                            <div className="text-2xl font-bold text-orange-600">
+                              {analysisResult.performance_trends.efficiency_decline_rate.toFixed(1)}%
+                            </div>
+                            <div className="text-sm text-muted-foreground">Efficiency Decline</div>
+                            <div className="text-xs text-muted-foreground">per month</div>
+                          </div>
+                          <div className="text-center p-4 bg-red-50 rounded-lg">
+                            <div className="text-2xl font-bold text-red-600">
+                              +{analysisResult.performance_trends.energy_consumption_increase.toFixed(1)}%
+                            </div>
+                            <div className="text-sm text-muted-foreground">Energy Increase</div>
+                            <div className="text-xs text-muted-foreground">vs baseline</div>
+                          </div>
+                          <div className="text-center p-4 bg-blue-50 rounded-lg">
+                            <div className="text-lg font-bold text-blue-600">
+                              {new Date(analysisResult.performance_trends.projected_failure_date).toLocaleDateString()}
+                            </div>
+                            <div className="text-sm text-muted-foreground">Projected Failure</div>
+                            <div className="text-xs text-muted-foreground">if no intervention</div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   )}
                 </div>
               </TabsContent>
