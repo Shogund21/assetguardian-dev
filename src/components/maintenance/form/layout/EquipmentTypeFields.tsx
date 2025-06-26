@@ -10,6 +10,7 @@ import RestroomMaintenanceFields from '../RestroomMaintenanceFields';
 import CoolingTowerFields from '../CoolingTowerFields';
 import ChillerMaintenanceFields from '../ChillerMaintenanceFields';
 import RTUMaintenanceFields from '../RTUMaintenanceFields';
+import ComprehensiveChillerFields from '../ComprehensiveChillerFields';
 
 const EquipmentTypeFields = () => {
   const { form, equipmentType, selectedEquipment } = useMaintenanceFormContext();
@@ -32,14 +33,19 @@ const EquipmentTypeFields = () => {
   
   console.log('Rendering fields for equipment type:', equipmentType);
   
+  // Check if this is a comprehensive chiller that needs the detailed form
+  const isComprehensiveChiller = selectedEquipment?.name?.toLowerCase().includes('chiller') ||
+                                 selectedEquipment?.name?.toLowerCase().includes('trane') ||
+                                 equipmentType === 'chiller';
+  
   // Render appropriate fields based on equipment type
   switch (equipmentType) {
     case 'ahu':
       console.log('Rendering AHU fields');
       return <AHUMaintenanceFields form={form} />;
     case 'chiller':
-      console.log('Rendering Chiller fields');
-      return <ChillerMaintenanceFields form={form} />;
+      console.log('Rendering Comprehensive Chiller fields');
+      return <ComprehensiveChillerFields form={form} />;
     case 'rtu':
       console.log('Rendering RTU fields');
       return <RTUMaintenanceFields form={form} />;
@@ -53,6 +59,12 @@ const EquipmentTypeFields = () => {
       console.log('Rendering Restroom fields');
       return <RestroomMaintenanceFields form={form} />;
     default:
+      // If it's a chiller but not categorized properly, still show comprehensive form
+      if (isComprehensiveChiller) {
+        console.log('Rendering Comprehensive Chiller fields for uncategorized chiller');
+        return <ComprehensiveChillerFields form={form} />;
+      }
+      
       console.log('Rendering default/general fields for type:', equipmentType);
       return (
         <>
