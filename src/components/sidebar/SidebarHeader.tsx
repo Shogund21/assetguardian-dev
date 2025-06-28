@@ -19,7 +19,7 @@ export function SidebarHeader({ isMobile }: SidebarHeaderProps) {
     <div className="flex h-[60px] items-center justify-between border-b px-4 bg-white">
       <Link to="/" className="flex items-center gap-2 font-semibold">
         <img 
-          src="/lovable-uploads/4dfe5c17-1999-42ee-95ba-9c21b23df30a.png" 
+          src="/lovable-uploads/91b3768c-9bf7-4a1c-b2be-aea61a3ff3be.png" 
           alt="Asset Guardian Logo" 
           className="h-6 w-6 flex-shrink-0" 
         />

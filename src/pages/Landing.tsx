@@ -102,7 +102,7 @@ const Landing = () => {
         <nav className="landing-nav">
           <div className="landing-nav__brand">
             <img 
-              src="/lovable-uploads/4dfe5c17-1999-42ee-95ba-9c21b23df30a.png" 
+              src="/lovable-uploads/91b3768c-9bf7-4a1c-b2be-aea61a3ff3be.png" 
               alt="Asset Guardian Logo" 
               className="h-8 w-8 mr-3" 
             />
@@ -120,7 +120,7 @@ const Landing = () => {
           {/* Logo prominently displayed */}
           <div className="flex justify-center mb-8">
             <img 
-              src="/lovable-uploads/4dfe5c17-1999-42ee-95ba-9c21b23df30a.png" 
+              src="/lovable-uploads/91b3768c-9bf7-4a1c-b2be-aea61a3ff3be.png" 
               alt="Asset Guardian Logo" 
               className="h-20 w-20 mb-4" 
             />
@@ -246,7 +246,7 @@ const Landing = () => {
               </div>
               <div className="landing-stat">
                 <div className="landing-stat__number">24/7</div>
-                <div className="landing-stat__label">AI Monitoring</div>
+                <div class="landing-stat__label">AI Monitoring</div>
               </div>
             </div>
           </div>

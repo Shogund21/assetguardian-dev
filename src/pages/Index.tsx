@@ -30,7 +30,7 @@ const Index = () => {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <div className="flex items-center">
               <img 
-                src="/lovable-uploads/4dfe5c17-1999-42ee-95ba-9c21b23df30a.png" 
+                src="/lovable-uploads/91b3768c-9bf7-4a1c-b2be-aea61a3ff3be.png" 
                 alt="Asset Guardian Logo" 
                 className="h-12 w-12 mr-4" 
               />
