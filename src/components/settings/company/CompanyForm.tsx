@@ -15,6 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Upload, X } from "lucide-react";
 
 const companySchema = z.object({
   name: z.string().min(1, "Company name is required"),
@@ -33,6 +34,9 @@ interface CompanyFormProps {
 
 export const CompanyForm = ({ initialData, onSuccess }: CompanyFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(initialData?.logo_url || null);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<CompanyFormValues>({
@@ -46,14 +50,89 @@ export const CompanyForm = ({ initialData, onSuccess }: CompanyFormProps) => {
     },
   });
 
+  const handleLogoUpload = async (file: File): Promise<string | null> => {
+    if (!file) return null;
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `company-logos/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('company-assets')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      console.error('Error uploading logo:', uploadError);
+      throw uploadError;
+    }
+
+    const { data } = supabase.storage
+      .from('company-assets')
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid file type",
+          description: "Please select an image file",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please select an image smaller than 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setLogoFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const clearLogo = () => {
+    setLogoFile(null);
+    setLogoPreview(initialData?.logo_url || null);
+    form.setValue('logo_url', initialData?.logo_url || '');
+  };
+
   const onSubmit = async (values: CompanyFormValues) => {
     setIsSubmitting(true);
     try {
+      let logoUrl = values.logo_url;
+
+      // Upload new logo if selected
+      if (logoFile) {
+        setIsUploadingLogo(true);
+        logoUrl = await handleLogoUpload(logoFile);
+        setIsUploadingLogo(false);
+      }
+
       if (initialData?.id) {
         // Update existing company
         const { error } = await supabase
           .from("companies")
-          .update(values)
+          .update({
+            ...values,
+            logo_url: logoUrl
+          })
           .eq("id", initialData.id);
 
         if (error) throw error;
@@ -63,15 +142,15 @@ export const CompanyForm = ({ initialData, onSuccess }: CompanyFormProps) => {
           description: "Company updated successfully",
         });
       } else {
-        // Insert new company - ensure name is not optional in the actual insert
+        // Insert new company
         const { error } = await supabase
           .from("companies")
           .insert({
-            name: values.name, // Explicitly include name to satisfy TS
+            name: values.name,
             contact_email: values.contact_email,
             contact_phone: values.contact_phone,
             address: values.address,
-            logo_url: values.logo_url
+            logo_url: logoUrl
           });
 
         if (error) throw error;
@@ -92,6 +171,7 @@ export const CompanyForm = ({ initialData, onSuccess }: CompanyFormProps) => {
       });
     } finally {
       setIsSubmitting(false);
+      setIsUploadingLogo(false);
     }
   };
 
@@ -154,14 +234,61 @@ export const CompanyForm = ({ initialData, onSuccess }: CompanyFormProps) => {
           )}
         />
 
+        <div className="space-y-2">
+          <FormLabel>Company Logo</FormLabel>
+          
+          {logoPreview && (
+            <div className="relative inline-block">
+              <img 
+                src={logoPreview} 
+                alt="Logo preview" 
+                className="w-20 h-20 object-contain border rounded"
+              />
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                onClick={clearLogo}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          )}
+          
+          <div className="flex items-center gap-2">
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+              id="logo-upload"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => document.getElementById('logo-upload')?.click()}
+              disabled={isUploadingLogo}
+              className="flex items-center gap-2"
+            >
+              <Upload className="h-4 w-4" />
+              {logoFile ? 'Change Logo' : 'Upload Logo'}
+            </Button>
+          </div>
+          
+          <p className="text-sm text-gray-500">
+            Upload an image file (max 5MB). Supported formats: JPG, PNG, GIF
+          </p>
+        </div>
+
         <FormField
           control={form.control}
           name="logo_url"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Logo URL</FormLabel>
+              <FormLabel>Logo URL (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="Enter logo URL" {...field} />
+                <Input placeholder="Or enter logo URL" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -171,11 +298,13 @@ export const CompanyForm = ({ initialData, onSuccess }: CompanyFormProps) => {
         <div className="flex justify-end space-x-2 pt-2">
           <Button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isUploadingLogo}
             className="bg-blue-900 hover:bg-blue-800 text-white"
           >
-            {isSubmitting
-              ? "Saving..."
+            {isSubmitting || isUploadingLogo
+              ? isUploadingLogo 
+                ? "Uploading..."
+                : "Saving..."
               : initialData?.id
               ? "Update Company"
               : "Add Company"
