@@ -246,7 +246,7 @@ const Landing = () => {
               </div>
               <div className="landing-stat">
                 <div className="landing-stat__number">24/7</div>
-                <div class="landing-stat__label">AI Monitoring</div>
+                <div className="landing-stat__label">AI Monitoring</div>
               </div>
             </div>
           </div>
