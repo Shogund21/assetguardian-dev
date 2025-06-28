@@ -1,4 +1,5 @@
 
+
 import { z } from "zod";
 
 export const maintenanceFormSchema = z.object({
@@ -8,6 +9,9 @@ export const maintenanceFormSchema = z.object({
   technician_id: z.string().min(1, "Technician is required"),
   notes: z.string().optional(),
   reading_mode: z.enum(["standard", "manual", "ai_image"]).optional(),
+  
+  // Maintenance frequency field
+  maintenance_frequency: z.string().optional(),
   
   // AI Image specific fields
   ai_extracted_image: z.string().optional(),
@@ -104,6 +108,42 @@ export const maintenanceFormSchema = z.object({
   afd_input_current_l2: z.string().optional(),
   afd_input_current_l3: z.string().optional(),
   
+  // RTU specific fields - Heating System
+  heat_exchanger_condition: z.string().optional(),
+  gas_pressure_reading: z.string().optional(),
+  ignition_system_status: z.string().optional(),
+  heat_strip_status: z.string().optional(),
+  flue_gas_temperature: z.string().optional(),
+  
+  // RTU specific fields - Cooling System
+  high_side_pressure: z.string().optional(),
+  low_side_pressure: z.string().optional(),
+  compressor_operation_status: z.string().optional(),
+  condenser_coil_condition: z.string().optional(),
+  evaporator_coil_condition: z.string().optional(),
+  expansion_valve_operation: z.string().optional(),
+  
+  // RTU specific fields - Air System
+  supply_air_temperature: z.string().optional(),
+  return_air_temperature: z.string().optional(),
+  static_pressure_reading: z.string().optional(),
+  ductwork_condition: z.string().optional(),
+  
+  // RTU specific fields - Electrical and Controls
+  thermostat_calibration: z.string().optional(),
+  control_sequence_verified: z.boolean().optional(),
+  safety_circuit_operation: z.string().optional(),
+  economizer_operation: z.string().optional(),
+  
+  // RTU specific fields - Mechanical Components
+  fan_motor_amp_draw: z.string().optional(),
+  blower_wheel_condition: z.string().optional(),
+  belt_tension_status: z.string().optional(),
+  bearing_lubrication_status: z.string().optional(),
+  
+  // RTU notes
+  rtu_notes: z.string().optional(),
+  
   // Elevator fields
   unusual_noise_elevator: z.boolean().optional(),
   vibration_elevator: z.boolean().optional(),
@@ -144,3 +184,4 @@ export const maintenanceFormSchema = z.object({
 });
 
 export type MaintenanceFormValues = z.infer<typeof maintenanceFormSchema>;
+
