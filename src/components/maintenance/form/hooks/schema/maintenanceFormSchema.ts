@@ -61,6 +61,16 @@ export const maintenanceFormSchema = z.object({
   discharge_pressure: z.string().optional(),
   oil_pressure: z.string().optional(),
   
+  // Trane RTAC specific fields
+  compressor_1_current: z.string().optional(),
+  compressor_2_current: z.string().optional(),
+  oil_pressure_1: z.string().optional(),
+  oil_pressure_2: z.string().optional(),
+  approach_temperature: z.string().optional(),
+  vfd_frequency: z.string().optional(),
+  staging_status: z.string().optional(),
+  control_mode: z.string().optional(),
+  
   // Comprehensive Chiller - Evaporator fields
   evaporator_leaving_water_temp: z.string().optional(),
   evaporator_entering_water_temp: z.string().optional(),
