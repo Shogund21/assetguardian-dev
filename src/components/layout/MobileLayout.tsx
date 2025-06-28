@@ -41,17 +41,17 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
         data-testid="mobile-content"
       >
         <div className="h-full w-full pt-16 px-3 sm:px-4">
-          {/* Application header with logo and controls */}
+          {/* Application header with new logo and controls */}
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
             <div className="flex items-center">
               <img 
-                src="/lovable-uploads/91b3768c-9bf7-4a1c-b2be-aea61a3ff3be.png" 
-                alt="AssetGuardian Logo" 
-                className="h-8 w-8 mr-3" 
+                src="/lovable-uploads/4dfe5c17-1999-42ee-95ba-9c21b23df30a.png" 
+                alt="Asset Guardian Logo" 
+                className="h-10 w-10 mr-3" 
               />
               <div>
-                <h1 className="text-xl font-bold text-gray-900">AssetGuardian</h1>
-                <p className="text-sm text-gray-500">by Shogunai LLC</p>
+                <h1 className="text-xl font-bold text-gray-900">Asset Guardian</h1>
+                <p className="text-sm text-gray-500">Facilities Management System</p>
               </div>
             </div>
             

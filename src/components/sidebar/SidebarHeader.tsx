@@ -1,5 +1,5 @@
 
-import { Building2, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useCompany } from "@/contexts/CompanyContext";
@@ -18,8 +18,12 @@ export function SidebarHeader({ isMobile }: SidebarHeaderProps) {
   return (
     <div className="flex h-[60px] items-center justify-between border-b px-4 bg-white">
       <Link to="/" className="flex items-center gap-2 font-semibold">
-        <Building2 className="h-5 w-5 flex-shrink-0" />
-        <span className="truncate max-w-[120px]">{currentCompany?.name || "Your Company"}</span>
+        <img 
+          src="/lovable-uploads/4dfe5c17-1999-42ee-95ba-9c21b23df30a.png" 
+          alt="Asset Guardian Logo" 
+          className="h-6 w-6 flex-shrink-0" 
+        />
+        <span className="truncate max-w-[120px]">Asset Guardian</span>
       </Link>
       {isMobile ? (
         <Button 

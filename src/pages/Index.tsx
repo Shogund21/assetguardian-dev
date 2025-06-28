@@ -25,15 +25,21 @@ const Index = () => {
   return (
     <CustomLayout>
       <div className="dashboard-content min-h-[200px] bg-gray-50">
-        {/* Enhanced Header Section */}
+        {/* Enhanced Header Section with Asset Guardian branding */}
         <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-700 text-white p-6 rounded-xl mb-6 shadow-lg">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-            <div>
-              <h1 className="text-3xl font-bold mb-2 flex items-center gap-3">
-                <i className="fas fa-shield-alt text-2xl"></i>
-                Dashboard
-              </h1>
-              <p className="text-blue-100 text-lg">Facility Management Overview</p>
+            <div className="flex items-center">
+              <img 
+                src="/lovable-uploads/4dfe5c17-1999-42ee-95ba-9c21b23df30a.png" 
+                alt="Asset Guardian Logo" 
+                className="h-12 w-12 mr-4" 
+              />
+              <div>
+                <h1 className="text-3xl font-bold mb-2 flex items-center gap-3">
+                  Dashboard
+                </h1>
+                <p className="text-blue-100 text-lg">Asset Guardian - Facility Management Overview</p>
+              </div>
             </div>
             <div className="mt-4 md:mt-0 flex items-center gap-4">
               <div className="text-right">

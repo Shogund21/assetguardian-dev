@@ -101,7 +101,12 @@ const Landing = () => {
       <header className="landing-header">
         <nav className="landing-nav">
           <div className="landing-nav__brand">
-            <h1 className="logo">AssetGuardian</h1>
+            <img 
+              src="/lovable-uploads/4dfe5c17-1999-42ee-95ba-9c21b23df30a.png" 
+              alt="Asset Guardian Logo" 
+              className="h-8 w-8 mr-3" 
+            />
+            <h1 className="logo">Asset Guardian</h1>
           </div>
           <div className="landing-nav__links">
             <Link to="/" className="landing-nav__link">Dashboard</Link>
@@ -112,6 +117,15 @@ const Landing = () => {
       {/* Hero Section */}
       <section className="landing-hero">
         <div className="landing-hero__content">
+          {/* Logo prominently displayed */}
+          <div className="flex justify-center mb-8">
+            <img 
+              src="/lovable-uploads/4dfe5c17-1999-42ee-95ba-9c21b23df30a.png" 
+              alt="Asset Guardian Logo" 
+              className="h-20 w-20 mb-4" 
+            />
+          </div>
+          
           <h1 className="landing-hero__title">
             AI-Powered <span className="landing-hero__title-highlight">Predictive Maintenance</span> Platform
           </h1>
