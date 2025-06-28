@@ -47,7 +47,7 @@ export const maintenanceFormSchema = z.object({
   fan_motor_current: z.string().optional(),
   visual_inspection_status: z.string().optional(),
   
-  // Chiller specific fields
+  // Basic Chiller specific fields
   evaporator_entering_temp: z.string().optional(),
   evaporator_leaving_temp: z.string().optional(),
   condenser_entering_temp: z.string().optional(),
@@ -56,6 +56,53 @@ export const maintenanceFormSchema = z.object({
   suction_pressure: z.string().optional(),
   discharge_pressure: z.string().optional(),
   oil_pressure: z.string().optional(),
+  
+  // Comprehensive Chiller - Evaporator fields
+  evaporator_leaving_water_temp: z.string().optional(),
+  evaporator_entering_water_temp: z.string().optional(),
+  evap_sat_rfgt_temp: z.string().optional(),
+  evap_rfgt_pressure: z.string().optional(),
+  evap_approach_temp: z.string().optional(),
+  active_chilled_water_setpoint: z.string().optional(),
+  evaporator_pump_override: z.string().optional(),
+  evap_water_flow_status: z.string().optional(),
+  
+  // Comprehensive Chiller - Condenser fields
+  condenser_entering_water_temp: z.string().optional(),
+  condenser_leaving_water_temp: z.string().optional(),
+  cond_sat_rfgt_temp: z.string().optional(),
+  cond_rfgt_pressure: z.string().optional(),
+  cond_approach_temp: z.string().optional(),
+  differential_refrigerant_pressure: z.string().optional(),
+  condenser_pump_override: z.string().optional(),
+  cond_water_flow_status: z.string().optional(),
+  
+  // Comprehensive Chiller - Compressor fields
+  compressor_running_status: z.string().optional(),
+  chiller_control_signal: z.string().optional(),
+  average_motor_current_pct_rla: z.string().optional(),
+  compressor_starts: z.string().optional(),
+  oil_differential_pressure: z.string().optional(),
+  compressor_running_time: z.string().optional(),
+  oil_pump_discharge_pressure: z.string().optional(),
+  oil_tank_pressure: z.string().optional(),
+  compressor_refrigerant_discharge_temp: z.string().optional(),
+  oil_pump_control: z.string().optional(),
+  oil_pump_command: z.string().optional(),
+  
+  // Comprehensive Chiller - Motor fields
+  active_current_limit_setpoint: z.string().optional(),
+  average_motor_current_pct_rla_motor: z.string().optional(),
+  motor_frequency: z.string().optional(),
+  starter_motor_current_l1_pct_rla: z.string().optional(),
+  starter_motor_current_l2_pct_rla: z.string().optional(),
+  starter_motor_current_l3_pct_rla: z.string().optional(),
+  starter_motor_current_l1: z.string().optional(),
+  starter_motor_current_l2: z.string().optional(),
+  starter_motor_current_l3: z.string().optional(),
+  afd_input_current_l1: z.string().optional(),
+  afd_input_current_l2: z.string().optional(),
+  afd_input_current_l3: z.string().optional(),
   
   // Elevator fields
   unusual_noise_elevator: z.boolean().optional(),
