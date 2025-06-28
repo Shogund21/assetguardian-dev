@@ -47,6 +47,16 @@ export const maintenanceFormSchema = z.object({
   fan_motor_current: z.string().optional(),
   visual_inspection_status: z.string().optional(),
   
+  // Chiller specific fields
+  evaporator_entering_temp: z.string().optional(),
+  evaporator_leaving_temp: z.string().optional(),
+  condenser_entering_temp: z.string().optional(),
+  condenser_leaving_temp: z.string().optional(),
+  compressor_current: z.string().optional(),
+  suction_pressure: z.string().optional(),
+  discharge_pressure: z.string().optional(),
+  oil_pressure: z.string().optional(),
+  
   // Elevator fields
   unusual_noise_elevator: z.boolean().optional(),
   vibration_elevator: z.boolean().optional(),
