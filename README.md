@@ -1,146 +1,343 @@
 
 # Mac's Facilities Maintenance System
 
-A comprehensive facility management system built with modern web technologies, designed to streamline maintenance operations and equipment tracking.
+A comprehensive facility management system built with modern web technologies, designed to streamline maintenance operations, equipment tracking, and predictive maintenance with AI-powered capabilities.
 
-## Features
+## 🚀 Key Features
 
 ### Equipment Management
-- Track and manage various types of HVAC equipment with detailed information
-- Real-time equipment status monitoring (Operational, Needs Attention, Under Maintenance, Non-operational)
-- Detailed equipment history and maintenance records
-- Equipment location tracking and mapping
-- QR code generation for equipment identification and quick access
-- Password-protected equipment management for enhanced security
-- Equipment printing capabilities for documentation
+- **Smart Equipment Tracking**: Manage various types of HVAC equipment with detailed specifications
+- **Real-time Status Monitoring**: Track equipment status (Operational, Needs Attention, Under Maintenance, Non-operational)
+- **QR Code Integration**: Generate QR codes for equipment identification and quick mobile access
+- **Equipment History**: Comprehensive maintenance records and equipment lifecycle tracking
+- **Location-based Organization**: Equipment mapping and location tracking
+- **Password Protection**: Enhanced security for sensitive equipment management areas
+- **Print Capabilities**: Generate equipment lists and documentation for offline reference
 
-### Maintenance Checks
-- Scheduled maintenance tracking and calendar integration
-- Digital maintenance checklists for different equipment types
-- Real-time maintenance reporting and status updates
-- AHU-specific maintenance workflows with detailed parameter tracking
-- Comprehensive reading and measurement logging
-- Document repository for maintenance manuals and reference materials
-- Maintenance history visualization and tracking
+### Predictive Maintenance (AI-Powered)
+- **AI Equipment Health Monitoring**: Real-time analysis of equipment condition and performance
+- **Sensor Data Collection**: Automated collection and analysis of equipment sensor readings
+- **Predictive Analytics**: AI-powered failure prediction with confidence scoring
+- **Health Matrix Visualization**: Color-coded equipment health overview dashboard
+- **Maintenance Windows**: Optimal maintenance timing recommendations
+- **Alert System**: Automated alerts for equipment requiring attention
+- **Timeline Predictions**: Forecast equipment failure timelines and maintenance needs
+- **Performance Trends**: Track equipment efficiency and performance degradation
+
+### AI Image Reading & Analysis
+- **Photo-based Readings**: Extract sensor readings directly from equipment photos using AI
+- **OpenAI Integration**: ChatGPT-4o powered image analysis for accurate data extraction
+- **Confidence Scoring**: AI provides confidence levels for extracted readings
+- **Multiple Reading Detection**: Identify and extract multiple readings from single images
+- **Manual Override**: Option to manually adjust AI-extracted readings
+- **Image Documentation**: Store equipment photos with extracted data for reference
+
+### Offline Support & Sync
+- **Complete Offline Functionality**: Work without internet connection using IndexedDB storage
+- **Automatic Synchronization**: Seamless data sync when connection is restored
+- **Offline Indicator**: Real-time connection status and sync progress display
+- **Cached Equipment Data**: Access equipment information while offline
+- **Unsynced Data Management**: Track and manage data pending synchronization
+- **Conflict Resolution**: Handle data conflicts during sync operations
+
+### Maintenance Management
+- **Digital Checklists**: Comprehensive maintenance forms for different equipment types
+- **Multi-Mode Data Entry**: Standard forms, manual readings, or AI image extraction
+- **Maintenance Scheduling**: Calendar integration and scheduled maintenance tracking
+- **Equipment-Specific Workflows**: Tailored maintenance procedures for different equipment types
+- **Reading Templates**: Pre-configured reading types and units for different equipment
+- **Maintenance History**: Complete maintenance record tracking and analysis
+- **Document Repository**: Store maintenance manuals, photos, and reference documents
+
+### Filter Changes Tracking
+- **Filter Lifecycle Management**: Track filter installation, condition, and replacement schedules
+- **Status Monitoring**: Active, completed, and overdue filter change tracking
+- **Equipment Integration**: Link filter changes to specific equipment units
+- **Dashboard Overview**: Quick view of all filter change statuses and upcoming changes
+- **Automated Notifications**: Alerts for upcoming and overdue filter changes
+
+### Company & Multi-Tenant Support
+- **Multi-Company Architecture**: Support for multiple companies with data isolation
+- **Company Selector**: Easy switching between different company environments
+- **User Management**: Company-specific user access and role management
+- **Data Segregation**: Secure separation of data between different companies
+- **Company-Specific Settings**: Customizable configurations per company
 
 ### Project Management
-- Project status tracking with customizable statuses
-- Task assignment and monitoring
-- Priority-based project organization (High, Medium, Low)
-- Project timeline visualization with start and end dates
-- Project description editor for detailed documentation
-- Project filtering and quick status updates
-- Printable project lists for offline reference
+- **Project Lifecycle Tracking**: Manage projects from inception to completion
+- **Priority-Based Organization**: High, Medium, Low priority classification
+- **Status Management**: Customizable project statuses with quick updates
+- **Timeline Visualization**: Project timelines with start and end dates
+- **Task Assignment**: Assign projects to specific technicians or teams
+- **Progress Monitoring**: Track project completion and performance metrics
+- **Printable Reports**: Generate project summaries for offline reference
 
 ### Technician Management
-- Technician availability tracking and scheduling
-- Skill and certification management
-- Work order assignment and performance tracking
-- Contact information management
-- Specialization tracking for optimal task assignment
+- **Availability Tracking**: Real-time technician availability and scheduling
+- **Skill Management**: Track technician specializations and certifications
+- **Performance Analytics**: Monitor technician performance and productivity
+- **Work Order Assignment**: Intelligent task assignment based on skills and availability
+- **Contact Management**: Comprehensive technician contact information
+- **Workload Balancing**: Distribute work evenly across available technicians
 
-## Dashboard
-- Real-time statistics showing equipment count, active projects, pending tasks, and available technicians
-- Recent activities feed showing latest project and maintenance updates
-- Equipment overview with quick status updates
-- Responsive design for all device sizes
-- Quick access to frequently used actions
+### Advanced Analytics & Reporting
+- **Equipment Health Matrix**: Visual representation of equipment condition across facilities
+- **Maintenance Trends**: Historical analysis of maintenance activities and patterns
+- **Location Breakdown**: Equipment distribution and performance by location
+- **Technician Performance**: Individual and team performance metrics
+- **Predictive Insights**: AI-driven insights for maintenance optimization
+- **Custom Date Ranges**: Flexible reporting periods for detailed analysis
+- **Export Capabilities**: Data export for external reporting and analysis
 
-## Analytics
-- Equipment status distribution charts
-- Maintenance completion rate tracking
-- Technician performance metrics
-- Location-based analytics for equipment distribution
-- Maintenance trends visualization
-- Data export capabilities for reporting
+### Dashboard & Real-time Monitoring
+- **Real-time Statistics**: Live KPIs showing equipment count, active projects, and pending tasks
+- **Activity Feed**: Recent activities across all system components
+- **Equipment Overview**: Quick status updates and equipment health summaries
+- **Responsive Design**: Optimized for desktop, tablet, and mobile devices
+- **Quick Actions**: Fast access to frequently used functions
+- **Status Indicators**: Visual indicators for system health and connectivity
 
-## Documentation
-- Comprehensive in-app documentation
-- Equipment management guides
-- Maintenance check procedures
-- Project management best practices
-- Technician management guidelines
+## 🛠 Technology Stack
 
-## Print Features
-- Equipment list printing
-- Project summary printing
-- Maintenance schedule printing
-- QR code printing for equipment identification
+### Frontend
+- **React 18** with TypeScript for type-safe development
+- **Vite** for fast development and optimized builds
+- **Tailwind CSS** for responsive, utility-first styling
+- **shadcn/ui** for consistent, accessible UI components
+- **React Hook Form** with Zod validation for robust form handling
+- **TanStack Query** for efficient data fetching and state management
+- **Recharts** for data visualization and analytics
 
-## Settings
-- User interface customization
-- Location management for organizing equipment and projects
-- Notification preferences
-- System configuration options
-- Administrator password protection for sensitive areas
+### Backend & Database
+- **Supabase** for backend services, authentication, and real-time database
+- **PostgreSQL** with Row Level Security (RLS) for secure data access
+- **Edge Functions** for serverless API endpoints and AI integration
+- **Real-time Subscriptions** for live data updates
 
-## Project Info
+### AI & Machine Learning
+- **OpenAI API** integration for image analysis and reading extraction
+- **ChatGPT-4o** for advanced image processing capabilities
+- **Custom AI Models** for predictive maintenance analytics
+- **Confidence Scoring** for AI-generated insights
 
-**URL**: https://lovable.dev/projects/504bf57f-2335-4e76-894e-5b151c1fbbad
+### Mobile & Offline
+- **Capacitor** for native mobile app deployment
+- **IndexedDB** for offline data storage and synchronization
+- **Service Workers** for offline functionality
+- **Progressive Web App (PWA)** capabilities
 
-## Technologies Used
+### Additional Integrations
+- **QR Code Generation** for equipment identification
+- **Camera Integration** for mobile photo capture
+- **Email Notifications** via Resend.com
+- **Print Optimization** for report generation
 
-This project leverages modern web technologies:
+## 📱 Mobile & PWA Features
 
-- **Frontend Framework**: React with TypeScript
-- **Build Tool**: Vite
-- **UI Components**: shadcn/ui
-- **Styling**: Tailwind CSS
-- **Backend & Database**: Supabase
-- **State Management**: TanStack Query
-- **Form Handling**: React Hook Form with Zod validation
-- **Charts**: Recharts
-- **QR Code Generation**: qrcode.react
+- **Native Mobile Apps**: Deploy as iOS and Android apps using Capacitor
+- **Offline-First Architecture**: Full functionality without internet connection
+- **Camera Integration**: Take photos directly within the app for AI analysis
+- **Touch-Optimized Interface**: Mobile-first design with touch-friendly controls
+- **Push Notifications**: Real-time alerts for maintenance and equipment issues
+- **Responsive Design**: Seamless experience across all device sizes
 
-## Documentation
+## 🔒 Security Features
 
-For detailed information about specific features, please refer to our documentation:
+- **Row Level Security (RLS)**: Database-level security for multi-tenant data protection
+- **Password Protection**: Secure access to sensitive equipment management areas
+- **Company Data Isolation**: Complete separation of data between companies
+- **API Key Management**: Secure storage and management of third-party API keys
+- **Authentication & Authorization**: Supabase Auth for secure user management
+- **Audit Trails**: Track all user actions and data modifications
 
-- [Equipment Management Guide](./docs/equipment-management.md)
-- [Maintenance Checks Guide](./docs/maintenance-checks.md)
-- [Project Management Guide](./docs/project-management.md)
-- [Technician Management Guide](./docs/technician-management.md)
+## 🚀 Getting Started
 
-## Development Setup
+### Prerequisites
+- Node.js 18+ and npm
+- Supabase account for backend services
+- OpenAI API key for AI features (optional)
 
-1. Clone the repository
-2. Install dependencies:
+### Installation
+
+1. **Clone and Install**
    ```bash
+   git clone [repository-url]
+   cd macs-facilities-maintenance
    npm install
    ```
-3. Set up environment variables:
-   - Create a `.env` file based on `.env.example`
-   - Add your Supabase credentials
-4. Start development server:
+
+2. **Environment Setup**
+   ```bash
+   cp .env.example .env
+   # Add your Supabase credentials and API keys
+   ```
+
+3. **Database Setup**
+   - Create a new Supabase project
+   - Run the provided SQL migrations
+   - Configure Row Level Security policies
+
+4. **Development Server**
    ```bash
    npm run dev
    ```
-5. Access the application at `http://localhost:5173`
 
-## Contributing
+5. **Access Application**
+   - Open http://localhost:5173
+   - Complete the setup wizard for initial configuration
+
+### Mobile App Deployment
+
+1. **Install Capacitor**
+   ```bash
+   npm install @capacitor/core @capacitor/cli
+   npx cap init
+   ```
+
+2. **Build and Deploy**
+   ```bash
+   npm run build
+   npx cap add ios # or android
+   npx cap sync
+   npx cap run ios # or android
+   ```
+
+## 📊 Database Schema
+
+### Core Tables
+- `equipment` - Equipment inventory and specifications
+- `hvac_maintenance_checks` - Maintenance records and checklists
+- `projects` - Project management and tracking
+- `technicians` - Technician information and availability
+- `locations` - Facility locations and organization
+- `companies` - Multi-tenant company management
+
+### Predictive Maintenance
+- `sensor_readings` - Equipment sensor data collection
+- `equipment_thresholds` - Alert thresholds and monitoring rules
+- `predictive_alerts` - AI-generated maintenance alerts
+- `automated_work_orders` - System-generated work orders
+
+### Additional Features
+- `filter_changes` - Filter maintenance tracking
+- `maintenance_documents` - Document storage and management
+- `company_users` - User-company relationships
+
+## 🔧 Configuration
+
+### Required Environment Variables
+```bash
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+### Supabase Edge Function Secrets
+- `OPENAI_API_KEY` - For AI image analysis features
+- `RESEND_API_KEY` - For email notifications (optional)
+
+### Feature Flags
+- Enable/disable predictive maintenance features
+- Configure AI integration settings
+- Customize company-specific features
+
+## 📖 Documentation
+
+Comprehensive guides available in the application:
+
+- **Equipment Management Guide** - Complete equipment lifecycle management
+- **Predictive Maintenance Guide** - AI-powered maintenance optimization
+- **Maintenance Procedures** - Step-by-step maintenance workflows
+- **Project Management Best Practices** - Efficient project execution
+- **Technician Management** - Team coordination and scheduling
+- **Offline Functionality** - Working without internet connection
+- **AI Image Reading** - Extracting data from equipment photos
+- **Company Setup** - Multi-tenant configuration
+
+## 🚀 Deployment Options
+
+### Lovable Platform (Recommended)
+- One-click deployment through Lovable dashboard
+- Automatic CI/CD pipeline
+- Custom domain support with paid plans
+- Integrated monitoring and analytics
+
+### Manual Deployment
+- **Netlify**: Connect GitHub repository for automatic deployments
+- **Vercel**: Deploy with zero configuration
+- **AWS Amplify**: Full-stack deployment with backend integration
+- **Traditional Hosting**: Build and deploy static files
+
+### Mobile App Stores
+- **iOS App Store**: Deploy using Xcode and Apple Developer Account
+- **Google Play Store**: Deploy using Android Studio and Play Console
+- **Enterprise Distribution**: Internal app distribution for organizations
+
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## Deployment
+### Development Guidelines
+- Follow TypeScript best practices
+- Use ESLint and Prettier for code formatting
+- Write tests for new features
+- Update documentation for API changes
+- Follow semantic versioning
 
-The application can be deployed through:
-- The Lovable platform (recommended)
-- Manual deployment to services like Netlify or Vercel
+## 📋 API Documentation
 
-For more information about deployment options, visit our [documentation](https://docs.lovable.dev/).
+### Supabase Integration
+- Real-time subscriptions for live data updates
+- Row Level Security for multi-tenant data protection
+- Edge Functions for custom business logic
+- File storage for documents and images
 
-## Support
+### AI Integration Endpoints
+- `/functions/v1/predictive-ai-analysis` - Equipment health analysis
+- `/functions/v1/extract-readings-from-image` - AI image reading extraction
 
-For support and questions:
-- Visit our [documentation](https://docs.lovable.dev/)
-- Create an issue in the repository
-- Contact the maintenance team
+## 🔍 Troubleshooting
 
-## License
+### Common Issues
+- **Offline Storage Issues**: Clear browser storage and refresh
+- **AI Integration Problems**: Verify OpenAI API key configuration
+- **Mobile App Build Errors**: Ensure Capacitor dependencies are installed
+- **Database Connection**: Check Supabase credentials and network connection
+
+### Performance Optimization
+- Enable browser caching for static assets
+- Use image compression for equipment photos
+- Implement lazy loading for large datasets
+- Optimize database queries with proper indexing
+
+## 📞 Support & Resources
+
+### Documentation Links
+- [Lovable Documentation](https://docs.lovable.dev/)
+- [Supabase Documentation](https://supabase.com/docs)
+- [React Documentation](https://react.dev/)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+
+### Community Support
+- [Lovable Discord Community](https://discord.com/channels/1119885301872070706/1280461670979993613)
+- [GitHub Issues](repository-url/issues)
+- Project documentation within the application
+
+### Professional Support
+- Enterprise support available through Lovable platform
+- Custom development and integration services
+- Training and onboarding assistance
+- Priority technical support
+
+## 📄 License
 
 This project is proprietary software. All rights reserved.
 
+---
+
+**Project URL**: https://lovable.dev/projects/504bf57f-2335-4e76-894e-5b151c1fbbad
+
+**Built with ❤️ using [Lovable](https://lovable.dev) - The AI-powered web development platform**
