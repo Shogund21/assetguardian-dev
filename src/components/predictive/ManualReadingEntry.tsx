@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -208,7 +207,7 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
         <CardContent className="space-y-6">
           {/* Reading Mode Selector */}
           <div className="space-y-4">
-            <FormLabel className="text-base font-medium">Reading Input Mode</FormLabel>
+            <label className="text-base font-medium">Reading Input Mode</label>
             <RadioGroup
               value={readingMode}
               onValueChange={(value: "manual" | "ai_image") => setReadingMode(value)}
@@ -249,7 +248,7 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
           {/* Extracted Readings Selection */}
           {readingMode === "ai_image" && extractedReadings.length > 1 && (
             <div className="space-y-2">
-              <FormLabel>Select Reading to Use</FormLabel>
+              <label className="text-sm font-medium text-gray-700">Select Reading to Use</label>
               <div className="grid gap-2">
                 {extractedReadings.map((reading, index) => (
                   <div

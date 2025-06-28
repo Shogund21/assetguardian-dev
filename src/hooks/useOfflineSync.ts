@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { offlineStorage } from '@/services/offlineStorageService';
 import { supabase } from '@/integrations/supabase/client';
@@ -41,7 +40,7 @@ export const useOfflineSync = () => {
     };
   }, []);
 
-  // Initialize and get unsynced count
+  // Initialize and get unsynced count with error handling
   useEffect(() => {
     const initOfflineStorage = async () => {
       try {
@@ -50,6 +49,8 @@ export const useOfflineSync = () => {
         setUnsyncedCount(count);
       } catch (error) {
         console.error('Failed to init offline storage:', error);
+        // Don't crash the app if offline storage fails
+        setUnsyncedCount(0);
       }
     };
 
@@ -180,6 +181,8 @@ export const useOfflineSync = () => {
       setUnsyncedCount(count);
     } catch (error) {
       console.error('Failed to update unsynced count:', error);
+      // Don't crash the app, just log the error
+      setUnsyncedCount(0);
     }
   }, []);
 

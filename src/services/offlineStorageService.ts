@@ -1,4 +1,3 @@
-
 interface OfflineReading {
   id: string;
   equipment_id: string;
@@ -8,7 +7,7 @@ interface OfflineReading {
   notes?: string;
   location_notes?: string;
   timestamp: string;
-  synced: boolean;
+  synced: number; // Changed from boolean to number (0 = false, 1 = true)
   retry_count: number;
 }
 
@@ -65,7 +64,7 @@ export class OfflineStorageService {
     const offlineReading: OfflineReading = {
       ...reading,
       id: crypto.randomUUID(),
-      synced: false,
+      synced: 0, // Changed from false to 0
       retry_count: 0,
     };
 
@@ -86,7 +85,7 @@ export class OfflineStorageService {
       const transaction = this.db!.transaction(['readings'], 'readonly');
       const store = transaction.objectStore('readings');
       const index = store.index('synced');
-      const request = index.getAll(IDBKeyRange.only(false));
+      const request = index.getAll(IDBKeyRange.only(0)); // Changed from false to 0
       
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
@@ -104,7 +103,7 @@ export class OfflineStorageService {
       getRequest.onsuccess = () => {
         const reading = getRequest.result;
         if (reading) {
-          reading.synced = true;
+          reading.synced = 1; // Changed from true to 1
           const putRequest = store.put(reading);
           putRequest.onsuccess = () => resolve();
           putRequest.onerror = () => reject(putRequest.error);
@@ -202,7 +201,7 @@ export class OfflineStorageService {
       const transaction = this.db!.transaction(['readings'], 'readonly');
       const store = transaction.objectStore('readings');
       const index = store.index('synced');
-      const request = index.count(IDBKeyRange.only(false));
+      const request = index.count(IDBKeyRange.only(0)); // Changed from false to 0
       
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
