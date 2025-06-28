@@ -39,6 +39,14 @@ export const maintenanceFormSchema = z.object({
   airflow_reading: z.string().optional(),
   airflow_unit: z.string().optional(),
   
+  // Additional AHU temperature and pressure fields
+  supply_air_temp: z.string().optional(),
+  return_air_temp: z.string().optional(),
+  static_pressure: z.string().optional(),
+  filter_pressure_drop: z.string().optional(),
+  fan_motor_current: z.string().optional(),
+  visual_inspection_status: z.string().optional(),
+  
   // Elevator fields
   unusual_noise_elevator: z.boolean().optional(),
   vibration_elevator: z.boolean().optional(),
