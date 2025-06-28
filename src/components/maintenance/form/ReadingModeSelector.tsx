@@ -58,7 +58,7 @@ const ReadingModeSelector = ({ form, equipmentType }: ReadingModeSelectorProps) 
                 </label>
               </div>
             </RadioGroup>
-          </FormContent>
+          </FormControl>
         </FormItem>
       )}
     />
