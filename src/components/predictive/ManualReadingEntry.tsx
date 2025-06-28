@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -8,12 +9,15 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { getEquipmentReadingTemplate } from "@/utils/equipmentTemplates";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { offlineStorage } from "@/services/offlineStorageService";
 import { OfflineIndicator } from "@/components/ui/OfflineIndicator";
+import AIImageReader from "@/components/maintenance/form/AIImageReader";
+import { Camera, Edit3, Settings } from "lucide-react";
 
 const readingSchema = z.object({
   equipment_id: z.string().min(1, "Equipment is required"),
@@ -22,6 +26,7 @@ const readingSchema = z.object({
   unit: z.string().min(1, "Unit is required"),
   notes: z.string().optional(),
   location_notes: z.string().optional(),
+  reading_mode: z.enum(["manual", "ai_image"]).optional(),
 });
 
 type ReadingFormValues = z.infer<typeof readingSchema>;
@@ -32,8 +37,19 @@ interface ManualReadingEntryProps {
   onSuccess?: () => void;
 }
 
+interface ExtractedReading {
+  type: string;
+  value: string;
+  unit: string;
+  confidence: number;
+  location?: string;
+}
+
 const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualReadingEntryProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [readingMode, setReadingMode] = useState<"manual" | "ai_image">("manual");
+  const [extractedReadings, setExtractedReadings] = useState<ExtractedReading[]>([]);
+  const [selectedReading, setSelectedReading] = useState<ExtractedReading | null>(null);
   const { toast } = useToast();
   const { isOnline, updateUnsyncedCount } = useOfflineSync();
   
@@ -46,6 +62,7 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
       unit: "",
       notes: "",
       location_notes: "",
+      reading_mode: "manual",
     },
   });
 
@@ -54,14 +71,45 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
 
   // Watch for reading type changes to auto-populate unit
   const selectedReadingType = form.watch('reading_type');
-  const selectedReading = readingTemplate.find(t => t.type === selectedReadingType);
+  const templateReading = readingTemplate.find(t => t.type === selectedReadingType);
 
   // Auto-populate unit when reading type changes, but allow manual override
-  React.useEffect(() => {
-    if (selectedReading?.unit && !form.getValues('unit')) {
-      form.setValue('unit', selectedReading.unit);
+  useEffect(() => {
+    if (templateReading?.unit && !form.getValues('unit')) {
+      form.setValue('unit', templateReading.unit);
     }
-  }, [selectedReading, form]);
+  }, [templateReading, form]);
+
+  // Handle AI image readings extraction
+  const handleReadingsExtracted = (readings: ExtractedReading[], imageUrl: string) => {
+    setExtractedReadings(readings);
+    if (readings.length > 0) {
+      // Auto-select the first reading with highest confidence
+      const bestReading = readings.reduce((prev, current) => 
+        (current.confidence > prev.confidence) ? current : prev
+      );
+      setSelectedReading(bestReading);
+      
+      // Auto-populate form with the best reading
+      form.setValue('reading_type', bestReading.type);
+      form.setValue('value', bestReading.value);
+      form.setValue('unit', bestReading.unit);
+      if (bestReading.location) {
+        form.setValue('location_notes', bestReading.location);
+      }
+    }
+  };
+
+  // Handle selection of a different extracted reading
+  const handleReadingSelection = (reading: ExtractedReading) => {
+    setSelectedReading(reading);
+    form.setValue('reading_type', reading.type);
+    form.setValue('value', reading.value);
+    form.setValue('unit', reading.unit);
+    if (reading.location) {
+      form.setValue('location_notes', reading.location);
+    }
+  };
 
   const onSubmit = async (values: ReadingFormValues) => {
     setIsSubmitting(true);
@@ -78,7 +126,7 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
             value: parseFloat(values.value),
             unit: values.unit,
             timestamp_utc: timestamp,
-            source: 'manual'
+            source: readingMode === 'ai_image' ? 'ai_image' : 'manual'
           });
 
         if (error) throw error;
@@ -89,19 +137,19 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
             .from('maintenance_documents')
             .insert({
               equipment_id: values.equipment_id,
-              file_name: `Manual Reading - ${values.reading_type}`,
+              file_name: `${readingMode === 'ai_image' ? 'AI Extracted' : 'Manual'} Reading - ${values.reading_type}`,
               file_path: 'manual_entry',
               file_type: 'text/plain',
               file_size: 0,
               category: 'manual_reading',
-              comments: `${values.notes || ''}\nLocation Notes: ${values.location_notes || ''}`,
-              tags: ['manual_reading', values.reading_type],
+              comments: `${values.notes || ''}\nLocation Notes: ${values.location_notes || ''}${selectedReading?.confidence ? `\nAI Confidence: ${Math.round(selectedReading.confidence * 100)}%` : ''}`,
+              tags: ['manual_reading', values.reading_type, readingMode],
             });
         }
 
         toast({
           title: "Success",
-          description: "Reading recorded successfully",
+          description: `Reading recorded successfully via ${readingMode === 'ai_image' ? 'AI extraction' : 'manual entry'}`,
         });
       } else {
         // Offline mode - save to local storage
@@ -124,6 +172,9 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
       }
 
       form.reset();
+      setExtractedReadings([]);
+      setSelectedReading(null);
+      setReadingMode("manual");
       onSuccess?.();
     } catch (error) {
       console.error('Error saving reading:', error);
@@ -144,7 +195,7 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            Record Manual Reading
+            Record Reading
             <div className="text-sm font-normal">
               {isOnline ? (
                 <span className="text-green-600">● Online</span>
@@ -154,7 +205,76 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
             </div>
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
+          {/* Reading Mode Selector */}
+          <div className="space-y-4">
+            <FormLabel className="text-base font-medium">Reading Input Mode</FormLabel>
+            <RadioGroup
+              value={readingMode}
+              onValueChange={(value: "manual" | "ai_image") => setReadingMode(value)}
+              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+            >
+              <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                <RadioGroupItem value="manual" id="manual" />
+                <label htmlFor="manual" className="flex items-center gap-2 cursor-pointer flex-1">
+                  <Edit3 className="h-4 w-4 text-purple-600" />
+                  <div>
+                    <div className="font-medium">Manual Entry</div>
+                    <div className="text-sm text-gray-500">Type readings manually</div>
+                  </div>
+                </label>
+              </div>
+              
+              <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                <RadioGroupItem value="ai_image" id="ai_image" />
+                <label htmlFor="ai_image" className="flex items-center gap-2 cursor-pointer flex-1">
+                  <Camera className="h-4 w-4 text-green-600" />
+                  <div>
+                    <div className="font-medium">AI Image Reading</div>
+                    <div className="text-sm text-gray-500">Extract from photos</div>
+                  </div>
+                </label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          {/* AI Image Reader */}
+          {readingMode === "ai_image" && (
+            <AIImageReader
+              onReadingsExtracted={handleReadingsExtracted}
+              equipmentType={equipmentType}
+            />
+          )}
+
+          {/* Extracted Readings Selection */}
+          {readingMode === "ai_image" && extractedReadings.length > 1 && (
+            <div className="space-y-2">
+              <FormLabel>Select Reading to Use</FormLabel>
+              <div className="grid gap-2">
+                {extractedReadings.map((reading, index) => (
+                  <div
+                    key={index}
+                    className={`p-3 border rounded cursor-pointer transition-colors ${
+                      selectedReading === reading ? 'border-blue-500 bg-blue-50' : 'hover:bg-gray-50'
+                    }`}
+                    onClick={() => handleReadingSelection(reading)}
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">{reading.type}</span>
+                      <div className="text-right">
+                        <span className="text-lg">{reading.value} {reading.unit}</span>
+                        <div className="text-xs text-gray-500">
+                          {Math.round(reading.confidence * 100)}% confident
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Reading Form */}
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -163,20 +283,26 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Reading Type</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    {readingMode === "manual" ? (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select reading type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {readingTemplate.map((template) => (
+                            <SelectItem key={template.type} value={template.type}>
+                              {template.label} ({template.unit})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select reading type" />
-                        </SelectTrigger>
+                        <Input {...field} placeholder="Reading type (from AI)" readOnly={extractedReadings.length > 0} />
                       </FormControl>
-                      <SelectContent>
-                        {readingTemplate.map((template) => (
-                          <SelectItem key={template.type} value={template.type}>
-                            {template.label} ({template.unit})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -189,7 +315,12 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
                   <FormItem>
                     <FormLabel>Reading Value</FormLabel>
                     <FormControl>
-                      <Input type="number" step="0.01" placeholder="Enter reading value" {...field} />
+                      <Input 
+                        type="number" 
+                        step="0.01" 
+                        placeholder="Enter reading value" 
+                        {...field} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -204,13 +335,13 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
                     <FormLabel>Unit</FormLabel>
                     <FormControl>
                       <Input 
-                        placeholder={selectedReading?.unit ? `e.g., ${selectedReading.unit}` : "Unit of measurement"}
+                        placeholder={templateReading?.unit ? `e.g., ${templateReading.unit}` : "Unit of measurement"}
                         {...field}
                       />
                     </FormControl>
-                    {selectedReading?.unit && (
+                    {templateReading?.unit && readingMode === "manual" && (
                       <p className="text-xs text-muted-foreground">
-                        Suggested: {selectedReading.unit} (you can edit this)
+                        Suggested: {templateReading.unit} (you can edit this)
                       </p>
                     )}
                     <FormMessage />
@@ -248,9 +379,9 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
 
               <Button 
                 type="submit" 
-                disabled={isSubmitting}
+                disabled={isSubmitting || (readingMode === "ai_image" && extractedReadings.length === 0)}
                 className="w-full bg-blue-900 hover:bg-blue-800 text-white touch-manipulation"
-                style={{ minHeight: '44px' }} // Mobile-friendly touch target
+                style={{ minHeight: '44px' }}
               >
                 {isSubmitting 
                   ? (isOnline ? "Recording..." : "Saving Offline...") 
