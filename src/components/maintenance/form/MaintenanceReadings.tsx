@@ -8,6 +8,7 @@ import { getEquipmentReadingTemplate } from "@/utils/equipmentTemplates";
 import { MaintenanceFormValues } from "./hooks/schema/maintenanceFormSchema";
 import ReadingModeSelector from "./ReadingModeSelector";
 import ManualReadingFields from "./ManualReadingFields";
+import AIImageReader from "./AIImageReader";
 
 interface MaintenanceReadingsProps {
   form: UseFormReturn<MaintenanceFormValues>;
@@ -18,7 +19,137 @@ const MaintenanceReadings = ({ form, equipmentType }: MaintenanceReadingsProps) 
   const readingMode = form.watch('reading_mode') || 'standard';
   const templateReadings = equipmentType ? getEquipmentReadingTemplate(equipmentType) : [];
 
-  // If manual mode is selected, show the manual reading fields
+  const handleAIReadingsExtracted = (readings: any[], imageUrl: string) => {
+    console.log('AI extracted readings:', readings);
+    
+    // Auto-populate form fields with extracted readings
+    readings.forEach((reading) => {
+      const fieldName = reading.type as keyof MaintenanceFormValues;
+      
+      // Map common reading types to form fields
+      const fieldMapping: { [key: string]: string } = {
+        'temperature': 'chiller_temperature_reading',
+        'pressure': 'chiller_pressure_reading',
+        'airflow': 'airflow_reading',
+        'supply_air_temperature': 'chiller_temperature_reading',
+        'return_air_temperature': 'chiller_temperature_reading',
+        'discharge_pressure': 'chiller_pressure_reading',
+        'suction_pressure': 'chiller_pressure_reading',
+      };
+      
+      const mappedField = fieldMapping[reading.type] || reading.type;
+      
+      // Set the value in the form
+      if (form.getValues(mappedField as keyof MaintenanceFormValues) !== undefined) {
+        form.setValue(mappedField as keyof MaintenanceFormValues, reading.value);
+      }
+    });
+    
+    // Store the image URL and extracted data for reference
+    form.setValue('ai_extracted_image', imageUrl);
+    form.setValue('ai_extracted_readings', JSON.stringify(readings));
+  };
+
+  // AI Image mode - show the image reader
+  if (readingMode === 'ai_image') {
+    return (
+      <div className="space-y-6">
+        <ReadingModeSelector form={form} equipmentType={equipmentType} />
+        <AIImageReader 
+          onReadingsExtracted={handleAIReadingsExtracted}
+          equipmentType={equipmentType}
+        />
+        
+        {/* Show extracted readings in form fields for review */}
+        {form.getValues('ai_extracted_readings') && (
+          <div className="space-y-4">
+            <h4 className="font-medium text-green-700">Review Extracted Readings</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {templateReadings.length > 0 ? (
+                templateReadings.map((template) => (
+                  <FormField
+                    key={template.type}
+                    control={form.control}
+                    name={template.type as keyof MaintenanceFormValues}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {template.label}
+                          {template.normalRange && (
+                            <span className="text-sm text-gray-500 ml-2">
+                              (Normal: {template.normalRange.min}-{template.normalRange.max} {template.unit})
+                            </span>
+                          )}
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            placeholder={`Enter ${template.label.toLowerCase()}`}
+                            value={typeof field.value === 'string' ? field.value : ''}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            name={field.name}
+                            ref={field.ref}
+                          />
+                        </FormControl>
+                        {template.description && (
+                          <p className="text-xs text-gray-600">{template.description}</p>
+                        )}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ))
+              ) : (
+                // Fallback fields for when no template is available
+                <>
+                  <FormField
+                    control={form.control}
+                    name="chiller_temperature_reading"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Temperature Reading (°F)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            placeholder="Enter temperature"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="chiller_pressure_reading"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Pressure Reading (PSI)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            placeholder="Enter pressure"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Manual mode - show the manual reading fields
   if (readingMode === 'manual') {
     return (
       <div className="space-y-6">
