@@ -15,23 +15,28 @@ export const ReadingModeSelector = ({
   console.log('🎛️ ReadingModeSelector rendering:', { readingMode });
 
   return (
-    <div className="space-y-4 bg-white p-4 rounded-lg border-2 border-blue-200 shadow-sm w-full">
-      <div className="flex items-center justify-between">
+    <div className="w-full bg-white p-4 rounded-lg border-2 border-blue-300 shadow-sm">
+      <div className="bg-blue-100 p-3 rounded-lg mb-4">
+        <div className="text-blue-800 font-bold">🎯 MODE SELECTOR DEBUG</div>
+        <div className="text-xs text-blue-700">Current mode: {readingMode}</div>
+      </div>
+      
+      <div className="flex items-center justify-between mb-4">
         <label className="text-base font-bold text-gray-900">Choose Recording Method</label>
-        <div className="text-xs text-blue-600 bg-blue-100 px-3 py-1 rounded-full font-medium">
-          Mobile Optimized
+        <div className="text-xs text-blue-600 bg-blue-200 px-3 py-1 rounded-full font-medium">
+          Mobile Ready
         </div>
       </div>
       
       <RadioGroup
         value={readingMode}
         onValueChange={(value: "manual" | "ai_image") => {
-          console.log('📻 Mode change:', value);
+          console.log('📻 Mode changing to:', value);
           onReadingModeChange(value);
         }}
         className="grid grid-cols-1 gap-4 w-full"
       >
-        {/* Manual Entry Option */}
+        {/* Manual Entry Option - Enhanced visibility */}
         <div className="relative w-full">
           <RadioGroupItem 
             value="manual" 
@@ -40,29 +45,29 @@ export const ReadingModeSelector = ({
           />
           <label 
             htmlFor="manual" 
-            className={`flex items-center gap-4 p-6 min-h-[80px] border-3 rounded-xl cursor-pointer transition-all duration-300 touch-manipulation w-full ${
+            className={`flex items-center gap-4 p-6 min-h-[90px] border-4 rounded-xl cursor-pointer transition-all duration-200 touch-manipulation w-full ${
               readingMode === "manual" 
-                ? 'border-purple-500 bg-purple-50 shadow-lg ring-2 ring-purple-300' 
-                : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                ? 'border-purple-500 bg-purple-100 shadow-lg ring-4 ring-purple-200' 
+                : 'border-gray-400 hover:border-gray-500 hover:bg-gray-50'
             }`}
           >
-            <div className={`flex-shrink-0 p-3 rounded-full transition-colors ${
-              readingMode === "manual" ? 'bg-purple-200' : 'bg-purple-100'
+            <div className={`flex-shrink-0 p-4 rounded-full transition-colors ${
+              readingMode === "manual" ? 'bg-purple-300' : 'bg-purple-200'
             }`}>
-              <Edit3 className="h-6 w-6 text-purple-600" />
+              <Edit3 className="h-7 w-7 text-purple-700" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="font-bold text-gray-900 text-lg mb-1">Manual Entry</div>
-              <div className="text-sm text-gray-600">Type readings manually with keyboard</div>
-              <div className="text-xs text-purple-600 mt-2 font-medium">✓ Works offline</div>
+              <div className="font-bold text-gray-900 text-xl mb-2">Manual Entry</div>
+              <div className="text-sm text-gray-600 mb-2">Type readings with keyboard</div>
+              <div className="text-xs text-purple-600 font-medium">✓ Works offline</div>
             </div>
             {readingMode === "manual" && (
-              <div className="flex-shrink-0 w-4 h-4 bg-purple-500 rounded-full border-2 border-white shadow-sm"></div>
+              <div className="flex-shrink-0 w-6 h-6 bg-purple-500 rounded-full border-4 border-white shadow-lg"></div>
             )}
           </label>
         </div>
         
-        {/* AI Camera Option */}
+        {/* AI Camera Option - Enhanced visibility */}
         <div className="relative w-full">
           <RadioGroupItem 
             value="ai_image" 
@@ -71,43 +76,43 @@ export const ReadingModeSelector = ({
           />
           <label 
             htmlFor="ai_image" 
-            className={`flex items-center gap-4 p-6 min-h-[80px] border-3 rounded-xl cursor-pointer transition-all duration-300 touch-manipulation w-full ${
+            className={`flex items-center gap-4 p-6 min-h-[90px] border-4 rounded-xl cursor-pointer transition-all duration-200 touch-manipulation w-full ${
               readingMode === "ai_image" 
-                ? 'border-green-500 bg-green-50 shadow-lg ring-2 ring-green-300' 
-                : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                ? 'border-green-500 bg-green-100 shadow-lg ring-4 ring-green-200' 
+                : 'border-gray-400 hover:border-gray-500 hover:bg-gray-50'
             }`}
           >
-            <div className={`flex-shrink-0 p-3 rounded-full transition-colors ${
-              readingMode === "ai_image" ? 'bg-green-200' : 'bg-green-100'
+            <div className={`flex-shrink-0 p-4 rounded-full transition-colors ${
+              readingMode === "ai_image" ? 'bg-green-300' : 'bg-green-200'
             }`}>
-              <Camera className="h-6 w-6 text-green-600" />
+              <Camera className="h-7 w-7 text-green-700" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="font-bold text-gray-900 text-lg mb-1">AI Camera</div>
-              <div className="text-sm text-gray-600">Extract readings from photos automatically</div>
-              <div className="text-xs text-green-600 mt-2 font-medium">✓ Fast & accurate</div>
+              <div className="font-bold text-gray-900 text-xl mb-2">AI Camera</div>
+              <div className="text-sm text-gray-600 mb-2">Extract readings from photos</div>
+              <div className="text-xs text-green-600 font-medium">✓ Fast & accurate</div>
             </div>
             {readingMode === "ai_image" && (
-              <div className="flex-shrink-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white shadow-sm"></div>
+              <div className="flex-shrink-0 w-6 h-6 bg-green-500 rounded-full border-4 border-white shadow-lg"></div>
             )}
           </label>
         </div>
       </RadioGroup>
       
-      {/* Enhanced Mobile-specific status */}
+      {/* Enhanced status indicator */}
       <div className="mt-4">
-        <div className={`text-sm text-center py-3 px-4 rounded-lg border-2 transition-all ${
+        <div className={`text-sm text-center py-4 px-4 rounded-lg border-4 transition-all ${
           readingMode === "manual" 
-            ? "bg-purple-50 border-purple-300 text-purple-700" 
-            : "bg-green-50 border-green-300 text-green-700"
+            ? "bg-purple-100 border-purple-400 text-purple-800" 
+            : "bg-green-100 border-green-400 text-green-800"
         }`}>
-          <div className="font-bold mb-1">
-            {readingMode === "manual" ? "📝 Manual Mode Selected" : "📷 AI Camera Mode Selected"}
+          <div className="font-bold text-lg mb-2">
+            {readingMode === "manual" ? "📝 Manual Mode Active" : "📷 AI Camera Mode Active"}
           </div>
-          <div className="text-xs">
+          <div className="text-sm">
             {readingMode === "manual" 
-              ? "Enter values using your device keyboard" 
-              : "Take photos of meters, gauges, or displays for automatic reading extraction"
+              ? "Use your device keyboard to enter values" 
+              : "Take photos of meters and gauges for automatic extraction"
             }
           </div>
         </div>
