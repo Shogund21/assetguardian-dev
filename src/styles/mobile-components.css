@@ -82,13 +82,35 @@
   
   /* Improve touch targets */
   .touch-target {
-    min-height: 44px !important; /* Apple's recommended minimum size */
+    min-height: 44px !important;
     min-width: 44px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     touch-action: manipulation !important;
     -webkit-tap-highlight-color: transparent !important;
+  }
+
+  /* Mobile form fixes */
+  .mobile-form-container {
+    min-height: 100vh !important;
+    padding-bottom: 100px !important;
+  }
+
+  .mobile-card {
+    margin: 0 !important;
+    width: 100% !important;
+    border-radius: 0 !important;
+    min-height: calc(100vh - 120px) !important;
+  }
+
+  /* Ensure forms display on mobile */
+  .predictive-form {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 1 !important;
   }
 }
 
