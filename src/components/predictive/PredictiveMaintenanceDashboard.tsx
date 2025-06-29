@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -74,15 +75,15 @@ const PredictiveMaintenanceDashboard = () => {
   const readingTemplates = getEquipmentReadingTemplate(equipmentType);
 
   return (
-    <div className="container mx-auto py-6 px-4 max-w-7xl">
-      <div className="mb-6">
+    <div className="w-full h-full">
+      <div className="mb-6 px-1">
         <h1 className="text-2xl font-bold mb-2">Predictive Maintenance Dashboard</h1>
         <p className="text-muted-foreground">
           Record manual readings and get AI-powered predictive maintenance insights
         </p>
       </div>
 
-      <div className="mb-6">
+      <div className="mb-6 px-1">
         <OfflineIndicator />
       </div>
 
@@ -96,9 +97,9 @@ const PredictiveMaintenanceDashboard = () => {
         </TabsList>
         
         <TabsContent value="readings">
-          <div className="mb-6">
+          <div className="mb-6 w-full">
             <Select value={selectedEquipmentId} onValueChange={setSelectedEquipmentId}>
-              <SelectTrigger className="w-full max-w-md touch-manipulation" style={{ minHeight: '44px' }}>
+              <SelectTrigger className="w-full touch-manipulation" style={{ minHeight: '44px' }}>
                 <SelectValue placeholder="Select equipment to monitor" />
               </SelectTrigger>
               <SelectContent className="max-h-60 overflow-y-auto">
@@ -154,9 +155,9 @@ const PredictiveMaintenanceDashboard = () => {
         </TabsContent>
         
         <TabsContent value="history">
-          <div className="mb-6">
+          <div className="mb-6 w-full">
             <Select value={selectedEquipmentId} onValueChange={setSelectedEquipmentId}>
-              <SelectTrigger className="w-full max-w-md">
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select equipment to view history" />
               </SelectTrigger>
               <SelectContent>
@@ -187,9 +188,9 @@ const PredictiveMaintenanceDashboard = () => {
         </TabsContent>
         
         <TabsContent value="analysis">
-          <div className="mb-6">
+          <div className="mb-6 w-full">
             <Select value={selectedEquipmentId} onValueChange={setSelectedEquipmentId}>
-              <SelectTrigger className="w-full max-w-md">
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select equipment to analyze" />
               </SelectTrigger>
               <SelectContent>
