@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -62,54 +61,26 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
     },
   });
 
-  // Enhanced equipment type detection with more robust matching
-  const getEquipmentType = (equipment: any) => {
-    if (!equipment && !equipmentType) return 'general';
-    
-    // Use provided equipmentType first
-    if (equipmentType) {
-      console.log('Using provided equipment type:', equipmentType);
-      return equipmentType;
-    }
-    
-    if (!equipment) return 'general';
-    
-    const name = equipment.name.toLowerCase();
-    console.log('Detecting equipment type for:', name);
-    
-    // Enhanced matching with more patterns
-    if (name.includes('chiller') || name.includes('chill')) {
-      console.log('Detected as chiller');
-      return 'chiller';
-    }
-    if (name.includes('ahu') || name.includes('air handler') || name.includes('air handling')) {
-      console.log('Detected as AHU');
-      return 'ahu';
-    }
-    if (name.includes('rtu') || name.includes('rooftop') || name.includes('roof top')) {
-      console.log('Detected as RTU');
-      return 'rtu';
-    }
-    if (name.includes('cooling tower') || name.includes('tower')) {
-      console.log('Detected as cooling tower');
-      return 'cooling_tower';
-    }
-    
-    console.log('Defaulting to general equipment type');
-    return 'general';
-  };
-
-  const detectedEquipmentType = getEquipmentType(null);
+  // Fixed equipment type detection - use the passed equipmentType prop first
+  const detectedEquipmentType = equipmentType || 'general';
   const readingTemplate = getEquipmentReadingTemplate(detectedEquipmentType);
 
-  // Debug logging for template loading
+  // Enhanced debug logging for template loading
   useEffect(() => {
-    console.log('Equipment type detection:', {
+    console.log('ManualReadingEntry - Equipment type detection:', {
       equipmentId,
-      equipmentType,
+      equipmentTypeProp: equipmentType,
       detectedEquipmentType,
-      templateCount: readingTemplate.length
+      templateCount: readingTemplate.length,
+      templateSample: readingTemplate.slice(0, 3).map(t => ({ type: t.type, label: t.label, section: t.section }))
     });
+
+    if (detectedEquipmentType === 'chiller') {
+      console.log('Chiller template sections:', {
+        sections: [...new Set(readingTemplate.map(t => t.section))],
+        totalReadings: readingTemplate.length
+      });
+    }
   }, [equipmentId, equipmentType, detectedEquipmentType, readingTemplate.length]);
 
   // Watch for reading type changes to auto-populate unit
@@ -247,9 +218,13 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
               )}
             </div>
           </CardTitle>
-          {/* Debug info for development */}
-          <div className="text-xs text-gray-500">
-            Equipment Type: {detectedEquipmentType} | Template Readings: {readingTemplate.length}
+          {/* Enhanced debug info */}
+          <div className="text-xs text-gray-500 space-y-1">
+            <div>Equipment Type: <span className="font-medium">{detectedEquipmentType}</span></div>
+            <div>Template Readings: <span className="font-medium text-blue-600">{readingTemplate.length}</span></div>
+            {detectedEquipmentType === 'chiller' && readingTemplate.length > 0 && (
+              <div className="text-green-600">✓ Chiller template loaded with {readingTemplate.length} readings</div>
+            )}
           </div>
         </CardHeader>
         <CardContent className="space-y-6">

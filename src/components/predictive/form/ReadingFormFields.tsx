@@ -32,7 +32,8 @@ export const ReadingFormFields = ({
   extractedReadings,
   templateReading
 }: ReadingFormFieldsProps) => {
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['Evaporator']));
+  // Default to expanding first section for better UX
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['Evaporator', 'General']));
 
   // Group readings by section for better organization
   const groupedReadings = useMemo(() => {
@@ -62,7 +63,8 @@ export const ReadingFormFields = ({
   console.log('ReadingFormFields rendered with:', {
     templateCount: readingTemplate.length,
     sections: Object.keys(groupedReadings),
-    readingMode
+    readingMode,
+    hasReadings: readingTemplate.length > 0
   });
 
   return (
@@ -77,21 +79,29 @@ export const ReadingFormFields = ({
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger className="min-h-[44px] touch-manipulation">
-                    <SelectValue placeholder="Select reading type" />
+                    <SelectValue placeholder={
+                      readingTemplate.length > 0 
+                        ? "Select reading type" 
+                        : "No reading templates available"
+                    } />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent className="max-h-80 overflow-y-auto">
-                  {Object.keys(groupedReadings).length > 1 ? (
+                  {readingTemplate.length === 0 ? (
+                    <div className="px-2 py-4 text-center text-gray-500">
+                      No reading templates available
+                    </div>
+                  ) : Object.keys(groupedReadings).length > 1 ? (
                     // Sectioned display for complex templates (like chiller)
                     Object.entries(groupedReadings).map(([section, readings]) => (
                       <div key={section}>
-                        <div className="px-2 py-1 text-sm font-semibold text-gray-600 bg-gray-50 sticky top-0">
-                          {section}
+                        <div className="px-2 py-2 text-sm font-semibold text-gray-700 bg-gray-100 sticky top-0 border-b">
+                          {section} ({readings.length} readings)
                         </div>
                         {readings.map((template) => (
                           <SelectItem key={template.type} value={template.type} className="pl-4">
                             <div className="flex flex-col">
-                              <span>{template.label}</span>
+                              <span className="font-medium">{template.label}</span>
                               <span className="text-xs text-gray-500">
                                 {template.unit}
                                 {template.description && ` - ${template.description}`}
@@ -208,13 +218,26 @@ export const ReadingFormFields = ({
         )}
       />
 
-      {/* Show template info for debugging */}
+      {/* Enhanced template info display */}
       {readingTemplate.length > 0 && (
-        <div className="text-xs text-gray-500 p-2 bg-gray-50 rounded">
-          <strong>Available readings:</strong> {readingTemplate.length} templates loaded
-          {Object.keys(groupedReadings).length > 1 && (
-            <div>Sections: {Object.keys(groupedReadings).join(', ')}</div>
-          )}
+        <div className="text-sm text-blue-700 p-3 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="font-medium mb-1">✓ Reading Templates Loaded</div>
+          <div className="text-xs text-blue-600">
+            {readingTemplate.length} readings available
+            {Object.keys(groupedReadings).length > 1 && (
+              <span> in {Object.keys(groupedReadings).length} sections: {Object.keys(groupedReadings).join(', ')}</span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Show warning if no templates loaded */}
+      {readingTemplate.length === 0 && (
+        <div className="text-sm text-orange-700 p-3 bg-orange-50 rounded-lg border border-orange-200">
+          <div className="font-medium mb-1">⚠ No Reading Templates</div>
+          <div className="text-xs text-orange-600">
+            Equipment type may not be detected correctly, or no templates are configured for this equipment type.
+          </div>
         </div>
       )}
     </>
