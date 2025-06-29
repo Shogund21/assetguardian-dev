@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileLayout } from "@/components/layout/MobileLayout";
@@ -30,15 +30,17 @@ const Layout = ({ children }: LayoutProps) => {
   
   return (
     <SidebarProvider defaultOpen={!isMobile}>
-      {isMobile ? (
-        <MobileLayout>
-          {children}
-        </MobileLayout>
-      ) : (
-        <DesktopLayout>
-          {children}
-        </DesktopLayout>
-      )}
+      <div className="min-h-screen flex w-full">
+        {isMobile ? (
+          <MobileLayout>
+            {children}
+          </MobileLayout>
+        ) : (
+          <DesktopLayout>
+            {children}
+          </DesktopLayout>
+        )}
+      </div>
     </SidebarProvider>
   );
 };

@@ -26,7 +26,7 @@ export function MobileDropdownMenu() {
     setIsOpen(!isOpen);
   };
 
-  const handleItemClick = (item: any) => {
+  const handleItemClick = () => {
     setIsOpen(false);
   };
 
@@ -81,8 +81,8 @@ export function MobileDropdownMenu() {
                     key={item.path}
                     to={item.path}
                     className="flex items-center gap-3 p-3 rounded-md hover:bg-gray-100 border border-gray-100 transition-colors"
-                    onClick={() => handleItemClick(item)}
-                    data-testid={`mobile-nav-item-${item.title.toLowerCase().replace(' ', '-')}`}
+                    onClick={handleItemClick}
+                    data-testid={`mobile-nav-item-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
                   >
                     <div className="flex-shrink-0">
                       <item.icon className="h-5 w-5 text-blue-600" />

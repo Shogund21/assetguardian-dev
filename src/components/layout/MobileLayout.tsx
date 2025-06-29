@@ -13,7 +13,7 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
   return (
     <div className="h-screen w-full overflow-hidden bg-gray-50">
       {/* Sidebar trigger */}
-      <div className="fixed top-4 left-4 z-[200]" data-sidebar-trigger-wrapper>
+      <div className="fixed top-4 left-4 z-[200]">
         <SidebarTrigger 
           className="bg-white shadow-lg h-12 w-12 touch-manipulation hover:bg-gray-100 rounded-lg"
           aria-label="Toggle Menu"
@@ -21,7 +21,7 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
       </div>
       
       {/* Mobile dropdown menu */}
-      <div className="fixed top-4 right-4 z-[200]" data-mobile-dropdown>
+      <div className="fixed top-4 right-4 z-[200]">
         <MobileDropdownMenu />
       </div>
       
