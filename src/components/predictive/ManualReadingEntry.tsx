@@ -67,15 +67,13 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
   const detectedEquipmentType = equipmentType || 'general';
   const readingTemplate = getEquipmentReadingTemplate(detectedEquipmentType);
 
-  useEffect(() => {
-    console.log('🔧 ManualReadingEntry initialization:', {
-      equipmentId,
-      equipmentType,
-      detectedEquipmentType,
-      templateCount: readingTemplate.length,
-      readingMode
-    });
-  }, [equipmentId, equipmentType, detectedEquipmentType, readingTemplate.length, readingMode]);
+  console.log('🔧 ManualReadingEntry render:', {
+    equipmentId,
+    equipmentType,
+    detectedEquipmentType,
+    templateCount: readingTemplate.length,
+    readingMode
+  });
 
   const selectedReadingType = form.watch('reading_type');
   const templateReading = readingTemplate.find(t => t.type === selectedReadingType);
@@ -87,45 +85,32 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
   }, [templateReading, form]);
 
   const handleReadingsExtracted = (readings: ExtractedReading[], imageUrl: string) => {
-    try {
-      console.log('📷 AI readings extracted:', { count: readings.length });
-      setExtractedReadings(readings);
+    console.log('📷 AI readings extracted:', { count: readings.length });
+    setExtractedReadings(readings);
+    
+    if (readings.length > 0) {
+      const bestReading = readings.reduce((prev, current) => 
+        (current.confidence > prev.confidence) ? current : prev
+      );
+      setSelectedReading(bestReading);
       
-      if (readings.length > 0) {
-        const bestReading = readings.reduce((prev, current) => 
-          (current.confidence > prev.confidence) ? current : prev
-        );
-        setSelectedReading(bestReading);
-        
-        // Auto-populate form
-        form.setValue('reading_type', bestReading.type);
-        form.setValue('value', bestReading.value);
-        form.setValue('unit', bestReading.unit);
-        if (bestReading.location) {
-          form.setValue('location_notes', bestReading.location);
-        }
+      // Auto-populate form
+      form.setValue('reading_type', bestReading.type);
+      form.setValue('value', bestReading.value);
+      form.setValue('unit', bestReading.unit);
+      if (bestReading.location) {
+        form.setValue('location_notes', bestReading.location);
       }
-    } catch (error) {
-      console.error('❌ Error handling extracted readings:', error);
-      toast({
-        title: "Error",
-        description: "Failed to process extracted readings",
-        variant: "destructive",
-      });
     }
   };
 
   const handleReadingSelection = (reading: ExtractedReading) => {
-    try {
-      setSelectedReading(reading);
-      form.setValue('reading_type', reading.type);
-      form.setValue('value', reading.value);
-      form.setValue('unit', reading.unit);
-      if (reading.location) {
-        form.setValue('location_notes', reading.location);
-      }
-    } catch (error) {
-      console.error('❌ Error selecting reading:', error);
+    setSelectedReading(reading);
+    form.setValue('reading_type', reading.type);
+    form.setValue('value', reading.value);
+    form.setValue('unit', reading.unit);
+    if (reading.location) {
+      form.setValue('location_notes', reading.location);
     }
   };
 
@@ -201,7 +186,7 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
   };
 
   return (
-    <div className="space-y-4 w-full min-h-screen">
+    <div className="space-y-4 w-full min-h-screen mobile-form-container">
       <OfflineIndicator />
       
       <Card className="mobile-card w-full">
@@ -220,17 +205,15 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
         </CardHeader>
         
         <CardContent className="space-y-6 w-full">
-          {/* ALWAYS show mode selector */}
-          <div className="w-full">
-            <ReadingModeSelector
-              readingMode={readingMode}
-              onReadingModeChange={setReadingMode}
-            />
-          </div>
+          {/* Mode selector - always visible */}
+          <ReadingModeSelector
+            readingMode={readingMode}
+            onReadingModeChange={setReadingMode}
+          />
 
-          {/* AI Camera section */}
+          {/* AI Camera section - show when ai_image mode */}
           {readingMode === "ai_image" && (
-            <div className="w-full">
+            <div className="w-full mobile-form-field">
               <AIImageReader
                 onReadingsExtracted={handleReadingsExtracted}
                 equipmentType={detectedEquipmentType}
@@ -247,19 +230,17 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
             />
           )}
 
-          {/* ALWAYS show form */}
-          <div className="w-full">
-            <ReadingForm
-              form={form}
-              onSubmit={onSubmit}
-              isSubmitting={isSubmitting}
-              isOnline={isOnline}
-              readingMode={readingMode}
-              readingTemplate={readingTemplate}
-              extractedReadings={extractedReadings}
-              templateReading={templateReading}
-            />
-          </div>
+          {/* Form - always visible */}
+          <ReadingForm
+            form={form}
+            onSubmit={onSubmit}
+            isSubmitting={isSubmitting}
+            isOnline={isOnline}
+            readingMode={readingMode}
+            readingTemplate={readingTemplate}
+            extractedReadings={extractedReadings}
+            templateReading={templateReading}
+          />
         </CardContent>
       </Card>
     </div>

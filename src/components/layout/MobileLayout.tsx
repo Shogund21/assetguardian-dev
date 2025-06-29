@@ -28,10 +28,8 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
       <MobileHint />
       <Sidebar />
 
-      {/* Main content */}
-      <div 
-        className="bg-gray-50 min-h-screen w-full overflow-y-auto"
-      >
+      {/* Main content with mobile optimization */}
+      <div className="bg-gray-50 min-h-screen w-full overflow-y-auto mobile-form-container">
         <div className="h-full w-full pt-20 px-3 sm:px-4">
           {/* Application header */}
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200 bg-white p-4 rounded-lg shadow-sm">
@@ -48,8 +46,8 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
             </div>
           </div>
           
-          {/* Main content */}
-          <div className="min-h-[200px]">
+          {/* Main content - ensure mobile compatibility */}
+          <div className="min-h-[200px] mobile-form-container predictive-form">
             {children || (
               <div className="flex items-center justify-center h-64">
                 <p className="text-gray-500">Loading content...</p>
