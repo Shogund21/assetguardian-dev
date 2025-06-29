@@ -52,8 +52,8 @@ export function MobileDropdownMenu() {
             onClick={() => setIsOpen(false)}
           />
           
-          {/* Menu panel */}
-          <div className="absolute right-0 top-16 w-80 max-h-[80vh] overflow-y-auto bg-white shadow-2xl border border-gray-200 z-[200] rounded-lg">
+          {/* Menu panel - Fixed positioning for better mobile alignment */}
+          <div className="fixed right-4 top-20 w-80 max-w-[calc(100vw-2rem)] max-h-[80vh] overflow-y-auto bg-white shadow-2xl border border-gray-200 z-[200] rounded-lg">
             <div className="p-4">
               {/* Quick sidebar access */}
               <Button
