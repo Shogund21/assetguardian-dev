@@ -13,17 +13,18 @@ export const ReadingModeSelector = ({
   onReadingModeChange 
 }: ReadingModeSelectorProps) => {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 bg-white p-4 rounded-lg border-2 border-blue-100 shadow-sm">
       <div className="flex items-center justify-between">
-        <label className="text-base font-medium">Choose Recording Method</label>
-        <div className="text-xs text-gray-500 hidden md:block">
-          Select how you want to record readings
+        <label className="text-base font-semibold text-gray-900">Choose Recording Method</label>
+        <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+          Mobile Optimized
         </div>
       </div>
+      
       <RadioGroup
         value={readingMode}
         onValueChange={(value: "manual" | "ai_image") => onReadingModeChange(value)}
-        className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4"
+        className="grid grid-cols-1 gap-4"
       >
         {/* Manual Entry Option */}
         <div className="relative">
@@ -34,17 +35,24 @@ export const ReadingModeSelector = ({
           />
           <label 
             htmlFor="manual" 
-            className="flex items-center gap-3 p-4 min-h-[60px] md:min-h-[80px] border-2 rounded-lg cursor-pointer transition-all duration-200 peer-checked:border-purple-500 peer-checked:bg-purple-50 peer-checked:shadow-md hover:bg-gray-50 hover:border-gray-300 touch-manipulation"
+            className={`flex items-center gap-4 p-6 min-h-[80px] border-3 rounded-xl cursor-pointer transition-all duration-300 touch-manipulation ${
+              readingMode === "manual" 
+                ? 'border-purple-500 bg-purple-50 shadow-lg ring-2 ring-purple-200' 
+                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+            }`}
           >
-            <div className="flex-shrink-0 p-2 rounded-full bg-purple-100 peer-checked:bg-purple-200">
-              <Edit3 className="h-5 w-5 md:h-6 md:w-6 text-purple-600" />
+            <div className={`flex-shrink-0 p-3 rounded-full transition-colors ${
+              readingMode === "manual" ? 'bg-purple-200' : 'bg-purple-100'
+            }`}>
+              <Edit3 className="h-6 w-6 text-purple-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="font-semibold text-gray-900 text-base md:text-lg">Manual Entry</div>
-              <div className="text-sm text-gray-600 mt-1">Type readings manually with keyboard</div>
+              <div className="font-bold text-gray-900 text-lg mb-1">Manual Entry</div>
+              <div className="text-sm text-gray-600">Type readings manually with keyboard</div>
+              <div className="text-xs text-purple-600 mt-2 font-medium">✓ Works offline</div>
             </div>
             {readingMode === "manual" && (
-              <div className="flex-shrink-0 w-3 h-3 bg-purple-500 rounded-full"></div>
+              <div className="flex-shrink-0 w-4 h-4 bg-purple-500 rounded-full border-2 border-white shadow-sm"></div>
             )}
           </label>
         </div>
@@ -58,26 +66,45 @@ export const ReadingModeSelector = ({
           />
           <label 
             htmlFor="ai_image" 
-            className="flex items-center gap-3 p-4 min-h-[60px] md:min-h-[80px] border-2 rounded-lg cursor-pointer transition-all duration-200 peer-checked:border-green-500 peer-checked:bg-green-50 peer-checked:shadow-md hover:bg-gray-50 hover:border-gray-300 touch-manipulation"
+            className={`flex items-center gap-4 p-6 min-h-[80px] border-3 rounded-xl cursor-pointer transition-all duration-300 touch-manipulation ${
+              readingMode === "ai_image" 
+                ? 'border-green-500 bg-green-50 shadow-lg ring-2 ring-green-200' 
+                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+            }`}
           >
-            <div className="flex-shrink-0 p-2 rounded-full bg-green-100 peer-checked:bg-green-200">
-              <Camera className="h-5 w-5 md:h-6 md:w-6 text-green-600" />
+            <div className={`flex-shrink-0 p-3 rounded-full transition-colors ${
+              readingMode === "ai_image" ? 'bg-green-200' : 'bg-green-100'
+            }`}>
+              <Camera className="h-6 w-6 text-green-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="font-semibold text-gray-900 text-base md:text-lg">AI Camera</div>
-              <div className="text-sm text-gray-600 mt-1">Extract readings from photos automatically</div>
+              <div className="font-bold text-gray-900 text-lg mb-1">AI Camera</div>
+              <div className="text-sm text-gray-600">Extract readings from photos automatically</div>
+              <div className="text-xs text-green-600 mt-2 font-medium">✓ Fast & accurate</div>
             </div>
             {readingMode === "ai_image" && (
-              <div className="flex-shrink-0 w-3 h-3 bg-green-500 rounded-full"></div>
+              <div className="flex-shrink-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white shadow-sm"></div>
             )}
           </label>
         </div>
       </RadioGroup>
       
-      {/* Mobile-specific hint */}
-      <div className="md:hidden">
-        <div className="text-xs text-gray-500 text-center py-2 px-3 bg-blue-50 rounded-md border border-blue-200">
-          💡 {readingMode === "manual" ? "Use the keyboard to type in values" : "Take a photo of gauges, meters, or displays"}
+      {/* Enhanced Mobile-specific hint */}
+      <div className="mt-4">
+        <div className={`text-sm text-center py-3 px-4 rounded-lg border-2 transition-all ${
+          readingMode === "manual" 
+            ? "bg-purple-50 border-purple-200 text-purple-700" 
+            : "bg-green-50 border-green-200 text-green-700"
+        }`}>
+          <div className="font-medium mb-1">
+            {readingMode === "manual" ? "📝 Manual Mode Selected" : "📷 AI Camera Mode Selected"}
+          </div>
+          <div className="text-xs">
+            {readingMode === "manual" 
+              ? "Enter values using your device keyboard" 
+              : "Take photos of meters, gauges, or displays for automatic reading extraction"
+            }
+          </div>
         </div>
       </div>
     </div>

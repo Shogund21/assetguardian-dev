@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,6 +8,7 @@ import { getEquipmentReadingTemplate } from "@/utils/equipmentTemplates";
 
 // Import new components
 import { PredictiveDashboardHeader } from "./dashboard/PredictiveDashboardHeader";
+import { MobileBreadcrumb } from "./dashboard/MobileBreadcrumb";
 import { ReadingsTabContent } from "./dashboard/ReadingsTabContent";
 import { EquipmentTabContent } from "./dashboard/EquipmentTabContent";
 import ReadingHistory from "./ReadingHistory";
@@ -18,6 +18,7 @@ import DatabaseStatus from "./DatabaseStatus";
 
 const PredictiveMaintenanceDashboard = () => {
   const [selectedEquipmentId, setSelectedEquipmentId] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<string>("readings");
   const { isOnline, cacheEquipmentData } = useOfflineSync();
 
   // Fetch equipment list with offline caching
@@ -78,8 +79,13 @@ const PredictiveMaintenanceDashboard = () => {
   return (
     <div className="w-full h-full">
       <PredictiveDashboardHeader />
+      
+      <MobileBreadcrumb 
+        currentStep={activeTab === "readings" ? "recording" : "analysis"}
+        equipmentName={selectedEquipment?.name}
+      />
 
-      <Tabs defaultValue="readings" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-5 mb-6">
           <TabsTrigger value="readings" className="touch-manipulation">Record</TabsTrigger>
           <TabsTrigger value="history" className="touch-manipulation">History</TabsTrigger>
