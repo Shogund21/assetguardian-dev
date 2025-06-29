@@ -1,19 +1,20 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { offlineStorage } from "@/services/offlineStorageService";
-import { OfflineIndicator } from "@/components/ui/OfflineIndicator";
-import ManualReadingEntry from "./ManualReadingEntry";
+import { getEquipmentReadingTemplate } from "@/utils/equipmentTemplates";
+
+// Import new components
+import { PredictiveDashboardHeader } from "./dashboard/PredictiveDashboardHeader";
+import { ReadingsTabContent } from "./dashboard/ReadingsTabContent";
+import { EquipmentTabContent } from "./dashboard/EquipmentTabContent";
 import ReadingHistory from "./ReadingHistory";
 import EnhancedAIAnalysis from "./EnhancedAIAnalysis";
 import AnalysisResultsHistory from "./AnalysisResultsHistory";
 import DatabaseStatus from "./DatabaseStatus";
-import { getEquipmentReadingTemplate } from "@/utils/equipmentTemplates";
 
 const PredictiveMaintenanceDashboard = () => {
   const [selectedEquipmentId, setSelectedEquipmentId] = useState<string>("");
@@ -76,16 +77,7 @@ const PredictiveMaintenanceDashboard = () => {
 
   return (
     <div className="w-full h-full">
-      <div className="mb-6 px-1">
-        <h1 className="text-2xl font-bold mb-2">Predictive Maintenance Dashboard</h1>
-        <p className="text-muted-foreground">
-          Record manual readings and get AI-powered predictive maintenance insights
-        </p>
-      </div>
-
-      <div className="mb-6 px-1">
-        <OfflineIndicator />
-      </div>
+      <PredictiveDashboardHeader />
 
       <Tabs defaultValue="readings" className="w-full">
         <TabsList className="grid w-full grid-cols-5 mb-6">
@@ -97,128 +89,50 @@ const PredictiveMaintenanceDashboard = () => {
         </TabsList>
         
         <TabsContent value="readings">
-          <div className="mb-6 w-full">
-            <Select value={selectedEquipmentId} onValueChange={setSelectedEquipmentId}>
-              <SelectTrigger className="w-full touch-manipulation" style={{ minHeight: '44px' }}>
-                <SelectValue placeholder="Select equipment to monitor" />
-              </SelectTrigger>
-              <SelectContent className="max-h-60 overflow-y-auto">
-                {equipment.map((eq) => (
-                  <SelectItem key={eq.id} value={eq.id} className="touch-manipulation">
-                    {eq.name} - {eq.location}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {selectedEquipment ? (
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>{selectedEquipment.name}</CardTitle>
-                  <div className="text-sm text-muted-foreground">
-                    <p>Location: {selectedEquipment.location}</p>
-                    <p>Status: {selectedEquipment.status || 'Active'}</p>
-                    {readingTemplates.length > 0 && (
-                      <p className="mt-2 text-blue-600">
-                        {readingTemplates.length} standard readings available for this equipment type
-                      </p>
-                    )}
-                  </div>
-                </CardHeader>
-              </Card>
-
-              <ManualReadingEntry 
-                equipmentId={selectedEquipmentId}
-                equipmentType={equipmentType}
-                onSuccess={() => {
-                  console.log('Reading recorded successfully');
-                }}
-              />
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <h3 className="text-lg font-medium mb-2">Select Equipment</h3>
-                <p className="text-muted-foreground">
-                  Choose equipment above to start recording readings
-                  {!isOnline && equipment.length === 0 && (
-                    <span className="block mt-2 text-orange-600">
-                      No cached equipment available. Connect to internet to load equipment list.
-                    </span>
-                  )}
-                </p>
-              </CardContent>
-            </Card>
-          )}
+          <ReadingsTabContent
+            equipment={equipment}
+            selectedEquipmentId={selectedEquipmentId}
+            onEquipmentChange={setSelectedEquipmentId}
+            selectedEquipment={selectedEquipment}
+            equipmentType={equipmentType}
+            readingTemplates={readingTemplates}
+            isOnline={isOnline}
+          />
         </TabsContent>
         
         <TabsContent value="history">
-          <div className="mb-6 w-full">
-            <Select value={selectedEquipmentId} onValueChange={setSelectedEquipmentId}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select equipment to view history" />
-              </SelectTrigger>
-              <SelectContent>
-                {equipment.map((eq) => (
-                  <SelectItem key={eq.id} value={eq.id}>
-                    {eq.name} - {eq.location}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {selectedEquipment ? (
+          <EquipmentTabContent
+            equipment={equipment}
+            selectedEquipmentId={selectedEquipmentId}
+            onEquipmentChange={setSelectedEquipmentId}
+            selectedEquipment={selectedEquipment}
+            placeholder="Select equipment to view history"
+            emptyStateTitle="Select Equipment"
+            emptyStateMessage="Choose equipment above to view reading history"
+          >
             <ReadingHistory 
               equipmentId={selectedEquipmentId}
               equipmentType={equipmentType}
             />
-          ) : (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <h3 className="text-lg font-medium mb-2">Select Equipment</h3>
-                <p className="text-muted-foreground">
-                  Choose equipment above to view reading history
-                </p>
-              </CardContent>
-            </Card>
-          )}
+          </EquipmentTabContent>
         </TabsContent>
         
         <TabsContent value="analysis">
-          <div className="mb-6 w-full">
-            <Select value={selectedEquipmentId} onValueChange={setSelectedEquipmentId}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select equipment to analyze" />
-              </SelectTrigger>
-              <SelectContent>
-                {equipment.map((eq) => (
-                  <SelectItem key={eq.id} value={eq.id}>
-                    {eq.name} - {eq.location}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {selectedEquipment ? (
+          <EquipmentTabContent
+            equipment={equipment}
+            selectedEquipmentId={selectedEquipmentId}
+            onEquipmentChange={setSelectedEquipmentId}
+            selectedEquipment={selectedEquipment}
+            placeholder="Select equipment to analyze"
+            emptyStateTitle="Select Equipment"
+            emptyStateMessage="Choose equipment above to run AI analysis"
+          >
             <EnhancedAIAnalysis 
               equipmentId={selectedEquipmentId}
               equipmentType={equipmentType}
-              equipmentName={selectedEquipment.name}
+              equipmentName={selectedEquipment?.name || ''}
             />
-          ) : (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <h3 className="text-lg font-medium mb-2">Select Equipment</h3>
-                <p className="text-muted-foreground">
-                  Choose equipment above to run AI analysis
-                </p>
-              </CardContent>
-            </Card>
-          )}
+          </EquipmentTabContent>
         </TabsContent>
         
         <TabsContent value="results">
