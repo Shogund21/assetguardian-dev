@@ -4,23 +4,16 @@ import { useState, useEffect, useCallback } from "react"
 const MOBILE_BREAKPOINT = 768
 
 export function useIsMobile() {
-  const [isMobile, setIsMobile] = useState<boolean | null>(null); // Start with null to indicate loading
+  const [isMobile, setIsMobile] = useState<boolean | null>(null);
   const [isStable, setIsStable] = useState(false);
   
   const checkIfMobile = useCallback(() => {
     if (typeof window === 'undefined') {
-      console.log("📱 useIsMobile: Server-side rendering, will detect on client");
       return false;
     }
     
     const viewportWidth = window.innerWidth;
     const result = viewportWidth < MOBILE_BREAKPOINT;
-    
-    console.log("📱 useIsMobile: Simple detection:", {
-      viewportWidth,
-      isMobile: result,
-      breakpoint: MOBILE_BREAKPOINT
-    });
     
     return result;
   }, []);
@@ -30,13 +23,11 @@ export function useIsMobile() {
     
     // Initial detection with stability check
     const initialResult = checkIfMobile();
-    console.log("📱 useIsMobile: Initial detection result:", initialResult);
     setIsMobile(initialResult);
     
     // Mark as stable after initial render
     const stabilityTimeout = setTimeout(() => {
       setIsStable(true);
-      console.log("📱 useIsMobile: Detection stabilized");
     }, 100);
     
     // Debounced resize handler
@@ -46,7 +37,6 @@ export function useIsMobile() {
       
       resizeTimeout = window.setTimeout(() => {
         const newResult = checkIfMobile();
-        console.log("📱 useIsMobile: Resize detected, new result:", newResult);
         setIsMobile(newResult);
       }, 150);
     };
@@ -62,10 +52,8 @@ export function useIsMobile() {
 
   // Return loading state until detection is stable
   if (isMobile === null || !isStable) {
-    console.log("📱 useIsMobile: Still detecting, returning loading state");
     return null;
   }
 
-  console.log("📱 useIsMobile: Stable result:", isMobile);
   return isMobile;
 }
