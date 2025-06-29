@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -45,6 +46,7 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
   const [readingMode, setReadingMode] = useState<"manual" | "ai_image">("manual");
   const [extractedReadings, setExtractedReadings] = useState<ExtractedReading[]>([]);
   const [selectedReading, setSelectedReading] = useState<ExtractedReading | null>(null);
+  const [componentMounted, setComponentMounted] = useState(false);
   const { toast } = useToast();
   const { isOnline, updateUnsyncedCount } = useOfflineSync();
   
@@ -61,24 +63,33 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
     },
   });
 
-  // Fixed equipment type detection - use the passed equipmentType prop first
+  // Enhanced equipment type detection with explicit debugging
   const detectedEquipmentType = equipmentType || 'general';
   const readingTemplate = getEquipmentReadingTemplate(detectedEquipmentType);
 
-  // Enhanced debug logging for template loading
+  // Component mounting and debugging
   useEffect(() => {
-    console.log('ManualReadingEntry - Equipment type detection:', {
+    setComponentMounted(true);
+    console.log('🔧 ManualReadingEntry mounted:', {
       equipmentId,
       equipmentTypeProp: equipmentType,
       detectedEquipmentType,
       templateCount: readingTemplate.length,
-      templateSample: readingTemplate.slice(0, 3).map(t => ({ type: t.type, label: t.label, section: t.section }))
+      componentMounted: true,
+      formDefaults: form.getValues()
     });
 
+    // Special logging for chiller detection
     if (detectedEquipmentType === 'chiller') {
-      console.log('Chiller template sections:', {
+      console.log('🧊 Chiller detected - Template details:', {
+        totalReadings: readingTemplate.length,
         sections: [...new Set(readingTemplate.map(t => t.section))],
-        totalReadings: readingTemplate.length
+        sampleReadings: readingTemplate.slice(0, 5).map(t => ({ 
+          type: t.type, 
+          label: t.label, 
+          section: t.section,
+          unit: t.unit 
+        }))
       });
     }
   }, [equipmentId, equipmentType, detectedEquipmentType, readingTemplate.length]);
@@ -87,18 +98,19 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
   const selectedReadingType = form.watch('reading_type');
   const templateReading = readingTemplate.find(t => t.type === selectedReadingType);
 
-  // Auto-populate unit when reading type changes, but allow manual override
+  // Auto-populate unit when reading type changes
   useEffect(() => {
     if (templateReading?.unit && !form.getValues('unit')) {
       form.setValue('unit', templateReading.unit);
+      console.log('🔄 Auto-populated unit:', templateReading.unit);
     }
   }, [templateReading, form]);
 
   // Handle AI image readings extraction
   const handleReadingsExtracted = (readings: ExtractedReading[], imageUrl: string) => {
+    console.log('📷 AI readings extracted:', readings.length);
     setExtractedReadings(readings);
     if (readings.length > 0) {
-      // Auto-select the first reading with highest confidence
       const bestReading = readings.reduce((prev, current) => 
         (current.confidence > prev.confidence) ? current : prev
       );
@@ -114,8 +126,8 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
     }
   };
 
-  // Handle selection of a different extracted reading
   const handleReadingSelection = (reading: ExtractedReading) => {
+    console.log('📝 Reading selected:', reading.type);
     setSelectedReading(reading);
     form.setValue('reading_type', reading.type);
     form.setValue('value', reading.value);
@@ -129,9 +141,9 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
     setIsSubmitting(true);
     try {
       const timestamp = new Date().toISOString();
+      console.log('💾 Submitting reading:', { ...values, readingMode, isOnline });
       
       if (isOnline) {
-        // Online mode - save directly to Supabase
         const { error } = await supabase
           .from('sensor_readings')
           .insert({
@@ -145,7 +157,6 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
 
         if (error) throw error;
 
-        // Store additional notes if provided
         if (values.notes || values.location_notes) {
           await supabase
             .from('maintenance_documents')
@@ -166,7 +177,6 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
           description: `Reading recorded successfully via ${readingMode === 'ai_image' ? 'AI extraction' : 'manual entry'}`,
         });
       } else {
-        // Offline mode - save to local storage
         await offlineStorage.storeReading({
           equipment_id: values.equipment_id,
           reading_type: values.reading_type,
@@ -191,7 +201,7 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
       setReadingMode("manual");
       onSuccess?.();
     } catch (error) {
-      console.error('Error saving reading:', error);
+      console.error('❌ Error saving reading:', error);
       toast({
         title: "Error",
         description: isOnline ? "Failed to save reading" : "Failed to save reading offline",
@@ -202,66 +212,107 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
     }
   };
 
+  // Don't render until component is fully mounted
+  if (!componentMounted) {
+    return (
+      <div className="space-y-4">
+        <Card>
+          <CardContent className="py-12 text-center">
+            <div className="animate-pulse">
+              <div className="h-4 bg-gray-200 rounded w-1/4 mx-auto"></div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <OfflineIndicator />
       
-      <Card>
+      <Card className="mobile-card">
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
+          <CardTitle className="flex items-center justify-between text-lg">
             Record Reading
-            <div className="text-sm font-normal">
+            <div className="text-sm font-normal flex items-center gap-2">
               {isOnline ? (
-                <span className="text-green-600">● Online</span>
+                <span className="text-green-600 flex items-center gap-1">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  Online
+                </span>
               ) : (
-                <span className="text-orange-600">● Offline</span>
+                <span className="text-orange-600 flex items-center gap-1">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                  Offline
+                </span>
               )}
             </div>
           </CardTitle>
-          {/* Enhanced debug info */}
-          <div className="text-xs text-gray-500 space-y-1">
-            <div>Equipment Type: <span className="font-medium">{detectedEquipmentType}</span></div>
-            <div>Template Readings: <span className="font-medium text-blue-600">{readingTemplate.length}</span></div>
-            {detectedEquipmentType === 'chiller' && readingTemplate.length > 0 && (
-              <div className="text-green-600">✓ Chiller template loaded with {readingTemplate.length} readings</div>
+          
+          {/* Enhanced mobile-friendly debug info */}
+          <div className="text-xs text-gray-500 space-y-1 bg-gray-50 p-3 rounded-lg">
+            <div className="flex justify-between">
+              <span>Equipment Type:</span>
+              <span className="font-medium text-blue-600">{detectedEquipmentType}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Template Readings:</span>
+              <span className={`font-medium ${readingTemplate.length > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {readingTemplate.length}
+              </span>
+            </div>
+            {detectedEquipmentType === 'chiller' && (
+              <div className="text-green-600 text-center font-medium">
+                ✓ Chiller template loaded ({readingTemplate.length} readings)
+              </div>
             )}
           </div>
         </CardHeader>
+        
         <CardContent className="space-y-6">
-          {/* Always show ReadingModeSelector */}
-          <ReadingModeSelector
-            readingMode={readingMode}
-            onReadingModeChange={setReadingMode}
-          />
-
-          {/* AI Image Reader */}
-          {readingMode === "ai_image" && (
-            <AIImageReader
-              onReadingsExtracted={handleReadingsExtracted}
-              equipmentType={detectedEquipmentType}
+          {/* Always render ReadingModeSelector first */}
+          <div className="bg-blue-50 p-1 rounded-lg border border-blue-200">
+            <ReadingModeSelector
+              readingMode={readingMode}
+              onReadingModeChange={setReadingMode}
             />
+          </div>
+
+          {/* AI Image Reader - only show when AI mode is selected */}
+          {readingMode === "ai_image" && (
+            <div className="border-t pt-4">
+              <AIImageReader
+                onReadingsExtracted={handleReadingsExtracted}
+                equipmentType={detectedEquipmentType}
+              />
+            </div>
           )}
 
-          {/* Extracted Readings Selection */}
-          {readingMode === "ai_image" && (
-            <ExtractedReadingsSelector
+          {/* Extracted Readings Selection - only show when we have AI readings */}
+          {readingMode === "ai_image" && extractedReadings.length > 0 && (
+            <div className="border-t pt-4">
+              <ExtractedReadingsSelector
+                extractedReadings={extractedReadings}
+                selectedReading={selectedReading}
+                onReadingSelection={handleReadingSelection}
+              />
+            </div>
+          )}
+
+          {/* Reading Form - always show, but with proper fallbacks */}
+          <div className="border-t pt-4">
+            <ReadingForm
+              form={form}
+              onSubmit={onSubmit}
+              isSubmitting={isSubmitting}
+              isOnline={isOnline}
+              readingMode={readingMode}
+              readingTemplate={readingTemplate}
               extractedReadings={extractedReadings}
-              selectedReading={selectedReading}
-              onReadingSelection={handleReadingSelection}
+              templateReading={templateReading}
             />
-          )}
-
-          {/* Reading Form */}
-          <ReadingForm
-            form={form}
-            onSubmit={onSubmit}
-            isSubmitting={isSubmitting}
-            isOnline={isOnline}
-            readingMode={readingMode}
-            readingTemplate={readingTemplate}
-            extractedReadings={extractedReadings}
-            templateReading={templateReading}
-          />
+          </div>
         </CardContent>
       </Card>
     </div>
