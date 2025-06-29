@@ -31,7 +31,6 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
       {/* Main content */}
       <div 
         className="bg-gray-50 min-h-screen w-full overflow-y-auto"
-        data-testid="mobile-content"
       >
         <div className="h-full w-full pt-20 px-3 sm:px-4">
           {/* Application header */}

@@ -39,7 +39,6 @@ export function MobileDropdownMenu() {
         onClick={toggleMenu}
         className="h-12 w-12 rounded-lg bg-white shadow-lg touch-manipulation hover:bg-gray-100"
         aria-label="Open menu"
-        data-testid="mobile-dropdown-trigger"
       >
         {isOpen ? <X className="h-6 w-6 text-gray-700" /> : <Menu className="h-6 w-6 text-gray-700" />}
       </Button>
@@ -54,10 +53,7 @@ export function MobileDropdownMenu() {
           />
           
           {/* Menu panel */}
-          <div
-            className="absolute right-0 top-16 w-80 max-h-[80vh] overflow-y-auto bg-white shadow-2xl border border-gray-200 z-[200] rounded-lg"
-            data-testid="mobile-dropdown-content"
-          >
+          <div className="absolute right-0 top-16 w-80 max-h-[80vh] overflow-y-auto bg-white shadow-2xl border border-gray-200 z-[200] rounded-lg">
             <div className="p-4">
               {/* Quick sidebar access */}
               <Button
@@ -82,7 +78,6 @@ export function MobileDropdownMenu() {
                     to={item.path}
                     className="flex items-center gap-3 p-3 rounded-md hover:bg-gray-100 border border-gray-100 transition-colors"
                     onClick={handleItemClick}
-                    data-testid={`mobile-nav-item-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
                   >
                     <div className="flex-shrink-0">
                       <item.icon className="h-5 w-5 text-blue-600" />
