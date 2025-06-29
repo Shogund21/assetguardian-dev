@@ -12,12 +12,10 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   const isMobile = useIsMobile();
+  const [debugInfo, setDebugInfo] = useState({ width: 0, height: 0 });
   
   // Apply viewport height adjustment
   useViewportHeight();
-  
-  // Add debugging state
-  const [debugInfo, setDebugInfo] = useState({ width: 0, height: 0 });
   
   useEffect(() => {
     const updateDebugInfo = () => {
@@ -30,37 +28,35 @@ const Layout = ({ children }: LayoutProps) => {
     updateDebugInfo();
     window.addEventListener('resize', updateDebugInfo);
     
-    console.log("🔄 Layout: Component mounted");
-    console.log("🔄 Layout: Mobile detection result:", isMobile);
-    console.log("🔄 Layout: Window dimensions:", debugInfo);
-    
     return () => window.removeEventListener('resize', updateDebugInfo);
   }, []);
   
-  // Force reflow on device type change to avoid layout issues
-  useEffect(() => {
-    console.log("🔄 Layout: Device type changed to:", isMobile ? "MOBILE" : "DESKTOP");
-    
-    // Small timeout to ensure DOM is ready
-    const timeout = setTimeout(() => {
-      // Force a reflow by accessing offsetHeight
-      document.body.offsetHeight;
-      console.log("🔄 Layout: Forced reflow completed");
-    }, 50);
-    
-    return () => clearTimeout(timeout);
-  }, [isMobile]);
+  // Show loading state while mobile detection is stabilizing
+  if (isMobile === null) {
+    console.log("🔄 Layout: Mobile detection loading...");
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading layout...</p>
+        </div>
+      </div>
+    );
+  }
   
-  // Use different layout approach for mobile vs desktop
+  console.log("🔄 Layout: Using layout type:", isMobile ? "MOBILE" : "DESKTOP");
+  
   return (
     <SidebarProvider defaultOpen={!isMobile}>
-      {/* Debug overlay */}
-      <div className="fixed bottom-4 left-4 bg-black text-white text-xs p-2 z-[200] rounded opacity-75 pointer-events-none">
-        Layout: {isMobile ? "MOBILE" : "DESKTOP"}
-        <br />
-        {debugInfo.width}x{debugInfo.height}
+      {/* Enhanced debug overlay */}
+      <div className="fixed top-4 left-4 bg-black text-white text-xs p-3 z-[300] rounded shadow-lg pointer-events-none">
+        <div className="font-bold text-green-400">LAYOUT DEBUG</div>
+        <div>Type: {isMobile ? "📱 MOBILE" : "🖥️ DESKTOP"}</div>
+        <div>Size: {debugInfo.width}x{debugInfo.height}</div>
+        <div>Breakpoint: &lt; 768px</div>
       </div>
       
+      {/* Force mobile layout for testing if screen is small */}
       {isMobile ? (
         <MobileLayout>
           {children}

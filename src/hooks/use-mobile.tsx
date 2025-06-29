@@ -4,41 +4,22 @@ import { useState, useEffect, useCallback } from "react"
 const MOBILE_BREAKPOINT = 768
 
 export function useIsMobile() {
-  // Default to true for mobile-first approach to avoid blank screens on phones
-  const [isMobile, setIsMobile] = useState<boolean>(true);
+  const [isMobile, setIsMobile] = useState<boolean | null>(null); // Start with null to indicate loading
+  const [isStable, setIsStable] = useState(false);
   
   const checkIfMobile = useCallback(() => {
-    // Only run in browser environment
     if (typeof window === 'undefined') {
-      console.log("📱 useIsMobile: Server-side rendering, defaulting to mobile");
-      return true;
+      console.log("📱 useIsMobile: Server-side rendering, will detect on client");
+      return false;
     }
     
-    // Check multiple conditions to better detect mobile devices
     const viewportWidth = window.innerWidth;
-    const userAgent = window.navigator.userAgent.toLowerCase();
+    const result = viewportWidth < MOBILE_BREAKPOINT;
     
-    // UserAgent based detection as fallback
-    const isMobileUserAgent = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|tablet/i.test(userAgent);
-    
-    // Width based detection (primary)
-    const isMobileViewport = viewportWidth < MOBILE_BREAKPOINT;
-    
-    // Touch capability check
-    const hasTouchCapability = 'ontouchstart' in window || 
-      navigator.maxTouchPoints > 0 || 
-      (navigator as any).msMaxTouchPoints > 0;
-    
-    // Prioritize viewport width for consistent behavior
-    const result = isMobileViewport || (isMobileUserAgent && hasTouchCapability);
-    
-    console.log("📱 useIsMobile: Detection results:", {
+    console.log("📱 useIsMobile: Simple detection:", {
       viewportWidth,
-      isMobileViewport,
-      isMobileUserAgent,
-      hasTouchCapability,
-      finalResult: result,
-      userAgent: userAgent.substring(0, 50) + "..."
+      isMobile: result,
+      breakpoint: MOBILE_BREAKPOINT
     });
     
     return result;
@@ -47,48 +28,44 @@ export function useIsMobile() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
-    // Set initial value - check right away
+    // Initial detection with stability check
     const initialResult = checkIfMobile();
     console.log("📱 useIsMobile: Initial detection result:", initialResult);
     setIsMobile(initialResult);
     
-    // Handle both resize and orientation changes with debouncing
-    let timeoutId: number | undefined;
+    // Mark as stable after initial render
+    const stabilityTimeout = setTimeout(() => {
+      setIsStable(true);
+      console.log("📱 useIsMobile: Detection stabilized");
+    }, 100);
     
-    const handleViewportChange = () => {
-      if (timeoutId) window.clearTimeout(timeoutId);
+    // Debounced resize handler
+    let resizeTimeout: number;
+    const handleResize = () => {
+      if (resizeTimeout) clearTimeout(resizeTimeout);
       
-      timeoutId = window.setTimeout(() => {
+      resizeTimeout = window.setTimeout(() => {
         const newResult = checkIfMobile();
-        console.log("📱 useIsMobile: Viewport change detected, new result:", newResult);
+        console.log("📱 useIsMobile: Resize detected, new result:", newResult);
         setIsMobile(newResult);
-      }, 100);
+      }, 150);
     };
     
-    window.addEventListener('resize', handleViewportChange, { passive: true });
-    window.addEventListener('orientationchange', handleViewportChange, { passive: true });
+    window.addEventListener('resize', handleResize, { passive: true });
     
-    // Force recheck after a short delay to account for any layout shifts
-    const recheckTimeout = setTimeout(() => {
-      const recheckResult = checkIfMobile();
-      console.log("📱 useIsMobile: Delayed recheck result:", recheckResult);
-      setIsMobile(recheckResult);
-    }, 200);
-    
-    // Clean up
     return () => {
-      window.removeEventListener('resize', handleViewportChange);
-      window.removeEventListener('orientationchange', handleViewportChange);
-      if (timeoutId) {
-        window.clearTimeout(timeoutId);
-      }
-      clearTimeout(recheckTimeout);
+      window.removeEventListener('resize', handleResize);
+      if (resizeTimeout) clearTimeout(resizeTimeout);
+      clearTimeout(stabilityTimeout);
     };
   }, [checkIfMobile]);
 
-  useEffect(() => {
-    console.log("📱 useIsMobile: Final state changed to:", isMobile);
-  }, [isMobile]);
+  // Return loading state until detection is stable
+  if (isMobile === null || !isStable) {
+    console.log("📱 useIsMobile: Still detecting, returning loading state");
+    return null;
+  }
 
+  console.log("📱 useIsMobile: Stable result:", isMobile);
   return isMobile;
 }

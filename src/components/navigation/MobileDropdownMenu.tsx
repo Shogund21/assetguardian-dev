@@ -11,6 +11,7 @@ export function MobileDropdownMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const { toggleSidebar } = useSidebar();
   
+  // Hardcoded menu items for testing
   const menuItems = [
     { title: "Dashboard", icon: LayoutDashboard, path: "/" },
     { title: "Equipment", icon: Wrench, path: "/equipment" },
@@ -22,135 +23,122 @@ export function MobileDropdownMenu() {
     { title: "Customer Manual", icon: FileText, path: "/customer-manual" }
   ];
 
-  // Debug logging
   useEffect(() => {
-    console.log("🔍 MobileDropdownMenu: Component mounted");
-    console.log("📱 MobileDropdownMenu: Menu items count:", menuItems.length);
-    console.log("📱 MobileDropdownMenu: Menu items:", menuItems.map(item => item.title));
+    console.log("🔍 MobileDropdownMenu: Component mounted successfully");
+    console.log("📱 MobileDropdownMenu: Menu items loaded:", menuItems.length);
+    console.log("📱 MobileDropdownMenu: All menu items:", menuItems.map(item => `${item.title} -> ${item.path}`));
     
-    // Test icon loading
-    menuItems.forEach(item => {
-      if (!item.icon) {
-        console.error(`❌ MobileDropdownMenu: Missing icon for ${item.title}`);
-      } else {
-        console.log(`✅ MobileDropdownMenu: Icon loaded for ${item.title}`);
-      }
-    });
+    // Test icon availability
+    const iconTests = menuItems.map(item => ({
+      title: item.title,
+      iconExists: !!item.icon,
+      iconName: item.icon?.name || 'unknown'
+    }));
+    console.log("📱 MobileDropdownMenu: Icon test results:", iconTests);
   }, []);
 
   useEffect(() => {
-    console.log("📱 MobileDropdownMenu: Menu state changed - isOpen:", isOpen);
+    console.log("📱 MobileDropdownMenu: Menu state changed to:", isOpen ? "OPEN" : "CLOSED");
   }, [isOpen]);
 
   const toggleMenu = () => {
-    console.log("📱 MobileDropdownMenu: Toggle menu clicked, current state:", isOpen);
+    console.log("📱 MobileDropdownMenu: Toggle clicked, current state:", isOpen);
     setIsOpen(!isOpen);
   };
 
-  const handleItemClick = () => {
-    console.log("📱 MobileDropdownMenu: Menu item clicked, closing menu");
-    setIsOpen(false);
-  };
-  
-  const handleSidebarToggle = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    console.log("📱 MobileDropdownMenu: Sidebar toggle clicked");
-    toggleSidebar();
+  const handleItemClick = (item: any) => {
+    console.log("📱 MobileDropdownMenu: Menu item clicked:", item.title, "->", item.path);
     setIsOpen(false);
   };
 
   return (
     <div className="relative">
-      {/* Debug info - temporarily visible */}
-      <div className="fixed top-0 left-0 bg-red-500 text-white text-xs p-1 z-[200] pointer-events-none">
-        Mobile Menu: {menuItems.length} items
+      {/* Very visible debug indicator */}
+      <div className="absolute -top-8 left-0 bg-yellow-400 text-black text-xs px-2 py-1 rounded pointer-events-none z-[400]">
+        Menu: {menuItems.length} items
       </div>
       
+      {/* Menu trigger button with enhanced visibility */}
       <Button 
         variant="ghost" 
         size="icon"
         onClick={toggleMenu}
-        className="h-12 w-12 rounded-full bg-white/90 shadow-sm touch-manipulation border-2 border-blue-500"
+        className="h-12 w-12 rounded-full bg-white shadow-lg touch-manipulation border-4 border-purple-500"
         aria-label="Open menu"
-        aria-expanded={isOpen}
-        aria-controls="mobile-dropdown-menu"
+        data-testid="mobile-dropdown-trigger"
       >
-        {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        {isOpen ? <X className="h-6 w-6 text-red-500" /> : <Menu className="h-6 w-6 text-blue-500" />}
       </Button>
       
+      {/* Menu content */}
       {isOpen && (
         <>
+          {/* Overlay */}
           <div 
-            className="fixed inset-0 bg-black/30 z-40 animate-fade-in"
+            className="fixed inset-0 bg-black/50 z-[100]"
             onClick={() => {
               console.log("📱 MobileDropdownMenu: Overlay clicked, closing menu");
               setIsOpen(false);
             }}
-            aria-hidden="true"
           />
+          
+          {/* Menu panel */}
           <div
-            id="mobile-dropdown-menu"
-            className="absolute right-0 top-14 w-72 max-h-[80vh] overflow-y-auto rounded-lg bg-white shadow-xl border-4 border-green-500 z-50 animate-scale-in"
-            style={{
-              transformOrigin: 'top right',
-            }}
+            className="absolute right-0 top-16 w-80 max-h-[80vh] overflow-y-auto bg-white shadow-2xl border-4 border-green-500 z-[200] rounded-lg"
+            data-testid="mobile-dropdown-content"
           >
-            {/* Debug header */}
-            <div className="bg-yellow-100 p-2 text-sm font-bold border-b">
-              Debug: {menuItems.length} menu items loaded
+            {/* Debug header - very visible */}
+            <div className="bg-green-100 p-3 border-b-2 border-green-500">
+              <div className="font-bold text-green-800">🔧 DEBUG: DROPDOWN MENU</div>
+              <div className="text-sm text-green-700">Items loaded: {menuItems.length}</div>
             </div>
             
-            <div className="p-3 flex flex-col gap-1">
+            <div className="p-4">
+              {/* Quick sidebar access */}
               <Button
-                variant="ghost"
-                className="flex items-center justify-start px-3 py-3 text-left min-h-[48px] font-medium text-blue-600 bg-blue-50"
-                onClick={handleSidebarToggle}
+                variant="outline"
+                className="w-full mb-3 p-3 border-2 border-blue-400"
+                onClick={() => {
+                  console.log("📱 MobileDropdownMenu: Opening sidebar");
+                  toggleSidebar();
+                  setIsOpen(false);
+                }}
               >
-                <LayoutDashboard className="h-4 w-4 mr-3 flex-shrink-0" />
-                <span>Full Navigation</span>
+                <LayoutDashboard className="h-4 w-4 mr-2" />
+                Open Full Sidebar
               </Button>
               
-              <div className="h-px bg-gray-200 my-2" />
+              <div className="border-t pt-3 mb-3"></div>
               
-              {/* Main Navigation Items with enhanced debugging */}
-              <div className="space-y-1">
-                {menuItems.length === 0 ? (
-                  <div className="text-red-500 p-2">❌ No menu items found!</div>
-                ) : (
-                  menuItems.map((item, index) => {
-                    console.log(`📱 MobileDropdownMenu: Rendering item ${index + 1}/${menuItems.length}:`, item.title);
-                    
-                    return (
-                      <Link 
-                        key={item.title} 
-                        to={item.path}
-                        className={cn(
-                          "flex items-center gap-3 px-3 py-3 text-sm rounded-md min-h-[48px] w-full",
-                          "hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation",
-                          "text-gray-700 font-medium border border-gray-300"
-                        )}
-                        onClick={handleItemClick}
-                      >
-                        {item.icon ? (
-                          <item.icon className="h-4 w-4 flex-shrink-0 text-blue-600" />
-                        ) : (
-                          <div className="h-4 w-4 bg-red-500 flex-shrink-0" title="Missing icon" />
-                        )}
-                        <span className="truncate">{item.title}</span>
-                        <span className="text-xs text-gray-400 ml-auto">#{index + 1}</span>
-                      </Link>
-                    );
-                  })
-                )}
+              {/* Navigation items */}
+              <div className="space-y-2">
+                {menuItems.map((item, index) => (
+                  <Link 
+                    key={item.path}
+                    to={item.path}
+                    className="flex items-center gap-3 p-3 rounded-md hover:bg-gray-100 border-2 border-gray-200 transition-colors"
+                    onClick={() => handleItemClick(item)}
+                    data-testid={`mobile-nav-item-${item.title.toLowerCase().replace(' ', '-')}`}
+                  >
+                    <div className="flex-shrink-0">
+                      {item.icon ? (
+                        <item.icon className="h-5 w-5 text-blue-600" />
+                      ) : (
+                        <div className="h-5 w-5 bg-red-500 rounded" title="Missing icon" />
+                      )}
+                    </div>
+                    <span className="font-medium text-gray-800">{item.title}</span>
+                    <span className="ml-auto text-xs text-gray-400">#{index + 1}</span>
+                  </Link>
+                ))}
               </div>
               
-              <div className="h-px bg-gray-200 my-2" />
-              
-              {/* Sign Out Section */}
-              <LogoutButton className="flex items-center justify-start gap-3 px-3 py-3 text-sm rounded-md min-h-[48px] w-full hover:bg-red-50 active:bg-red-100 transition-colors touch-manipulation font-medium text-red-600 hover:text-red-700 border border-red-300">
-                <LogOut className="h-4 w-4 flex-shrink-0" />
-                <span>Sign Out</span>
-              </LogoutButton>
+              <div className="border-t pt-3 mt-3">
+                <LogoutButton className="w-full p-3 border-2 border-red-300 hover:bg-red-50 rounded-md flex items-center justify-center gap-2 text-red-600">
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </LogoutButton>
+              </div>
             </div>
           </div>
         </>
