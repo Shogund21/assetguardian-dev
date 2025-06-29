@@ -62,8 +62,55 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
     },
   });
 
-  // Get reading template based on equipment type
-  const readingTemplate = equipmentType ? getEquipmentReadingTemplate(equipmentType) : [];
+  // Enhanced equipment type detection with more robust matching
+  const getEquipmentType = (equipment: any) => {
+    if (!equipment && !equipmentType) return 'general';
+    
+    // Use provided equipmentType first
+    if (equipmentType) {
+      console.log('Using provided equipment type:', equipmentType);
+      return equipmentType;
+    }
+    
+    if (!equipment) return 'general';
+    
+    const name = equipment.name.toLowerCase();
+    console.log('Detecting equipment type for:', name);
+    
+    // Enhanced matching with more patterns
+    if (name.includes('chiller') || name.includes('chill')) {
+      console.log('Detected as chiller');
+      return 'chiller';
+    }
+    if (name.includes('ahu') || name.includes('air handler') || name.includes('air handling')) {
+      console.log('Detected as AHU');
+      return 'ahu';
+    }
+    if (name.includes('rtu') || name.includes('rooftop') || name.includes('roof top')) {
+      console.log('Detected as RTU');
+      return 'rtu';
+    }
+    if (name.includes('cooling tower') || name.includes('tower')) {
+      console.log('Detected as cooling tower');
+      return 'cooling_tower';
+    }
+    
+    console.log('Defaulting to general equipment type');
+    return 'general';
+  };
+
+  const detectedEquipmentType = getEquipmentType(null);
+  const readingTemplate = getEquipmentReadingTemplate(detectedEquipmentType);
+
+  // Debug logging for template loading
+  useEffect(() => {
+    console.log('Equipment type detection:', {
+      equipmentId,
+      equipmentType,
+      detectedEquipmentType,
+      templateCount: readingTemplate.length
+    });
+  }, [equipmentId, equipmentType, detectedEquipmentType, readingTemplate.length]);
 
   // Watch for reading type changes to auto-populate unit
   const selectedReadingType = form.watch('reading_type');
@@ -200,8 +247,13 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
               )}
             </div>
           </CardTitle>
+          {/* Debug info for development */}
+          <div className="text-xs text-gray-500">
+            Equipment Type: {detectedEquipmentType} | Template Readings: {readingTemplate.length}
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Always show ReadingModeSelector */}
           <ReadingModeSelector
             readingMode={readingMode}
             onReadingModeChange={setReadingMode}
@@ -211,7 +263,7 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
           {readingMode === "ai_image" && (
             <AIImageReader
               onReadingsExtracted={handleReadingsExtracted}
-              equipmentType={equipmentType}
+              equipmentType={detectedEquipmentType}
             />
           )}
 

@@ -36,6 +36,32 @@ export const ReadingsTabContent = ({
   readingTemplates,
   isOnline
 }: ReadingsTabContentProps) => {
+  // Enhanced equipment type detection
+  const getEquipmentTypeFromName = (equipment: Equipment | undefined): string => {
+    if (!equipment) return 'general';
+    
+    const name = equipment.name.toLowerCase();
+    console.log('Detecting equipment type for equipment:', equipment.name);
+    
+    if (name.includes('chiller') || name.includes('chill')) {
+      console.log('Detected as chiller');
+      return 'chiller';
+    }
+    if (name.includes('ahu') || name.includes('air handler') || name.includes('air handling')) {
+      return 'ahu';
+    }
+    if (name.includes('rtu') || name.includes('rooftop') || name.includes('roof top')) {
+      return 'rtu';
+    }
+    if (name.includes('cooling tower') || name.includes('tower')) {
+      return 'cooling_tower';
+    }
+    
+    return 'general';
+  };
+
+  const detectedEquipmentType = getEquipmentTypeFromName(selectedEquipment);
+
   return (
     <>
       <EquipmentSelector
@@ -53,6 +79,7 @@ export const ReadingsTabContent = ({
               <div className="text-sm text-muted-foreground">
                 <p>Location: {selectedEquipment.location}</p>
                 <p>Status: {selectedEquipment.status || 'Active'}</p>
+                <p>Detected Type: {detectedEquipmentType}</p>
                 {readingTemplates.length > 0 && (
                   <p className="mt-2 text-blue-600">
                     {readingTemplates.length} standard readings available for this equipment type
@@ -64,7 +91,7 @@ export const ReadingsTabContent = ({
 
           <ManualReadingEntry 
             equipmentId={selectedEquipmentId}
-            equipmentType={equipmentType}
+            equipmentType={detectedEquipmentType}
             onSuccess={() => {
               console.log('Reading recorded successfully');
             }}
