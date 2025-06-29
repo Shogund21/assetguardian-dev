@@ -33,12 +33,16 @@ export const ReadingFormFields = ({
     templateCount: readingTemplate.length,
     readingMode,
     extractedCount: extractedReadings.length,
-    hasControl: !!control
+    hasControl: !!control,
+    timestamp: new Date().toISOString()
   });
 
-  // Always render form fields - no conditional logic
   return (
     <div className="space-y-6 w-full bg-white p-4 rounded-lg border-2 border-gray-300 mobile-form-container predictive-form">
+      <div className="text-pink-500 text-sm font-bold bg-pink-100 p-2 border border-pink-300">
+        🔍 DEBUG: ReadingFormFields Started
+      </div>
+
       {/* Simple status display */}
       <div className="bg-blue-100 p-3 rounded-lg border border-blue-300">
         <div className="text-blue-800 font-bold">📋 Form Status</div>
@@ -49,29 +53,53 @@ export const ReadingFormFields = ({
         </div>
       </div>
 
+      <div className="text-purple-500 text-sm font-bold bg-purple-100 p-2 border border-purple-300">
+        ⬇️ DEBUG: ReadingTypeField Below
+      </div>
+
       {/* Always show all form fields */}
-      <ReadingTypeField
-        control={control}
-        readingTemplate={readingTemplate}
-        readingMode={readingMode}
-        extractedReadings={extractedReadings}
-        groupedReadings={readingTemplate.reduce((acc, reading) => {
-          const section = reading.section || 'General';
-          if (!acc[section]) acc[section] = [];
-          acc[section].push(reading);
-          return acc;
-        }, {} as Record<string, ReadingTemplate[]>)}
-      />
+      <div className="border-2 border-purple-300 p-2 bg-purple-50">
+        <ReadingTypeField
+          control={control}
+          readingTemplate={readingTemplate}
+          readingMode={readingMode}
+          extractedReadings={extractedReadings}
+          groupedReadings={readingTemplate.reduce((acc, reading) => {
+            const section = reading.section || 'General';
+            if (!acc[section]) acc[section] = [];
+            acc[section].push(reading);
+            return acc;
+          }, {} as Record<string, ReadingTemplate[]>)}
+        />
+      </div>
 
-      <ValueField control={control} />
+      <div className="text-teal-500 text-sm font-bold bg-teal-100 p-2 border border-teal-300">
+        ⬇️ DEBUG: ValueField Below
+      </div>
 
-      <UnitField 
-        control={control}
-        templateReading={templateReading}
-        readingMode={readingMode}
-      />
+      <div className="border-2 border-teal-300 p-2 bg-teal-50">
+        <ValueField control={control} />
+      </div>
 
-      <NotesFields control={control} />
+      <div className="text-amber-500 text-sm font-bold bg-amber-100 p-2 border border-amber-300">
+        ⬇️ DEBUG: UnitField Below
+      </div>
+
+      <div className="border-2 border-amber-300 p-2 bg-amber-50">
+        <UnitField 
+          control={control}
+          templateReading={templateReading}
+          readingMode={readingMode}
+        />
+      </div>
+
+      <div className="text-rose-500 text-sm font-bold bg-rose-100 p-2 border border-rose-300">
+        ⬇️ DEBUG: NotesFields Below
+      </div>
+
+      <div className="border-2 border-rose-300 p-2 bg-rose-50">
+        <NotesFields control={control} />
+      </div>
 
       {/* Confirmation */}
       <div className="bg-green-100 p-3 rounded-lg border border-green-400 text-center">
@@ -79,6 +107,10 @@ export const ReadingFormFields = ({
         <div className="text-xs text-green-700 mt-1">
           {readingTemplate.length} templates | {readingMode} mode
         </div>
+      </div>
+
+      <div className="text-green-500 text-sm font-bold bg-green-100 p-2 border border-green-300">
+        ✅ DEBUG: ReadingFormFields Finished
       </div>
     </div>
   );

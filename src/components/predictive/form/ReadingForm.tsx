@@ -43,7 +43,8 @@ export const ReadingForm = ({
   console.log('📝 ReadingForm render:', { 
     readingMode, 
     templateCount: readingTemplate.length,
-    hasForm: !!form
+    hasForm: !!form,
+    timestamp: new Date().toISOString()
   });
 
   if (!form) {
@@ -61,20 +62,37 @@ export const ReadingForm = ({
 
   return (
     <div className="w-full space-y-4 bg-white mobile-form-container predictive-form">
+      <div className="text-orange-500 text-sm font-bold bg-orange-100 p-2 border border-orange-300">
+        🔍 DEBUG: ReadingForm Started - Form exists: {!!form ? 'YES' : 'NO'}
+      </div>
+
       <Form {...form}>
         <form 
           onSubmit={form.handleSubmit(onSubmit)} 
           className="space-y-6 w-full"
           noValidate
         >
+          <div className="text-cyan-500 text-sm font-bold bg-cyan-100 p-2 border border-cyan-300">
+            ⬇️ DEBUG: ReadingFormFields should be below this
+          </div>
+
           {/* Form fields - always rendered */}
-          <ReadingFormFields
-            control={form.control}
-            readingTemplate={readingTemplate}
-            readingMode={readingMode}
-            extractedReadings={extractedReadings}
-            templateReading={templateReading}
-          />
+          <div className="border-4 border-cyan-500 p-2 bg-cyan-50">
+            <div className="text-cyan-700 font-bold text-center mb-2">
+              📋 DEBUG: ReadingFormFields Container
+            </div>
+            <ReadingFormFields
+              control={form.control}
+              readingTemplate={readingTemplate}
+              readingMode={readingMode}
+              extractedReadings={extractedReadings}
+              templateReading={templateReading}
+            />
+          </div>
+
+          <div className="text-indigo-500 text-sm font-bold bg-indigo-100 p-2 border border-indigo-300">
+            ⬇️ DEBUG: Submit Button Section Below
+          </div>
 
           {/* Mobile-optimized submit section */}
           <div className="sticky bottom-0 bg-white p-4 border-4 border-blue-300 rounded-lg shadow-xl mt-6 mobile-form-field">
@@ -118,6 +136,10 @@ export const ReadingForm = ({
           </div>
         </form>
       </Form>
+
+      <div className="text-green-500 text-sm font-bold bg-green-100 p-2 border border-green-300">
+        ✅ DEBUG: ReadingForm Finished Rendering
+      </div>
     </div>
   );
 };
