@@ -59,42 +59,46 @@ export function MobileDropdownMenu() {
           />
           <div
             id="mobile-dropdown-menu"
-            className="absolute right-0 top-14 w-64 rounded-lg bg-white shadow-lg border border-gray-100 z-50 animate-scale-in"
+            className="absolute right-0 top-14 w-72 max-h-[80vh] overflow-y-auto rounded-lg bg-white shadow-xl border border-gray-100 z-50 animate-scale-in"
             style={{
               transformOrigin: 'top right',
             }}
           >
-            <div className="p-2 flex flex-col gap-1">
+            <div className="p-3 flex flex-col gap-1">
               <Button
                 variant="ghost"
-                className="flex items-center justify-start px-3 py-2 text-left min-h-[44px]"
+                className="flex items-center justify-start px-3 py-3 text-left min-h-[48px] font-medium text-blue-600"
                 onClick={handleSidebarToggle}
               >
+                <LayoutDashboard className="h-4 w-4 mr-3 flex-shrink-0" />
                 <span>Full Navigation</span>
               </Button>
               
-              <div className="h-px bg-gray-100 my-1" />
+              <div className="h-px bg-gray-200 my-2" />
               
               {/* Main Navigation Items */}
-              {menuItems.map((item) => (
-                <Link 
-                  key={item.title} 
-                  to={item.path}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2 text-sm rounded-md min-h-[44px]",
-                    "hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation"
-                  )}
-                  onClick={handleItemClick}
-                >
-                  <item.icon className="h-4 w-4 flex-shrink-0" />
-                  <span>{item.title}</span>
-                </Link>
-              ))}
+              <div className="space-y-1">
+                {menuItems.map((item) => (
+                  <Link 
+                    key={item.title} 
+                    to={item.path}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-3 text-sm rounded-md min-h-[48px] w-full",
+                      "hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation",
+                      "text-gray-700 font-medium"
+                    )}
+                    onClick={handleItemClick}
+                  >
+                    <item.icon className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">{item.title}</span>
+                  </Link>
+                ))}
+              </div>
               
-              <div className="h-px bg-gray-100 my-1" />
+              <div className="h-px bg-gray-200 my-2" />
               
               {/* Sign Out Section */}
-              <LogoutButton className="flex items-center justify-start gap-3 px-3 py-2 text-sm rounded-md min-h-[44px] w-full hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation font-normal">
+              <LogoutButton className="flex items-center justify-start gap-3 px-3 py-3 text-sm rounded-md min-h-[48px] w-full hover:bg-red-50 active:bg-red-100 transition-colors touch-manipulation font-medium text-red-600 hover:text-red-700">
                 <LogOut className="h-4 w-4 flex-shrink-0" />
                 <span>Sign Out</span>
               </LogoutButton>
