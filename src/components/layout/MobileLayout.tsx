@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Menu } from "lucide-react";
@@ -14,13 +14,30 @@ interface MobileLayoutProps {
 }
 
 export const MobileLayout = ({ children }: MobileLayoutProps) => {
+  useEffect(() => {
+    console.log("📱 MobileLayout: Component mounted - using mobile layout");
+    console.log("📱 MobileLayout: Window dimensions:", {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      userAgent: navigator.userAgent
+    });
+  }, []);
+
   return (
     <div className="block h-screen w-full overflow-hidden">
+      {/* Debug indicator */}
+      <div className="fixed top-16 left-4 bg-green-500 text-white text-xs p-2 z-[200] rounded">
+        Mobile Layout Active
+        <br />
+        Width: {window.innerWidth}px
+      </div>
+
       {/* Mobile sidebar trigger with enhanced z-index and tap area */}
       <div className="fixed top-4 left-4 z-[100]" data-sidebar-trigger-wrapper>
         <SidebarTrigger 
-          className="bg-white/80 backdrop-blur-sm shadow-sm h-12 w-12 touch-manipulation"
+          className="bg-white/80 backdrop-blur-sm shadow-sm h-12 w-12 touch-manipulation border-2 border-red-500"
           aria-label="Toggle Menu"
+          onClick={() => console.log("📱 MobileLayout: SidebarTrigger clicked")}
         />
       </div>
       
