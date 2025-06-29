@@ -12,22 +12,27 @@ export const ReadingModeSelector = ({
   readingMode, 
   onReadingModeChange 
 }: ReadingModeSelectorProps) => {
+  console.log('🎛️ ReadingModeSelector rendering:', { readingMode });
+
   return (
-    <div className="space-y-4 bg-white p-4 rounded-lg border-2 border-blue-100 shadow-sm">
+    <div className="space-y-4 bg-white p-4 rounded-lg border-2 border-blue-200 shadow-sm w-full">
       <div className="flex items-center justify-between">
-        <label className="text-base font-semibold text-gray-900">Choose Recording Method</label>
-        <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+        <label className="text-base font-bold text-gray-900">Choose Recording Method</label>
+        <div className="text-xs text-blue-600 bg-blue-100 px-3 py-1 rounded-full font-medium">
           Mobile Optimized
         </div>
       </div>
       
       <RadioGroup
         value={readingMode}
-        onValueChange={(value: "manual" | "ai_image") => onReadingModeChange(value)}
-        className="grid grid-cols-1 gap-4"
+        onValueChange={(value: "manual" | "ai_image") => {
+          console.log('📻 Mode change:', value);
+          onReadingModeChange(value);
+        }}
+        className="grid grid-cols-1 gap-4 w-full"
       >
         {/* Manual Entry Option */}
-        <div className="relative">
+        <div className="relative w-full">
           <RadioGroupItem 
             value="manual" 
             id="manual" 
@@ -35,10 +40,10 @@ export const ReadingModeSelector = ({
           />
           <label 
             htmlFor="manual" 
-            className={`flex items-center gap-4 p-6 min-h-[80px] border-3 rounded-xl cursor-pointer transition-all duration-300 touch-manipulation ${
+            className={`flex items-center gap-4 p-6 min-h-[80px] border-3 rounded-xl cursor-pointer transition-all duration-300 touch-manipulation w-full ${
               readingMode === "manual" 
-                ? 'border-purple-500 bg-purple-50 shadow-lg ring-2 ring-purple-200' 
-                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                ? 'border-purple-500 bg-purple-50 shadow-lg ring-2 ring-purple-300' 
+                : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
             }`}
           >
             <div className={`flex-shrink-0 p-3 rounded-full transition-colors ${
@@ -58,7 +63,7 @@ export const ReadingModeSelector = ({
         </div>
         
         {/* AI Camera Option */}
-        <div className="relative">
+        <div className="relative w-full">
           <RadioGroupItem 
             value="ai_image" 
             id="ai_image" 
@@ -66,10 +71,10 @@ export const ReadingModeSelector = ({
           />
           <label 
             htmlFor="ai_image" 
-            className={`flex items-center gap-4 p-6 min-h-[80px] border-3 rounded-xl cursor-pointer transition-all duration-300 touch-manipulation ${
+            className={`flex items-center gap-4 p-6 min-h-[80px] border-3 rounded-xl cursor-pointer transition-all duration-300 touch-manipulation w-full ${
               readingMode === "ai_image" 
-                ? 'border-green-500 bg-green-50 shadow-lg ring-2 ring-green-200' 
-                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                ? 'border-green-500 bg-green-50 shadow-lg ring-2 ring-green-300' 
+                : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
             }`}
           >
             <div className={`flex-shrink-0 p-3 rounded-full transition-colors ${
@@ -89,14 +94,14 @@ export const ReadingModeSelector = ({
         </div>
       </RadioGroup>
       
-      {/* Enhanced Mobile-specific hint */}
+      {/* Enhanced Mobile-specific status */}
       <div className="mt-4">
         <div className={`text-sm text-center py-3 px-4 rounded-lg border-2 transition-all ${
           readingMode === "manual" 
-            ? "bg-purple-50 border-purple-200 text-purple-700" 
-            : "bg-green-50 border-green-200 text-green-700"
+            ? "bg-purple-50 border-purple-300 text-purple-700" 
+            : "bg-green-50 border-green-300 text-green-700"
         }`}>
-          <div className="font-medium mb-1">
+          <div className="font-bold mb-1">
             {readingMode === "manual" ? "📝 Manual Mode Selected" : "📷 AI Camera Mode Selected"}
           </div>
           <div className="text-xs">

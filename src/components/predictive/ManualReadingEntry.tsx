@@ -46,7 +46,6 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
   const [readingMode, setReadingMode] = useState<"manual" | "ai_image">("manual");
   const [extractedReadings, setExtractedReadings] = useState<ExtractedReading[]>([]);
   const [selectedReading, setSelectedReading] = useState<ExtractedReading | null>(null);
-  const [componentMounted, setComponentMounted] = useState(false);
   const { toast } = useToast();
   const { isOnline, updateUnsyncedCount } = useOfflineSync();
   
@@ -67,15 +66,13 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
   const detectedEquipmentType = equipmentType || 'general';
   const readingTemplate = getEquipmentReadingTemplate(detectedEquipmentType);
 
-  // Component mounting and debugging
+  // Component mounting and debugging - REMOVED componentMounted delay
   useEffect(() => {
-    setComponentMounted(true);
     console.log('🔧 ManualReadingEntry mounted:', {
       equipmentId,
       equipmentTypeProp: equipmentType,
       detectedEquipmentType,
       templateCount: readingTemplate.length,
-      componentMounted: true,
       formDefaults: form.getValues()
     });
 
@@ -212,26 +209,12 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
     }
   };
 
-  // Don't render until component is fully mounted
-  if (!componentMounted) {
-    return (
-      <div className="space-y-4">
-        <Card>
-          <CardContent className="py-12 text-center">
-            <div className="animate-pulse">
-              <div className="h-4 bg-gray-200 rounded w-1/4 mx-auto"></div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
+  // REMOVED componentMounted check - render immediately
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full">
       <OfflineIndicator />
       
-      <Card className="mobile-card">
+      <Card className="mobile-card w-full">
         <CardHeader>
           <CardTitle className="flex items-center justify-between text-lg">
             Record Reading
@@ -251,28 +234,29 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
           </CardTitle>
           
           {/* Enhanced mobile-friendly debug info */}
-          <div className="text-xs text-gray-500 space-y-1 bg-gray-50 p-3 rounded-lg">
+          <div className="text-xs text-gray-500 space-y-1 bg-gray-50 p-3 rounded-lg border-2 border-blue-200">
             <div className="flex justify-between">
               <span>Equipment Type:</span>
-              <span className="font-medium text-blue-600">{detectedEquipmentType}</span>
+              <span className="font-bold text-blue-600">{detectedEquipmentType}</span>
             </div>
             <div className="flex justify-between">
               <span>Template Readings:</span>
-              <span className={`font-medium ${readingTemplate.length > 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <span className={`font-bold ${readingTemplate.length > 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {readingTemplate.length}
               </span>
             </div>
-            {detectedEquipmentType === 'chiller' && (
-              <div className="text-green-600 text-center font-medium">
-                ✓ Chiller template loaded ({readingTemplate.length} readings)
+            {detectedEquipmentType === 'chiller' && readingTemplate.length > 0 && (
+              <div className="text-green-600 text-center font-bold bg-green-100 p-2 rounded border">
+                ✅ Chiller template loaded ({readingTemplate.length} readings)
               </div>
             )}
           </div>
         </CardHeader>
         
-        <CardContent className="space-y-6">
-          {/* Always render ReadingModeSelector first */}
-          <div className="bg-blue-50 p-1 rounded-lg border border-blue-200">
+        <CardContent className="space-y-6 w-full">
+          {/* ALWAYS render ReadingModeSelector - highest priority */}
+          <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-300 w-full min-h-[120px] flex flex-col">
+            <div className="text-sm font-bold text-blue-800 mb-2">📱 Recording Method</div>
             <ReadingModeSelector
               readingMode={readingMode}
               onReadingModeChange={setReadingMode}
@@ -281,7 +265,10 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
 
           {/* AI Image Reader - only show when AI mode is selected */}
           {readingMode === "ai_image" && (
-            <div className="border-t pt-4">
+            <div className="border-t-2 border-gray-200 pt-4 w-full">
+              <div className="bg-green-50 p-3 rounded-lg border-2 border-green-200 mb-4">
+                <div className="text-green-800 font-bold">📷 AI Camera Mode Active</div>
+              </div>
               <AIImageReader
                 onReadingsExtracted={handleReadingsExtracted}
                 equipmentType={detectedEquipmentType}
@@ -291,7 +278,7 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
 
           {/* Extracted Readings Selection - only show when we have AI readings */}
           {readingMode === "ai_image" && extractedReadings.length > 0 && (
-            <div className="border-t pt-4">
+            <div className="border-t-2 border-gray-200 pt-4 w-full">
               <ExtractedReadingsSelector
                 extractedReadings={extractedReadings}
                 selectedReading={selectedReading}
@@ -300,8 +287,12 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
             </div>
           )}
 
-          {/* Reading Form - always show, but with proper fallbacks */}
-          <div className="border-t pt-4">
+          {/* Reading Form - ALWAYS show with enhanced visibility */}
+          <div className="border-t-2 border-gray-200 pt-4 w-full">
+            <div className="bg-purple-50 p-3 rounded-lg border-2 border-purple-200 mb-4">
+              <div className="text-purple-800 font-bold">📝 Reading Form</div>
+              <div className="text-xs text-purple-600">Templates: {readingTemplate.length} | Mode: {readingMode}</div>
+            </div>
             <ReadingForm
               form={form}
               onSubmit={onSubmit}
