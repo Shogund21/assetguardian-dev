@@ -90,29 +90,29 @@ const PredictiveMaintenanceDashboard = () => {
         equipmentName={selectedEquipment?.name}
       />
 
-      {/* Compact equipment selector for specific tabs */}
-      {showEquipmentSelector && (
-        <div className="mb-3 px-1">
-          <EquipmentSelector
-            equipment={equipment}
-            selectedEquipmentId={selectedEquipmentId}
-            onEquipmentChange={setSelectedEquipmentId}
-            placeholder="Select equipment"
-            className="w-full"
-          />
-        </div>
-      )}
-
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 mb-4">
+        <TabsList className="grid w-full grid-cols-5 mb-2">
           <TabsTrigger value="readings" className="touch-manipulation">Record</TabsTrigger>
           <TabsTrigger value="history" className="touch-manipulation">History</TabsTrigger>
           <TabsTrigger value="analysis" className="touch-manipulation">Analysis</TabsTrigger>
           <TabsTrigger value="results" className="touch-manipulation">Results</TabsTrigger>
           <TabsTrigger value="database" className="touch-manipulation">Status</TabsTrigger>
         </TabsList>
+
+        {/* Compact equipment selector for specific tabs only */}
+        {showEquipmentSelector && (
+          <div className="mb-3 px-1">
+            <EquipmentSelector
+              equipment={equipment}
+              selectedEquipmentId={selectedEquipmentId}
+              onEquipmentChange={setSelectedEquipmentId}
+              placeholder="Select equipment"
+              className="w-full"
+            />
+          </div>
+        )}
         
-        <TabsContent value="readings">
+        <TabsContent value="readings" className="mt-2">
           <ReadingsTabContent
             equipment={equipment}
             selectedEquipmentId={selectedEquipmentId}
