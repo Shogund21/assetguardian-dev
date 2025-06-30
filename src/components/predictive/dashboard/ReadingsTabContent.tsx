@@ -82,7 +82,7 @@ export const ReadingsTabContent = ({
   });
 
   return (
-    <div className="space-y-4 px-4">
+    <div className="space-y-4">
       {/* Welcome section with consistent spacing */}
       <div className="pt-2 pb-3">
         <h3 className="text-lg font-semibold text-gray-900 mb-1">Equipment Readings</h3>
