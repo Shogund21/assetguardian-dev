@@ -88,7 +88,7 @@ const PredictiveMaintenanceDashboard = () => {
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 mb-1">
+        <TabsList className="grid w-full grid-cols-5 mb-4">
           <TabsTrigger value="readings" className="touch-manipulation">Record</TabsTrigger>
           <TabsTrigger value="history" className="touch-manipulation">History</TabsTrigger>
           <TabsTrigger value="analysis" className="touch-manipulation">Analysis</TabsTrigger>
@@ -96,20 +96,25 @@ const PredictiveMaintenanceDashboard = () => {
           <TabsTrigger value="database" className="touch-manipulation">Status</TabsTrigger>
         </TabsList>
 
-        {/* Universal equipment selector - always visible except on readings tab */}
-        {activeTab !== "readings" && (
-          <div className="mb-2 px-1">
-            <EquipmentSelector
-              equipment={equipment}
-              selectedEquipmentId={selectedEquipmentId}
-              onEquipmentChange={setSelectedEquipmentId}
-              placeholder="Select equipment"
-              className="w-full"
-            />
+        {/* Universal equipment selector - visible for tabs that need equipment selection */}
+        {(activeTab === "history" || activeTab === "analysis") && (
+          <div className="mb-4 px-2">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+              <p className="text-sm text-blue-800 font-medium mb-2">
+                📋 Select equipment to view {activeTab === "history" ? "reading history" : "AI analysis"}
+              </p>
+              <EquipmentSelector
+                equipment={equipment}
+                selectedEquipmentId={selectedEquipmentId}
+                onEquipmentChange={setSelectedEquipmentId}
+                placeholder={`Select equipment for ${activeTab}`}
+                className="w-full"
+              />
+            </div>
           </div>
         )}
         
-        <TabsContent value="readings" className="mt-1">
+        <TabsContent value="readings" className="mt-2">
           <ReadingsTabContent
             equipment={equipment}
             selectedEquipmentId={selectedEquipmentId}
@@ -121,20 +126,24 @@ const PredictiveMaintenanceDashboard = () => {
           />
         </TabsContent>
         
-        <TabsContent value="history">
+        <TabsContent value="history" className="mt-2">
           {selectedEquipment ? (
             <ReadingHistory 
               equipmentId={selectedEquipmentId}
               equipmentType={equipmentType}
             />
           ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              Select equipment above to view history
+            <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+              <div className="text-4xl mb-4">📊</div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No Equipment Selected</h3>
+              <p className="text-gray-600 max-w-md mx-auto">
+                Select equipment above to view its reading history and trends
+              </p>
             </div>
           )}
         </TabsContent>
         
-        <TabsContent value="analysis">
+        <TabsContent value="analysis" className="mt-2">
           {selectedEquipment ? (
             <EnhancedAIAnalysis 
               equipmentId={selectedEquipmentId}
@@ -142,17 +151,21 @@ const PredictiveMaintenanceDashboard = () => {
               equipmentName={selectedEquipment?.name || ''}
             />
           ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              Select equipment above to run analysis
+            <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+              <div className="text-4xl mb-4">🤖</div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No Equipment Selected</h3>
+              <p className="text-gray-600 max-w-md mx-auto">
+                Select equipment above to run AI-powered predictive analysis
+              </p>
             </div>
           )}
         </TabsContent>
         
-        <TabsContent value="results">
+        <TabsContent value="results" className="mt-2">
           <AnalysisResultsHistory />
         </TabsContent>
         
-        <TabsContent value="database">
+        <TabsContent value="database" className="mt-2">
           <DatabaseStatus />
         </TabsContent>
       </Tabs>
