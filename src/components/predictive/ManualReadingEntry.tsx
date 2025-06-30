@@ -203,22 +203,15 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
   console.log('🎨 About to render ManualReadingEntry');
 
   return (
-    <div className="min-h-screen overflow-y-auto w-full border-4 border-yellow-400 bg-yellow-50 p-4 mobile-form-container predictive-form">
-      <div className="text-yellow-800 font-bold text-center p-4 bg-yellow-200 border border-yellow-600 mb-4">
-        🔍 DEBUG: Main Container (Yellow Border) - min-h-screen + overflow-y-auto
-      </div>
-      
+    <div className="min-h-screen overflow-y-auto w-full bg-gray-50 p-4 mobile-form-container predictive-form">
       <OfflineIndicator />
 
-      <Card className="mobile-card w-full border-4 border-red-500 bg-red-50 overflow-visible mb-4">
+      <Card className="mobile-card w-full bg-white overflow-visible mb-4">
         <CardHeader>
           <CardTitle className="flex items-center justify-between text-lg">
             Record Reading
             <ConnectionStatus isOnline={isOnline} />
           </CardTitle>
-          <div className="text-red-800 font-bold bg-red-200 p-2 border border-red-600">
-            🔍 DEBUG: Card Container (Red Border)
-          </div>
           <EquipmentDebugInfo
             detectedEquipmentType={detectedEquipmentType}
             templateCount={readingTemplate.length}
@@ -227,21 +220,14 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
           />
         </CardHeader>
 
-        <CardContent className="space-y-6 w-full border-4 border-blue-400 bg-blue-50 overflow-y-auto">
-          <div className="text-blue-800 font-bold bg-blue-200 p-2 border border-blue-600">
-            🔍 DEBUG: CardContent (Blue Border) - overflow-y-auto
-          </div>
-          
+        <CardContent className="space-y-6 w-full bg-white overflow-y-auto">
           <ReadingModeSelector
             readingMode={readingMode}
             onReadingModeChange={setReadingMode}
           />
 
           {readingMode === "ai_image" && (
-            <div className="border-2 border-green-500 bg-green-50 p-4">
-              <div className="text-green-800 font-bold bg-green-200 p-2 border border-green-600 mb-4">
-                🔍 DEBUG: AI Image Section (Green Border)
-              </div>
+            <div className="bg-green-50 p-4 rounded-lg border border-green-200">
               <AIImageReader
                 onReadingsExtracted={handleReadingsExtracted}
                 equipmentType={detectedEquipmentType}
@@ -257,10 +243,7 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
             />
           )}
 
-          <div className="border-4 border-purple-400 bg-purple-50 min-h-[400px] overflow-y-auto p-4">
-            <div className="text-purple-800 font-bold bg-purple-200 p-2 border border-purple-600 mb-4">
-              🔍 DEBUG: ReadingForm Container (Purple Border) - min-h-400px + overflow-y-auto
-            </div>
+          <div className="bg-white min-h-[400px] overflow-y-auto p-4 rounded-lg border border-gray-200">
             <ReadingForm
               form={form}
               onSubmit={onSubmit}

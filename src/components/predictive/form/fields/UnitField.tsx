@@ -18,18 +18,17 @@ interface UnitFieldProps {
 
 export const UnitField = ({ control, templateReading, readingMode }: UnitFieldProps) => {
   return (
-    <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-300">
-      <div className="text-blue-800 font-bold mb-2">📏 UNIT FIELD</div>
+    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
       <FormField
         control={control}
         name="unit"
         render={({ field, fieldState }) => (
           <FormItem className="w-full">
-            <FormLabel className="text-base font-bold text-gray-900">Unit</FormLabel>
+            <FormLabel className="text-base font-bold text-gray-900">📏 Unit</FormLabel>
             <FormControl>
               <Input 
                 placeholder={templateReading?.unit ? `e.g., ${templateReading.unit}` : "Unit"}
-                className="min-h-[52px] touch-manipulation text-base bg-white border-2 border-gray-400"
+                className="min-h-[52px] touch-manipulation text-base bg-white border-2 border-gray-300"
                 {...field}
               />
             </FormControl>
@@ -40,7 +39,9 @@ export const UnitField = ({ control, templateReading, readingMode }: UnitFieldPr
             )}
             <FormMessage />
             {fieldState.error && (
-              <div className="text-xs text-red-600">Error: {fieldState.error.message}</div>
+              <div className="text-xs text-red-600 bg-red-100 p-2 rounded mt-1 border border-red-200">
+                Error: {fieldState.error.message}
+              </div>
             )}
           </FormItem>
         )}

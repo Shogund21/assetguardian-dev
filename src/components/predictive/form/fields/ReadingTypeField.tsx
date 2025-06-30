@@ -29,8 +29,7 @@ export const ReadingTypeField = ({
   groupedReadings
 }: ReadingTypeFieldProps) => {
   return (
-    <div className="bg-yellow-50 p-4 rounded-lg border-2 border-yellow-300">
-      <div className="text-yellow-800 font-bold mb-2">📝 READING TYPE FIELD</div>
+    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
       <FormField
         control={control}
         name="reading_type"
@@ -45,12 +44,12 @@ export const ReadingTypeField = ({
           return (
             <FormItem className="w-full">
               <FormLabel className="text-base font-bold text-gray-900">
-                Reading Type {fieldState.error && <span className="text-red-500">⚠️</span>}
+                📝 Reading Type {fieldState.error && <span className="text-red-500">⚠️</span>}
               </FormLabel>
               {readingMode === "manual" ? (
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger className="min-h-[52px] touch-manipulation text-base w-full bg-white border-2 border-gray-400 shadow-sm">
+                    <SelectTrigger className="min-h-[52px] touch-manipulation text-base w-full bg-white border-2 border-gray-300 shadow-sm">
                       <SelectValue 
                         placeholder={
                           readingTemplate.length > 0 
@@ -60,7 +59,7 @@ export const ReadingTypeField = ({
                       />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent className="max-h-[70vh] overflow-y-auto bg-white border-2 border-gray-400 shadow-xl z-[9999] w-full">
+                  <SelectContent className="max-h-[70vh] overflow-y-auto bg-white border-2 border-gray-300 shadow-xl z-[9999] w-full">
                     {readingTemplate.length === 0 ? (
                       <div className="px-4 py-8 text-center text-gray-500">
                         <div className="text-lg mb-2">⚠️</div>
@@ -115,13 +114,13 @@ export const ReadingTypeField = ({
                     {...field} 
                     placeholder="Reading type (from AI)" 
                     readOnly={extractedReadings.length > 0}
-                    className="min-h-[52px] touch-manipulation text-base bg-white border-2 border-gray-400"
+                    className="min-h-[52px] touch-manipulation text-base bg-white border-2 border-gray-300"
                   />
                 </FormControl>
               )}
               <FormMessage />
               {fieldState.error && (
-                <div className="text-xs text-red-600 bg-red-100 p-2 rounded mt-1">
+                <div className="text-xs text-red-600 bg-red-100 p-2 rounded mt-1 border border-red-200">
                   Error: {fieldState.error.message}
                 </div>
               )}
