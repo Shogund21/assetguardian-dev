@@ -43,23 +43,41 @@ interface ExtractedReading {
 }
 
 const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualReadingEntryProps) => {
-  console.log('🧪 ManualReadingEntry is rendering:', {
-    equipmentId,
-    equipmentType,
-    timestamp: new Date().toISOString()
-  });
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [readingMode, setReadingMode] = useState<"manual" | "ai_image">("manual");
   const [extractedReadings, setExtractedReadings] = useState<ExtractedReading[]>([]);
   const [selectedReading, setSelectedReading] = useState<ExtractedReading | null>(null);
+  const [debugPhase, setDebugPhase] = useState(1);
   const { toast } = useToast();
   const { isOnline, updateUnsyncedCount } = useOfflineSync();
-  
-  // Force readingMode to manual for debugging
+
+  // Debug viewport and container info
   useEffect(() => {
-    console.log('🔧 Force setting readingMode to manual');
-    setReadingMode("manual");
+    console.log('🔍 PHASE 1 - CONTAINER DEBUG:', {
+      windowInnerHeight: window.innerHeight,
+      windowInnerWidth: window.innerWidth,
+      documentBodyHeight: document.body.scrollHeight,
+      documentBodyWidth: document.body.scrollWidth,
+      timestamp: new Date().toISOString()
+    });
+
+    // Check for problematic CSS on parent containers
+    const tabsContent = document.querySelector('[data-state="active"]');
+    const mainContainer = document.querySelector('.min-h-screen');
+    const cardElements = document.querySelectorAll('.mobile-card');
+
+    console.log('🔍 CONTAINER ANALYSIS:', {
+      tabsContentExists: !!tabsContent,
+      tabsContentStyles: tabsContent ? window.getComputedStyle(tabsContent) : null,
+      mainContainerExists: !!mainContainer,
+      mainContainerStyles: mainContainer ? {
+        overflow: window.getComputedStyle(mainContainer).overflow,
+        height: window.getComputedStyle(mainContainer).height,
+        maxHeight: window.getComputedStyle(mainContainer).maxHeight,
+        position: window.getComputedStyle(mainContainer).position
+      } : null,
+      cardElementsCount: cardElements.length
+    });
   }, []);
 
   const form = useForm<ReadingFormValues>({
@@ -78,14 +96,16 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
   const detectedEquipmentType = equipmentType || 'general';
   const readingTemplate = getEquipmentReadingTemplate(detectedEquipmentType);
 
-  console.log('🔧 ManualReadingEntry render state:', {
-    equipmentId,
-    equipmentType,
-    detectedEquipmentType,
-    templateCount: readingTemplate.length,
-    readingMode,
-    hasForm: !!form
-  });
+  useEffect(() => {
+    console.log('🔧 ManualReadingEntry initialization:', {
+      equipmentId,
+      equipmentType,
+      detectedEquipmentType,
+      templateCount: readingTemplate.length,
+      readingMode,
+      debugPhase
+    });
+  }, [equipmentId, equipmentType, detectedEquipmentType, readingTemplate.length, readingMode, debugPhase]);
 
   const selectedReadingType = form.watch('reading_type');
   const templateReading = readingTemplate.find(t => t.type === selectedReadingType);
@@ -97,32 +117,44 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
   }, [templateReading, form]);
 
   const handleReadingsExtracted = (readings: ExtractedReading[], imageUrl: string) => {
-    console.log('📷 AI readings extracted:', { count: readings.length });
-    setExtractedReadings(readings);
-    
-    if (readings.length > 0) {
-      const bestReading = readings.reduce((prev, current) => 
-        (current.confidence > prev.confidence) ? current : prev
-      );
-      setSelectedReading(bestReading);
-      
-      // Auto-populate form
-      form.setValue('reading_type', bestReading.type);
-      form.setValue('value', bestReading.value);
-      form.setValue('unit', bestReading.unit);
-      if (bestReading.location) {
-        form.setValue('location_notes', bestReading.location);
+    try {
+      console.log('📷 AI readings extracted:', { count: readings.length });
+      setExtractedReadings(readings);
+
+      if (readings.length > 0) {
+        const bestReading = readings.reduce((prev, current) =>
+          (current.confidence > prev.confidence) ? current : prev
+        );
+        setSelectedReading(bestReading);
+
+        form.setValue('reading_type', bestReading.type);
+        form.setValue('value', bestReading.value);
+        form.setValue('unit', bestReading.unit);
+        if (bestReading.location) {
+          form.setValue('location_notes', bestReading.location);
+        }
       }
+    } catch (error) {
+      console.error('❌ Error handling extracted readings:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process extracted readings",
+        variant: "destructive",
+      });
     }
   };
 
   const handleReadingSelection = (reading: ExtractedReading) => {
-    setSelectedReading(reading);
-    form.setValue('reading_type', reading.type);
-    form.setValue('value', reading.value);
-    form.setValue('unit', reading.unit);
-    if (reading.location) {
-      form.setValue('location_notes', reading.location);
+    try {
+      setSelectedReading(reading);
+      form.setValue('reading_type', reading.type);
+      form.setValue('value', reading.value);
+      form.setValue('unit', reading.unit);
+      if (reading.location) {
+        form.setValue('location_notes', reading.location);
+      }
+    } catch (error) {
+      console.error('❌ Error selecting reading:', error);
     }
   };
 
@@ -130,7 +162,7 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
     setIsSubmitting(true);
     try {
       const timestamp = new Date().toISOString();
-      
+
       if (isOnline) {
         const { error } = await supabase
           .from('sensor_readings')
@@ -197,91 +229,112 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
     }
   };
 
-  console.log('🎨 About to render ManualReadingEntry JSX');
-
-  return (
-    <div className="w-full min-h-screen overflow-y-auto bg-gray-50 pb-20">
-      <div className="text-red-500 text-lg font-bold bg-red-100 p-4 border border-red-300 rounded m-2">
-        🚨 DEBUG: ManualReadingEntry Component Started Rendering
-      </div>
-
-      <div className="px-2">
-        <OfflineIndicator />
-        
-        {/* Yellow border around entire card to test clipping */}
-        <div className="border-4 border-yellow-500 p-2 bg-yellow-50 rounded-lg">
-          <div className="text-yellow-800 font-bold text-center mb-2">
-            🔍 DEBUG: Card Container (if you see this, card is rendering)
-          </div>
-          
-          <Card className="w-full border-2 border-blue-500 bg-white">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center justify-between text-lg">
-                Record Reading
-                <ConnectionStatus isOnline={isOnline} />
-              </CardTitle>
-              
-              <EquipmentDebugInfo
-                detectedEquipmentType={detectedEquipmentType}
-                templateCount={readingTemplate.length}
-                readingMode={readingMode}
-                form={form}
-              />
-            </CardHeader>
+  // Render different phases of debugging
+  const renderDebugPhase = () => {
+    switch (debugPhase) {
+      case 1:
+        return (
+          <div className="space-y-4 w-full min-h-screen overflow-visible border-4 border-yellow-400 bg-yellow-50">
+            <div className="text-yellow-800 font-bold text-center p-4 bg-yellow-200 border border-yellow-600">
+              🔍 PHASE 1: Container CSS Investigation (Yellow Border = Main Container)
+            </div>
             
-            <CardContent className="space-y-4 p-4">
-              <div className="text-red-500 text-sm font-bold bg-red-100 p-2 border border-red-300 rounded">
-                ⬇️ DEBUG: Reading Mode Selector should be below this
-              </div>
+            <OfflineIndicator />
 
-              {/* Mode selector - always visible */}
-              <div className="border-2 border-purple-500 p-2 bg-purple-50 rounded">
+            <Card className="mobile-card w-full border-4 border-red-500 bg-red-50 overflow-visible">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between text-lg">
+                  Record Reading
+                  <ConnectionStatus isOnline={isOnline} />
+                </CardTitle>
+                <div className="text-red-800 font-bold bg-red-200 p-2 border border-red-600">
+                  🔍 Red Border = Card Container
+                </div>
+                <EquipmentDebugInfo
+                  detectedEquipmentType={detectedEquipmentType}
+                  templateCount={readingTemplate.length}
+                  readingMode={readingMode}
+                  form={form}
+                />
+              </CardHeader>
+
+              <CardContent className="space-y-6 w-full border-2 border-blue-400 bg-blue-50 overflow-visible">
+                <div className="text-blue-800 font-bold bg-blue-200 p-2 border border-blue-600">
+                  🔍 Blue Border = CardContent
+                </div>
+                
                 <ReadingModeSelector
                   readingMode={readingMode}
                   onReadingModeChange={setReadingMode}
                 />
-              </div>
 
-              <div className="text-blue-500 text-sm font-bold bg-blue-100 p-2 border border-blue-300 rounded">
-                ⬇️ DEBUG: AI Image Section (if ai_image mode selected)
-              </div>
-
-              {/* AI Camera section - show when ai_image mode */}
-              {readingMode === "ai_image" && (
-                <div className="border-2 border-blue-500 p-2 bg-blue-50 rounded">
-                  <div className="text-blue-700 font-bold text-center mb-2">
-                    📷 DEBUG: AI Image Reader Active
+                {readingMode === "ai_image" && (
+                  <div className="border-2 border-green-500 bg-green-50">
+                    <div className="text-green-800 font-bold bg-green-200 p-2 border border-green-600">
+                      🔍 Green Border = AI Image Section
+                    </div>
+                    <AIImageReader
+                      onReadingsExtracted={handleReadingsExtracted}
+                      equipmentType={detectedEquipmentType}
+                    />
                   </div>
-                  <AIImageReader
-                    onReadingsExtracted={handleReadingsExtracted}
-                    equipmentType={detectedEquipmentType}
-                  />
-                </div>
-              )}
+                )}
 
-              <div className="text-purple-500 text-sm font-bold bg-purple-100 p-2 border border-purple-300 rounded">
-                ⬇️ DEBUG: Extracted Readings Selector (if readings extracted)
-              </div>
-
-              {/* Extracted readings selector */}
-              {readingMode === "ai_image" && extractedReadings.length > 0 && (
-                <div className="border-2 border-purple-500 p-2 bg-purple-50 rounded">
+                {readingMode === "ai_image" && extractedReadings.length > 0 && (
                   <ExtractedReadingsSelector
                     extractedReadings={extractedReadings}
                     selectedReading={selectedReading}
                     onReadingSelection={handleReadingSelection}
                   />
-                </div>
-              )}
+                )}
 
-              <div className="text-green-500 text-sm font-bold bg-green-100 p-2 border border-green-300 rounded">
-                ⬇️ DEBUG: Reading Form should be below this
+                <div className="border-2 border-purple-400 bg-purple-50 min-h-[400px] overflow-visible">
+                  <div className="text-purple-800 font-bold bg-purple-200 p-2 border border-purple-600">
+                    🔍 Purple Border = ReadingForm Container
+                  </div>
+                  <ReadingForm
+                    form={form}
+                    onSubmit={onSubmit}
+                    isSubmitting={isSubmitting}
+                    isOnline={isOnline}
+                    readingMode={readingMode}
+                    readingTemplate={readingTemplate}
+                    extractedReadings={extractedReadings}
+                    templateReading={templateReading}
+                  />
+                </div>
+                
+                <button 
+                  onClick={() => setDebugPhase(2)}
+                  className="w-full bg-orange-500 text-white p-4 font-bold rounded border-2 border-orange-700"
+                >
+                  🚀 SWITCH TO PHASE 2: Force Visibility Test
+                </button>
+              </CardContent>
+            </Card>
+          </div>
+        );
+
+      case 2:
+        return (
+          <div className="fixed inset-0 z-[9999] bg-pink-100 border-8 border-pink-600 overflow-auto">
+            <div className="text-pink-800 font-bold text-center p-4 bg-pink-200 border-b-4 border-pink-600">
+              🚀 PHASE 2: FORCE VISIBILITY TEST (Fixed Position, Max Z-Index)
+            </div>
+            
+            <div className="p-4 space-y-4">
+              <div className="bg-pink-200 p-4 border-2 border-pink-500 rounded">
+                <div className="font-bold text-pink-800 mb-2">Visibility Test Results:</div>
+                <div className="text-sm text-pink-700">
+                  ✅ If you can see this, the component CAN render<br/>
+                  ✅ If form appears below, it's a layering/container issue<br/>
+                  ❌ If form still missing, it's a React rendering issue
+                </div>
               </div>
 
-              {/* Form - always visible */}
-              <div className="border-4 border-green-500 p-2 bg-green-50 rounded min-h-[400px]">
-                <div className="text-green-700 font-bold text-center mb-2">
-                  📝 DEBUG: Reading Form Container
+              <div className="bg-white p-4 border-4 border-indigo-600 rounded min-h-[300px]">
+                <div className="text-indigo-800 font-bold bg-indigo-100 p-2 border border-indigo-400 mb-4">
+                  🔍 Force-Visible ReadingForm (Indigo Border)
                 </div>
                 <ReadingForm
                   form={form}
@@ -294,16 +347,85 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
                   templateReading={templateReading}
                 />
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
 
-      <div className="text-green-500 text-lg font-bold bg-green-100 p-4 border border-green-300 rounded m-2">
-        ✅ DEBUG: ManualReadingEntry Component Finished Rendering
-      </div>
-    </div>
-  );
+              <button 
+                onClick={() => setDebugPhase(3)}
+                className="w-full bg-teal-500 text-white p-4 font-bold rounded border-2 border-teal-700"
+              >
+                🔍 SWITCH TO PHASE 3: Simplified Test
+              </button>
+              
+              <button 
+                onClick={() => setDebugPhase(1)}
+                className="w-full bg-gray-500 text-white p-4 font-bold rounded border-2 border-gray-700"
+              >
+                ⬅️ Back to Phase 1
+              </button>
+            </div>
+          </div>
+        );
+
+      case 3:
+        return (
+          <div className="w-full min-h-screen bg-emerald-100 border-8 border-emerald-600 p-4">
+            <div className="text-emerald-800 font-bold text-center p-4 bg-emerald-200 border-b-4 border-emerald-600 mb-4">
+              🔍 PHASE 3: SIMPLIFIED COMPONENT TEST
+            </div>
+            
+            <div className="space-y-4">
+              <div className="bg-emerald-200 p-4 border-2 border-emerald-500 rounded">
+                <div className="font-bold text-emerald-800 mb-2">Simple Form Test:</div>
+                <div className="text-sm text-emerald-700">
+                  Testing if basic form elements can render at all
+                </div>
+              </div>
+
+              {/* Ultra-simple form test */}
+              <div className="bg-white p-6 border-4 border-red-500 rounded">
+                <h3 className="text-xl font-bold text-red-800 mb-4">📝 SIMPLE FORM TEST</h3>
+                <form className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Test Input:</label>
+                    <input 
+                      type="text" 
+                      placeholder="Type here to test input"
+                      className="w-full p-3 border-2 border-gray-300 rounded text-lg"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Test Select:</label>
+                    <select className="w-full p-3 border-2 border-gray-300 rounded text-lg">
+                      <option>Option 1</option>
+                      <option>Option 2</option>
+                    </select>
+                  </div>
+                  <button 
+                    type="button"
+                    className="w-full bg-blue-500 text-white p-4 rounded text-lg font-bold"
+                  >
+                    Test Button
+                  </button>
+                </form>
+              </div>
+
+              <button 
+                onClick={() => setDebugPhase(1)}
+                className="w-full bg-gray-500 text-white p-4 font-bold rounded border-2 border-gray-700"
+              >
+                ⬅️ Back to Phase 1
+              </button>
+            </div>
+          </div>
+        );
+
+      default:
+        return <div>Unknown debug phase</div>;
+    }
+  };
+
+  console.log('🎨 About to render ManualReadingEntry, debugPhase:', debugPhase);
+
+  return renderDebugPhase();
 };
 
 export default ManualReadingEntry;
