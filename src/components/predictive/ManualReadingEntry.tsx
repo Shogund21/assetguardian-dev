@@ -200,100 +200,106 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
   console.log('🎨 About to render ManualReadingEntry JSX');
 
   return (
-    <div className="space-y-4 w-full min-h-screen mobile-form-container">
-      <div className="text-red-500 text-lg font-bold bg-red-100 p-4 border border-red-300 rounded">
+    <div className="w-full min-h-screen overflow-y-auto bg-gray-50 pb-20">
+      <div className="text-red-500 text-lg font-bold bg-red-100 p-4 border border-red-300 rounded m-2">
         🚨 DEBUG: ManualReadingEntry Component Started Rendering
       </div>
 
-      <OfflineIndicator />
-      
-      {/* Yellow border around entire card to test clipping */}
-      <div className="border-4 border-yellow-500 p-2 bg-yellow-50">
-        <div className="text-yellow-800 font-bold text-center mb-2">
-          🔍 DEBUG: Card Container (if you see this, card is rendering)
-        </div>
+      <div className="px-2">
+        <OfflineIndicator />
         
-        <Card className="mobile-card w-full">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between text-lg">
-              Record Reading
-              <ConnectionStatus isOnline={isOnline} />
-            </CardTitle>
-            
-            <EquipmentDebugInfo
-              detectedEquipmentType={detectedEquipmentType}
-              templateCount={readingTemplate.length}
-              readingMode={readingMode}
-              form={form}
-            />
-          </CardHeader>
+        {/* Yellow border around entire card to test clipping */}
+        <div className="border-4 border-yellow-500 p-2 bg-yellow-50 rounded-lg">
+          <div className="text-yellow-800 font-bold text-center mb-2">
+            🔍 DEBUG: Card Container (if you see this, card is rendering)
+          </div>
           
-          <CardContent className="space-y-6 w-full">
-            <div className="text-red-500 text-sm font-bold bg-red-100 p-2 border border-red-300">
-              ⬇️ DEBUG: Reading Mode Selector should be below this
-            </div>
+          <Card className="w-full border-2 border-blue-500 bg-white">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center justify-between text-lg">
+                Record Reading
+                <ConnectionStatus isOnline={isOnline} />
+              </CardTitle>
+              
+              <EquipmentDebugInfo
+                detectedEquipmentType={detectedEquipmentType}
+                templateCount={readingTemplate.length}
+                readingMode={readingMode}
+                form={form}
+              />
+            </CardHeader>
+            
+            <CardContent className="space-y-4 p-4">
+              <div className="text-red-500 text-sm font-bold bg-red-100 p-2 border border-red-300 rounded">
+                ⬇️ DEBUG: Reading Mode Selector should be below this
+              </div>
 
-            {/* Mode selector - always visible */}
-            <ReadingModeSelector
-              readingMode={readingMode}
-              onReadingModeChange={setReadingMode}
-            />
-
-            <div className="text-blue-500 text-sm font-bold bg-blue-100 p-2 border border-blue-300">
-              ⬇️ DEBUG: AI Image Section (if ai_image mode selected)
-            </div>
-
-            {/* AI Camera section - show when ai_image mode */}
-            {readingMode === "ai_image" && (
-              <div className="w-full mobile-form-field border-4 border-blue-500 p-2">
-                <div className="text-blue-700 font-bold text-center mb-2">
-                  📷 DEBUG: AI Image Reader Active
-                </div>
-                <AIImageReader
-                  onReadingsExtracted={handleReadingsExtracted}
-                  equipmentType={detectedEquipmentType}
+              {/* Mode selector - always visible */}
+              <div className="border-2 border-purple-500 p-2 bg-purple-50 rounded">
+                <ReadingModeSelector
+                  readingMode={readingMode}
+                  onReadingModeChange={setReadingMode}
                 />
               </div>
-            )}
 
-            <div className="text-purple-500 text-sm font-bold bg-purple-100 p-2 border border-purple-300">
-              ⬇️ DEBUG: Extracted Readings Selector (if readings extracted)
-            </div>
-
-            {/* Extracted readings selector */}
-            {readingMode === "ai_image" && extractedReadings.length > 0 && (
-              <ExtractedReadingsSelector
-                extractedReadings={extractedReadings}
-                selectedReading={selectedReading}
-                onReadingSelection={handleReadingSelection}
-              />
-            )}
-
-            <div className="text-green-500 text-sm font-bold bg-green-100 p-2 border border-green-300">
-              ⬇️ DEBUG: Reading Form should be below this
-            </div>
-
-            {/* Form - always visible */}
-            <div className="border-4 border-green-500 p-2 bg-green-50">
-              <div className="text-green-700 font-bold text-center mb-2">
-                📝 DEBUG: Reading Form Container
+              <div className="text-blue-500 text-sm font-bold bg-blue-100 p-2 border border-blue-300 rounded">
+                ⬇️ DEBUG: AI Image Section (if ai_image mode selected)
               </div>
-              <ReadingForm
-                form={form}
-                onSubmit={onSubmit}
-                isSubmitting={isSubmitting}
-                isOnline={isOnline}
-                readingMode={readingMode}
-                readingTemplate={readingTemplate}
-                extractedReadings={extractedReadings}
-                templateReading={templateReading}
-              />
-            </div>
-          </CardContent>
-        </Card>
+
+              {/* AI Camera section - show when ai_image mode */}
+              {readingMode === "ai_image" && (
+                <div className="border-2 border-blue-500 p-2 bg-blue-50 rounded">
+                  <div className="text-blue-700 font-bold text-center mb-2">
+                    📷 DEBUG: AI Image Reader Active
+                  </div>
+                  <AIImageReader
+                    onReadingsExtracted={handleReadingsExtracted}
+                    equipmentType={detectedEquipmentType}
+                  />
+                </div>
+              )}
+
+              <div className="text-purple-500 text-sm font-bold bg-purple-100 p-2 border border-purple-300 rounded">
+                ⬇️ DEBUG: Extracted Readings Selector (if readings extracted)
+              </div>
+
+              {/* Extracted readings selector */}
+              {readingMode === "ai_image" && extractedReadings.length > 0 && (
+                <div className="border-2 border-purple-500 p-2 bg-purple-50 rounded">
+                  <ExtractedReadingsSelector
+                    extractedReadings={extractedReadings}
+                    selectedReading={selectedReading}
+                    onReadingSelection={handleReadingSelection}
+                  />
+                </div>
+              )}
+
+              <div className="text-green-500 text-sm font-bold bg-green-100 p-2 border border-green-300 rounded">
+                ⬇️ DEBUG: Reading Form should be below this
+              </div>
+
+              {/* Form - always visible */}
+              <div className="border-4 border-green-500 p-2 bg-green-50 rounded min-h-[400px]">
+                <div className="text-green-700 font-bold text-center mb-2">
+                  📝 DEBUG: Reading Form Container
+                </div>
+                <ReadingForm
+                  form={form}
+                  onSubmit={onSubmit}
+                  isSubmitting={isSubmitting}
+                  isOnline={isOnline}
+                  readingMode={readingMode}
+                  readingTemplate={readingTemplate}
+                  extractedReadings={extractedReadings}
+                  templateReading={templateReading}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
-      <div className="text-green-500 text-lg font-bold bg-green-100 p-4 border border-green-300 rounded">
+      <div className="text-green-500 text-lg font-bold bg-green-100 p-4 border border-green-300 rounded m-2">
         ✅ DEBUG: ManualReadingEntry Component Finished Rendering
       </div>
     </div>
