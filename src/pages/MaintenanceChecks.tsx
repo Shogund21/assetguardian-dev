@@ -22,9 +22,11 @@ const MaintenanceChecks = () => {
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    // Don't hide form when switching to form tab
+    // Show form when switching to form tab
     if (value === "form") {
       setShowForm(true);
+    } else {
+      setShowForm(false);
     }
   };
 
@@ -53,27 +55,13 @@ const MaintenanceChecks = () => {
             </p>
           </div>
           
-          {showForm && isMobile ? (
-            <Button 
-              onClick={() => {
-                setShowForm(false);
-                setActiveTab("history");
-              }}
-              variant="outline"
-              className="w-full md:w-auto flex items-center justify-center bg-blue-900 hover:bg-blue-800 text-white border-blue-900"
-              size={isMobile ? "default" : "lg"}
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back to List
-            </Button>
-          ) : (
-            <Button 
-              onClick={handleNewCheck}
-              className={`${isMobile ? 'w-full py-2 text-sm' : ''} bg-blue-900 hover:bg-blue-800 text-white shadow transition-all duration-200`}
-              size={isMobile ? "default" : "lg"}
-            >
-              <Plus className={`${isMobile ? 'mr-1 h-4 w-4' : 'mr-2 h-5 w-5'}`} /> New Check
-            </Button>
-          )}
+          <Button 
+            onClick={handleNewCheck}
+            className={`${isMobile ? 'w-full py-2 text-sm' : ''} bg-blue-900 hover:bg-blue-800 text-white shadow transition-all duration-200`}
+            size={isMobile ? "default" : "lg"}
+          >
+            <Plus className={`${isMobile ? 'mr-1 h-4 w-4' : 'mr-2 h-5 w-5'}`} /> New Check
+          </Button>
         </div>
 
         <Tabs 
@@ -81,10 +69,25 @@ const MaintenanceChecks = () => {
           onValueChange={handleTabChange}
           className="w-full"
         >
-          <TabsList className="w-full grid grid-cols-3">
-            <TabsTrigger value="history" className="flex-1">Maintenance History</TabsTrigger>
-            <TabsTrigger value="documents" className="flex-1">Documents Repository</TabsTrigger>
-            <TabsTrigger value="form" className="flex-1">New Check</TabsTrigger>
+          <TabsList className={`w-full grid ${isMobile ? 'grid-cols-3 h-auto' : 'grid-cols-3'}`}>
+            <TabsTrigger 
+              value="history" 
+              className={`flex-1 ${isMobile ? 'text-xs px-2 py-2' : 'text-sm'}`}
+            >
+              {isMobile ? 'History' : 'Maintenance History'}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="documents" 
+              className={`flex-1 ${isMobile ? 'text-xs px-2 py-2' : 'text-sm'}`}
+            >
+              {isMobile ? 'Docs' : 'Documents Repository'}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="form" 
+              className={`flex-1 ${isMobile ? 'text-xs px-2 py-2' : 'text-sm'}`}
+            >
+              New Check
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="history" className="mt-4">
