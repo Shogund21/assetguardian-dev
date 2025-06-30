@@ -22,9 +22,20 @@ const MaintenanceChecks = () => {
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    if (value !== "form") {
-      setShowForm(false);
+    // Don't hide form when switching to form tab
+    if (value === "form") {
+      setShowForm(true);
     }
+  };
+
+  const handleNewCheck = () => {
+    setShowForm(true);
+    setActiveTab("form");
+  };
+
+  const handleFormComplete = () => {
+    setShowForm(false);
+    setActiveTab("history");
   };
 
   if (!mounted) return null;
@@ -44,7 +55,10 @@ const MaintenanceChecks = () => {
           
           {showForm && isMobile ? (
             <Button 
-              onClick={() => setShowForm(false)}
+              onClick={() => {
+                setShowForm(false);
+                setActiveTab("history");
+              }}
               variant="outline"
               className="w-full md:w-auto flex items-center justify-center bg-blue-900 hover:bg-blue-800 text-white border-blue-900"
               size={isMobile ? "default" : "lg"}
@@ -53,10 +67,7 @@ const MaintenanceChecks = () => {
             </Button>
           ) : (
             <Button 
-              onClick={() => {
-                setShowForm(true);
-                setActiveTab("form");
-              }}
+              onClick={handleNewCheck}
               className={`${isMobile ? 'w-full py-2 text-sm' : ''} bg-blue-900 hover:bg-blue-800 text-white shadow transition-all duration-200`}
               size={isMobile ? "default" : "lg"}
             >
@@ -65,39 +76,37 @@ const MaintenanceChecks = () => {
           )}
         </div>
 
-        {!showForm && (
-          <Tabs 
-            defaultValue="history" 
-            value={activeTab}
-            onValueChange={handleTabChange}
-            className="w-full"
-          >
-            <TabsList className="w-full">
-              <TabsTrigger value="history" className="flex-1">Maintenance History</TabsTrigger>
-              <TabsTrigger value="documents" className="flex-1">Documents Repository</TabsTrigger>
-            </TabsList>
+        <Tabs 
+          value={activeTab}
+          onValueChange={handleTabChange}
+          className="w-full"
+        >
+          <TabsList className="w-full grid grid-cols-3">
+            <TabsTrigger value="history" className="flex-1">Maintenance History</TabsTrigger>
+            <TabsTrigger value="documents" className="flex-1">Documents Repository</TabsTrigger>
+            <TabsTrigger value="form" className="flex-1">New Check</TabsTrigger>
+          </TabsList>
 
-            <TabsContent value="history" className="mt-4">
-              <div className="bg-white rounded-lg shadow-sm p-4">
-                <MaintenanceHistory />
-              </div>
-            </TabsContent>
+          <TabsContent value="history" className="mt-4">
+            <div className="bg-white rounded-lg shadow-sm p-4">
+              <MaintenanceHistory />
+            </div>
+          </TabsContent>
 
-            <TabsContent value="documents" className="mt-4">
-              <div className="bg-white rounded-lg shadow-sm p-4">
-                <FormSection noPadding>
-                  <DocumentManager isRepositoryView={true} />
-                </FormSection>
-              </div>
-            </TabsContent>
-          </Tabs>
-        )}
+          <TabsContent value="documents" className="mt-4">
+            <div className="bg-white rounded-lg shadow-sm p-4">
+              <FormSection noPadding>
+                <DocumentManager isRepositoryView={true} />
+              </FormSection>
+            </div>
+          </TabsContent>
 
-        {showForm && (
-          <div className="bg-white rounded-lg shadow-sm p-4 animate-fade-in">
-            <MaintenanceCheckFormRefactored onComplete={() => setShowForm(false)} />
-          </div>
-        )}
+          <TabsContent value="form" className="mt-4">
+            <div className="bg-white rounded-lg shadow-sm p-4 animate-fade-in">
+              <MaintenanceCheckFormRefactored onComplete={handleFormComplete} />
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </Layout>
   );
