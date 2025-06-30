@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,6 +16,7 @@ import ReadingHistory from "./ReadingHistory";
 import EnhancedAIAnalysis from "./EnhancedAIAnalysis";
 import AnalysisResultsHistory from "./AnalysisResultsHistory";
 import DatabaseStatus from "./DatabaseStatus";
+import { EquipmentSelector } from "./dashboard/EquipmentSelector";
 
 const PredictiveMaintenanceDashboard = () => {
   const [selectedEquipmentId, setSelectedEquipmentId] = useState<string>("");
@@ -76,6 +78,9 @@ const PredictiveMaintenanceDashboard = () => {
   const equipmentType = getEquipmentType(selectedEquipment);
   const readingTemplates = getEquipmentReadingTemplate(equipmentType);
 
+  // Show equipment selector for tabs that need it
+  const showEquipmentSelector = ["history", "analysis"].includes(activeTab);
+
   return (
     <div className="w-full h-full">
       <PredictiveDashboardHeader />
@@ -85,8 +90,21 @@ const PredictiveMaintenanceDashboard = () => {
         equipmentName={selectedEquipment?.name}
       />
 
+      {/* Compact equipment selector for specific tabs */}
+      {showEquipmentSelector && (
+        <div className="mb-3 px-1">
+          <EquipmentSelector
+            equipment={equipment}
+            selectedEquipmentId={selectedEquipmentId}
+            onEquipmentChange={setSelectedEquipmentId}
+            placeholder="Select equipment"
+            className="w-full"
+          />
+        </div>
+      )}
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 mb-6">
+        <TabsList className="grid w-full grid-cols-5 mb-4">
           <TabsTrigger value="readings" className="touch-manipulation">Record</TabsTrigger>
           <TabsTrigger value="history" className="touch-manipulation">History</TabsTrigger>
           <TabsTrigger value="analysis" className="touch-manipulation">Analysis</TabsTrigger>
@@ -107,38 +125,30 @@ const PredictiveMaintenanceDashboard = () => {
         </TabsContent>
         
         <TabsContent value="history">
-          <EquipmentTabContent
-            equipment={equipment}
-            selectedEquipmentId={selectedEquipmentId}
-            onEquipmentChange={setSelectedEquipmentId}
-            selectedEquipment={selectedEquipment}
-            placeholder="Select equipment to view history"
-            emptyStateTitle="Select Equipment"
-            emptyStateMessage="Choose equipment above to view reading history"
-          >
+          {selectedEquipment ? (
             <ReadingHistory 
               equipmentId={selectedEquipmentId}
               equipmentType={equipmentType}
             />
-          </EquipmentTabContent>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              Select equipment above to view history
+            </div>
+          )}
         </TabsContent>
         
         <TabsContent value="analysis">
-          <EquipmentTabContent
-            equipment={equipment}
-            selectedEquipmentId={selectedEquipmentId}
-            onEquipmentChange={setSelectedEquipmentId}
-            selectedEquipment={selectedEquipment}
-            placeholder="Select equipment to analyze"
-            emptyStateTitle="Select Equipment"
-            emptyStateMessage="Choose equipment above to run AI analysis"
-          >
+          {selectedEquipment ? (
             <EnhancedAIAnalysis 
               equipmentId={selectedEquipmentId}
               equipmentType={equipmentType}
               equipmentName={selectedEquipment?.name || ''}
             />
-          </EquipmentTabContent>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              Select equipment above to run analysis
+            </div>
+          )}
         </TabsContent>
         
         <TabsContent value="results">

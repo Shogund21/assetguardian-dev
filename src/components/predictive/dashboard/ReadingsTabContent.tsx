@@ -83,21 +83,24 @@ export const ReadingsTabContent = ({
 
   return (
     <div className="space-y-4">
-      <EquipmentSelector
-        equipment={equipment}
-        selectedEquipmentId={selectedEquipmentId}
-        onEquipmentChange={onEquipmentChange}
-        placeholder="Select equipment to monitor"
-        className="mb-6"
-      />
+      {/* Compact equipment selector for readings tab */}
+      <div className="mb-3">
+        <EquipmentSelector
+          equipment={equipment}
+          selectedEquipmentId={selectedEquipmentId}
+          onEquipmentChange={onEquipmentChange}
+          placeholder="Select equipment to monitor"
+          className="w-full"
+        />
+      </div>
 
       {selectedEquipment ? (
-        <div className="space-y-6">
+        <div className="space-y-4">
           <Card className="mobile-card">
-            <CardHeader>
+            <CardHeader className="pb-3">
               <CardTitle className="text-lg">{selectedEquipment.name}</CardTitle>
-              <div className="text-sm text-muted-foreground space-y-2">
-                <div className="grid grid-cols-1 gap-2">
+              <div className="text-sm text-muted-foreground space-y-1">
+                <div className="grid grid-cols-2 gap-2">
                   <div className="flex justify-between">
                     <span>Location:</span>
                     <span className="font-medium">{selectedEquipment.location}</span>
@@ -106,16 +109,16 @@ export const ReadingsTabContent = ({
                     <span>Status:</span>
                     <span className="font-medium text-green-600">{selectedEquipment.status || 'Active'}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Detected Type:</span>
-                    <span className="font-medium text-blue-600">{finalEquipmentType}</span>
-                  </div>
+                </div>
+                <div className="flex justify-between">
+                  <span>Type:</span>
+                  <span className="font-medium text-blue-600">{finalEquipmentType}</span>
                 </div>
                 
                 {readingTemplates.length > 0 && (
-                  <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <div className="text-blue-800 font-medium text-center">
-                      ✅ {readingTemplates.length} standard readings available for this equipment type
+                  <div className="mt-2 p-2 bg-blue-50 rounded border border-blue-200">
+                    <div className="text-blue-800 font-medium text-sm text-center">
+                      ✅ {readingTemplates.length} readings available
                     </div>
                   </div>
                 )}

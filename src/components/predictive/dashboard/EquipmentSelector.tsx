@@ -25,15 +25,18 @@ export const EquipmentSelector = ({
   className = "w-full"
 }: EquipmentSelectorProps) => {
   return (
-    <div className={`mb-6 ${className}`}>
+    <div className={className}>
       <Select value={selectedEquipmentId} onValueChange={onEquipmentChange}>
-        <SelectTrigger className="w-full touch-manipulation" style={{ minHeight: '44px' }}>
+        <SelectTrigger className="w-full touch-manipulation h-10" style={{ minHeight: '40px' }}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent className="max-h-60 overflow-y-auto">
           {equipment.map((eq) => (
             <SelectItem key={eq.id} value={eq.id} className="touch-manipulation">
-              {eq.name} - {eq.location}
+              <div className="flex flex-col">
+                <span className="font-medium">{eq.name}</span>
+                <span className="text-xs text-muted-foreground">{eq.location}</span>
+              </div>
             </SelectItem>
           ))}
         </SelectContent>
