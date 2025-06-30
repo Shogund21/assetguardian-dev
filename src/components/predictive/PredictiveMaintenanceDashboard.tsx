@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -91,7 +90,7 @@ const PredictiveMaintenanceDashboard = () => {
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 mb-2">
+        <TabsList className="grid w-full grid-cols-5 mb-1">
           <TabsTrigger value="readings" className="touch-manipulation">Record</TabsTrigger>
           <TabsTrigger value="history" className="touch-manipulation">History</TabsTrigger>
           <TabsTrigger value="analysis" className="touch-manipulation">Analysis</TabsTrigger>
@@ -101,7 +100,7 @@ const PredictiveMaintenanceDashboard = () => {
 
         {/* Compact equipment selector for specific tabs only */}
         {showEquipmentSelector && (
-          <div className="mb-3 px-1">
+          <div className="mb-2 px-1">
             <EquipmentSelector
               equipment={equipment}
               selectedEquipmentId={selectedEquipmentId}
@@ -112,7 +111,7 @@ const PredictiveMaintenanceDashboard = () => {
           </div>
         )}
         
-        <TabsContent value="readings" className="mt-2">
+        <TabsContent value="readings" className="mt-1">
           <ReadingsTabContent
             equipment={equipment}
             selectedEquipmentId={selectedEquipmentId}

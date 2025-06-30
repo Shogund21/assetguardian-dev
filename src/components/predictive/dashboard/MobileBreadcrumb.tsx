@@ -13,7 +13,7 @@ export const MobileBreadcrumb = ({ currentStep, equipmentName }: MobileBreadcrum
   const navigate = useNavigate();
 
   return (
-    <div className="md:hidden bg-white border-b border-gray-200 px-4 py-3 mb-4">
+    <div className="md:hidden bg-white border-b border-gray-200 px-4 py-1 mb-1">
       <div className="flex items-center gap-2 text-sm">
         <Button
           variant="ghost"
