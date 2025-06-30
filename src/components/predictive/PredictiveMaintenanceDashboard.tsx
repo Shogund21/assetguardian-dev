@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -77,9 +78,6 @@ const PredictiveMaintenanceDashboard = () => {
   const equipmentType = getEquipmentType(selectedEquipment);
   const readingTemplates = getEquipmentReadingTemplate(equipmentType);
 
-  // Show equipment selector for tabs that need it
-  const showEquipmentSelector = ["history", "analysis"].includes(activeTab);
-
   return (
     <div className="w-full h-full">
       <PredictiveDashboardHeader />
@@ -98,8 +96,8 @@ const PredictiveMaintenanceDashboard = () => {
           <TabsTrigger value="database" className="touch-manipulation">Status</TabsTrigger>
         </TabsList>
 
-        {/* Compact equipment selector for specific tabs only */}
-        {showEquipmentSelector && (
+        {/* Universal equipment selector - always visible except on readings tab */}
+        {activeTab !== "readings" && (
           <div className="mb-2 px-1">
             <EquipmentSelector
               equipment={equipment}
