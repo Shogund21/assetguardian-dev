@@ -11,7 +11,11 @@ interface MobileLayoutProps {
 
 export const MobileLayout = ({ children }: MobileLayoutProps) => {
   return (
-    <div className="h-screen w-full overflow-hidden bg-gray-50">
+    <div className="h-screen w-full overflow-y-auto bg-gray-50 border-2 border-orange-500">
+      <div className="text-orange-800 font-bold bg-orange-200 p-2 border border-orange-600 text-center">
+        🔍 DEBUG: MobileLayout Root (Orange Border) - overflow-y-auto instead of overflow-hidden
+      </div>
+      
       {/* Sidebar trigger */}
       <div className="fixed top-4 left-4 z-[200]">
         <SidebarTrigger 
@@ -29,7 +33,10 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
       <Sidebar />
 
       {/* Main content with mobile optimization */}
-      <div className="bg-gray-50 min-h-screen w-full overflow-y-auto mobile-form-container">
+      <div className="bg-gray-50 min-h-screen w-full overflow-y-auto mobile-form-container border-2 border-teal-500">
+        <div className="text-teal-800 font-bold bg-teal-200 p-2 border border-teal-600 text-center">
+          🔍 DEBUG: Main Content Container (Teal Border) - overflow-y-auto
+        </div>
         <div className="h-full w-full pt-20 px-3 sm:px-4">
           {/* Application header */}
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200 bg-white p-4 rounded-lg shadow-sm">
@@ -47,7 +54,10 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
           </div>
           
           {/* Main content - ensure mobile compatibility */}
-          <div className="min-h-[200px] mobile-form-container predictive-form">
+          <div className="min-h-[200px] mobile-form-container predictive-form overflow-y-auto border-2 border-indigo-500">
+            <div className="text-indigo-800 font-bold bg-indigo-200 p-2 border border-indigo-600 text-center">
+              🔍 DEBUG: Children Container (Indigo Border) - overflow-y-auto
+            </div>
             {children || (
               <div className="flex items-center justify-center h-64">
                 <p className="text-gray-500">Loading content...</p>

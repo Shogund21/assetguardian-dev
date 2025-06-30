@@ -91,7 +91,7 @@
     -webkit-tap-highlight-color: transparent !important;
   }
 
-  /* Mobile form fixes - CRITICAL */
+  /* Mobile form fixes - CRITICAL - UPDATED FOR VISIBILITY */
   .mobile-form-container {
     display: block !important;
     visibility: visible !important;
@@ -99,6 +99,8 @@
     width: 100% !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
+    position: relative !important;
+    z-index: 1 !important;
   }
 
   .mobile-card {
@@ -107,9 +109,10 @@
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
+    overflow: visible !important;
   }
 
-  /* Ensure forms display on mobile - MOST CRITICAL */
+  /* Ensure forms display on mobile - MOST CRITICAL - UPDATED */
   .predictive-form {
     display: block !important;
     visibility: visible !important;
@@ -118,6 +121,8 @@
     z-index: 1 !important;
     width: 100% !important;
     min-height: 200px !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
   }
 
   /* Force all form elements to be visible on mobile */
@@ -128,6 +133,7 @@
     width: 100% !important;
     min-height: 52px !important;
     position: relative !important;
+    overflow: visible !important;
   }
 
   /* Radio buttons - remove sr-only on mobile */
@@ -168,21 +174,24 @@
     visibility: visible !important;
   }
 
-  /* Ensure TabsContent doesn't clip content */
+  /* Ensure TabsContent doesn't clip content - UPDATED */
   [data-state="active"] {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
-    overflow: visible !important;
+    overflow-y: auto !important;
     max-height: none !important;
+    min-height: 200px !important;
+    -webkit-overflow-scrolling: touch !important;
   }
 
-  /* Fix any potential container issues */
+  /* Fix any potential container issues - UPDATED */
   .container, .max-w-7xl, .mx-auto {
     width: 100% !important;
     max-width: none !important;
     padding-left: 0.5rem !important;
     padding-right: 0.5rem !important;
+    overflow-y: auto !important;
   }
 }
 

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -47,38 +48,19 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
   const [readingMode, setReadingMode] = useState<"manual" | "ai_image">("manual");
   const [extractedReadings, setExtractedReadings] = useState<ExtractedReading[]>([]);
   const [selectedReading, setSelectedReading] = useState<ExtractedReading | null>(null);
-  const [debugPhase, setDebugPhase] = useState(1);
   const { toast } = useToast();
   const { isOnline, updateUnsyncedCount } = useOfflineSync();
 
-  // Debug viewport and container info
+  // Debug logging
   useEffect(() => {
-    console.log('🔍 PHASE 1 - CONTAINER DEBUG:', {
-      windowInnerHeight: window.innerHeight,
-      windowInnerWidth: window.innerWidth,
-      documentBodyHeight: document.body.scrollHeight,
-      documentBodyWidth: document.body.scrollWidth,
+    console.log('🔍 ManualReadingEntry initialization:', {
+      equipmentId,
+      equipmentType,
+      windowHeight: window.innerHeight,
+      windowWidth: window.innerWidth,
       timestamp: new Date().toISOString()
     });
-
-    // Check for problematic CSS on parent containers
-    const tabsContent = document.querySelector('[data-state="active"]');
-    const mainContainer = document.querySelector('.min-h-screen');
-    const cardElements = document.querySelectorAll('.mobile-card');
-
-    console.log('🔍 CONTAINER ANALYSIS:', {
-      tabsContentExists: !!tabsContent,
-      tabsContentStyles: tabsContent ? window.getComputedStyle(tabsContent) : null,
-      mainContainerExists: !!mainContainer,
-      mainContainerStyles: mainContainer ? {
-        overflow: window.getComputedStyle(mainContainer).overflow,
-        height: window.getComputedStyle(mainContainer).height,
-        maxHeight: window.getComputedStyle(mainContainer).maxHeight,
-        position: window.getComputedStyle(mainContainer).position
-      } : null,
-      cardElementsCount: cardElements.length
-    });
-  }, []);
+  }, [equipmentId, equipmentType]);
 
   const form = useForm<ReadingFormValues>({
     resolver: zodResolver(readingSchema),
@@ -95,17 +77,6 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
 
   const detectedEquipmentType = equipmentType || 'general';
   const readingTemplate = getEquipmentReadingTemplate(detectedEquipmentType);
-
-  useEffect(() => {
-    console.log('🔧 ManualReadingEntry initialization:', {
-      equipmentId,
-      equipmentType,
-      detectedEquipmentType,
-      templateCount: readingTemplate.length,
-      readingMode,
-      debugPhase
-    });
-  }, [equipmentId, equipmentType, detectedEquipmentType, readingTemplate.length, readingMode, debugPhase]);
 
   const selectedReadingType = form.watch('reading_type');
   const templateReading = readingTemplate.find(t => t.type === selectedReadingType);
@@ -229,203 +200,82 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
     }
   };
 
-  // Render different phases of debugging
-  const renderDebugPhase = () => {
-    switch (debugPhase) {
-      case 1:
-        return (
-          <div className="space-y-4 w-full min-h-screen overflow-visible border-4 border-yellow-400 bg-yellow-50">
-            <div className="text-yellow-800 font-bold text-center p-4 bg-yellow-200 border border-yellow-600">
-              🔍 PHASE 1: Container CSS Investigation (Yellow Border = Main Container)
-            </div>
-            
-            <OfflineIndicator />
+  console.log('🎨 About to render ManualReadingEntry');
 
-            <Card className="mobile-card w-full border-4 border-red-500 bg-red-50 overflow-visible">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between text-lg">
-                  Record Reading
-                  <ConnectionStatus isOnline={isOnline} />
-                </CardTitle>
-                <div className="text-red-800 font-bold bg-red-200 p-2 border border-red-600">
-                  🔍 Red Border = Card Container
-                </div>
-                <EquipmentDebugInfo
-                  detectedEquipmentType={detectedEquipmentType}
-                  templateCount={readingTemplate.length}
-                  readingMode={readingMode}
-                  form={form}
-                />
-              </CardHeader>
+  return (
+    <div className="min-h-screen overflow-y-auto w-full border-4 border-yellow-400 bg-yellow-50 p-4 mobile-form-container predictive-form">
+      <div className="text-yellow-800 font-bold text-center p-4 bg-yellow-200 border border-yellow-600 mb-4">
+        🔍 DEBUG: Main Container (Yellow Border) - min-h-screen + overflow-y-auto
+      </div>
+      
+      <OfflineIndicator />
 
-              <CardContent className="space-y-6 w-full border-2 border-blue-400 bg-blue-50 overflow-visible">
-                <div className="text-blue-800 font-bold bg-blue-200 p-2 border border-blue-600">
-                  🔍 Blue Border = CardContent
-                </div>
-                
-                <ReadingModeSelector
-                  readingMode={readingMode}
-                  onReadingModeChange={setReadingMode}
-                />
-
-                {readingMode === "ai_image" && (
-                  <div className="border-2 border-green-500 bg-green-50">
-                    <div className="text-green-800 font-bold bg-green-200 p-2 border border-green-600">
-                      🔍 Green Border = AI Image Section
-                    </div>
-                    <AIImageReader
-                      onReadingsExtracted={handleReadingsExtracted}
-                      equipmentType={detectedEquipmentType}
-                    />
-                  </div>
-                )}
-
-                {readingMode === "ai_image" && extractedReadings.length > 0 && (
-                  <ExtractedReadingsSelector
-                    extractedReadings={extractedReadings}
-                    selectedReading={selectedReading}
-                    onReadingSelection={handleReadingSelection}
-                  />
-                )}
-
-                <div className="border-2 border-purple-400 bg-purple-50 min-h-[400px] overflow-visible">
-                  <div className="text-purple-800 font-bold bg-purple-200 p-2 border border-purple-600">
-                    🔍 Purple Border = ReadingForm Container
-                  </div>
-                  <ReadingForm
-                    form={form}
-                    onSubmit={onSubmit}
-                    isSubmitting={isSubmitting}
-                    isOnline={isOnline}
-                    readingMode={readingMode}
-                    readingTemplate={readingTemplate}
-                    extractedReadings={extractedReadings}
-                    templateReading={templateReading}
-                  />
-                </div>
-                
-                <button 
-                  onClick={() => setDebugPhase(2)}
-                  className="w-full bg-orange-500 text-white p-4 font-bold rounded border-2 border-orange-700"
-                >
-                  🚀 SWITCH TO PHASE 2: Force Visibility Test
-                </button>
-              </CardContent>
-            </Card>
+      <Card className="mobile-card w-full border-4 border-red-500 bg-red-50 overflow-visible mb-4">
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between text-lg">
+            Record Reading
+            <ConnectionStatus isOnline={isOnline} />
+          </CardTitle>
+          <div className="text-red-800 font-bold bg-red-200 p-2 border border-red-600">
+            🔍 DEBUG: Card Container (Red Border)
           </div>
-        );
+          <EquipmentDebugInfo
+            detectedEquipmentType={detectedEquipmentType}
+            templateCount={readingTemplate.length}
+            readingMode={readingMode}
+            form={form}
+          />
+        </CardHeader>
 
-      case 2:
-        return (
-          <div className="fixed inset-0 z-[9999] bg-pink-100 border-8 border-pink-600 overflow-auto">
-            <div className="text-pink-800 font-bold text-center p-4 bg-pink-200 border-b-4 border-pink-600">
-              🚀 PHASE 2: FORCE VISIBILITY TEST (Fixed Position, Max Z-Index)
-            </div>
-            
-            <div className="p-4 space-y-4">
-              <div className="bg-pink-200 p-4 border-2 border-pink-500 rounded">
-                <div className="font-bold text-pink-800 mb-2">Visibility Test Results:</div>
-                <div className="text-sm text-pink-700">
-                  ✅ If you can see this, the component CAN render<br/>
-                  ✅ If form appears below, it's a layering/container issue<br/>
-                  ❌ If form still missing, it's a React rendering issue
-                </div>
-              </div>
-
-              <div className="bg-white p-4 border-4 border-indigo-600 rounded min-h-[300px]">
-                <div className="text-indigo-800 font-bold bg-indigo-100 p-2 border border-indigo-400 mb-4">
-                  🔍 Force-Visible ReadingForm (Indigo Border)
-                </div>
-                <ReadingForm
-                  form={form}
-                  onSubmit={onSubmit}
-                  isSubmitting={isSubmitting}
-                  isOnline={isOnline}
-                  readingMode={readingMode}
-                  readingTemplate={readingTemplate}
-                  extractedReadings={extractedReadings}
-                  templateReading={templateReading}
-                />
-              </div>
-
-              <button 
-                onClick={() => setDebugPhase(3)}
-                className="w-full bg-teal-500 text-white p-4 font-bold rounded border-2 border-teal-700"
-              >
-                🔍 SWITCH TO PHASE 3: Simplified Test
-              </button>
-              
-              <button 
-                onClick={() => setDebugPhase(1)}
-                className="w-full bg-gray-500 text-white p-4 font-bold rounded border-2 border-gray-700"
-              >
-                ⬅️ Back to Phase 1
-              </button>
-            </div>
+        <CardContent className="space-y-6 w-full border-4 border-blue-400 bg-blue-50 overflow-y-auto">
+          <div className="text-blue-800 font-bold bg-blue-200 p-2 border border-blue-600">
+            🔍 DEBUG: CardContent (Blue Border) - overflow-y-auto
           </div>
-        );
+          
+          <ReadingModeSelector
+            readingMode={readingMode}
+            onReadingModeChange={setReadingMode}
+          />
 
-      case 3:
-        return (
-          <div className="w-full min-h-screen bg-emerald-100 border-8 border-emerald-600 p-4">
-            <div className="text-emerald-800 font-bold text-center p-4 bg-emerald-200 border-b-4 border-emerald-600 mb-4">
-              🔍 PHASE 3: SIMPLIFIED COMPONENT TEST
-            </div>
-            
-            <div className="space-y-4">
-              <div className="bg-emerald-200 p-4 border-2 border-emerald-500 rounded">
-                <div className="font-bold text-emerald-800 mb-2">Simple Form Test:</div>
-                <div className="text-sm text-emerald-700">
-                  Testing if basic form elements can render at all
-                </div>
+          {readingMode === "ai_image" && (
+            <div className="border-2 border-green-500 bg-green-50 p-4">
+              <div className="text-green-800 font-bold bg-green-200 p-2 border border-green-600 mb-4">
+                🔍 DEBUG: AI Image Section (Green Border)
               </div>
-
-              {/* Ultra-simple form test */}
-              <div className="bg-white p-6 border-4 border-red-500 rounded">
-                <h3 className="text-xl font-bold text-red-800 mb-4">📝 SIMPLE FORM TEST</h3>
-                <form className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Test Input:</label>
-                    <input 
-                      type="text" 
-                      placeholder="Type here to test input"
-                      className="w-full p-3 border-2 border-gray-300 rounded text-lg"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Test Select:</label>
-                    <select className="w-full p-3 border-2 border-gray-300 rounded text-lg">
-                      <option>Option 1</option>
-                      <option>Option 2</option>
-                    </select>
-                  </div>
-                  <button 
-                    type="button"
-                    className="w-full bg-blue-500 text-white p-4 rounded text-lg font-bold"
-                  >
-                    Test Button
-                  </button>
-                </form>
-              </div>
-
-              <button 
-                onClick={() => setDebugPhase(1)}
-                className="w-full bg-gray-500 text-white p-4 font-bold rounded border-2 border-gray-700"
-              >
-                ⬅️ Back to Phase 1
-              </button>
+              <AIImageReader
+                onReadingsExtracted={handleReadingsExtracted}
+                equipmentType={detectedEquipmentType}
+              />
             </div>
+          )}
+
+          {readingMode === "ai_image" && extractedReadings.length > 0 && (
+            <ExtractedReadingsSelector
+              extractedReadings={extractedReadings}
+              selectedReading={selectedReading}
+              onReadingSelection={handleReadingSelection}
+            />
+          )}
+
+          <div className="border-4 border-purple-400 bg-purple-50 min-h-[400px] overflow-y-auto p-4">
+            <div className="text-purple-800 font-bold bg-purple-200 p-2 border border-purple-600 mb-4">
+              🔍 DEBUG: ReadingForm Container (Purple Border) - min-h-400px + overflow-y-auto
+            </div>
+            <ReadingForm
+              form={form}
+              onSubmit={onSubmit}
+              isSubmitting={isSubmitting}
+              isOnline={isOnline}
+              readingMode={readingMode}
+              readingTemplate={readingTemplate}
+              extractedReadings={extractedReadings}
+              templateReading={templateReading}
+            />
           </div>
-        );
-
-      default:
-        return <div>Unknown debug phase</div>;
-    }
-  };
-
-  console.log('🎨 About to render ManualReadingEntry, debugPhase:', debugPhase);
-
-  return renderDebugPhase();
+        </CardContent>
+      </Card>
+    </div>
+  );
 };
 
 export default ManualReadingEntry;
