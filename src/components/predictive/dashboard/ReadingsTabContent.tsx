@@ -82,14 +82,14 @@ export const ReadingsTabContent = ({
   });
 
   return (
-    <div className="space-y-4">
-      {/* Welcome section with spacing */}
+    <div className="space-y-4 px-4">
+      {/* Welcome section with consistent spacing */}
       <div className="pt-2 pb-3">
         <h3 className="text-lg font-semibold text-gray-900 mb-1">Equipment Readings</h3>
         <p className="text-sm text-gray-600">Select equipment below to start recording readings</p>
       </div>
 
-      {/* Equipment selector moved down with proper spacing */}
+      {/* Equipment selector with consistent alignment */}
       <div className="mb-4">
         <EquipmentSelector
           equipment={equipment}
