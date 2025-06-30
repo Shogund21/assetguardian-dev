@@ -36,61 +36,28 @@ export const ReadingsTabContent = ({
   readingTemplates,
   isOnline
 }: ReadingsTabContentProps) => {
-  // Enhanced equipment type detection with detailed logging
   const getEquipmentTypeFromName = (equipment: Equipment | undefined): string => {
-    if (!equipment) {
-      console.log('🔍 No equipment selected, defaulting to general');
-      return 'general';
-    }
-    
+    if (!equipment) return 'general';
     const name = equipment.name.toLowerCase();
-    console.log('🔍 Detecting equipment type for:', {
-      originalName: equipment.name,
-      lowerName: name,
-      id: equipment.id
-    });
-    
-    if (name.includes('chiller') || name.includes('chill')) {
-      console.log('🧊 Detected as CHILLER type');
-      return 'chiller';
-    }
-    if (name.includes('ahu') || name.includes('air handler') || name.includes('air handling')) {
-      console.log('🌬️ Detected as AHU type');
-      return 'ahu';
-    }
-    if (name.includes('rtu') || name.includes('rooftop') || name.includes('roof top')) {
-      console.log('🏠 Detected as RTU type');
-      return 'rtu';
-    }
-    if (name.includes('cooling tower') || name.includes('tower')) {
-      console.log('🗼 Detected as cooling tower type');
-      return 'cooling_tower';
-    }
-    
-    console.log('📋 Defaulted to general type');
+    if (name.includes('chiller') || name.includes('chill')) return 'chiller';
+    if (name.includes('ahu') || name.includes('air handler') || name.includes('air handling')) return 'ahu';
+    if (name.includes('rtu') || name.includes('rooftop') || name.includes('roof top')) return 'rtu';
+    if (name.includes('cooling tower') || name.includes('tower')) return 'cooling_tower';
     return 'general';
   };
 
-  // Use the passed equipmentType prop first, then fallback to detection
   const finalEquipmentType = equipmentType || getEquipmentTypeFromName(selectedEquipment);
-  
-  console.log('🎯 Final equipment type resolution:', {
-    passedEquipmentType: equipmentType,
-    detectedFromName: getEquipmentTypeFromName(selectedEquipment),
-    finalType: finalEquipmentType,
-    selectedEquipmentName: selectedEquipment?.name
-  });
 
   return (
-    <div className="space-y-4 mt-4">
-      {/* Welcome section with consistent spacing */}
-      <div className="pt-2 pb-3">
+    <div className="space-y-4 mt-4 min-h-screen overflow-y-auto px-2 md:px-0 border-l-4 border-blue-200">
+      {/* Header Section */}
+      <div className="pt-2 pb-3 border-b border-gray-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-1">Equipment Readings</h3>
         <p className="text-sm text-gray-600">Select equipment below to start recording readings</p>
       </div>
 
-      {/* Equipment selector with consistent alignment */}
-      <div className="mb-4">
+      {/* Equipment Selector */}
+      <div className="mb-4 border-2 border-purple-200 p-2 rounded-md">
         <EquipmentSelector
           equipment={equipment}
           selectedEquipmentId={selectedEquipmentId}
@@ -100,9 +67,11 @@ export const ReadingsTabContent = ({
         />
       </div>
 
+      {/* Conditional Rendering */}
       {selectedEquipment ? (
-        <div className="space-y-4">
-          <Card className="mobile-card">
+        <div className="space-y-4 border-2 border-green-300 p-2 rounded-md">
+          {/* Equipment Info Card */}
+          <Card className="mobile-card border border-gray-200">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg">{selectedEquipment.name}</CardTitle>
               <div className="text-sm text-muted-foreground space-y-1">
@@ -120,12 +89,9 @@ export const ReadingsTabContent = ({
                   <span>Type:</span>
                   <span className="font-medium text-blue-600">{finalEquipmentType}</span>
                 </div>
-                
                 {readingTemplates.length > 0 && (
-                  <div className="mt-2 p-2 bg-blue-50 rounded border border-blue-200">
-                    <div className="text-blue-800 font-medium text-sm text-center">
-                      ✅ {readingTemplates.length} readings available
-                    </div>
+                  <div className="mt-2 p-2 bg-blue-50 rounded border border-blue-200 text-blue-800 font-medium text-sm text-center">
+                    ✅ {readingTemplates.length} readings available
                   </div>
                 )}
               </div>
