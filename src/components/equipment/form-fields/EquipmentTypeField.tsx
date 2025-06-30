@@ -22,6 +22,37 @@ interface EquipmentTypeFieldProps {
 }
 
 const EquipmentTypeField = ({ form }: EquipmentTypeFieldProps) => {
+  const detectEquipmentType = (name: string): string => {
+    const lowerName = name.toLowerCase();
+    
+    // Enhanced chiller detection for all variations
+    if (lowerName.includes('chiller')) {
+      return 'chiller';
+    }
+    
+    if (lowerName.includes('ahu') || lowerName.includes('air handler')) {
+      return 'ahu';
+    }
+    
+    if (lowerName.includes('rtu') || lowerName.includes('rooftop')) {
+      return 'rtu';
+    }
+    
+    if (lowerName.includes('cooling tower')) {
+      return 'cooling_tower';
+    }
+    
+    if (lowerName.includes('elevator')) {
+      return 'elevator';
+    }
+    
+    if (lowerName.includes('restroom')) {
+      return 'restroom';
+    }
+    
+    return 'general';
+  };
+
   return (
     <FormField
       control={form.control}
@@ -33,21 +64,8 @@ const EquipmentTypeField = ({ form }: EquipmentTypeFieldProps) => {
             onValueChange={(value) => {
               field.onChange(value);
               // Auto-set the type category based on the name
-              if (value.toLowerCase().includes('chiller')) {
-                form.setValue('type', 'chiller');
-              } else if (value.toLowerCase().includes('ahu') || value.toLowerCase().includes('air handler')) {
-                form.setValue('type', 'ahu');
-              } else if (value.toLowerCase().includes('rtu') || value.toLowerCase().includes('rooftop')) {
-                form.setValue('type', 'rtu');
-              } else if (value.toLowerCase().includes('cooling tower')) {
-                form.setValue('type', 'cooling_tower');
-              } else if (value.toLowerCase().includes('elevator')) {
-                form.setValue('type', 'elevator');
-              } else if (value.toLowerCase().includes('restroom')) {
-                form.setValue('type', 'restroom');
-              } else {
-                form.setValue('type', 'general');
-              }
+              const detectedType = detectEquipmentType(value);
+              form.setValue('type', detectedType);
             }}
             value={field.value}
             defaultValue={field.value}

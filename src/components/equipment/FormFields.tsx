@@ -10,6 +10,37 @@ interface FormFieldsProps {
 }
 
 const FormFields = ({ formData, onInputChange }: FormFieldsProps) => {
+  const detectEquipmentType = (name: string): string => {
+    const lowerName = name.toLowerCase();
+    
+    // Enhanced chiller detection for all variations including numbered ones
+    if (lowerName.includes('chiller')) {
+      return 'chiller';
+    }
+    
+    if (lowerName.includes('ahu') || lowerName.includes('air handler')) {
+      return 'ahu';
+    }
+    
+    if (lowerName.includes('rtu') || lowerName.includes('rooftop')) {
+      return 'rtu';
+    }
+    
+    if (lowerName.includes('cooling tower')) {
+      return 'cooling_tower';
+    }
+    
+    if (lowerName.includes('elevator')) {
+      return 'elevator';
+    }
+    
+    if (lowerName.includes('restroom')) {
+      return 'restroom';
+    }
+    
+    return 'general';
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -18,22 +49,9 @@ const FormFields = ({ formData, onInputChange }: FormFieldsProps) => {
           value={formData.name} 
           onValueChange={(value) => {
             onInputChange('name', value);
-            // Auto-set the type based on the name
-            if (value.toLowerCase().includes('chiller')) {
-              onInputChange('type', 'chiller');
-            } else if (value.toLowerCase().includes('ahu') || value.toLowerCase().includes('air handler')) {
-              onInputChange('type', 'ahu');
-            } else if (value.toLowerCase().includes('rtu') || value.toLowerCase().includes('rooftop')) {
-              onInputChange('type', 'rtu');
-            } else if (value.toLowerCase().includes('cooling tower')) {
-              onInputChange('type', 'cooling_tower');
-            } else if (value.toLowerCase().includes('elevator')) {
-              onInputChange('type', 'elevator');
-            } else if (value.toLowerCase().includes('restroom')) {
-              onInputChange('type', 'restroom');
-            } else {
-              onInputChange('type', 'general');
-            }
+            // Auto-set the type based on the name using enhanced detection
+            const detectedType = detectEquipmentType(value);
+            onInputChange('type', detectedType);
           }}
         >
           <SelectTrigger className="mt-2">

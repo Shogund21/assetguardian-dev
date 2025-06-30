@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -62,15 +61,21 @@ const PredictiveMaintenanceDashboard = () => {
     gcTime: 24 * 60 * 60 * 1000, // 24 hours
   });
 
-  // Detect equipment type for template selection
+  // Enhanced equipment type detection for all chiller variations
   const getEquipmentType = (equipment: any) => {
     if (!equipment) return 'general';
     
     const name = equipment.name.toLowerCase();
-    if (name.includes('ahu') || name.includes('air handler')) return 'ahu';
+    
+    // Enhanced chiller detection - covers all numbered and hyphenated variations
     if (name.includes('chiller')) return 'chiller';
+    
+    if (name.includes('ahu') || name.includes('air handler') || name.includes('air handling')) return 'ahu';
     if (name.includes('rtu') || name.includes('rooftop')) return 'rtu';
     if (name.includes('cooling tower')) return 'cooling_tower';
+    if (name.includes('elevator')) return 'elevator';
+    if (name.includes('restroom')) return 'restroom';
+    
     return 'general';
   };
 
