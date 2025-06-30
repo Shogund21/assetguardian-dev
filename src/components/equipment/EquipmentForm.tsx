@@ -27,7 +27,6 @@ export const EquipmentForm = ({ initialData, onSubmit, isEdit = false }: Equipme
     status: initialData?.status || "Active",
     serial_number: initialData?.serial_number || "",
     model: initialData?.model || "",
-    year: initialData?.year || undefined,
   });
 
   const handleInputChange = (field: keyof EquipmentFormData, value: string | number) => {
@@ -42,23 +41,45 @@ export const EquipmentForm = ({ initialData, onSubmit, isEdit = false }: Equipme
     setIsLoading(true);
 
     try {
+      // Validate required fields
+      if (!formData.name.trim()) {
+        throw new Error("Equipment name is required");
+      }
+      if (!formData.location.trim()) {
+        throw new Error("Location is required");
+      }
+      if (!formData.type.trim()) {
+        throw new Error("Equipment type is required");
+      }
+
+      console.log("Submitting equipment data:", formData);
+
       if (onSubmit) {
         await onSubmit(formData);
       } else {
-        // Default create behavior
-        const { error } = await supabase
-          .from('equipment')
-          .insert([{
-            name: formData.name,
-            location: formData.location,
-            type: formData.type,
-            status: formData.status,
-            serial_number: formData.serial_number || null,
-            model: formData.model || null,
-            year: formData.year || null,
-          }]);
+        // Default create behavior - only include fields that exist in database
+        const equipmentData = {
+          name: formData.name.trim(),
+          location: formData.location.trim(),
+          type: formData.type.trim(),
+          status: formData.status || "Active",
+          serial_number: formData.serial_number?.trim() || null,
+          model: formData.model?.trim() || null,
+        };
 
-        if (error) throw error;
+        console.log("Inserting equipment:", equipmentData);
+
+        const { data, error } = await supabase
+          .from('equipment')
+          .insert([equipmentData])
+          .select();
+
+        if (error) {
+          console.error("Database error:", error);
+          throw error;
+        }
+
+        console.log("Equipment created successfully:", data);
 
         toast({
           title: "Success",

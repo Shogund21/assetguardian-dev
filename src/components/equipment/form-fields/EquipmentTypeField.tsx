@@ -1,3 +1,4 @@
+
 import {
   FormControl,
   FormField,
@@ -29,7 +30,25 @@ const EquipmentTypeField = ({ form }: EquipmentTypeFieldProps) => {
         <FormItem>
           <FormLabel>Equipment Type</FormLabel>
           <Select 
-            onValueChange={field.onChange} 
+            onValueChange={(value) => {
+              field.onChange(value);
+              // Auto-set the type category based on the name
+              if (value.toLowerCase().includes('chiller')) {
+                form.setValue('type', 'chiller');
+              } else if (value.toLowerCase().includes('ahu') || value.toLowerCase().includes('air handler')) {
+                form.setValue('type', 'ahu');
+              } else if (value.toLowerCase().includes('rtu') || value.toLowerCase().includes('rooftop')) {
+                form.setValue('type', 'rtu');
+              } else if (value.toLowerCase().includes('cooling tower')) {
+                form.setValue('type', 'cooling_tower');
+              } else if (value.toLowerCase().includes('elevator')) {
+                form.setValue('type', 'elevator');
+              } else if (value.toLowerCase().includes('restroom')) {
+                form.setValue('type', 'restroom');
+              } else {
+                form.setValue('type', 'general');
+              }
+            }}
             value={field.value}
             defaultValue={field.value}
           >
@@ -38,7 +57,7 @@ const EquipmentTypeField = ({ form }: EquipmentTypeFieldProps) => {
                 <SelectValue placeholder="Select equipment type" />
               </SelectTrigger>
             </FormControl>
-            <SelectContent className="bg-white">
+            <SelectContent className="bg-white max-h-60 overflow-y-auto">
               {EQUIPMENT_TYPES.map((type) => (
                 <SelectItem 
                   key={type} 

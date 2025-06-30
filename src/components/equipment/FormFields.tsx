@@ -1,9 +1,8 @@
 
-import { UseFormReturn } from "react-hook-form";
 import { EquipmentFormData } from "@/types/equipment";
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { EQUIPMENT_TYPES } from "./constants/equipmentTypes";
 
 interface FormFieldsProps {
   formData: EquipmentFormData;
@@ -14,13 +13,40 @@ const FormFields = ({ formData, onInputChange }: FormFieldsProps) => {
   return (
     <div className="space-y-6">
       <div>
-        <label className="text-base font-semibold">Equipment Name</label>
-        <Input
-          value={formData.name}
-          onChange={(e) => onInputChange('name', e.target.value)}
-          placeholder="Enter equipment name"
-          className="mt-2"
-        />
+        <label className="text-base font-semibold">Equipment Name/Type</label>
+        <Select 
+          value={formData.name} 
+          onValueChange={(value) => {
+            onInputChange('name', value);
+            // Auto-set the type based on the name
+            if (value.toLowerCase().includes('chiller')) {
+              onInputChange('type', 'chiller');
+            } else if (value.toLowerCase().includes('ahu') || value.toLowerCase().includes('air handler')) {
+              onInputChange('type', 'ahu');
+            } else if (value.toLowerCase().includes('rtu') || value.toLowerCase().includes('rooftop')) {
+              onInputChange('type', 'rtu');
+            } else if (value.toLowerCase().includes('cooling tower')) {
+              onInputChange('type', 'cooling_tower');
+            } else if (value.toLowerCase().includes('elevator')) {
+              onInputChange('type', 'elevator');
+            } else if (value.toLowerCase().includes('restroom')) {
+              onInputChange('type', 'restroom');
+            } else {
+              onInputChange('type', 'general');
+            }
+          }}
+        >
+          <SelectTrigger className="mt-2">
+            <SelectValue placeholder="Select equipment type" />
+          </SelectTrigger>
+          <SelectContent className="max-h-60 overflow-y-auto">
+            {EQUIPMENT_TYPES.map((type) => (
+              <SelectItem key={type} value={type}>
+                {type}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div>
@@ -30,17 +56,26 @@ const FormFields = ({ formData, onInputChange }: FormFieldsProps) => {
           onChange={(e) => onInputChange('location', e.target.value)}
           placeholder="Enter location"
           className="mt-2"
+          required
         />
       </div>
 
       <div>
-        <label className="text-base font-semibold">Type</label>
-        <Input
-          value={formData.type}
-          onChange={(e) => onInputChange('type', e.target.value)}
-          placeholder="Enter equipment type"
-          className="mt-2"
-        />
+        <label className="text-base font-semibold">Equipment Type Category</label>
+        <Select value={formData.type} onValueChange={(value) => onInputChange('type', value)}>
+          <SelectTrigger className="mt-2">
+            <SelectValue placeholder="Select type category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ahu">AHU (Air Handling Unit)</SelectItem>
+            <SelectItem value="chiller">Chiller</SelectItem>
+            <SelectItem value="rtu">RTU (Rooftop Unit)</SelectItem>
+            <SelectItem value="cooling_tower">Cooling Tower</SelectItem>
+            <SelectItem value="elevator">Elevator</SelectItem>
+            <SelectItem value="restroom">Restroom</SelectItem>
+            <SelectItem value="general">General Equipment</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div>
@@ -73,17 +108,6 @@ const FormFields = ({ formData, onInputChange }: FormFieldsProps) => {
           value={formData.serial_number || ''}
           onChange={(e) => onInputChange('serial_number', e.target.value)}
           placeholder="Enter serial number"
-          className="mt-2"
-        />
-      </div>
-
-      <div>
-        <label className="text-base font-semibold">Year</label>
-        <Input
-          type="number"
-          value={formData.year || ''}
-          onChange={(e) => onInputChange('year', parseInt(e.target.value) || 0)}
-          placeholder="Enter year"
           className="mt-2"
         />
       </div>

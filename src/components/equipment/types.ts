@@ -1,3 +1,4 @@
+
 import * as z from "zod";
 
 export const EquipmentFormSchema = z.object({
@@ -8,6 +9,7 @@ export const EquipmentFormSchema = z.object({
   status: z.string().optional(),
   lastMaintenance: z.string().nullable().optional(),
   nextMaintenance: z.string().nullable().optional(),
+  type: z.string().min(1, "Type is required"),
 });
 
 export type EquipmentFormValues = z.infer<typeof EquipmentFormSchema>;

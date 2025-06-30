@@ -7,7 +7,6 @@ export interface Equipment {
   status: string;
   serial_number?: string | null;
   model?: string | null;
-  year?: number | null;
   created_at: string;
   updated_at: string;
   company_id?: string | null;
@@ -24,5 +23,4 @@ export interface EquipmentFormData {
   status: string;
   serial_number?: string;
   model?: string;
-  year?: number;
 }
