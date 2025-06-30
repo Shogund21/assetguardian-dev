@@ -88,12 +88,22 @@ const PredictiveMaintenanceDashboard = () => {
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 mb-4">
-          <TabsTrigger value="readings" className="touch-manipulation">Record</TabsTrigger>
-          <TabsTrigger value="history" className="touch-manipulation">History</TabsTrigger>
-          <TabsTrigger value="analysis" className="touch-manipulation">Analysis</TabsTrigger>
-          <TabsTrigger value="results" className="touch-manipulation">Results</TabsTrigger>
-          <TabsTrigger value="database" className="touch-manipulation">Status</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 mb-4 h-auto">
+          <TabsTrigger value="readings" className="touch-manipulation text-xs md:text-sm py-2">
+            Record
+          </TabsTrigger>
+          <TabsTrigger value="history" className="touch-manipulation text-xs md:text-sm py-2">
+            History
+          </TabsTrigger>
+          <TabsTrigger value="analysis" className="touch-manipulation text-xs md:text-sm py-2">
+            Analysis
+          </TabsTrigger>
+          <TabsTrigger value="results" className="touch-manipulation text-xs md:text-sm py-2">
+            Results
+          </TabsTrigger>
+          <TabsTrigger value="database" className="touch-manipulation text-xs md:text-sm py-2">
+            Status
+          </TabsTrigger>
         </TabsList>
 
         {/* Universal equipment selector - visible for tabs that need equipment selection */}
