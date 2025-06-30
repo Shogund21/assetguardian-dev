@@ -50,10 +50,10 @@ export const ReadingsTabContent = ({
 
   return (
     <div className="space-y-4 mt-4 min-h-screen overflow-y-auto px-2 md:px-0 border-l-4 border-blue-200">
-      {/* Header Section */}
-      <div className="pt-2 pb-3 border-b border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900 mb-1">Equipment Readings</h3>
-        <p className="text-sm text-gray-600">Select equipment below to start recording readings</p>
+      {/* Header Section - Moved to far left */}
+      <div className="pt-2 pb-3 border-b border-gray-200 text-left">
+        <h3 className="text-lg font-semibold text-gray-900 mb-1 text-left">Equipment Readings</h3>
+        <p className="text-sm text-gray-600 text-left">Select equipment below to start recording readings</p>
       </div>
 
       {/* Equipment Selector */}
