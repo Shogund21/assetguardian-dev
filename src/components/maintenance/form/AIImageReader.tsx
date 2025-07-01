@@ -254,7 +254,7 @@ const AIImageReader = ({ onReadingsExtracted, equipmentType }: AIImageReaderProp
                 Try Another Image
               </Button>
               {extractedReadings.length === 0 && !isProcessing && (
-                <Button onClick={() => processImage(capturedImage)} className="flex-1">
+                <Button onClick={() => processImage(capturedImage)} variant="outline" className="flex-1">
                   <AlertCircle className="h-4 w-4 mr-2" />
                   Retry Extraction
                 </Button>
