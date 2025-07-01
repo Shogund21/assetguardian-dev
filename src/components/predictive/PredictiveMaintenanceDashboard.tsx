@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { offlineStorage } from "@/services/offlineStorageService";
 import { getEquipmentReadingTemplate } from "@/utils/equipmentTemplates";
+import { getSortedEquipmentList } from "@/utils/equipmentSorting";
 
 // Import new components
 import { PredictiveDashboardHeader } from "./dashboard/PredictiveDashboardHeader";
@@ -79,7 +80,10 @@ const PredictiveMaintenanceDashboard = () => {
     return 'general';
   };
 
-  const selectedEquipment = equipment.find(eq => eq.id === selectedEquipmentId);
+  // Sort equipment alphabetically by type
+  const sortedEquipment = getSortedEquipmentList(equipment);
+  
+  const selectedEquipment = sortedEquipment.find(eq => eq.id === selectedEquipmentId);
   const equipmentType = getEquipmentType(selectedEquipment);
   const readingTemplates = getEquipmentReadingTemplate(equipmentType);
 
@@ -119,7 +123,7 @@ const PredictiveMaintenanceDashboard = () => {
                 📋 Select equipment to view {activeTab === "history" ? "reading history" : "AI analysis"}
               </p>
               <EquipmentSelector
-                equipment={equipment}
+                equipment={sortedEquipment}
                 selectedEquipmentId={selectedEquipmentId}
                 onEquipmentChange={setSelectedEquipmentId}
                 placeholder={`Select equipment for ${activeTab}`}
@@ -131,7 +135,7 @@ const PredictiveMaintenanceDashboard = () => {
         
         <TabsContent value="readings" className="mt-2">
           <ReadingsTabContent
-            equipment={equipment}
+            equipment={sortedEquipment}
             selectedEquipmentId={selectedEquipmentId}
             onEquipmentChange={setSelectedEquipmentId}
             selectedEquipment={selectedEquipment}
