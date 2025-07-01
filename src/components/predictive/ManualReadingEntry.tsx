@@ -93,16 +93,15 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
       setExtractedReadings(readings);
 
       if (readings.length > 0) {
-        const bestReading = readings.reduce((prev, current) =>
-          (current.confidence > prev.confidence) ? current : prev
-        );
-        setSelectedReading(bestReading);
+        // Since all readings now meet 98% confidence, just use the first one
+        const reading = readings[0];
+        setSelectedReading(reading);
 
-        form.setValue('reading_type', bestReading.type);
-        form.setValue('value', bestReading.value);
-        form.setValue('unit', bestReading.unit);
-        if (bestReading.location) {
-          form.setValue('location_notes', bestReading.location);
+        form.setValue('reading_type', reading.type);
+        form.setValue('value', reading.value);
+        form.setValue('unit', reading.unit);
+        if (reading.location) {
+          form.setValue('location_notes', reading.location);
         }
       }
     } catch (error) {
@@ -236,11 +235,13 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
           )}
 
           {readingMode === "ai_image" && extractedReadings.length > 0 && (
-            <ExtractedReadingsSelector
-              extractedReadings={extractedReadings}
-              selectedReading={selectedReading}
-              onReadingSelection={handleReadingSelection}
-            />
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div className="text-green-800 font-medium mb-2">✅ High-Confidence Reading Extracted</div>
+              <div className="text-sm text-green-700">
+                Successfully extracted: <strong>{extractedReadings[0]?.type}</strong> = {extractedReadings[0]?.value} {extractedReadings[0]?.unit}
+                <div className="text-xs mt-1">Confidence: {Math.round((extractedReadings[0]?.confidence || 0) * 100)}%</div>
+              </div>
+            </div>
           )}
 
           <div className="bg-white min-h-[400px] overflow-y-auto p-4 rounded-lg border border-gray-200">

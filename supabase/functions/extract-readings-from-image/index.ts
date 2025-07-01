@@ -140,7 +140,28 @@ If you cannot find any clear readings, return {"readings": []}.`;
 
     console.log('Validated readings:', validatedReadings);
 
+    // Check if all readings meet the 98% confidence threshold
+    const CONFIDENCE_THRESHOLD = 0.98;
+    const lowConfidenceReadings = validatedReadings.filter(reading => reading.confidence < CONFIDENCE_THRESHOLD);
+    
+    if (validatedReadings.length > 0 && lowConfidenceReadings.length > 0) {
+      // Some readings found but confidence too low
+      return new Response(JSON.stringify({ 
+        status: 'needs_better_image',
+        message: 'Image quality insufficient for accurate readings. Please take a clearer photo or use manual input.',
+        confidence_issues: lowConfidenceReadings.map(r => ({
+          type: r.type,
+          confidence: Math.round(r.confidence * 100)
+        })),
+        threshold_required: 98
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Only return readings if all meet the confidence threshold or no readings found
     return new Response(JSON.stringify({ 
+      status: validatedReadings.length > 0 ? 'success' : 'no_readings',
       readings: validatedReadings,
       originalResponse: content 
     }), {

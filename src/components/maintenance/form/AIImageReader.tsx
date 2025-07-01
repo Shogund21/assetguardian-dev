@@ -102,21 +102,32 @@ const AIImageReader = ({ onReadingsExtracted, equipmentType }: AIImageReaderProp
 
       if (error) throw error;
 
-      console.log('Extracted readings:', data.readings);
-      setExtractedReadings(data.readings || []);
+      console.log('Image extraction response:', data);
       
-      if (data.readings && data.readings.length > 0) {
+      if (data.status === 'needs_better_image') {
+        toast({
+          title: "Image Quality Too Low",
+          description: "Readings detected but confidence below 98%. Please retake with better lighting and focus.",
+          variant: "destructive",
+        });
+        setExtractedReadings([]);
+        return;
+      }
+      
+      if (data.status === 'success' && data.readings && data.readings.length > 0) {
+        setExtractedReadings(data.readings);
         toast({
           title: "Readings Extracted!",
-          description: `Found ${data.readings.length} readings from the image.`,
+          description: `Found ${data.readings.length} high-confidence readings.`,
         });
         onReadingsExtracted(data.readings, imageData);
       } else {
         toast({
           title: "No Readings Found",
-          description: "Unable to extract readings from this image. Try a clearer photo of displays or gauges.",
+          description: "No clear readings detected. Try a clearer photo of displays or gauges.",
           variant: "destructive",
         });
+        setExtractedReadings([]);
       }
     } catch (error) {
       console.error('Error processing image:', error);
@@ -253,12 +264,12 @@ const AIImageReader = ({ onReadingsExtracted, equipmentType }: AIImageReaderProp
         )}
 
         <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded">
-          <p className="font-medium mb-1">Tips for best results:</p>
+          <p className="font-medium mb-1">Tips for 98%+ accuracy:</p>
           <ul className="text-xs space-y-1">
             <li>• Ensure displays/gauges are clearly visible and well-lit</li>
-            <li>• Hold camera steady and avoid reflections</li>
-            <li>• Capture digital displays, analog gauges, or control panels</li>
-            <li>• Multiple readings in one photo are supported</li>
+            <li>• Hold camera steady and avoid reflections or glare</li>
+            <li>• Get close enough to read numbers clearly</li>
+            <li>• If image quality is insufficient, use manual input instead</li>
           </ul>
         </div>
       </CardContent>
