@@ -7,11 +7,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Equipment } from "@/types/equipment";
 import { EquipmentFormSchema, EquipmentFormValues } from "./types";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Pen } from "lucide-react";
+import { EQUIPMENT_TYPES } from "./constants/equipmentTypes";
+import { detectEquipmentType } from "@/components/maintenance/form/hooks/utils/equipmentTypeDetection";
 
 interface EditEquipmentDialogProps {
   equipment: Equipment;
@@ -32,6 +35,7 @@ export const EditEquipmentDialog = ({ equipment, children }: EditEquipmentDialog
       serialNumber: equipment.serial_number || "",
       location: equipment.location,
       status: equipment.status || "",
+      type: equipment.type || "",
       lastMaintenance: null,
       nextMaintenance: null,
     },
@@ -48,6 +52,7 @@ export const EditEquipmentDialog = ({ equipment, children }: EditEquipmentDialog
           serial_number: values.serialNumber,
           location: values.location,
           status: values.status,
+          type: values.type,
         })
         .eq("id", equipment.id);
       
@@ -78,7 +83,6 @@ export const EditEquipmentDialog = ({ equipment, children }: EditEquipmentDialog
       variant="ghost" 
       size="icon" 
       className="text-blue-500 hover:text-blue-600 hover:bg-blue-50"
-      onClick={() => setOpen(true)}
     >
       <Pen className="h-4 w-4" />
     </Button>
@@ -86,7 +90,9 @@ export const EditEquipmentDialog = ({ equipment, children }: EditEquipmentDialog
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {triggerButton}
+      <DialogTrigger asChild>
+        {triggerButton}
+      </DialogTrigger>
       <DialogContent className="sm:max-w-[550px] bg-white">
         <DialogHeader>
           <DialogTitle>Edit Equipment</DialogTitle>
@@ -98,10 +104,33 @@ export const EditEquipmentDialog = ({ equipment, children }: EditEquipmentDialog
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Equipment Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="E.g., AHU-1, Elevator B" {...field} />
-                  </FormControl>
+                  <FormLabel>Equipment Name/Type</FormLabel>
+                  <Select 
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      // Auto-set the type category based on the name
+                      const detectedType = detectEquipmentType(value);
+                      form.setValue('type', detectedType);
+                    }}
+                    value={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select equipment type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="max-h-60 overflow-y-auto">
+                      {EQUIPMENT_TYPES.map((type) => (
+                        <SelectItem 
+                          key={type} 
+                          value={type}
+                          className="cursor-pointer hover:bg-gray-100"
+                        >
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -143,6 +172,32 @@ export const EditEquipmentDialog = ({ equipment, children }: EditEquipmentDialog
                   <FormControl>
                     <Input placeholder="Equipment location" {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Equipment Type Category</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select type category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="ahu">AHU (Air Handling Unit)</SelectItem>
+                      <SelectItem value="chiller">Chiller</SelectItem>
+                      <SelectItem value="rtu">RTU (Rooftop Unit)</SelectItem>
+                      <SelectItem value="cooling_tower">Cooling Tower</SelectItem>
+                      <SelectItem value="elevator">Elevator</SelectItem>
+                      <SelectItem value="restroom">Restroom</SelectItem>
+                      <SelectItem value="general">General Equipment</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
