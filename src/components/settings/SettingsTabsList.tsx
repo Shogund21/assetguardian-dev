@@ -44,18 +44,20 @@ const SettingsTabsList = ({ tabs, isMobile }: SettingsTabsListProps) => {
   };
 
   return (
-    <TabsList className="w-full max-w-none grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 h-auto overflow-visible">
-      {tabs.map((tab) => (
-        <TabsTrigger
-          key={tab.id}
-          value={tab.id}
-          className={`flex items-center ${isMobile ? 'justify-center px-1 py-1 text-xs' : 'justify-start px-2 py-1.5 text-sm'}`}
-        >
-          {getIcon(tab.id)}
-          <span className={`${isMobile ? 'ml-1' : 'ml-2'}`}>{tab.label}</span>
-        </TabsTrigger>
-      ))}
-    </TabsList>
+    <div className="w-full overflow-x-auto">
+      <TabsList className="w-full min-w-max grid grid-cols-9 md:grid-cols-5 lg:grid-cols-9 gap-1 md:gap-2 h-auto p-1">
+        {tabs.map((tab) => (
+          <TabsTrigger
+            key={tab.id}
+            value={tab.id}
+            className={`flex items-center whitespace-nowrap ${isMobile ? 'justify-center px-1 py-1 text-xs' : 'justify-center px-2 py-1.5 text-sm'} min-w-0 flex-shrink-0`}
+          >
+            {getIcon(tab.id)}
+            <span className={`${isMobile ? 'ml-1' : 'ml-2'} truncate`}>{tab.label}</span>
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </div>
   );
 };
 

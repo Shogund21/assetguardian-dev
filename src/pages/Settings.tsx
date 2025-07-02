@@ -68,7 +68,7 @@ const Settings = () => {
           <Tabs 
             value={activeTab}
             onValueChange={handleTabChange}
-            className={`${isMobile ? 'flex flex-col' : 'space-y-4'}`}
+            className={`${isMobile ? 'flex flex-col' : 'space-y-2'}`}
           >
             {showTabList && (
               <div className={`${isMobile ? 'mb-4 pb-2' : 'mb-2'} w-full`}>
