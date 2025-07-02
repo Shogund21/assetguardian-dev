@@ -28,7 +28,7 @@ const Settings = () => {
     console.log("Mobile detection still loading");
     return (
       <Layout>
-        <div className="container mx-auto py-4 md:py-6 px-2 md:px-4">
+        <div className="container mx-auto py-4 md:py-6 px-1 md:px-2">
           <div className="flex items-center justify-center min-h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
@@ -41,7 +41,7 @@ const Settings = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto py-4 md:py-6 px-2 md:px-4">
+      <div className="container mx-auto py-4 md:py-6 px-1 md:px-2">
         <div className="flex items-center justify-between mb-4 md:mb-6">
           <h1 className="text-xl md:text-2xl font-bold">Settings</h1>
           {isMobile && (

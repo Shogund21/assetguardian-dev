@@ -15,10 +15,10 @@ export const DesktopLayout = ({ children }: DesktopLayoutProps) => {
 
       {/* Main content with proper margin to prevent overlap */}
       <SidebarInset 
-        className="flex-1 bg-gray-50 min-h-screen w-full overflow-y-auto pl-48" 
+        className="flex-1 bg-gray-50 min-h-screen w-full overflow-y-auto pl-6" 
         data-testid="sidebar-inset"
       >
-        <div className="w-full p-3 sm:p-4 md:p-6">
+        <div className="w-full p-2 sm:p-3 md:p-4">
           {/* Application header with new logo and name */}
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
             <div className="flex items-center">
