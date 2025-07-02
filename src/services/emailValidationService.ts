@@ -74,6 +74,13 @@ export const authenticateUser = async (email: string): Promise<{ success: boolea
     const validation = await validateEmailAccess(email);
     
     if (!validation.isValid) {
+      // Log failed login attempt
+      const { AuditService } = await import('@/services/auditService');
+      await AuditService.logLogin(false, {
+        email: email.toLowerCase(),
+        reason: 'Email not authorized for access',
+        timestamp: new Date().toISOString()
+      });
       return { success: false, error: "Email not authorized for access" };
     }
 
@@ -89,6 +96,14 @@ export const authenticateUser = async (email: string): Promise<{ success: boolea
     localStorage.setItem('assetguardian_auth', JSON.stringify(authData));
     console.log("User authenticated successfully:", validation.userType);
     
+    // Log successful login
+    const { AuditService } = await import('@/services/auditService');
+    await AuditService.logLogin(true, {
+      email: email.toLowerCase(),
+      userType: validation.userType,
+      timestamp: new Date().toISOString()
+    });
+    
     // Dispatch custom event to notify auth state change
     window.dispatchEvent(new CustomEvent('authStateChanged', { detail: authData }));
     
@@ -98,6 +113,18 @@ export const authenticateUser = async (email: string): Promise<{ success: boolea
     };
   } catch (error) {
     console.error("Authentication error:", error);
+    // Log failed login attempt
+    try {
+      const { AuditService } = await import('@/services/auditService');
+      await AuditService.logLogin(false, {
+        email: email.toLowerCase(),
+        reason: 'Authentication error',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+    } catch (auditError) {
+      console.error("Failed to log authentication error:", auditError);
+    }
     return { success: false, error: "Authentication failed" };
   }
 };
@@ -123,7 +150,15 @@ export const checkAuthStatus = (): { isAuthenticated: boolean; userData?: any } 
 };
 
 // Function to logout user
-export const logoutUser = (): void => {
+export const logoutUser = async (): Promise<void> => {
+  try {
+    // Log logout before removing auth data
+    const { AuditService } = await import('@/services/auditService');
+    await AuditService.logLogout();
+  } catch (error) {
+    console.error("Failed to log logout event:", error);
+  }
+  
   localStorage.removeItem('assetguardian_auth');
   console.log("User logged out");
 };

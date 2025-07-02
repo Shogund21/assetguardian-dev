@@ -5,10 +5,13 @@ import TechnicianManagement from "../TechnicianManagement";
 import { Button } from "@/components/ui/button";
 import { Lock } from "lucide-react";
 import PasswordProtectionModal from "@/components/equipment/PasswordProtectionModal";
+import { AuditDashboard } from "@/components/audit/AuditDashboard";
+import { useAuth } from "@/hooks/useAuth";
 
 export const GeneralSection = () => {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { isAdmin } = useAuth();
 
   const handleAuthSuccess = () => {
     setIsAuthenticated(true);
@@ -43,6 +46,20 @@ export const GeneralSection = () => {
           )}
         </CardContent>
       </Card>
+
+      {isAdmin() && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl md:text-2xl">SOC 2 Audit Dashboard</CardTitle>
+            <CardDescription className="text-sm md:text-base">
+              Monitor user activity, access logs, and security events for compliance reporting.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <AuditDashboard />
+          </CardContent>
+        </Card>
+      )}
 
       <PasswordProtectionModal
         isOpen={isPasswordModalOpen}

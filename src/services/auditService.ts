@@ -90,6 +90,44 @@ export class AuditService {
     });
   }
 
+  static async logFeatureAccess(feature: string, route: string, metadata?: Record<string, any>) {
+    return this.logEvent({
+      action: 'FEATURE_ACCESS',
+      tableName: 'navigation',
+      metadata: {
+        feature,
+        route,
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        ...metadata
+      }
+    });
+  }
+
+  static async logSessionStart(sessionId: string) {
+    return this.logEvent({
+      action: 'SESSION_START',
+      tableName: 'auth.sessions',
+      metadata: {
+        sessionId,
+        userAgent: navigator.userAgent,
+        timestamp: new Date().toISOString()
+      }
+    });
+  }
+
+  static async logSessionEnd(sessionId: string, duration: number) {
+    return this.logEvent({
+      action: 'SESSION_END',
+      tableName: 'auth.sessions',
+      metadata: {
+        sessionId,
+        duration,
+        timestamp: new Date().toISOString()
+      }
+    });
+  }
+
   static async logAIAnalysis(equipmentId: string, analysisType: string, metadata: Record<string, any>) {
     return this.logEvent({
       action: 'AI_ANALYSIS',

@@ -11,8 +11,8 @@ interface LogoutButtonProps {
 export const LogoutButton = ({ className, children }: LogoutButtonProps) => {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logoutUser();
+  const handleLogout = async () => {
+    await logoutUser(); // Now supports async for audit logging
     navigate("/");
     // Force a page reload to clear any cached state
     window.location.reload();

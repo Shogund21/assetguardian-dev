@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { CompanyProvider } from "@/contexts/CompanyContext";
 import PageTransition from "@/components/PageTransition";
+import { useAuditTracker } from "@/hooks/useAuditTracker";
 
 import RootPage from "@/components/RootPage";
 import Equipment from "./pages/Equipment";
@@ -22,6 +23,26 @@ import PredictiveMaintenance from "./pages/PredictiveMaintenance";
 
 const queryClient = new QueryClient();
 
+const AppContent = () => {
+  useAuditTracker(); // Enable automatic audit tracking
+  
+  return (
+    <Routes>
+      <Route path="/" element={<RootPage />} />
+      <Route path="/landing" element={<Landing />} />
+      <Route path="/equipment" element={<Equipment />} />
+      <Route path="/equipment/:id" element={<EquipmentDetails />} />
+      <Route path="/add-equipment" element={<AddEquipment />} />
+      <Route path="/projects" element={<Projects />} />
+      <Route path="/maintenance-checks" element={<MaintenanceChecks />} />
+      <Route path="/predictive-maintenance" element={<PredictiveMaintenance />} />
+      <Route path="/analytics" element={<Analytics />} />
+      <Route path="/settings" element={<Settings />} />
+      <Route path="/customer-manual" element={<CustomerManual />} />
+    </Routes>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <CompanyProvider>
@@ -31,19 +52,7 @@ const App = () => (
         <BrowserRouter>
           <SidebarProvider>
             <PageTransition>
-              <Routes>
-                <Route path="/" element={<RootPage />} />
-                <Route path="/landing" element={<Landing />} />
-                <Route path="/equipment" element={<Equipment />} />
-                <Route path="/equipment/:id" element={<EquipmentDetails />} />
-                <Route path="/add-equipment" element={<AddEquipment />} />
-                <Route path="/projects" element={<Projects />} />
-                <Route path="/maintenance-checks" element={<MaintenanceChecks />} />
-                <Route path="/predictive-maintenance" element={<PredictiveMaintenance />} />
-                <Route path="/analytics" element={<Analytics />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/customer-manual" element={<CustomerManual />} />
-              </Routes>
+              <AppContent />
             </PageTransition>
           </SidebarProvider>
         </BrowserRouter>
