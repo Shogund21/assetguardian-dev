@@ -5,7 +5,9 @@ import { useIsMobile } from "@/hooks/use-mobile";
 export const useSettingsTabs = () => {
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState("general");
-  const [showTabList, setShowTabList] = useState(!isMobile);
+  const [showTabList, setShowTabList] = useState(true); // Always show initially
+
+  console.log("useSettingsTabs:", { isMobile, activeTab, showTabList });
 
   const tabs = [
     { id: "general", label: "General" },
@@ -19,7 +21,9 @@ export const useSettingsTabs = () => {
   ];
 
   useEffect(() => {
-    setShowTabList(!isMobile);
+    if (isMobile !== null) {
+      setShowTabList(!isMobile);
+    }
   }, [isMobile]);
 
   const handleTabChange = (tabId: string) => {

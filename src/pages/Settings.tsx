@@ -8,6 +8,8 @@ import SettingsTabsContent from "@/components/settings/SettingsTabsContent";
 import MobileTabNavigation from "@/components/settings/MobileTabNavigation";
 
 const Settings = () => {
+  console.log("Settings component rendering");
+  
   const {
     tabs,
     activeTab,
@@ -19,8 +21,11 @@ const Settings = () => {
     toggleTabList
   } = useSettingsTabs();
 
+  console.log("Settings state:", { activeTab, showTabList, isMobile });
+
   // Add fallback for when mobile detection is still loading
   if (isMobile === null) {
+    console.log("Mobile detection still loading");
     return (
       <Layout>
         <div className="container mx-auto py-4 md:py-6 px-2 md:px-4">
@@ -31,6 +36,8 @@ const Settings = () => {
       </Layout>
     );
   }
+
+  console.log("Rendering settings page with tabs");
 
   return (
     <Layout>
