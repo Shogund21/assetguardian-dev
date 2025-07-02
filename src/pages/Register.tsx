@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
 
 interface RegistrationData {
   firstName: string;
@@ -15,7 +14,7 @@ interface RegistrationData {
   email: string;
   phone: string;
   specialization: string;
-  companyId: string;
+  companyName: string;
 }
 
 const Register = () => {
@@ -28,21 +27,9 @@ const Register = () => {
     email: "",
     phone: "",
     specialization: "",
-    companyId: "",
+    companyName: "",
   });
 
-  // Fetch companies for selection
-  const { data: companies } = useQuery({
-    queryKey: ["companies"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("companies")
-        .select("*")
-        .order("name");
-      if (error) throw error;
-      return data;
-    },
-  });
 
   const handleInputChange = (field: keyof RegistrationData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -78,7 +65,7 @@ const Register = () => {
           email: formData.email,
           phone: formData.phone,
           specialization: formData.specialization,
-          company_id: formData.companyId,
+          company_name: formData.companyName,
           status: 'pending',
           user_role: 'technician'
         }])
@@ -186,19 +173,15 @@ const Register = () => {
             </div>
 
             <div>
-              <Label htmlFor="company">Company</Label>
-              <Select value={formData.companyId} onValueChange={(value) => handleInputChange("companyId", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select your company" />
-                </SelectTrigger>
-                <SelectContent>
-                  {companies?.map((company) => (
-                    <SelectItem key={company.id} value={company.id}>
-                      {company.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="companyName">Company Name</Label>
+              <Input
+                id="companyName"
+                type="text"
+                required
+                placeholder="Enter your company name"
+                value={formData.companyName}
+                onChange={(e) => handleInputChange("companyName", e.target.value)}
+              />
             </div>
 
             <Button 
