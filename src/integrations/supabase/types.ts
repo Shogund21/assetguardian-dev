@@ -918,6 +918,7 @@ export type Database = {
           phone: string
           specialization: string
           updatedAt: string | null
+          user_role: string | null
         }
         Insert: {
           company_id?: string | null
@@ -930,6 +931,7 @@ export type Database = {
           phone: string
           specialization: string
           updatedAt?: string | null
+          user_role?: string | null
         }
         Update: {
           company_id?: string | null
@@ -942,6 +944,7 @@ export type Database = {
           phone?: string
           specialization?: string
           updatedAt?: string | null
+          user_role?: string | null
         }
         Relationships: [
           {
@@ -1048,6 +1051,20 @@ export type Database = {
           unit: string
         }[]
       }
+      get_technicians_with_roles: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          firstName: string
+          lastName: string
+          email: string
+          phone: string
+          specialization: string
+          company_id: string
+          user_role: string
+          is_admin: boolean
+        }[]
+      }
       get_user_company: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -1077,6 +1094,14 @@ export type Database = {
       track_failed_login: {
         Args: { p_email: string; p_ip_address?: unknown; p_user_agent?: string }
         Returns: boolean
+      }
+      update_technician_role: {
+        Args: {
+          p_technician_id: string
+          p_new_role: string
+          p_is_admin?: boolean
+        }
+        Returns: undefined
       }
     }
     Enums: {

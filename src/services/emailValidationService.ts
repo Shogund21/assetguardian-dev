@@ -12,7 +12,7 @@ export interface ValidationResult {
 export const validateEmailAccess = async (email: string): Promise<ValidationResult> => {
   console.log("Validating email access for:", email);
   
-  // Check if it's the admin email - immediate access
+  // Check if it's the admin email - immediate access (fallback)
   if (email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
     console.log("Admin email detected - granting full access");
     return {
@@ -28,7 +28,48 @@ export const validateEmailAccess = async (email: string): Promise<ValidationResu
     };
   }
 
-  // Check if email exists in technicians table
+  // First check company_users table for role-based access
+  try {
+    const { data: companyUser, error: companyError } = await supabase
+      .from('company_users')
+      .select('*')
+      .eq('user_id', email.toLowerCase())
+      .single();
+
+    if (companyUser) {
+      // Get technician details if available
+      const { data: technician } = await supabase
+        .from('technicians')
+        .select('*')
+        .eq('email', email.toLowerCase())
+        .single();
+
+      const userType = companyUser.is_admin ? "admin" : "technician";
+      const name = technician ? `${technician.firstName} ${technician.lastName}` : "User";
+      
+      console.log("Company user found with role:", companyUser.role);
+      return {
+        isValid: true,
+        userType,
+        userData: {
+          email,
+          role: companyUser.role,
+          name,
+          hasFullAccess: companyUser.is_admin,
+          permissions: companyUser.is_admin 
+            ? ["equipment", "settings", "analytics", "projects", "maintenance", "technicians", "all"]
+            : ["equipment", "maintenance", "analytics"],
+          isAdmin: companyUser.is_admin,
+          companyId: companyUser.company_id,
+          ...(technician && { technician })
+        }
+      };
+    }
+  } catch (error) {
+    console.log("Error checking company_users:", error);
+  }
+
+  // Fallback: Check if email exists in technicians table (legacy support)
   try {
     const { data: technician, error } = await supabase
       .from('technicians')
@@ -44,16 +85,20 @@ export const validateEmailAccess = async (email: string): Promise<ValidationResu
       };
     }
 
-    console.log("Technician found:", technician);
+    console.log("Technician found (legacy mode):", technician);
+    const userType = technician.user_role === 'admin' ? 'admin' : 'technician';
+    
     return {
       isValid: true,
-      userType: "technician",
+      userType,
       userData: {
         ...technician,
-        role: "technician",
+        role: technician.user_role || "technician",
         name: `${technician.firstName} ${technician.lastName}`,
-        hasFullAccess: false,
-        permissions: ["equipment", "maintenance", "analytics"]
+        hasFullAccess: userType === 'admin',
+        permissions: userType === 'admin' 
+          ? ["equipment", "settings", "analytics", "projects", "maintenance", "technicians", "all"]
+          : ["equipment", "maintenance", "analytics"]
       }
     };
   } catch (error) {
