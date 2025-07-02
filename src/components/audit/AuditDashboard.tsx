@@ -259,7 +259,7 @@ export const AuditDashboard = () => {
           </div>
           
           <div className="flex gap-2">
-            <Button onClick={fetchAuditLogs} disabled={loading}>
+            <Button variant="outline" onClick={fetchAuditLogs} disabled={loading}>
               <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
               {loading ? 'Loading...' : 'Apply Filters'}
             </Button>
