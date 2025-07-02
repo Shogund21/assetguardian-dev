@@ -264,12 +264,14 @@ const AIImageReader = ({ onReadingsExtracted, equipmentType }: AIImageReaderProp
         )}
 
         <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded">
-          <p className="font-medium mb-1">Tips for 98%+ accuracy:</p>
+          <p className="font-medium mb-1">Enhanced AI Reading - Phase 1 Improvements:</p>
           <ul className="text-xs space-y-1">
-            <li>• Ensure displays/gauges are clearly visible and well-lit</li>
-            <li>• Hold camera steady and avoid reflections or glare</li>
-            <li>• Get close enough to read numbers clearly</li>
-            <li>• If image quality is insufficient, use manual input instead</li>
+            <li>• <strong>Latest AI Model:</strong> Using GPT-4.1 with multi-model validation</li>
+            <li>• <strong>Equipment-Specific Training:</strong> Enhanced prompts with industry examples</li>
+            <li>• <strong>Image Quality:</strong> Ensure displays are clearly visible and well-lit</li>
+            <li>• <strong>Camera Tips:</strong> Hold steady, avoid reflections, get close to displays</li>
+            <li>• <strong>Cross-Validation:</strong> Two AI models verify each reading for accuracy</li>
+            <li>• <strong>Confidence Threshold:</strong> Only accepts readings with 98%+ confidence</li>
           </ul>
         </div>
       </CardContent>

@@ -34,8 +34,29 @@ serve(async (req) => {
     const standardReadings = sensorReadings.filter((r: any) => r.source === 'maintenance_check');
     const dataSourceSummary = `Data includes ${manualReadings.length} manual readings and ${standardReadings.length} standard maintenance check readings.`;
 
-    // Prepare the enhanced AI prompt with predictive timeline focus
-    const prompt = `You are AssetGuardian AI, an expert in predictive maintenance analysis with advanced timeline forecasting capabilities. Analyze the following equipment data and provide a comprehensive risk assessment with detailed predictive timeline.
+    // Enhanced AI prompt with industry standards and multi-factor analysis
+    const prompt = `You are AssetGuardian AI, a senior predictive maintenance engineer with 25+ years of experience in HVAC systems analysis. You have access to industry failure databases and manufacturer reliability data. Analyze the following equipment data using advanced statistical models and provide a comprehensive risk assessment with detailed predictive timeline.
+
+ANALYSIS METHODOLOGY:
+1. Apply industry-standard failure rate curves (Weibull distribution)
+2. Consider equipment age, usage patterns, and environmental factors
+3. Use manufacturer specifications and industry benchmarks
+4. Factor in seasonal variations for HVAC equipment
+5. Apply cost-benefit analysis for maintenance recommendations
+
+INDUSTRY BENCHMARKS:
+- Chiller bearing life: 15-20 years typical, 10-12 years in high-use environments
+- AHU filter life: 3-6 months depending on environment
+- Motor life expectancy: 15-20 years with proper maintenance
+- Compressor life: 15-25 years for reciprocating, 20-30 for centrifugal
+- Heat exchanger life: 20-30 years with proper water treatment
+
+COST REFERENCES:
+- Emergency repairs: 3-5x normal maintenance cost
+- Planned downtime: $500-2000/hour for commercial buildings
+- Chiller replacement: $150,000-500,000+ depending on tonnage
+- AHU major overhaul: $15,000-50,000
+- Motor replacement: $2,000-15,000 depending on HP
 
 Equipment Information:
 - Asset ID: ${equipmentData.asset_id}
@@ -125,19 +146,19 @@ Focus on providing detailed predictive timelines with specific dates, probabilit
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-4.1-2025-04-14',
         messages: [
           {
             role: 'system',
-            content: 'You are AssetGuardian AI, an expert predictive maintenance analyst with advanced timeline forecasting capabilities. Always respond with valid JSON matching the specified schema. Focus on providing detailed predictive timelines with specific dates, probabilities, and cost estimates. Consider both manual sensor readings and standard maintenance check readings, prioritizing manual readings when available.'
+            content: 'You are AssetGuardian AI, a senior predictive maintenance engineer with 25+ years of HVAC experience and access to industry failure databases. Always respond with valid JSON matching the specified schema. Use industry-standard failure models, manufacturer data, and statistical analysis. Provide conservative yet actionable predictions with realistic cost estimates based on current market rates. Prioritize manual sensor readings over standard maintenance readings for accuracy.'
           },
           {
             role: 'user',
             content: prompt
           }
         ],
-        temperature: 0.3,
-        max_tokens: 2000,
+        temperature: 0.2,
+        max_tokens: 3000,
         response_format: { type: "json_object" }
       }),
     })
