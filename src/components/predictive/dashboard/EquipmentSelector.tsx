@@ -35,7 +35,7 @@ export const EquipmentSelector = ({
         </SelectTrigger>
         <SelectContent className="max-h-60 overflow-y-auto">
           {groupedEquipment.map((group) => (
-            <React.Fragment key={group.type}>
+            <div key={group.type}>
               {groupedEquipment.length > 1 && (
                 <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/50 sticky top-0">
                   {group.typeLabel}
@@ -49,7 +49,7 @@ export const EquipmentSelector = ({
                   </div>
                 </SelectItem>
               ))}
-            </React.Fragment>
+            </div>
           ))}
         </SelectContent>
       </Select>
