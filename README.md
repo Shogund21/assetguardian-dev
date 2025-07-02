@@ -72,13 +72,18 @@ A comprehensive facility management system built with modern web technologies, d
 - **Progress Monitoring**: Track project completion and performance metrics
 - **Printable Reports**: Generate project summaries for offline reference
 
-### Technician Management
+### Technician Management & Role-Based Access Control
+- **Role-Based User Management**: Two-tier system with Admin and Technician roles
+- **Secure Role Assignment**: Database-level functions for safe role management
+- **Dynamic Role Updates**: Change user roles with audit trail tracking
+- **Permission-Based Access**: Role-specific UI and functionality access
 - **Availability Tracking**: Real-time technician availability and scheduling
 - **Skill Management**: Track technician specializations and certifications
 - **Performance Analytics**: Monitor technician performance and productivity
 - **Work Order Assignment**: Intelligent task assignment based on skills and availability
 - **Contact Management**: Comprehensive technician contact information
 - **Workload Balancing**: Distribute work evenly across available technicians
+- **Multi-Company Role Isolation**: Roles are scoped to specific companies for security
 
 ### Advanced Analytics & Reporting
 - **Equipment Health Matrix**: Visual representation of equipment condition across facilities
@@ -144,11 +149,14 @@ A comprehensive facility management system built with modern web technologies, d
 ## 🔒 Security Features
 
 - **Row Level Security (RLS)**: Database-level security for multi-tenant data protection
+- **Role-Based Access Control**: Admin and Technician roles with different permission levels
+- **Secure Role Management**: Database functions ensure safe role assignment and updates
 - **Password Protection**: Secure access to sensitive equipment management areas
-- **Company Data Isolation**: Complete separation of data between companies
+- **Company Data Isolation**: Complete separation of data between companies with role scoping
 - **API Key Management**: Secure storage and management of third-party API keys
 - **Authentication & Authorization**: Supabase Auth for secure user management
-- **Audit Trails**: Track all user actions and data modifications
+- **Audit Trails**: Track all user actions, role changes, and data modifications
+- **Permission-Based UI**: Interface adapts based on user role and permissions
 
 ## 🚀 Getting Started
 
@@ -218,10 +226,16 @@ A comprehensive facility management system built with modern web technologies, d
 - `predictive_alerts` - AI-generated maintenance alerts
 - `automated_work_orders` - System-generated work orders
 
+### Role Management & Security
+- `company_users` - User-company relationships and role assignments
+- `technicians` - Enhanced with `user_role` column for role tracking
+- `update_technician_role()` - Secure function for role assignment
+- `get_technicians_with_roles()` - Function to retrieve users with role information
+
 ### Additional Features
 - `filter_changes` - Filter maintenance tracking
 - `maintenance_documents` - Document storage and management
-- `company_users` - User-company relationships
+- `audit_logs` - Complete audit trail for all system activities
 
 ## 🔧 Configuration
 
