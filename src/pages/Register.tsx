@@ -87,18 +87,6 @@ const Register = () => {
 
       if (techError) throw techError;
 
-      // Create company_users entry
-      const { error: companyUserError } = await supabase
-        .from("company_users")
-        .insert([{
-          user_id: formData.email,
-          company_id: formData.companyId,
-          role: 'technician',
-          is_admin: false
-        }]);
-
-      if (companyUserError) throw companyUserError;
-
       toast({
         title: "Registration Successful",
         description: "Your account has been created and is pending approval. You'll receive an email once approved.",
