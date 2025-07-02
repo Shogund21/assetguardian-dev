@@ -31,15 +31,23 @@ export const GeneralSection = () => {
           {isAuthenticated ? (
             <TechnicianManagement />
           ) : (
-            <div className="flex flex-col items-center justify-center space-y-4 py-8">
-              <Lock className="h-12 w-12 text-gray-400" />
-              <p className="text-center text-muted-foreground">
-                This section is password protected. Please authenticate to access technician management.
-              </p>
+            <div className="flex flex-col items-center justify-center space-y-6 py-10">
+              <Lock className="h-16 w-16 text-gray-400" />
+              <div className="text-center space-y-3 max-w-md">
+                <h3 className="text-lg font-semibold text-gray-900">Admin Access Required</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Please enter your admin credentials to manage technicians and access sensitive settings. 
+                  This helps ensure only authorized personnel can modify critical system configurations.
+                </p>
+                <p className="text-sm text-gray-500">
+                  Contact your system administrator if you need access.
+                </p>
+              </div>
               <Button 
                 onClick={() => setIsPasswordModalOpen(true)}
-                className="bg-[#1EAEDB] hover:bg-[#33C3F0] text-black"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2"
               >
+                <Lock className="h-4 w-4 mr-2" />
                 Unlock Access
               </Button>
             </div>

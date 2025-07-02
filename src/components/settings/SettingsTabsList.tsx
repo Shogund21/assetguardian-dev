@@ -44,18 +44,26 @@ const SettingsTabsList = ({ tabs, isMobile }: SettingsTabsListProps) => {
   };
 
   return (
-    <TabsList className="w-full max-w-none grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-1 md:gap-2 h-auto overflow-visible">
-      {tabs.map((tab) => (
-        <TabsTrigger
-          key={tab.id}
-          value={tab.id}
-          className={`flex items-center ${isMobile ? 'justify-center px-1 py-1 text-xs' : 'justify-center px-2 py-1.5 text-sm'} min-w-0`}
-        >
-          {getIcon(tab.id)}
-          <span className={`${isMobile ? 'ml-1' : 'ml-2'} truncate`}>{tab.label}</span>
-        </TabsTrigger>
-      ))}
-    </TabsList>
+    <div className="w-full overflow-x-auto">
+      <TabsList className="w-full min-w-max grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-9 gap-2 md:gap-3 h-auto p-2 bg-muted/50 rounded-lg">
+        {tabs.map((tab) => (
+          <TabsTrigger
+            key={tab.id}
+            value={tab.id}
+            className={`flex items-center justify-center ${
+              isMobile 
+                ? 'px-2 py-2 text-xs min-h-[44px]' 
+                : 'px-3 py-2.5 text-sm min-h-[48px]'
+            } min-w-0 rounded-md transition-all duration-200 hover:bg-background/80 data-[state=active]:bg-background data-[state=active]:shadow-sm border border-transparent data-[state=active]:border-border/20`}
+          >
+            <div className="flex flex-col items-center space-y-1">
+              {getIcon(tab.id)}
+              <span className="truncate text-center leading-tight">{tab.label}</span>
+            </div>
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </div>
   );
 };
 

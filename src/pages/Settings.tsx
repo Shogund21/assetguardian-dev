@@ -41,7 +41,7 @@ const Settings = () => {
 
   return (
     <Layout>
-      <div className="py-2 md:py-3 px-1 md:px-2 max-w-full">
+      <div className="container mx-auto py-4 md:py-6 px-4 md:px-6 max-w-7xl">
         <div className="flex items-center justify-between mb-2 md:mb-3">
           <h1 className="text-xl md:text-2xl font-bold">Settings</h1>
           {isMobile && (

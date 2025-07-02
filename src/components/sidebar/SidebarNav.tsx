@@ -85,8 +85,8 @@ export function SidebarNav({ closeMenuOnMobile }: SidebarNavProps) {
                       className="flex items-center"
                       onClick={closeMenuOnMobile}
                     >
-                      <item.icon className="h-4 w-4" />
-                      {!isCollapsed && <span>{item.title}</span>}
+                      <item.icon className="h-5 w-5" />
+                      {!isCollapsed && <span className="ml-3">{item.title}</span>}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -101,8 +101,8 @@ export function SidebarNav({ closeMenuOnMobile }: SidebarNavProps) {
         <SidebarGroupContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <LogoutButton className="w-full justify-start p-2 h-8 font-normal hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
-                <LogOut className="h-4 w-4 mr-2" />
+              <LogoutButton className="w-full justify-start p-2 h-10 font-normal hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
+                <LogOut className="h-5 w-5 mr-3" />
                 {!isCollapsed && <span>Sign Out</span>}
               </LogoutButton>
             </SidebarMenuItem>
