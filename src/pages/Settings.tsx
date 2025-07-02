@@ -41,7 +41,7 @@ const Settings = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto py-2 md:py-3 px-1 md:px-2">
+      <div className="w-full py-2 md:py-3 px-1 md:px-2">
         <div className="flex items-center justify-between mb-2 md:mb-3">
           <h1 className="text-xl md:text-2xl font-bold">Settings</h1>
           {isMobile && (
@@ -71,7 +71,7 @@ const Settings = () => {
             className={`${isMobile ? 'flex flex-col' : 'space-y-4'}`}
           >
             {showTabList && (
-              <div className={`${isMobile ? 'mb-4 pb-2 overflow-x-auto -mx-2 px-2' : ''}`}>
+              <div className={`${isMobile ? 'mb-4 pb-2' : 'mb-2'} w-full`}>
                 <SettingsTabsList tabs={tabs} isMobile={isMobile} />
               </div>
             )}
