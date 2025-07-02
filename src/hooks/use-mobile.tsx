@@ -4,8 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 const MOBILE_BREAKPOINT = 768
 
 export function useIsMobile() {
-  const [isMobile, setIsMobile] = useState<boolean | null>(null);
-  const [isStable, setIsStable] = useState(false);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
   
   const checkIfMobile = useCallback(() => {
     if (typeof window === 'undefined') {
@@ -21,14 +20,9 @@ export function useIsMobile() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
-    // Initial detection with stability check
+    // Initial detection - immediate result
     const initialResult = checkIfMobile();
     setIsMobile(initialResult);
-    
-    // Mark as stable after initial render
-    const stabilityTimeout = setTimeout(() => {
-      setIsStable(true);
-    }, 100);
     
     // Debounced resize handler
     let resizeTimeout: number;
@@ -38,7 +32,7 @@ export function useIsMobile() {
       resizeTimeout = window.setTimeout(() => {
         const newResult = checkIfMobile();
         setIsMobile(newResult);
-      }, 150);
+      }, 100);
     };
     
     window.addEventListener('resize', handleResize, { passive: true });
@@ -46,21 +40,8 @@ export function useIsMobile() {
     return () => {
       window.removeEventListener('resize', handleResize);
       if (resizeTimeout) clearTimeout(resizeTimeout);
-      clearTimeout(stabilityTimeout);
     };
   }, [checkIfMobile]);
-
-  // Return loading state until detection is stable, but with timeout
-  if (isMobile === null || !isStable) {
-    // Add timeout fallback to prevent infinite loading
-    setTimeout(() => {
-      if (isMobile === null) {
-        setIsMobile(false); // Default to desktop if detection fails
-        setIsStable(true);
-      }
-    }, 1000);
-    return null;
-  }
 
   return isMobile;
 }

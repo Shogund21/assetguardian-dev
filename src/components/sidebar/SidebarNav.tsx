@@ -64,6 +64,15 @@ export function SidebarNav({ closeMenuOnMobile }: SidebarNavProps) {
   const location = useLocation();
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
+  
+  const handleMobileNavigation = (url: string) => {
+    // Close menu immediately after a short delay to prevent animation conflicts
+    setTimeout(() => {
+      if (closeMenuOnMobile) {
+        closeMenuOnMobile();
+      }
+    }, 100);
+  };
 
   return (
     <>
@@ -83,7 +92,7 @@ export function SidebarNav({ closeMenuOnMobile }: SidebarNavProps) {
                     <Link 
                       to={item.url} 
                       className="flex items-center"
-                      onClick={closeMenuOnMobile}
+                      onClick={() => handleMobileNavigation(item.url)}
                     >
                       <item.icon className="h-5 w-5" />
                       {!isCollapsed && <span className="ml-3">{item.title}</span>}
