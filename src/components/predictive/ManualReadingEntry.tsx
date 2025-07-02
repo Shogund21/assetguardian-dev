@@ -6,6 +6,7 @@ import * as z from "zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { AuditService } from "@/services/auditService";
 import { getEquipmentReadingTemplate } from "@/utils/equipmentTemplates";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { offlineStorage } from "@/services/offlineStorageService";
@@ -146,6 +147,19 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
           });
 
         if (error) throw error;
+
+        // Log the creation for SOC 2 compliance
+        await AuditService.logCreate(
+          'sensor_readings',
+          values.equipment_id,
+          {
+            sensor_type: values.reading_type,
+            value: parseFloat(values.value),
+            unit: values.unit,
+            source: readingMode === 'ai_image' ? 'ai_image' : 'manual'
+          },
+          `Reading recorded via ${readingMode === 'ai_image' ? 'AI extraction' : 'manual entry'}`
+        );
 
         if (values.notes || values.location_notes) {
           await supabase.from('maintenance_documents').insert({

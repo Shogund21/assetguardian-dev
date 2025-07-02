@@ -1,12 +1,17 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { getReadingStandards } from "@/utils/equipmentTemplates";
 import { format } from "date-fns";
+import { Trash2 } from "lucide-react";
+import { useDeleteReading } from "@/hooks/useDeleteReading";
+import { DeleteReadingDialog } from "./components/DeleteReadingDialog";
+import { SensorReading as PredictiveSensorReading } from "@/types/predictive";
 
 interface ReadingHistoryProps {
   equipmentId: string;
@@ -14,24 +19,29 @@ interface ReadingHistoryProps {
   readingType?: string;
 }
 
-interface SensorReading {
+interface LocalSensorReading {
   id: string;
   equipment_id: string;
   sensor_type: string;
   value: number;
   unit: string;
   timestamp_utc: string;
+  source?: string;
 }
 
-interface ProcessedReading extends SensorReading {
+interface ProcessedReading extends LocalSensorReading {
   timestamp: number;
   formattedDate: string;
 }
 
 const ReadingHistory = ({ equipmentId, equipmentType, readingType }: ReadingHistoryProps) => {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedReading, setSelectedReading] = useState<PredictiveSensorReading | null>(null);
+  const deleteReading = useDeleteReading();
+
   const { data: readings = [], isLoading } = useQuery({
     queryKey: ['reading-history', equipmentId, readingType],
-    queryFn: async (): Promise<SensorReading[]> => {
+    queryFn: async (): Promise<LocalSensorReading[]> => {
       let query = supabase
         .from('sensor_readings')
         .select('*')
@@ -74,6 +84,29 @@ const ReadingHistory = ({ equipmentId, equipmentType, readingType }: ReadingHist
     });
     return acc;
   }, {});
+
+  const handleDeleteReading = (reading: ProcessedReading) => {
+    // Convert to PredictiveSensorReading format for the dialog
+    const predictiveReading: PredictiveSensorReading = {
+      ...reading,
+      created_at: reading.timestamp_utc,
+      source: (reading.source as "manual" | "maintenance_check") || "manual"
+    };
+    setSelectedReading(predictiveReading);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = (reason: string) => {
+    if (selectedReading) {
+      deleteReading.mutate({
+        readingId: selectedReading.id,
+        reason,
+        equipmentId
+      });
+      setDeleteDialogOpen(false);
+      setSelectedReading(null);
+    }
+  };
 
   const getStatusBadge = (value: number, sensorType: string) => {
     const standards = getReadingStandards(equipmentType, sensorType);
@@ -204,10 +237,54 @@ const ReadingHistory = ({ equipmentId, equipmentType, readingType }: ReadingHist
                   </div>
                 </div>
               )}
+
+              {/* Recent Readings Table */}
+              <div className="mt-6">
+                <h4 className="text-sm font-medium mb-3 flex items-center justify-between">
+                  Recent Readings
+                  <span className="text-xs text-muted-foreground">
+                    Last {Math.min(sensorReadings.length, 10)} entries
+                  </span>
+                </h4>
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                  {sensorReadings.slice(-10).reverse().map((reading) => (
+                    <div key={reading.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                      <div className="flex items-center gap-3 flex-1">
+                        <span className="font-medium">{reading.value} {reading.unit}</span>
+                        {getStatusBadge(reading.value, sensorType)}
+                        <span className="text-sm text-muted-foreground">
+                          {format(new Date(reading.timestamp_utc), 'MMM dd, HH:mm:ss')}
+                        </span>
+                        {reading.source && (
+                          <Badge variant="outline" className="text-xs">
+                            {reading.source}
+                          </Badge>
+                        )}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteReading(reading)}
+                        className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </CardContent>
           </Card>
         );
       })}
+
+      <DeleteReadingDialog
+        isOpen={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        onConfirm={handleConfirmDelete}
+        reading={selectedReading}
+        isDeleting={deleteReading.isPending}
+      />
     </div>
   );
 };

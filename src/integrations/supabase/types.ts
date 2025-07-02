@@ -27,6 +27,54 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          ip_address: unknown | null
+          metadata: Json | null
+          new_values: Json | null
+          old_values: Json | null
+          reason: string | null
+          record_id: string | null
+          session_id: string | null
+          table_name: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          new_values?: Json | null
+          old_values?: Json | null
+          reason?: string | null
+          record_id?: string | null
+          session_id?: string | null
+          table_name: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          new_values?: Json | null
+          old_values?: Json | null
+          reason?: string | null
+          record_id?: string | null
+          session_id?: string | null
+          table_name?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       automated_work_orders: {
         Row: {
           alert_id: string | null
@@ -223,6 +271,39 @@ export type Database = {
           unit?: string
           updated_at?: string
           warning_threshold?: number
+        }
+        Relationships: []
+      }
+      failed_login_attempts: {
+        Row: {
+          attempt_count: number | null
+          created_at: string
+          email: string | null
+          id: string
+          ip_address: unknown | null
+          last_attempt: string
+          locked_until: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          attempt_count?: number | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          ip_address?: unknown | null
+          last_attempt?: string
+          locked_until?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          attempt_count?: number | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          ip_address?: unknown | null
+          last_attempt?: string
+          locked_until?: string | null
+          user_agent?: string | null
         }
         Relationships: []
       }
@@ -977,9 +1058,25 @@ export type Database = {
         Args: { company_id: string }
         Returns: boolean
       }
+      log_audit_event: {
+        Args: {
+          p_action: string
+          p_table_name: string
+          p_record_id?: string
+          p_old_values?: Json
+          p_new_values?: Json
+          p_reason?: string
+          p_metadata?: Json
+        }
+        Returns: string
+      }
       set_claim: {
         Args: { uid: string; claim: string; value: string }
         Returns: undefined
+      }
+      track_failed_login: {
+        Args: { p_email: string; p_ip_address?: unknown; p_user_agent?: string }
+        Returns: boolean
       }
     }
     Enums: {
