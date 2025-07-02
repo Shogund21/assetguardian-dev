@@ -30,18 +30,18 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
 
       {/* Main content with mobile optimization */}
       <div className="bg-gray-50 min-h-screen w-full overflow-y-auto mobile-form-container">
-        <div className="h-full w-full pt-20 px-3 sm:px-4">
+        <div className="h-full w-full pt-20 px-2 sm:px-3">
           {/* Application header */}
-          <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200 bg-white p-4 rounded-lg shadow-sm">
+          <div className="flex items-center mb-4 pb-3 border-b border-gray-200 bg-white p-3 rounded-lg shadow-sm">
             <div className="flex items-center">
               <img 
                 src="/lovable-uploads/91b3768c-9bf7-4a1c-b2be-aea61a3ff3be.png" 
                 alt="Asset Guardian Logo" 
-                className="h-10 w-10 mr-3" 
+                className="h-8 w-8 mr-2" 
               />
               <div>
-                <h1 className="text-xl font-bold text-gray-900">Asset Guardian</h1>
-                <p className="text-sm text-gray-500">Facilities Management System</p>
+                <h1 className="text-lg font-bold text-gray-900">Asset Guardian</h1>
+                <p className="text-xs text-gray-500">Facilities Management System</p>
               </div>
             </div>
           </div>

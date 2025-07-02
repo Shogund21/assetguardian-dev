@@ -64,7 +64,7 @@ export default function Sidebar({ children, className, ...props }: SidebarProps)
       <SheetOverlay className="z-40" />
       <SheetContent 
         side="left" 
-        className="p-0 w-[280px] max-w-[85%] z-50 bg-white border-r mobile-sidebar-content"
+        className="p-0 w-[260px] max-w-[75%] z-50 bg-white border-r mobile-sidebar-content"
         data-sidebar="sidebar"
         data-mobile="true"
         onPointerDown={(e) => e.stopPropagation()} // Prevent event bubbling
