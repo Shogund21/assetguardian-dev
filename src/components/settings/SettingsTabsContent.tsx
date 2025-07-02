@@ -8,6 +8,7 @@ import { MaintenanceSection } from "./sections/MaintenanceSection";
 import { DocumentationSection } from "./sections/DocumentationSection";
 import { AppearanceSection } from "./sections/AppearanceSection";
 import { CompaniesSection } from "./sections/CompaniesSection";
+import { AuditSection } from "./sections/AuditSection";
 
 const ErrorFallback = ({ sectionName }: { sectionName: string }) => (
   <div className="p-4 text-center text-muted-foreground">
@@ -70,6 +71,11 @@ const SettingsTabsContent = ({ isMobile }: SettingsTabsContentProps) => {
       <TabsContent value="documentation" className="mt-0">
         <SectionWrapper sectionName="Documentation">
           <DocumentationSection />
+        </SectionWrapper>
+      </TabsContent>
+      <TabsContent value="audit" className="mt-0">
+        <SectionWrapper sectionName="Audit">
+          <AuditSection />
         </SectionWrapper>
       </TabsContent>
     </div>

@@ -18,6 +18,7 @@ export const useSettingsTabs = () => {
     { id: "maintenance", label: "Maintenance" },
     { id: "appearance", label: "Appearance" },
     { id: "documentation", label: "Documentation" },
+    { id: "audit", label: "Audit" },
   ];
 
   useEffect(() => {

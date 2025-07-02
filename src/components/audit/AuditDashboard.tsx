@@ -53,7 +53,7 @@ export const AuditDashboard = () => {
         startDate: filters.startDate?.toISOString(),
         endDate: filters.endDate?.toISOString(),
         tableName: filters.tableName,
-        action: filters.action,
+        action: filters.action === "all" ? undefined : filters.action,
         userId: filters.userId,
         limit: filters.limit
       };
@@ -236,7 +236,7 @@ export const AuditDashboard = () => {
                   <SelectValue placeholder="All actions" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All actions</SelectItem>
+                  <SelectItem value="all">All actions</SelectItem>
                   <SelectItem value="LOGIN_SUCCESS">Login Success</SelectItem>
                   <SelectItem value="LOGIN_FAILED">Login Failed</SelectItem>
                   <SelectItem value="LOGOUT">Logout</SelectItem>

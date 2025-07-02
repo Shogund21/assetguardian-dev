@@ -50,8 +50,15 @@ export function useIsMobile() {
     };
   }, [checkIfMobile]);
 
-  // Return loading state until detection is stable
+  // Return loading state until detection is stable, but with timeout
   if (isMobile === null || !isStable) {
+    // Add timeout fallback to prevent infinite loading
+    setTimeout(() => {
+      if (isMobile === null) {
+        setIsMobile(false); // Default to desktop if detection fails
+        setIsStable(true);
+      }
+    }, 1000);
     return null;
   }
 
