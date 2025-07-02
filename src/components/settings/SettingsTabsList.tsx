@@ -41,12 +41,12 @@ const SettingsTabsList = ({ tabs, isMobile }: SettingsTabsListProps) => {
   };
 
   return (
-    <TabsList className={`grid grid-cols-2 md:grid-cols-4 lg:flex lg:flex-col ${isMobile ? '' : 'h-auto'}`}>
+    <TabsList className={`grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 ${isMobile ? '' : 'h-auto'}`}>
       {tabs.map((tab) => (
         <TabsTrigger
           key={tab.id}
           value={tab.id}
-          className={`flex items-center ${isMobile ? 'justify-center px-2 py-1 text-xs' : 'justify-start p-3 text-sm'}`}
+          className={`flex items-center ${isMobile ? 'justify-center px-2 py-1 text-xs' : 'justify-start p-2 text-sm'}`}
         >
           {getIcon(tab.id)}
           <span className={`${isMobile ? 'ml-1' : 'ml-2'}`}>{tab.label}</span>
