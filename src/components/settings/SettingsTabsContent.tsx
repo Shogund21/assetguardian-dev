@@ -9,6 +9,22 @@ import { DocumentationSection } from "./sections/DocumentationSection";
 import { AppearanceSection } from "./sections/AppearanceSection";
 import { CompaniesSection } from "./sections/CompaniesSection";
 
+const ErrorFallback = ({ sectionName }: { sectionName: string }) => (
+  <div className="p-4 text-center text-muted-foreground">
+    <p>Unable to load {sectionName} section.</p>
+    <p className="text-sm">Please refresh the page or try again later.</p>
+  </div>
+);
+
+const SectionWrapper = ({ children, sectionName }: { children: React.ReactNode; sectionName: string }) => {
+  try {
+    return <>{children}</>;
+  } catch (error) {
+    console.error(`Error in ${sectionName} section:`, error);
+    return <ErrorFallback sectionName={sectionName} />;
+  }
+};
+
 interface SettingsTabsContentProps {
   isMobile: boolean;
 }
@@ -17,28 +33,44 @@ const SettingsTabsContent = ({ isMobile }: SettingsTabsContentProps) => {
   return (
     <div className={`${isMobile ? 'mt-0' : 'mt-2'}`}>
       <TabsContent value="general" className="mt-0">
-        <GeneralSection />
+        <SectionWrapper sectionName="General">
+          <GeneralSection />
+        </SectionWrapper>
       </TabsContent>
       <TabsContent value="notifications" className="mt-0">
-        <NotificationsSection />
+        <SectionWrapper sectionName="Notifications">
+          <NotificationsSection />
+        </SectionWrapper>
       </TabsContent>
       <TabsContent value="locations" className="mt-0">
-        <LocationsSection />
+        <SectionWrapper sectionName="Locations">
+          <LocationsSection />
+        </SectionWrapper>
       </TabsContent>
       <TabsContent value="companies" className="mt-0">
-        <CompaniesSection />
+        <SectionWrapper sectionName="Companies">
+          <CompaniesSection />
+        </SectionWrapper>
       </TabsContent>
       <TabsContent value="features" className="mt-0">
-        <FeaturesSection />
+        <SectionWrapper sectionName="Features">
+          <FeaturesSection />
+        </SectionWrapper>
       </TabsContent>
       <TabsContent value="maintenance" className="mt-0">
-        <MaintenanceSection />
+        <SectionWrapper sectionName="Maintenance">
+          <MaintenanceSection />
+        </SectionWrapper>
       </TabsContent>
       <TabsContent value="appearance" className="mt-0">
-        <AppearanceSection />
+        <SectionWrapper sectionName="Appearance">
+          <AppearanceSection />
+        </SectionWrapper>
       </TabsContent>
       <TabsContent value="documentation" className="mt-0">
-        <DocumentationSection />
+        <SectionWrapper sectionName="Documentation">
+          <DocumentationSection />
+        </SectionWrapper>
       </TabsContent>
     </div>
   );

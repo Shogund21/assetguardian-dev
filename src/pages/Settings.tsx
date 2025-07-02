@@ -19,6 +19,19 @@ const Settings = () => {
     toggleTabList
   } = useSettingsTabs();
 
+  // Add fallback for when mobile detection is still loading
+  if (isMobile === null) {
+    return (
+      <Layout>
+        <div className="container mx-auto py-4 md:py-6 px-2 md:px-4">
+          <div className="flex items-center justify-center min-h-64">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="container mx-auto py-4 md:py-6 px-2 md:px-4">
