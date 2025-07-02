@@ -19,6 +19,7 @@ import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import CustomerManual from "./pages/CustomerManual";
 import Landing from "./pages/Landing";
+import Register from "./pages/Register";
 import PredictiveMaintenance from "./pages/PredictiveMaintenance";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const AppContent = () => {
     <Routes>
       <Route path="/" element={<RootPage />} />
       <Route path="/landing" element={<Landing />} />
+      <Route path="/register" element={<Register />} />
       <Route path="/equipment" element={<Equipment />} />
       <Route path="/equipment/:id" element={<EquipmentDetails />} />
       <Route path="/add-equipment" element={<AddEquipment />} />

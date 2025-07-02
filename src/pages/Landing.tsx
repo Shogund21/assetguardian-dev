@@ -4,6 +4,7 @@ import "../styles/landing.css";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LandingHero } from "@/components/landing/LandingHero";
 import { LandingFeatures } from "@/components/landing/LandingFeatures";
+import { ChatWidget } from "@/components/chatbot/ChatWidget";
 import { useLandingForm } from "@/hooks/useLandingForm";
 
 const Landing = () => {
@@ -47,6 +48,7 @@ const Landing = () => {
         onSubmit={handleSubmit}
       />
       <LandingFeatures />
+      <ChatWidget />
     </div>
   );
 };

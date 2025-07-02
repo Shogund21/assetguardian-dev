@@ -14,6 +14,7 @@ export const LandingHeader = () => {
           <h1 className="logo">Asset Guardian</h1>
         </div>
         <div className="landing-nav__links">
+          <Link to="/register" className="landing-nav__link">Join Us</Link>
           <Link to="/" className="landing-nav__link">Dashboard</Link>
         </div>
       </nav>

@@ -120,6 +120,39 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_sessions: {
+        Row: {
+          created_at: string | null
+          email_sent: boolean | null
+          id: string
+          lead_qualified: boolean | null
+          messages: Json[] | null
+          session_id: string | null
+          updated_at: string | null
+          visitor_info: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          email_sent?: boolean | null
+          id?: string
+          lead_qualified?: boolean | null
+          messages?: Json[] | null
+          session_id?: string | null
+          updated_at?: string | null
+          visitor_info?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          email_sent?: boolean | null
+          id?: string
+          lead_qualified?: boolean | null
+          messages?: Json[] | null
+          session_id?: string | null
+          updated_at?: string | null
+          visitor_info?: Json | null
+        }
+        Relationships: []
+      }
       companies: {
         Row: {
           address: string | null
@@ -916,7 +949,9 @@ export type Database = {
           isAvailable: boolean | null
           lastName: string
           phone: string
+          registration_date: string | null
           specialization: string
+          status: string | null
           updatedAt: string | null
           user_role: string | null
         }
@@ -929,7 +964,9 @@ export type Database = {
           isAvailable?: boolean | null
           lastName: string
           phone: string
+          registration_date?: string | null
           specialization: string
+          status?: string | null
           updatedAt?: string | null
           user_role?: string | null
         }
@@ -942,7 +979,9 @@ export type Database = {
           isAvailable?: boolean | null
           lastName?: string
           phone?: string
+          registration_date?: string | null
           specialization?: string
+          status?: string | null
           updatedAt?: string | null
           user_role?: string | null
         }
