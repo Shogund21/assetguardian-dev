@@ -9,6 +9,8 @@ import { DocumentationSection } from "./sections/DocumentationSection";
 import { AppearanceSection } from "./sections/AppearanceSection";
 import { CompaniesSection } from "./sections/CompaniesSection";
 import { AuditSection } from "./sections/AuditSection";
+import AccessRequestManagement from "./access/AccessRequestManagement";
+import { checkAuthStatus } from "@/services/emailValidationService";
 
 const ErrorFallback = ({ sectionName }: { sectionName: string }) => (
   <div className="p-4 text-center text-muted-foreground">
@@ -31,6 +33,9 @@ interface SettingsTabsContentProps {
 }
 
 const SettingsTabsContent = ({ isMobile }: SettingsTabsContentProps) => {
+  const authData = checkAuthStatus();
+  const isAdminUser = authData.userData?.email === "edward@shogunai.com";
+  
   return (
     <div className={`${isMobile ? 'mt-0' : 'mt-2'}`}>
       <TabsContent value="general" className="mt-0">
@@ -78,6 +83,13 @@ const SettingsTabsContent = ({ isMobile }: SettingsTabsContentProps) => {
           <AuditSection />
         </SectionWrapper>
       </TabsContent>
+      {isAdminUser && (
+        <TabsContent value="access-requests" className="mt-0">
+          <SectionWrapper sectionName="Access Requests">
+            <AccessRequestManagement />
+          </SectionWrapper>
+        </TabsContent>
+      )}
     </div>
   );
 };

@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { checkAuthStatus } from "@/services/emailValidationService";
 
 export const useSettingsTabs = () => {
   const isMobile = useIsMobile();
@@ -9,7 +10,10 @@ export const useSettingsTabs = () => {
 
   console.log("useSettingsTabs:", { isMobile, activeTab, showTabList });
 
-  const tabs = [
+  const authData = checkAuthStatus();
+  const isAdminUser = authData.userData?.email === "edward@shogunai.com";
+
+  const baseTabs = [
     { id: "general", label: "General" },
     { id: "notifications", label: "Notifications" },
     { id: "locations", label: "Locations" },
@@ -20,6 +24,12 @@ export const useSettingsTabs = () => {
     { id: "documentation", label: "Documentation" },
     { id: "audit", label: "Audit" },
   ];
+
+  const adminTabs = [
+    { id: "access-requests", label: "Access Requests" },
+  ];
+
+  const tabs = isAdminUser ? [...baseTabs, ...adminTabs] : baseTabs;
 
   useEffect(() => {
     if (isMobile !== null) {

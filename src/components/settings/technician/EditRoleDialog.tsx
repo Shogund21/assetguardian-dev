@@ -88,7 +88,7 @@ const EditRoleDialog = ({ technician, onRoleUpdate }: EditRoleDialogProps) => {
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-blue-500 text-black hover:bg-blue-600">
+            <Button type="submit" className="bg-primary text-primary-foreground hover:bg-primary/90">
               Update Role
             </Button>
           </div>
