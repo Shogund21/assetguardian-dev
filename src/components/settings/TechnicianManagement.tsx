@@ -41,6 +41,17 @@ const TechnicianManagement = () => {
     mutationFn: async (newTechnician: TechnicianFormData) => {
       const { userRole, ...technicianData } = newTechnician;
       
+      // Check if email already exists
+      const { data: existingTechnician } = await supabase
+        .from("technicians")
+        .select("email")
+        .eq("email", newTechnician.email)
+        .single();
+
+      if (existingTechnician) {
+        throw new Error("A technician with this email already exists");
+      }
+      
       // First create the technician
       const { data: technician, error } = await supabase
         .from("technicians")
