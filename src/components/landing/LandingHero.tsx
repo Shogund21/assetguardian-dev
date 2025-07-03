@@ -1,30 +1,12 @@
 
-import { LandingEmailForm } from "./LandingEmailForm";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 interface LandingHeroProps {
-  formData: {
-    email: string;
-    firstName: string;
-    lastName: string;
-    phone: string;
-    company: string;
-    reason: string;
-  };
-  message: string;
-  messageType: "success" | "error" | "info" | "";
-  isSubmitting: boolean;
-  onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  onSubmit: (e: React.FormEvent) => void;
+  onRequestAccess: () => void;
 }
 
-export const LandingHero = ({
-  formData,
-  message,
-  messageType,
-  isSubmitting,
-  onInputChange,
-  onSubmit
-}: LandingHeroProps) => {
+export const LandingHero = ({ onRequestAccess }: LandingHeroProps) => {
   return (
     <section className="landing-hero">
       <div className="landing-hero__content">
@@ -44,17 +26,26 @@ export const LandingHero = ({
           Transform your facility management with cutting-edge AI that predicts failures before they happen, optimizes maintenance schedules, and prevents costly downtime with surgical precision.
         </p>
         
-        <div className="landing-hero__form">
-          <LandingEmailForm
-            formData={formData}
-            message={message}
-            messageType={messageType}
-            isSubmitting={isSubmitting}
-            onInputChange={onInputChange}
-            onSubmit={onSubmit}
-          />
+        <div className="landing-hero__actions">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Button
+              onClick={onRequestAccess}
+              size="lg"
+              className="bg-white text-primary hover:bg-white/90 text-lg px-8 py-4 h-auto font-semibold"
+            >
+              Request Access
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="border-white text-white hover:bg-white hover:text-primary text-lg px-8 py-4 h-auto font-semibold"
+            >
+              <Link to="/">Sign In</Link>
+            </Button>
+          </div>
           
-          <p className="landing-hero__form-note">
+          <p className="landing-hero__form-note mt-6">
             Enterprise-grade AI platform • Access requests will be reviewed by our team
           </p>
         </div>

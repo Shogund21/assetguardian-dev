@@ -1,13 +1,15 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import "../styles/landing.css";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LandingHero } from "@/components/landing/LandingHero";
 import { LandingFeatures } from "@/components/landing/LandingFeatures";
+import { AccessRequestModal } from "@/components/landing/AccessRequestModal";
 import { ChatWidget } from "@/components/chatbot/ChatWidget";
 import { useLandingForm } from "@/hooks/useLandingForm";
 
 const Landing = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const {
     formData,
     message,
@@ -39,7 +41,11 @@ const Landing = () => {
   return (
     <div className="landing-page">
       <LandingHeader />
-      <LandingHero
+      <LandingHero onRequestAccess={() => setIsModalOpen(true)} />
+      <LandingFeatures />
+      <AccessRequestModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         formData={formData}
         message={message}
         messageType={messageType}
@@ -47,7 +53,6 @@ const Landing = () => {
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}
       />
-      <LandingFeatures />
       <ChatWidget />
     </div>
   );
