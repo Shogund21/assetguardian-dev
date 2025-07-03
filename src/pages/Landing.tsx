@@ -9,7 +9,7 @@ import { useLandingForm } from "@/hooks/useLandingForm";
 
 const Landing = () => {
   const {
-    email,
+    formData,
     message,
     messageType,
     isSubmitting,
@@ -40,11 +40,11 @@ const Landing = () => {
     <div className="landing-page">
       <LandingHeader />
       <LandingHero
-        email={email}
+        formData={formData}
         message={message}
         messageType={messageType}
         isSubmitting={isSubmitting}
-        onEmailChange={handleInputChange}
+        onInputChange={handleInputChange}
         onSubmit={handleSubmit}
       />
       <LandingFeatures />

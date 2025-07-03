@@ -2,20 +2,27 @@
 import { LandingEmailForm } from "./LandingEmailForm";
 
 interface LandingHeroProps {
-  email: string;
+  formData: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    company: string;
+    reason: string;
+  };
   message: string;
   messageType: "success" | "error" | "info" | "";
   isSubmitting: boolean;
-  onEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   onSubmit: (e: React.FormEvent) => void;
 }
 
 export const LandingHero = ({
-  email,
+  formData,
   message,
   messageType,
   isSubmitting,
-  onEmailChange,
+  onInputChange,
   onSubmit
 }: LandingHeroProps) => {
   return (
@@ -39,16 +46,16 @@ export const LandingHero = ({
         
         <div className="landing-hero__form">
           <LandingEmailForm
-            email={email}
+            formData={formData}
             message={message}
             messageType={messageType}
             isSubmitting={isSubmitting}
-            onEmailChange={onEmailChange}
+            onInputChange={onInputChange}
             onSubmit={onSubmit}
           />
           
           <p className="landing-hero__form-note">
-            Enterprise-grade AI platform • Authorized technicians and facility managers only
+            Enterprise-grade AI platform • Access requests will be reviewed by our team
           </p>
         </div>
       </div>
