@@ -91,9 +91,9 @@ const TechnicianForm = ({ formData, onInputChange, onRoleChange, onSubmit }: Tec
       </div>
       <Button 
         type="submit" 
-        className="w-full sm:w-auto bg-blue-500 text-black hover:bg-blue-600"
+        className="w-full sm:w-auto"
       >
-        <UserPlus className="mr-2" />
+        <UserPlus className="mr-2 h-4 w-4" />
         Add Technician
       </Button>
     </form>
