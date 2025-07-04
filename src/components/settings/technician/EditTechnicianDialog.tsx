@@ -31,12 +31,12 @@ const EditTechnicianDialog = ({ technician, onUpdate }: EditTechnicianDialogProp
   const [open, setOpen] = useState(false);
   const { companies } = useCompany();
   const [formData, setFormData] = useState({
-    firstName: technician.firstName,
-    lastName: technician.lastName,
-    email: technician.email,
-    phone: technician.phone,
-    specialization: technician.specialization,
-    company_id: technician.company_id || "",
+    firstName: technician.firstName || "",
+    lastName: technician.lastName || "",
+    email: technician.email || "",
+    phone: technician.phone || "",
+    specialization: technician.specialization || "",
+    company_id: technician.company_id || "none",
     company_name: technician.company_name || "",
   });
 
@@ -50,13 +50,18 @@ const EditTechnicianDialog = ({ technician, onUpdate }: EditTechnicianDialogProp
     setFormData((prev) => ({ 
       ...prev, 
       company_id: companyId,
-      company_name: selectedCompany?.name || "",
+      company_name: companyId === "none" ? "" : (selectedCompany?.name || ""),
     }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onUpdate(technician.id, formData);
+    const updateData = {
+      ...formData,
+      company_id: formData.company_id === "none" ? null : formData.company_id,
+      company_name: formData.company_id === "none" ? "" : formData.company_name,
+    };
+    onUpdate(technician.id, updateData);
     setOpen(false);
   };
 
@@ -136,7 +141,7 @@ const EditTechnicianDialog = ({ technician, onUpdate }: EditTechnicianDialogProp
                   <SelectValue placeholder="Select a company" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No Company</SelectItem>
+                  <SelectItem value="none">No Company</SelectItem>
                   {companies.map((company) => (
                     <SelectItem key={company.id} value={company.id}>
                       {company.name}
