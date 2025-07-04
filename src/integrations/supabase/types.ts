@@ -1369,6 +1369,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      can_modify_data: {
+        Args: { p_company_id: string }
+        Returns: boolean
+      }
       check_threshold_violations: {
         Args: { p_equipment_id: string }
         Returns: {
@@ -1378,6 +1382,24 @@ export type Database = {
           critical_threshold: number
           violation_level: string
           unit: string
+        }[]
+      }
+      cleanup_expired_trials: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      create_complete_trial_company: {
+        Args: {
+          p_company_name: string
+          p_user_email: string
+          p_user_first_name?: string
+          p_user_last_name?: string
+        }
+        Returns: {
+          company_id: string
+          trial_expires_at: string
+          days_remaining: number
+          demo_data_created: boolean
         }[]
       }
       create_trial_company: {
@@ -1396,6 +1418,10 @@ export type Database = {
           p_actions_count?: number
         }
         Returns: undefined
+      }
+      extend_trial: {
+        Args: { p_company_id: string; p_additional_days?: number }
+        Returns: string
       }
       generate_demo_data: {
         Args: { p_company_id: string; p_company_name: string }
