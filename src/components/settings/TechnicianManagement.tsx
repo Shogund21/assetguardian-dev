@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AuditService } from "@/services/auditService";
+import { Technician } from "@/types/technician";
 import TechnicianForm from "./technician/TechnicianForm";
 import TechnicianList from "./technician/TechnicianList";
 
@@ -35,7 +36,22 @@ const TechnicianManagement = () => {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_technicians_with_roles');
       if (error) throw error;
-      return data;
+      
+      // Transform snake_case to camelCase to match our interface
+      return data?.map((tech: any) => ({
+        id: tech.id,
+        firstName: tech.firstName,
+        lastName: tech.lastName,
+        email: tech.email,
+        phone: tech.phone,
+        specialization: tech.specialization,
+        company_id: tech.company_id,
+        userRole: tech.user_role || 'technician',
+        isAdmin: tech.is_admin || false,
+        company_name: tech.company_name,
+        status: tech.status || 'active',
+        isAvailable: tech.isAvailable !== false
+      })) || [];
     },
   });
 
@@ -100,7 +116,7 @@ const TechnicianManagement = () => {
   });
 
   const updateTechnicianMutation = useMutation({
-    mutationFn: async ({ id, updatedData }: { id: string; updatedData: Omit<TechnicianFormData, 'userRole'> }) => {
+    mutationFn: async ({ id, updatedData }: { id: string; updatedData: Omit<Technician, 'id'> }) => {
       const { data, error } = await supabase
         .from("technicians")
         .update({
@@ -188,7 +204,7 @@ const TechnicianManagement = () => {
     setFormData((prev) => ({ ...prev, userRole: role }));
   };
 
-  const handleUpdate = (id: string, updatedData: Omit<TechnicianFormData, 'userRole'>) => {
+  const handleUpdate = (id: string, updatedData: Omit<Technician, 'id'>) => {
     updateTechnicianMutation.mutate({ id, updatedData });
   };
 

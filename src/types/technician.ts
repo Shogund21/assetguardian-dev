@@ -5,7 +5,12 @@ export interface Technician {
   email: string;
   phone: string;
   specialization: string;
-  isAvailable: boolean;
+  isAvailable?: boolean;
+  userRole?: string;
+  isAdmin?: boolean;
+  company_id?: string;
+  company_name?: string;
+  status?: string;
   createdAt?: string;
   updatedAt?: string;
 }

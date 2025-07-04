@@ -2,21 +2,9 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { UserX, Shield, User } from "lucide-react";
+import { Technician } from "@/types/technician";
 import EditTechnicianDialog from "./EditTechnicianDialog";
 import EditRoleDialog from "./EditRoleDialog";
-
-interface Technician {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  specialization: string;
-  userRole?: string;
-  isAdmin?: boolean;
-  company_id?: string;
-  company_name?: string;
-}
 
 interface TechnicianListProps {
   technicians: Technician[];

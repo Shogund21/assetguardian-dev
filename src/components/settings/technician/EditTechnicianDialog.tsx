@@ -20,17 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { Edit } from "lucide-react";
 import { useCompany } from "@/contexts/CompanyContext";
-
-interface Technician {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  specialization: string;
-  company_id?: string;
-  company_name?: string;
-}
+import { Technician } from "@/types/technician";
 
 interface EditTechnicianDialogProps {
   technician: Technician;

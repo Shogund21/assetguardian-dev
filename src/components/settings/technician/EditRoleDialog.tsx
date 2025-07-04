@@ -11,17 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Shield, User } from "lucide-react";
-
-interface Technician {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  specialization: string;
-  userRole?: string;
-  isAdmin?: boolean;
-}
+import { Technician } from "@/types/technician";
 
 interface EditRoleDialogProps {
   technician: Technician;
