@@ -16,6 +16,7 @@ interface Technician {
   specialization: string;
   status: string;
   user_role: string;
+  company_name?: string;
 }
 
 interface TechniciansTableProps {
@@ -33,6 +34,7 @@ export const TechniciansTable = ({ data }: TechniciansTableProps) => {
             <TableHead>Email</TableHead>
             <TableHead>Phone</TableHead>
             <TableHead>Specialization</TableHead>
+            <TableHead>Company</TableHead>
             <TableHead>Role</TableHead>
             <TableHead>Status</TableHead>
           </TableRow>
@@ -44,6 +46,7 @@ export const TechniciansTable = ({ data }: TechniciansTableProps) => {
               <TableCell>{technician.email}</TableCell>
               <TableCell>{technician.phone}</TableCell>
               <TableCell>{technician.specialization}</TableCell>
+              <TableCell>{technician.company_name || "No Company"}</TableCell>
               <TableCell>{technician.user_role || "technician"}</TableCell>
               <TableCell>{technician.status}</TableCell>
             </TableRow>

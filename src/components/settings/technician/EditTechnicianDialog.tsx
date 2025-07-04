@@ -4,6 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -12,6 +19,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Edit } from "lucide-react";
+import { useCompany } from "@/contexts/CompanyContext";
 
 interface Technician {
   id: string;
@@ -20,6 +28,8 @@ interface Technician {
   email: string;
   phone: string;
   specialization: string;
+  company_id?: string;
+  company_name?: string;
 }
 
 interface EditTechnicianDialogProps {
@@ -29,17 +39,29 @@ interface EditTechnicianDialogProps {
 
 const EditTechnicianDialog = ({ technician, onUpdate }: EditTechnicianDialogProps) => {
   const [open, setOpen] = useState(false);
+  const { companies } = useCompany();
   const [formData, setFormData] = useState({
     firstName: technician.firstName,
     lastName: technician.lastName,
     email: technician.email,
     phone: technician.phone,
     specialization: technician.specialization,
+    company_id: technician.company_id || "",
+    company_name: technician.company_name || "",
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleCompanyChange = (companyId: string) => {
+    const selectedCompany = companies.find(c => c.id === companyId);
+    setFormData((prev) => ({ 
+      ...prev, 
+      company_id: companyId,
+      company_name: selectedCompany?.name || "",
+    }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -116,6 +138,22 @@ const EditTechnicianDialog = ({ technician, onUpdate }: EditTechnicianDialogProp
                 onChange={handleInputChange}
                 required
               />
+            </div>
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="company">Company</Label>
+              <Select value={formData.company_id} onValueChange={handleCompanyChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a company" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">No Company</SelectItem>
+                  {companies.map((company) => (
+                    <SelectItem key={company.id} value={company.id}>
+                      {company.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <div className="flex justify-end space-x-2">

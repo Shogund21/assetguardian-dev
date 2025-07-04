@@ -14,6 +14,8 @@ interface TechnicianFormData {
   phone: string;
   specialization: string;
   userRole: string;
+  company_id?: string;
+  company_name?: string;
 }
 
 const TechnicianManagement = () => {
@@ -101,7 +103,15 @@ const TechnicianManagement = () => {
     mutationFn: async ({ id, updatedData }: { id: string; updatedData: Omit<TechnicianFormData, 'userRole'> }) => {
       const { data, error } = await supabase
         .from("technicians")
-        .update(updatedData)
+        .update({
+          firstName: updatedData.firstName,
+          lastName: updatedData.lastName,
+          email: updatedData.email,
+          phone: updatedData.phone,
+          specialization: updatedData.specialization,
+          company_id: updatedData.company_id,
+          company_name: updatedData.company_name,
+        })
         .eq("id", id)
         .select()
         .single();

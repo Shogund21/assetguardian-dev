@@ -14,6 +14,8 @@ interface Technician {
   specialization: string;
   userRole?: string;
   isAdmin?: boolean;
+  company_id?: string;
+  company_name?: string;
 }
 
 interface TechnicianListProps {
@@ -49,6 +51,11 @@ const TechnicianList = ({ technicians, onDelete, onUpdate, onRoleUpdate }: Techn
               <p className="text-sm text-muted-foreground">
                 {technician.email} • {technician.phone}
               </p>
+              {technician.company_name && (
+                <p className="text-sm text-muted-foreground">
+                  Company: {technician.company_name}
+                </p>
+              )}
             </div>
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
               <EditTechnicianDialog 
