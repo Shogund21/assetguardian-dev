@@ -477,7 +477,7 @@
   }
   
   .landing-nav__link {
-    display: none;
+    font-size: var(--font-size-sm);
   }
   
   .landing-hero {
