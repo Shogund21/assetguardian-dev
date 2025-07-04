@@ -38,6 +38,30 @@ export const DocumentationSection = () => {
       icon: Brain,
       path: "/docs/predictive-maintenance.md",
     },
+    {
+      title: "Settings Management",
+      description: "Comprehensive guide for managing system settings, locations, and companies.",
+      icon: FileText,
+      path: "/docs/settings-management.md",
+    },
+    {
+      title: "Authentication Guide",
+      description: "User management, access requests, and authentication system guide.",
+      icon: Info,
+      path: "/docs/authentication-guide.md",
+    },
+    {
+      title: "Mobile Usage Guide",
+      description: "Complete guide for using Asset Guardian on mobile devices.",
+      icon: FileText,
+      path: "/docs/mobile-usage-guide.md",
+    },
+    {
+      title: "Administrator Features",
+      description: "Administrative tools, user management, and system oversight guide.",
+      icon: Info,
+      path: "/docs/admin-features.md",
+    },
   ];
 
   return (
