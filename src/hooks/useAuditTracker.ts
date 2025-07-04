@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AuditService } from '@/services/auditService';
+import { UserMetricsService } from '@/services/userMetricsService';
 import { useAuth } from '@/hooks/useAuth';
 
 interface FeatureMap {
@@ -40,7 +41,13 @@ export const useAuditTracker = () => {
     if (isAuthenticated && user && location.pathname !== lastRoute.current) {
       const featureName = getFeatureName(location.pathname);
       
+      // Log to both audit service and user metrics service
       AuditService.logFeatureAccess(featureName, location.pathname, {
+        previousRoute: lastRoute.current,
+        sessionId: sessionId.current
+      });
+      
+      UserMetricsService.logFeatureAccess(featureName, location.pathname, {
         previousRoute: lastRoute.current,
         sessionId: sessionId.current
       });

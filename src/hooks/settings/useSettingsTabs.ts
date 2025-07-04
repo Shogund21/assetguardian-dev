@@ -23,6 +23,7 @@ export const useSettingsTabs = () => {
     { id: "appearance", label: "Appearance" },
     { id: "documentation", label: "Documentation" },
     { id: "audit", label: "Audit" },
+    { id: "user-metrics", label: "User Metrics" },
   ];
 
   const adminTabs = [

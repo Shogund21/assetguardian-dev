@@ -9,6 +9,7 @@ import { DocumentationSection } from "./sections/DocumentationSection";
 import { AppearanceSection } from "./sections/AppearanceSection";
 import { CompaniesSection } from "./sections/CompaniesSection";
 import { AuditSection } from "./sections/AuditSection";
+import { UserMetricsSection } from "./sections/UserMetricsSection";
 import AccessRequestManagement from "./access/AccessRequestManagement";
 import { checkAuthStatus } from "@/services/emailValidationService";
 
@@ -81,6 +82,11 @@ const SettingsTabsContent = ({ isMobile }: SettingsTabsContentProps) => {
       <TabsContent value="audit" className="mt-0">
         <SectionWrapper sectionName="Audit">
           <AuditSection />
+        </SectionWrapper>
+      </TabsContent>
+      <TabsContent value="user-metrics" className="mt-0">
+        <SectionWrapper sectionName="User Metrics">
+          <UserMetricsSection />
         </SectionWrapper>
       </TabsContent>
       {isAdminUser && (

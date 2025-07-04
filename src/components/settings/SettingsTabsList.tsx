@@ -9,7 +9,8 @@ import {
   Wrench, 
   Paintbrush, 
   FileText,
-  Shield
+  Shield,
+  Activity
 } from "lucide-react";
 
 interface SettingsTabsListProps {
@@ -38,6 +39,8 @@ const SettingsTabsList = ({ tabs, isMobile }: SettingsTabsListProps) => {
         return <FileText className="h-4 w-4" />;
       case "audit":
         return <Shield className="h-4 w-4" />;
+      case "user-metrics":
+        return <Activity className="h-4 w-4" />;
       default:
         return null;
     }

@@ -1299,6 +1299,14 @@ export type Database = {
           unit: string
         }[]
       }
+      end_user_session: {
+        Args: {
+          p_session_id: string
+          p_pages_visited?: number
+          p_actions_count?: number
+        }
+        Returns: undefined
+      }
       get_sensor_analysis: {
         Args: { p_equipment_id: string; p_hours?: number }
         Returns: {
@@ -1351,9 +1359,44 @@ export type Database = {
         }
         Returns: string
       }
+      log_performance_metric: {
+        Args: {
+          p_user_id: string
+          p_session_id: string
+          p_metric_type: string
+          p_page_route?: string
+          p_load_time_ms?: number
+          p_api_endpoint?: string
+          p_response_time_ms?: number
+          p_error_occurred?: boolean
+          p_error_message?: string
+        }
+        Returns: string
+      }
+      log_user_activity: {
+        Args: {
+          p_user_id: string
+          p_session_id: string
+          p_activity_type: string
+          p_page_route?: string
+          p_feature_name?: string
+          p_component_name?: string
+          p_action_details?: Json
+        }
+        Returns: string
+      }
       set_claim: {
         Args: { uid: string; claim: string; value: string }
         Returns: undefined
+      }
+      start_user_session: {
+        Args: {
+          p_user_id: string
+          p_session_id: string
+          p_ip_address?: unknown
+          p_user_agent?: string
+        }
+        Returns: string
       }
       track_failed_login: {
         Args: { p_email: string; p_ip_address?: unknown; p_user_agent?: string }
