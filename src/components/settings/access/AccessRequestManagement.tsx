@@ -170,7 +170,7 @@ const AccessRequestManagement = () => {
   const reviewedRequests = accessRequests?.filter(req => req.status !== 'pending') || [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
         <h2 className="text-2xl font-bold">Access Request Management</h2>
         <p className="text-muted-foreground">Review and approve access requests to the platform</p>
