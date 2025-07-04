@@ -1,5 +1,5 @@
 
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import MaintenanceCheckForm from "./MaintenanceCheckForm";
 import { MaintenanceCheck } from "@/types/maintenance";
 import { useState } from "react";
@@ -38,6 +38,12 @@ const EditMaintenanceDialog = ({
       onOpenChange(newOpen);
     }}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit Maintenance Check</DialogTitle>
+          <DialogDescription>
+            Update the maintenance check details and readings below.
+          </DialogDescription>
+        </DialogHeader>
         <MaintenanceCheckForm 
           onComplete={handleComplete} 
           initialData={check}
