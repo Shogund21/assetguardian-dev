@@ -26,17 +26,39 @@ const AccessRequestManagement = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: accessRequests, isLoading } = useQuery({
+  const { data: accessRequests, isLoading, error } = useQuery({
     queryKey: ["access-requests"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("access_requests")
-        .select("*")
-        .order("requested_at", { ascending: false });
+      console.log("🔍 AccessRequestManagement: Starting query for access requests");
       
-      if (error) throw error;
-      return data as AccessRequest[];
+      try {
+        const { data, error } = await supabase
+          .from("access_requests")
+          .select("*")
+          .order("requested_at", { ascending: false });
+        
+        console.log("🔍 AccessRequestManagement: Supabase query result:", { data, error });
+        
+        if (error) {
+          console.error("🚨 AccessRequestManagement: Supabase error:", error);
+          throw error;
+        }
+        
+        console.log("✅ AccessRequestManagement: Successfully fetched access requests:", data?.length || 0, "records");
+        return data as AccessRequest[];
+      } catch (err) {
+        console.error("🚨 AccessRequestManagement: Query failed:", err);
+        throw err;
+      }
     },
+  });
+
+  // Debug logging
+  console.log("🔍 AccessRequestManagement: Component state:", {
+    isLoading,
+    error,
+    accessRequestsCount: accessRequests?.length || 0,
+    accessRequests: accessRequests?.slice(0, 2) // Log first 2 for debugging
   });
 
   const updateRequestMutation = useMutation({

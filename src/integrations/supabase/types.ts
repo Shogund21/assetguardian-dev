@@ -1351,6 +1351,10 @@ export type Database = {
         Args: { company_id: string }
         Returns: boolean
       }
+      is_super_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       log_audit_event: {
         Args: {
           p_action: string
