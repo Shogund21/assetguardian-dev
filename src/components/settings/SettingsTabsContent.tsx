@@ -38,7 +38,7 @@ const SettingsTabsContent = ({ isMobile }: SettingsTabsContentProps) => {
   const isAdminUser = authData.userData?.email === "edward@shogunai.com";
   
   return (
-    <div className={`${isMobile ? 'mt-0' : 'mt-1'}`}>
+    <div className="mt-0">
       <TabsContent value="general" className="mt-0">
         <SectionWrapper sectionName="General">
           <GeneralSection />

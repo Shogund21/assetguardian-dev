@@ -170,14 +170,14 @@ const AccessRequestManagement = () => {
   const reviewedRequests = accessRequests?.filter(req => req.status !== 'pending') || [];
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1">
       <div>
         <h2 className="text-2xl font-bold">Access Request Management</h2>
         <p className="text-muted-foreground">Review and approve access requests to the platform</p>
       </div>
 
       {/* Pending Requests */}
-      <div className="space-y-2">
+      <div className="space-y-1">
         <h3 className="text-lg font-semibold">Pending Requests ({pendingRequests.length})</h3>
         {pendingRequests.length === 0 ? (
           <Card>
@@ -258,7 +258,7 @@ const AccessRequestManagement = () => {
 
       {/* Reviewed Requests */}
       {reviewedRequests.length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-1">
           <h3 className="text-lg font-semibold">Reviewed Requests ({reviewedRequests.length})</h3>
           {reviewedRequests.map((request) => (
             <Card key={request.id} className="opacity-75">
