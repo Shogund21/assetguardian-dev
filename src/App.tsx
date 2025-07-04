@@ -20,6 +20,7 @@ import Settings from "./pages/Settings";
 import CustomerManual from "./pages/CustomerManual";
 import Landing from "./pages/Landing";
 import Register from "./pages/Register";
+import Auth from "./pages/Auth";
 import PredictiveMaintenance from "./pages/PredictiveMaintenance";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const AppContent = () => {
     <Routes>
       <Route path="/" element={<RootPage />} />
       <Route path="/landing" element={<Landing />} />
+      <Route path="/auth" element={<Auth />} />
       <Route path="/register" element={<Register />} />
       <Route path="/equipment" element={<Equipment />} />
       <Route path="/equipment/:id" element={<EquipmentDetails />} />

@@ -41,7 +41,7 @@ export const LandingHero = ({ onRequestAccess }: LandingHeroProps) => {
               size="lg"
               className="border-white text-white hover:bg-white hover:text-primary text-lg px-8 py-4 h-auto font-semibold"
             >
-              <Link to="/">Sign In</Link>
+              <Link to="/auth">Sign In</Link>
             </Button>
           </div>
           
