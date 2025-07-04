@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { CompanyProvider } from "@/contexts/CompanyContext";
 import PageTransition from "@/components/PageTransition";
@@ -33,7 +33,7 @@ const AppContent = () => {
       <Route path="/" element={<RootPage />} />
       <Route path="/landing" element={<Landing />} />
       <Route path="/auth" element={<Auth />} />
-      <Route path="/register" element={<Register />} />
+      <Route path="/register" element={<Navigate to="/landing" replace />} />
       <Route path="/equipment" element={<Equipment />} />
       <Route path="/equipment/:id" element={<EquipmentDetails />} />
       <Route path="/add-equipment" element={<AddEquipment />} />
