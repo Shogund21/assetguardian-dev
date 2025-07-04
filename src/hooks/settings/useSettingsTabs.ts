@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { checkAuthStatus } from "@/services/emailValidationService";
+import { useAuth } from "@/hooks/useAuth";
 
 export const useSettingsTabs = () => {
   const isMobile = useIsMobile();
@@ -10,8 +10,8 @@ export const useSettingsTabs = () => {
 
   console.log("useSettingsTabs:", { isMobile, activeTab, showTabList });
 
-  const authData = checkAuthStatus();
-  const isAdminUser = authData.userData?.email === "edward@shogunai.com";
+  const { userProfile, isAdmin } = useAuth();
+  const isAdminUser = isAdmin() || userProfile?.email === "edward@shogunai.com";
 
   const baseTabs = [
     { id: "general", label: "General" },

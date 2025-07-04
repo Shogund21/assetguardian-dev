@@ -11,7 +11,7 @@ import { CompaniesSection } from "./sections/CompaniesSection";
 import { AuditSection } from "./sections/AuditSection";
 import { UserMetricsSection } from "./sections/UserMetricsSection";
 import AccessRequestManagement from "./access/AccessRequestManagement";
-import { checkAuthStatus } from "@/services/emailValidationService";
+import { useAuth } from "@/hooks/useAuth";
 
 const ErrorFallback = ({ sectionName }: { sectionName: string }) => (
   <div className="p-4 text-center text-muted-foreground">
@@ -34,8 +34,8 @@ interface SettingsTabsContentProps {
 }
 
 const SettingsTabsContent = ({ isMobile }: SettingsTabsContentProps) => {
-  const authData = checkAuthStatus();
-  const isAdminUser = authData.userData?.email === "edward@shogunai.com";
+  const { userProfile, isAdmin } = useAuth();
+  const isAdminUser = isAdmin() || userProfile?.email === "edward@shogunai.com";
   
   return (
     <div className="mt-0">

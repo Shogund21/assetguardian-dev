@@ -1,10 +1,11 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { authenticateUser } from "@/services/emailValidationService";
+import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
 export const useLandingForm = () => {
+  const { signIn } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     firstName: "",
@@ -69,17 +70,13 @@ export const useLandingForm = () => {
     try {
       console.log("Attempting access request for:", formData.email);
       
-      // Check if this is the admin email - give immediate access
+      // Check if this is the admin email - redirect to auth
       if (formData.email.toLowerCase() === "edward@shogunai.com") {
-        const result = await authenticateUser(formData.email);
-        
-        if (result.success) {
-          showMessage(`Access granted! Redirecting to dashboard...`, "success");
-          setTimeout(() => {
-            window.location.href = "/";
-          }, 1000);
-          return;
-        }
+        showMessage("Admin detected - redirecting to login...", "info");
+        setTimeout(() => {
+          navigate("/auth");
+        }, 1000);
+        return;
       }
       
       // For all other users, create an access request

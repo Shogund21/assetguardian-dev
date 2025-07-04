@@ -1565,6 +1565,10 @@ export type Database = {
         }
         Returns: string
       }
+      migrate_user_to_uuid: {
+        Args: { p_email: string; p_user_id: string }
+        Returns: undefined
+      }
       set_claim: {
         Args: { uid: string; claim: string; value: string }
         Returns: undefined
