@@ -71,12 +71,14 @@ const Settings = () => {
             className={`${isMobile ? 'flex flex-col' : 'space-y-1'}`}
           >
             {showTabList && (
-              <div className={`${isMobile ? 'mb-2 pb-1' : 'mb-1'} w-full`}>
+              <div className="mb-1 w-full">
                 <SettingsTabsList tabs={tabs} isMobile={isMobile} />
               </div>
             )}
 
-            <SettingsTabsContent isMobile={isMobile} />
+            <div className="mt-4">
+              <SettingsTabsContent isMobile={isMobile} />
+            </div>
           </Tabs>
         </div>
       </div>

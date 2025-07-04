@@ -48,20 +48,20 @@ const SettingsTabsList = ({ tabs, isMobile }: SettingsTabsListProps) => {
 
   return (
     <div className="w-full overflow-x-auto">
-      <TabsList className="w-full min-w-max grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-9 gap-2 md:gap-3 h-auto p-2 bg-muted/50 rounded-lg">
+      <TabsList className="flex min-w-max gap-2 h-auto p-2 bg-muted/50 rounded-lg">
         {tabs.map((tab) => (
           <TabsTrigger
             key={tab.id}
             value={tab.id}
-            className={`flex items-center justify-center ${
+            className={`box-border flex items-center justify-center ${
               isMobile 
-                ? 'px-2 py-2 text-xs min-h-[44px]' 
-                : 'px-3 py-2.5 text-sm min-h-[48px]'
-            } min-w-0 rounded-md transition-all duration-200 hover:bg-background/80 data-[state=active]:bg-background data-[state=active]:shadow-sm border border-transparent data-[state=active]:border-border/20`}
+                ? 'px-2 py-2 text-xs min-h-[44px] min-w-[80px]' 
+                : 'px-3 py-2.5 text-sm min-h-[48px] min-w-[100px]'
+            } rounded-md transition-all duration-200 hover:bg-background/80 data-[state=active]:ring-2 data-[state=active]:ring-primary/20 data-[state=active]:bg-background border border-transparent whitespace-nowrap`}
           >
             <div className="flex flex-col items-center space-y-1">
               {getIcon(tab.id)}
-              <span className="truncate text-center leading-tight">{tab.label}</span>
+              <span className="text-center leading-tight">{tab.label}</span>
             </div>
           </TabsTrigger>
         ))}
