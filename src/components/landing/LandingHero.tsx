@@ -27,21 +27,13 @@ export const LandingHero = ({ onRequestAccess }: LandingHeroProps) => {
         </p>
         
         <div className="landing-hero__actions">
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div className="flex justify-center">
             <Button
               onClick={onRequestAccess}
               size="lg"
               className="bg-white text-primary hover:bg-white/90 text-lg px-8 py-4 h-auto font-semibold"
             >
               Request Access
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              size="lg"
-              className="border-white text-white hover:bg-white hover:text-primary text-lg px-8 py-4 h-auto font-semibold"
-            >
-              <Link to="/auth">Sign In</Link>
             </Button>
           </div>
           
