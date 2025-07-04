@@ -1343,6 +1343,10 @@ export type Database = {
           company: Json
         }[]
       }
+      is_current_user_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       is_member_of: {
         Args: { company_id: string }
         Returns: boolean
