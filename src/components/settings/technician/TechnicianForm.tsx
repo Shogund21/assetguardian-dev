@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UserPlus } from "lucide-react";
+import { useCompany } from "@/contexts/CompanyContext";
 
 interface TechnicianFormData {
   firstName: string;
@@ -11,16 +12,21 @@ interface TechnicianFormData {
   phone: string;
   specialization: string;
   userRole: string;
+  company_id?: string;
+  company_name?: string;
 }
 
 interface TechnicianFormProps {
   formData: TechnicianFormData;
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRoleChange: (role: string) => void;
+  onCompanyChange: (companyId: string) => void;
   onSubmit: (e: React.FormEvent) => void;
 }
 
-const TechnicianForm = ({ formData, onInputChange, onRoleChange, onSubmit }: TechnicianFormProps) => {
+const TechnicianForm = ({ formData, onInputChange, onRoleChange, onCompanyChange, onSubmit }: TechnicianFormProps) => {
+  const { companies } = useCompany();
+
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -85,6 +91,22 @@ const TechnicianForm = ({ formData, onInputChange, onRoleChange, onSubmit }: Tec
             <SelectContent>
               <SelectItem value="technician">Technician</SelectItem>
               <SelectItem value="admin">Admin</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2 sm:col-span-2">
+          <Label htmlFor="company">Company</Label>
+          <Select value={formData.company_id || "none"} onValueChange={onCompanyChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select a company" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">No Company</SelectItem>
+              {companies.map((company) => (
+                <SelectItem key={company.id} value={company.id}>
+                  {company.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

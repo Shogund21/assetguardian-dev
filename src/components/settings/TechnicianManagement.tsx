@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AuditService } from "@/services/auditService";
 import { Technician } from "@/types/technician";
+import { useCompany } from "@/contexts/CompanyContext";
 import TechnicianForm from "./technician/TechnicianForm";
 import TechnicianList from "./technician/TechnicianList";
 
@@ -22,6 +23,7 @@ interface TechnicianFormData {
 const TechnicianManagement = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { companies } = useCompany();
   const [formData, setFormData] = useState<TechnicianFormData>({
     firstName: "",
     lastName: "",
@@ -29,6 +31,8 @@ const TechnicianManagement = () => {
     phone: "",
     specialization: "",
     userRole: "technician",
+    company_id: "none",
+    company_name: "",
   });
 
   const { data: technicians, isLoading } = useQuery({
@@ -57,7 +61,7 @@ const TechnicianManagement = () => {
 
   const addTechnicianMutation = useMutation({
     mutationFn: async (newTechnician: TechnicianFormData) => {
-      const { userRole, ...technicianData } = newTechnician;
+      const { userRole, company_id, company_name, ...technicianData } = newTechnician;
       
       // Check if email already exists
       const { data: existingTechnician } = await supabase
@@ -70,10 +74,18 @@ const TechnicianManagement = () => {
         throw new Error("A technician with this email already exists");
       }
       
+      // Prepare technician data with proper company handling
+      const technicianPayload = {
+        ...technicianData,
+        user_role: userRole,
+        company_id: company_id === "none" ? null : company_id,
+        company_name: company_id === "none" ? "" : company_name,
+      };
+      
       // First create the technician
       const { data: technician, error } = await supabase
         .from("technicians")
-        .insert([{ ...technicianData, user_role: userRole }])
+        .insert([technicianPayload])
         .select()
         .single();
       if (error) throw error;
@@ -104,6 +116,8 @@ const TechnicianManagement = () => {
         phone: "",
         specialization: "",
         userRole: "technician",
+        company_id: "none",
+        company_name: "",
       });
     },
     onError: (error) => {
@@ -204,6 +218,15 @@ const TechnicianManagement = () => {
     setFormData((prev) => ({ ...prev, userRole: role }));
   };
 
+  const handleCompanyChange = (companyId: string) => {
+    const selectedCompany = companies.find(c => c.id === companyId);
+    setFormData((prev) => ({ 
+      ...prev, 
+      company_id: companyId,
+      company_name: companyId === "none" ? "" : (selectedCompany?.name || ""),
+    }));
+  };
+
   const handleUpdate = (id: string, updatedData: Omit<Technician, 'id'>) => {
     updateTechnicianMutation.mutate({ id, updatedData });
   };
@@ -251,6 +274,7 @@ const TechnicianManagement = () => {
         formData={formData}
         onInputChange={handleInputChange}
         onRoleChange={handleRoleChange}
+        onCompanyChange={handleCompanyChange}
         onSubmit={handleSubmit}
       />
       <TechnicianList
