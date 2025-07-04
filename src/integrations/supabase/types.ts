@@ -1397,6 +1397,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      generate_demo_data: {
+        Args: { p_company_id: string; p_company_name: string }
+        Returns: undefined
+      }
       get_sensor_analysis: {
         Args: { p_equipment_id: string; p_hours?: number }
         Returns: {
