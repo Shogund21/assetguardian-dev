@@ -25,9 +25,9 @@ export const useLocationList = () => {
         // Start with the base query
         let query = supabase.from("locations").select("*");
         
-        // If we have a company ID, filter by it
+        // If we have a company ID, include both company locations and unassigned locations
         if (currentCompany?.id) {
-          query = query.eq("company_id", currentCompany.id);
+          query = query.or(`company_id.eq.${currentCompany.id},company_id.is.null`);
         }
         
         // Order by creation date
