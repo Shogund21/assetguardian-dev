@@ -1153,6 +1153,9 @@ export type Database = {
           company_id: string
           user_role: string
           is_admin: boolean
+          company_name: string
+          status: string
+          isAvailable: boolean
         }[]
       }
       get_user_company: {
