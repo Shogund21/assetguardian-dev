@@ -814,6 +814,51 @@ export type Database = {
           },
         ]
       }
+      performance_metrics: {
+        Row: {
+          api_endpoint: string | null
+          created_at: string | null
+          error_message: string | null
+          error_occurred: boolean | null
+          id: string
+          load_time_ms: number | null
+          metric_type: string
+          page_route: string | null
+          response_time_ms: number | null
+          session_id: string | null
+          timestamp_utc: string | null
+          user_id: string | null
+        }
+        Insert: {
+          api_endpoint?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          error_occurred?: boolean | null
+          id?: string
+          load_time_ms?: number | null
+          metric_type: string
+          page_route?: string | null
+          response_time_ms?: number | null
+          session_id?: string | null
+          timestamp_utc?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          api_endpoint?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          error_occurred?: boolean | null
+          id?: string
+          load_time_ms?: number | null
+          metric_type?: string
+          page_route?: string | null
+          response_time_ms?: number | null
+          session_id?: string | null
+          timestamp_utc?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       predictive_alerts: {
         Row: {
           asset_id: string
@@ -1045,6 +1090,132 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_activities: {
+        Row: {
+          action_details: Json | null
+          activity_type: string
+          component_name: string | null
+          created_at: string | null
+          feature_name: string | null
+          id: string
+          page_route: string | null
+          session_id: string | null
+          timestamp_utc: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action_details?: Json | null
+          activity_type: string
+          component_name?: string | null
+          created_at?: string | null
+          feature_name?: string | null
+          id?: string
+          page_route?: string | null
+          session_id?: string | null
+          timestamp_utc?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action_details?: Json | null
+          activity_type?: string
+          component_name?: string | null
+          created_at?: string | null
+          feature_name?: string | null
+          id?: string
+          page_route?: string | null
+          session_id?: string | null
+          timestamp_utc?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_engagement_metrics: {
+        Row: {
+          bounce_rate: number | null
+          created_at: string | null
+          date_recorded: string | null
+          id: string
+          last_active_at: string | null
+          login_count: number | null
+          most_used_features: string[] | null
+          pages_per_session: number | null
+          total_session_duration_minutes: number | null
+          total_sessions: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          bounce_rate?: number | null
+          created_at?: string | null
+          date_recorded?: string | null
+          id?: string
+          last_active_at?: string | null
+          login_count?: number | null
+          most_used_features?: string[] | null
+          pages_per_session?: number | null
+          total_session_duration_minutes?: number | null
+          total_sessions?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          bounce_rate?: number | null
+          created_at?: string | null
+          date_recorded?: string | null
+          id?: string
+          last_active_at?: string | null
+          login_count?: number | null
+          most_used_features?: string[] | null
+          pages_per_session?: number | null
+          total_session_duration_minutes?: number | null
+          total_sessions?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_sessions: {
+        Row: {
+          actions_count: number | null
+          created_at: string | null
+          duration_seconds: number | null
+          ended_at: string | null
+          id: string
+          ip_address: unknown | null
+          pages_visited: number | null
+          session_id: string
+          started_at: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          actions_count?: number | null
+          created_at?: string | null
+          duration_seconds?: number | null
+          ended_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          pages_visited?: number | null
+          session_id: string
+          started_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          actions_count?: number | null
+          created_at?: string | null
+          duration_seconds?: number | null
+          ended_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          pages_visited?: number | null
+          session_id?: string
+          started_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {
