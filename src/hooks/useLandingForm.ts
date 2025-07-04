@@ -71,7 +71,7 @@ export const useLandingForm = () => {
       console.log("Attempting access request for:", formData.email);
       
       // Check if this is the admin email - redirect to auth
-      if (formData.email.toLowerCase() === "edward@shogunai.com") {
+      if (formData.email.toLowerCase() === "edward@shogunaillc.com") {
         showMessage("Admin detected - redirecting to login...", "info");
         setTimeout(() => {
           navigate("/auth");

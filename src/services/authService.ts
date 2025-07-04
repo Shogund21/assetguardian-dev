@@ -184,7 +184,7 @@ export const authService = {
 
   // Check if user is admin
   isAdmin(userProfile: UserProfile | null): boolean {
-    return userProfile?.is_admin === true || userProfile?.email === 'edward@shogunai.com';
+    return userProfile?.is_admin === true || userProfile?.email === 'edward@shogunaillc.com';
   },
 
   // Check if user has specific permission

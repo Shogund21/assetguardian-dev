@@ -11,7 +11,7 @@ export const useSettingsTabs = () => {
   console.log("useSettingsTabs:", { isMobile, activeTab, showTabList });
 
   const { userProfile, isAdmin } = useAuth();
-  const isAdminUser = isAdmin() || userProfile?.email === "edward@shogunai.com";
+  const isAdminUser = isAdmin() || userProfile?.email === "edward@shogunaillc.com";
 
   const baseTabs = [
     { id: "general", label: "General" },

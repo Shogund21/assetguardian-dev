@@ -35,7 +35,7 @@ interface SettingsTabsContentProps {
 
 const SettingsTabsContent = ({ isMobile }: SettingsTabsContentProps) => {
   const { userProfile, isAdmin } = useAuth();
-  const isAdminUser = isAdmin() || userProfile?.email === "edward@shogunai.com";
+  const isAdminUser = isAdmin() || userProfile?.email === "edward@shogunaillc.com";
   
   return (
     <div className="mt-0">

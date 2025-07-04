@@ -1,7 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-const ADMIN_EMAIL = "edward@shogunai.com";
+const ADMIN_EMAIL = "edward@shogunaillc.com";
 
 export interface ValidationResult {
   isValid: boolean;
