@@ -1,8 +1,8 @@
 
 const statsData = [
-  { number: "95%", label: "Prediction Accuracy" },
-  { number: "67%", label: "Downtime Reduction" },
-  { number: "$2.3M", label: "Average Annual Savings" },
+  { number: "99%", label: "Prediction Accuracy" },
+  { number: "81%", label: "Downtime Reduction" },
+  { number: "$8.7M", label: "Average Annual Savings" },
   { number: "24/7", label: "AI Monitoring" }
 ];
 
