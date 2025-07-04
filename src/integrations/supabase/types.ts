@@ -208,8 +208,11 @@ export type Database = {
           contact_phone: string | null
           created_at: string | null
           id: string
+          is_trial: boolean | null
           logo_url: string | null
           name: string
+          trial_created_at: string | null
+          trial_expires_at: string | null
           updated_at: string | null
         }
         Insert: {
@@ -218,8 +221,11 @@ export type Database = {
           contact_phone?: string | null
           created_at?: string | null
           id?: string
+          is_trial?: boolean | null
           logo_url?: string | null
           name: string
+          trial_created_at?: string | null
+          trial_expires_at?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -228,8 +234,11 @@ export type Database = {
           contact_phone?: string | null
           created_at?: string | null
           id?: string
+          is_trial?: boolean | null
           logo_url?: string | null
           name?: string
+          trial_created_at?: string | null
+          trial_expires_at?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -265,6 +274,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_users_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "trial_companies"
             referencedColumns: ["id"]
           },
         ]
@@ -318,6 +334,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipment_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "trial_companies"
             referencedColumns: ["id"]
           },
         ]
@@ -681,6 +704,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "hvac_maintenance_checks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "trial_companies"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "hvac_maintenance_checks_equipment_id_fkey"
             columns: ["equipment_id"]
             isOneToOne: false
@@ -730,6 +760,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "locations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "trial_companies"
             referencedColumns: ["id"]
           },
         ]
@@ -789,6 +826,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "trial_companies"
             referencedColumns: ["id"]
           },
           {
@@ -958,6 +1002,13 @@ export type Database = {
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "projects_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "trial_companies"
+            referencedColumns: ["id"]
+          },
         ]
       }
       refactoring_rules: {
@@ -1087,6 +1138,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technicians_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "trial_companies"
             referencedColumns: ["id"]
           },
         ]
@@ -1282,6 +1340,25 @@ export type Database = {
           },
         ]
       }
+      trial_companies: {
+        Row: {
+          address: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string | null
+          days_remaining: number | null
+          id: string | null
+          is_expired: boolean | null
+          is_trial: boolean | null
+          logo_url: string | null
+          name: string | null
+          trial_created_at: string | null
+          trial_expires_at: string | null
+          updated_at: string | null
+          user_count: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       calculate_filter_status: {
@@ -1302,6 +1379,15 @@ export type Database = {
           violation_level: string
           unit: string
         }[]
+      }
+      create_trial_company: {
+        Args: {
+          p_company_name: string
+          p_user_email: string
+          p_user_first_name?: string
+          p_user_last_name?: string
+        }
+        Returns: string
       }
       end_user_session: {
         Args: {
@@ -1341,6 +1427,15 @@ export type Database = {
           isAvailable: boolean
         }[]
       }
+      get_trial_info: {
+        Args: { p_company_id: string }
+        Returns: {
+          is_trial: boolean
+          expires_at: string
+          days_remaining: number
+          is_expired: boolean
+        }[]
+      }
       get_user_company: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -1357,6 +1452,10 @@ export type Database = {
       }
       is_super_admin: {
         Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_trial_expired: {
+        Args: { p_company_id: string }
         Returns: boolean
       }
       log_audit_event: {
