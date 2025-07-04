@@ -41,6 +41,18 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const fetchCompanies = async () => {
     try {
       setIsLoading(true);
+      
+      // Check if user is authenticated first
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      // If not authenticated, don't try to fetch companies (for landing page)
+      if (!session) {
+        setCompanies([]);
+        setCurrentCompany(null);
+        setIsLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from("companies")
         .select("*")
@@ -69,11 +81,15 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
     } catch (error) {
       console.error("Error fetching companies:", error);
-      toast({
-        title: "Error",
-        description: "Could not load companies. Please try again.",
-        variant: "destructive",
-      });
+      // Only show error toast if user is authenticated (not on landing page)
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        toast({
+          title: "Error",
+          description: "Could not load companies. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
