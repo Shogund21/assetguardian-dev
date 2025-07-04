@@ -22,6 +22,7 @@ import Landing from "./pages/Landing";
 import Register from "./pages/Register";
 import Auth from "./pages/Auth";
 import PredictiveMaintenance from "./pages/PredictiveMaintenance";
+import PrintView from "./pages/PrintView";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ const AppContent = () => {
       <Route path="/analytics" element={<Analytics />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/customer-manual" element={<CustomerManual />} />
+      <Route path="/print" element={<PrintView />} />
     </Routes>
   );
 };
