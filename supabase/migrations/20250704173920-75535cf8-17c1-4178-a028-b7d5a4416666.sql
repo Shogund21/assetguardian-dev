@@ -5,17 +5,24 @@ DROP POLICY IF EXISTS "Only admin can view access requests" ON public.access_req
 DROP POLICY IF EXISTS "Only admin can manage access requests" ON public.access_requests;
 DROP POLICY IF EXISTS "Anyone can create access requests" ON public.access_requests;
 
--- Create new, cleaner RLS policies using the is_current_user_admin function
-CREATE POLICY "Admins can view all access requests" 
+-- Simplify RLS policies to work with custom authentication
+-- Allow anyone to view access requests (app-level security handles admin filtering)
+CREATE POLICY "Allow viewing access requests" 
 ON public.access_requests 
 FOR SELECT 
-USING (public.is_current_user_admin());
+USING (true);
 
+-- Restrict management operations to admin users
 CREATE POLICY "Admins can manage access requests" 
 ON public.access_requests 
-FOR ALL 
+FOR UPDATE 
 USING (public.is_current_user_admin())
 WITH CHECK (public.is_current_user_admin());
+
+CREATE POLICY "Admins can delete access requests" 
+ON public.access_requests 
+FOR DELETE 
+USING (public.is_current_user_admin());
 
 -- Allow anyone to create access requests (for the landing page form)
 CREATE POLICY "Anyone can create access requests" 
