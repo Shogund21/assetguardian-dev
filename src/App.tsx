@@ -21,6 +21,7 @@ import CustomerManual from "./pages/CustomerManual";
 import Landing from "./pages/Landing";
 import Register from "./pages/Register";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import PredictiveMaintenance from "./pages/PredictiveMaintenance";
 import PrintView from "./pages/PrintView";
 
@@ -34,6 +35,7 @@ const AppContent = () => {
       <Route path="/" element={<RootPage />} />
       <Route path="/landing" element={<Landing />} />
       <Route path="/auth" element={<Auth />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/register" element={<Navigate to="/landing" replace />} />
       <Route path="/equipment" element={<Equipment />} />
       <Route path="/equipment/:id" element={<EquipmentDetails />} />

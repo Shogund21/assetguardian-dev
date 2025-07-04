@@ -1,125 +1,106 @@
 
 import { useEffect, useState } from "react";
-import { User } from "@supabase/supabase-js";
-import { checkAuthStatus, ValidationResult } from "@/services/emailValidationService";
+import { User, Session } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
+import { authService, UserProfile } from "@/services/authService";
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [userValidation, setUserValidation] = useState<ValidationResult | null>(null);
-
-  const checkAuth = () => {
-    try {
-      const authStatus = checkAuthStatus();
-      console.log("Auth status check:", authStatus);
-      
-      if (authStatus.isAuthenticated && authStatus.userData) {
-        // Create a mock user object compatible with Supabase User type
-        const mockUser: User = {
-          id: authStatus.userData.email,
-          email: authStatus.userData.email,
-          aud: 'authenticated',
-          role: 'authenticated',
-          email_confirmed_at: new Date().toISOString(),
-          phone: '',
-          confirmed_at: new Date().toISOString(),
-          last_sign_in_at: new Date().toISOString(),
-          app_metadata: {},
-          user_metadata: {},
-          identities: [],
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          is_anonymous: false
-        };
-
-        setUser(mockUser);
-        setUserValidation({
-          isValid: true,
-          userType: authStatus.userData.userType,
-          userData: authStatus.userData.userData
-        });
-      } else {
-        setUser(null);
-        setUserValidation(null);
-      }
-    } catch (error) {
-      console.error("Error checking authentication:", error);
-      setUser(null);
-      setUserValidation(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   useEffect(() => {
-    checkAuth();
-
-    // Listen for storage changes (for logout from other tabs)
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'assetguardian_auth') {
-        console.log("Storage change detected, rechecking auth");
-        checkAuth();
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log("Auth state changed:", event, session?.user?.email);
+        
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        // Load user profile when session is established
+        if (session?.user) {
+          setTimeout(async () => {
+            const profile = await authService.getUserProfile(session.user.id);
+            setUserProfile(profile);
+            setIsLoading(false);
+          }, 0);
+        } else {
+          setUserProfile(null);
+          setIsLoading(false);
+        }
       }
-    };
+    );
 
-    // Listen for custom auth update events
-    const handleAuthUpdate = () => {
-      console.log("Auth update event received, rechecking auth");
-      checkAuth();
-    };
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        // Load user profile for existing session
+        setTimeout(async () => {
+          const profile = await authService.getUserProfile(session.user.id);
+          setUserProfile(profile);
+          setIsLoading(false);
+        }, 0);
+      } else {
+        setIsLoading(false);
+      }
+    });
 
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('authStateChanged', handleAuthUpdate);
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('authStateChanged', handleAuthUpdate);
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
   const getUserDisplayName = () => {
-    if (!user || !userValidation?.userData) return "Guest";
+    if (!userProfile) return "Guest";
     
-    // Use the name from validation data
-    if (userValidation.userData.name) {
-      return userValidation.userData.name;
+    // Use first/last name if available
+    if (userProfile.first_name || userProfile.last_name) {
+      return `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim();
     }
     
     // Fall back to email (remove domain part for cleaner display)
-    if (user.email) {
-      return user.email.split('@')[0];
+    if (userProfile.email) {
+      return userProfile.email.split('@')[0];
     }
     
     return "User";
   };
 
   const isAdmin = () => {
-    return userValidation?.userType === "admin";
+    return authService.isAdmin(userProfile);
   };
 
   const isTechnician = () => {
-    return userValidation?.userType === "technician";
+    return userProfile?.user_role === "technician" || userProfile?.user_role === "senior_technician";
   };
 
   const hasPermission = (permission: string) => {
-    if (isAdmin()) return true; // Admin has all permissions
-    return userValidation?.userData?.permissions?.includes(permission) || false;
+    return authService.hasPermission(userProfile, permission);
   };
 
   const hasFullAccess = () => {
-    return isAdmin() || userValidation?.userData?.hasFullAccess === true;
+    return isAdmin();
   };
 
   return {
     user,
+    session,
+    userProfile,
     isLoading,
     getUserDisplayName,
-    isAuthenticated: !!user && !!userValidation?.isValid,
-    userValidation,
+    isAuthenticated: !!user && !!session,
     isAdmin,
     isTechnician,
     hasPermission,
     hasFullAccess,
-    forceAuthCheck: checkAuth
+    // Auth actions
+    signIn: authService.signIn,
+    signUp: authService.signUp,
+    signOut: authService.signOut,
+    resetPassword: authService.resetPassword,
+    updatePassword: authService.updatePassword
   };
 };

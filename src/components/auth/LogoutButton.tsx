@@ -1,7 +1,8 @@
 
 import { useNavigate } from "react-router-dom";
-import { logoutUser } from "@/services/emailValidationService";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 interface LogoutButtonProps {
   className?: string;
@@ -10,12 +11,33 @@ interface LogoutButtonProps {
 
 export const LogoutButton = ({ className, children }: LogoutButtonProps) => {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
+  const { toast } = useToast();
 
   const handleLogout = async () => {
-    await logoutUser(); // Now supports async for audit logging
-    navigate("/");
-    // Force a page reload to clear any cached state
-    window.location.reload();
+    try {
+      const result = await signOut();
+      if (result.success) {
+        toast({
+          title: "Signed out",
+          description: "You have been signed out successfully.",
+        });
+        navigate("/auth");
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to sign out",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred during sign out.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

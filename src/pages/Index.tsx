@@ -11,7 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   const isMobile = useIsMobile();
-  const { getUserDisplayName, isLoading: userLoading, isAuthenticated, isAdmin, userValidation } = useAuth();
+  const { getUserDisplayName, isLoading: userLoading, isAuthenticated, isAdmin, userProfile } = useAuth();
 
   // Force content to render and stop loading state
   useEffect(() => {
@@ -46,7 +46,7 @@ const Index = () => {
                 <span className="text-blue-100 block">
                   {userLoading ? "Loading..." : `Welcome, ${getUserDisplayName()}`}
                 </span>
-                {userValidation && (
+                {userProfile && (
                   <span className="text-xs text-blue-200">
                     {isAdmin() ? "Administrator" : "Technician"} Access
                   </span>

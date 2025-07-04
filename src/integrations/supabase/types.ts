@@ -954,6 +954,33 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string
+          first_name: string | null
+          id: string
+          last_name: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          first_name?: string | null
+          id: string
+          last_name?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       projects: {
         Row: {
           company_id: string | null
@@ -1098,6 +1125,7 @@ export type Database = {
           specialization: string
           status: string | null
           updatedAt: string | null
+          user_id: string | null
           user_role: string | null
         }
         Insert: {
@@ -1114,6 +1142,7 @@ export type Database = {
           specialization: string
           status?: string | null
           updatedAt?: string | null
+          user_id?: string | null
           user_role?: string | null
         }
         Update: {
@@ -1130,6 +1159,7 @@ export type Database = {
           specialization?: string
           status?: string | null
           updatedAt?: string | null
+          user_id?: string | null
           user_role?: string | null
         }
         Relationships: [
@@ -1426,6 +1456,15 @@ export type Database = {
       generate_demo_data: {
         Args: { p_company_id: string; p_company_name: string }
         Returns: undefined
+      }
+      get_current_user_company: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          company_id: string
+          company_name: string
+          user_role: string
+          is_admin: boolean
+        }[]
       }
       get_sensor_analysis: {
         Args: { p_equipment_id: string; p_hours?: number }
