@@ -81,7 +81,7 @@ export const LandingEmailForm = ({
           name="reason"
           value={formData.reason}
           onChange={onInputChange}
-          placeholder="Please describe why you need access to the platform"
+          placeholder="Briefly explain your role and how you plan to use Asset Guardian"
           className="landing-email-form__input min-h-[100px] resize-none"
           disabled={isSubmitting}
           required
