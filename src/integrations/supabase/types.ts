@@ -1288,6 +1288,10 @@ export type Database = {
         Args: { p_due: string }
         Returns: string
       }
+      can_access_all_data: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       check_threshold_violations: {
         Args: { p_equipment_id: string }
         Returns: {
