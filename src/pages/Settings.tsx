@@ -18,7 +18,8 @@ const Settings = () => {
     nextTab,
     isMobile,
     handleTabChange,
-    toggleTabList
+    toggleTabList,
+    isDemoUser
   } = useSettingsTabs();
 
   console.log("Settings state:", { activeTab, showTabList, isMobile });
@@ -77,7 +78,7 @@ const Settings = () => {
             )}
 
             <div className="mt-4">
-              <SettingsTabsContent isMobile={isMobile} />
+              <SettingsTabsContent isMobile={isMobile} isDemoUser={isDemoUser} />
             </div>
           </Tabs>
         </div>

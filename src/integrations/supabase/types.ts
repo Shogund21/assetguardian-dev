@@ -1391,6 +1391,10 @@ export type Database = {
       }
     }
     Functions: {
+      assign_user_to_demo_company: {
+        Args: { p_user_email: string }
+        Returns: string
+      }
       calculate_filter_status: {
         Args: { p_due: string }
         Returns: string
@@ -1466,6 +1470,10 @@ export type Database = {
           is_admin: boolean
         }[]
       }
+      get_demo_company_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_sensor_analysis: {
         Args: { p_equipment_id: string; p_hours?: number }
         Returns: {
@@ -1513,6 +1521,10 @@ export type Database = {
       }
       is_current_user_admin: {
         Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_demo_user: {
+        Args: { p_user_id?: string }
         Returns: boolean
       }
       is_member_of: {

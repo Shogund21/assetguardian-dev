@@ -12,16 +12,21 @@ export const useSettingsTabs = () => {
 
   const { userProfile, isAdmin } = useAuth();
   const isAdminUser = isAdmin() || userProfile?.email === "edward@shogunaillc.com";
+  const isDemoUser = userProfile?.is_demo_user === true;
 
   const baseTabs = [
     { id: "general", label: "General" },
-    { id: "notifications", label: "Notifications" },
+    { id: "appearance", label: "Appearance" },
+    { id: "documentation", label: "Documentation" },
+  ];
+
+  // Additional tabs for users with real companies (not demo users)
+  const companyTabs = [
     { id: "locations", label: "Locations" },
     { id: "companies", label: "Companies" },
     { id: "features", label: "Features" },
     { id: "maintenance", label: "Maintenance" },
-    { id: "appearance", label: "Appearance" },
-    { id: "documentation", label: "Documentation" },
+    { id: "notifications", label: "Notifications" },
     { id: "audit", label: "Audit" },
     { id: "user-metrics", label: "User Metrics" },
   ];
@@ -30,7 +35,18 @@ export const useSettingsTabs = () => {
     { id: "access-requests", label: "Access Requests" },
   ];
 
-  const tabs = isAdminUser ? [...baseTabs, ...adminTabs] : baseTabs;
+  // Build tabs based on user type
+  let availableTabs = [...baseTabs];
+  
+  if (!isDemoUser) {
+    availableTabs = [...availableTabs, ...companyTabs];
+  }
+  
+  if (isAdminUser && !isDemoUser) {
+    availableTabs = [...availableTabs, ...adminTabs];
+  }
+
+  const tabs = availableTabs;
 
   useEffect(() => {
     if (isMobile !== null) {
@@ -72,5 +88,6 @@ export const useSettingsTabs = () => {
     isMobile,
     handleTabChange,
     toggleTabList,
+    isDemoUser,
   };
 };

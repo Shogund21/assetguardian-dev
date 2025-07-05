@@ -37,8 +37,18 @@ const Index = () => {
               <div>
                 <h1 className="text-3xl font-bold mb-2 flex items-center gap-3">
                   Dashboard
+                  {userProfile?.is_demo_user && (
+                    <span className="text-xs bg-white/20 px-3 py-1 rounded-full font-medium">
+                      Demo Mode
+                    </span>
+                  )}
                 </h1>
-                <p className="text-blue-100 text-lg">Asset Guardian - Facility Management Overview</p>
+                <p className="text-blue-100 text-lg">
+                  {userProfile?.is_demo_user 
+                    ? "Asset Guardian - Demo Experience • Explore all features with sample data"
+                    : "Asset Guardian - Facility Management Overview"
+                  }
+                </p>
               </div>
             </div>
             <div className="mt-4 md:mt-0 flex items-center gap-4">
@@ -48,7 +58,10 @@ const Index = () => {
                 </span>
                 {userProfile && (
                   <span className="text-xs text-blue-200">
-                    {isAdmin() ? "Administrator" : "Technician"} Access
+                    {userProfile.is_demo_user 
+                      ? "Demo User"
+                      : isAdmin() ? "Administrator" : "Technician"
+                    } Access
                   </span>
                 )}
               </div>
@@ -57,6 +70,21 @@ const Index = () => {
               </button>
             </div>
           </div>
+          {userProfile?.is_demo_user && (
+            <div className="mt-4 p-3 bg-white/10 rounded-lg border border-white/20">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <i className="fas fa-info-circle text-white/80"></i>
+                  <span className="text-sm text-white/90">
+                    You're exploring Asset Guardian with demo data. Ready to get started with your own company?
+                  </span>
+                </div>
+                <button className="bg-white text-purple-600 px-4 py-1 rounded-md text-sm font-medium hover:bg-white/90 transition-colors">
+                  Get Started
+                </button>
+              </div>
+            </div>
+          )}
         </div>
         
         {isLoading ? (

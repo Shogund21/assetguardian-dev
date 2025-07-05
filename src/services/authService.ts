@@ -10,6 +10,7 @@ export interface UserProfile {
   company_name?: string;
   user_role?: string;
   is_admin?: boolean;
+  is_demo_user?: boolean;
 }
 
 export interface AuthResult {
@@ -275,6 +276,40 @@ export const authService = {
         .rpc('get_current_user_company')
         .single();
 
+      // If user has no company, assign them to demo company
+      if (!companyInfo && profile.email) {
+        console.log("User has no company, assigning to demo company:", profile.email);
+        try {
+          await supabase.rpc('assign_user_to_demo_company', { 
+            p_user_email: profile.email 
+          });
+          
+          // Retry getting company info after assignment
+          const { data: updatedCompanyInfo } = await supabase
+            .rpc('get_current_user_company')
+            .single();
+            
+          return {
+            id: profile.id,
+            email: profile.email,
+            first_name: profile.first_name,
+            last_name: profile.last_name,
+            company_id: updatedCompanyInfo?.company_id,
+            company_name: updatedCompanyInfo?.company_name,
+            user_role: updatedCompanyInfo?.user_role || 'demo_user',
+            is_admin: updatedCompanyInfo?.is_admin || false,
+            is_demo_user: true
+          };
+        } catch (demoError) {
+          console.error("Error assigning user to demo company:", demoError);
+        }
+      }
+
+      // Check if user is demo user
+      const { data: isDemoUser } = await supabase
+        .rpc('is_demo_user')
+        .single();
+
       return {
         id: profile.id,
         email: profile.email,
@@ -283,7 +318,8 @@ export const authService = {
         company_id: companyInfo?.company_id,
         company_name: companyInfo?.company_name,
         user_role: companyInfo?.user_role || 'user',
-        is_admin: companyInfo?.is_admin || false
+        is_admin: companyInfo?.is_admin || false,
+        is_demo_user: isDemoUser || false
       };
     } catch (error) {
       console.error("Error getting user profile:", error);
