@@ -23,6 +23,8 @@ export const authService = {
   // Sign up with email and password
   async signUp(email: string, password: string, firstName?: string, lastName?: string): Promise<AuthResult> {
     try {
+      console.log("Attempting sign up for:", email);
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -36,18 +38,58 @@ export const authService = {
       });
 
       if (error) {
-        return { success: false, error: error.message };
+        console.error("Supabase signup error:", error);
+        
+        // Enhanced error parsing
+        let errorMessage = "Sign up failed";
+        
+        if (error.message) {
+          errorMessage = error.message;
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        } else if ((error as any).error_description) {
+          errorMessage = (error as any).error_description;
+        } else if ((error as any).msg) {
+          errorMessage = (error as any).msg;
+        }
+        
+        // Handle specific error cases
+        if (errorMessage.toLowerCase().includes('rate limit')) {
+          errorMessage = "Too many signup attempts. Please wait a few minutes and try again.";
+        } else if (errorMessage.toLowerCase().includes('invalid email')) {
+          errorMessage = "Please enter a valid email address.";
+        } else if (errorMessage.toLowerCase().includes('weak password')) {
+          errorMessage = "Password is too weak. Please choose a stronger password.";
+        } else if (errorMessage.toLowerCase().includes('user already registered')) {
+          errorMessage = "An account with this email already exists. Try signing in instead.";
+        }
+        
+        return { success: false, error: errorMessage };
       }
 
+      console.log("Sign up successful for:", email);
       return { 
         success: true, 
         user: data.user, 
         session: data.session 
       };
     } catch (error) {
+      console.error("Unexpected signup error:", error);
+      
+      let errorMessage = "An unexpected error occurred during sign up";
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object') {
+        // Handle objects that might not have a message property
+        errorMessage = JSON.stringify(error);
+      }
+      
       return { 
         success: false, 
-        error: error instanceof Error ? error.message : "Sign up failed" 
+        error: errorMessage
       };
     }
   },
@@ -55,24 +97,64 @@ export const authService = {
   // Sign in with email and password
   async signIn(email: string, password: string): Promise<AuthResult> {
     try {
+      console.log("Attempting sign in for:", email);
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
-        return { success: false, error: error.message };
+        console.error("Supabase signin error:", error);
+        
+        // Enhanced error parsing
+        let errorMessage = "Sign in failed";
+        
+        if (error.message) {
+          errorMessage = error.message;
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        } else if ((error as any).error_description) {
+          errorMessage = (error as any).error_description;
+        } else if ((error as any).msg) {
+          errorMessage = (error as any).msg;
+        }
+        
+        // Handle specific error cases
+        if (errorMessage.toLowerCase().includes('invalid login credentials')) {
+          errorMessage = "Invalid email or password. Please check your credentials and try again.";
+        } else if (errorMessage.toLowerCase().includes('rate limit')) {
+          errorMessage = "Too many login attempts. Please wait a few minutes and try again.";
+        } else if (errorMessage.toLowerCase().includes('email not confirmed')) {
+          errorMessage = "Please check your email and click the confirmation link before signing in.";
+        }
+        
+        return { success: false, error: errorMessage };
       }
 
+      console.log("Sign in successful for:", email);
       return { 
         success: true, 
         user: data.user, 
         session: data.session 
       };
     } catch (error) {
+      console.error("Unexpected signin error:", error);
+      
+      let errorMessage = "An unexpected error occurred during sign in";
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object') {
+        // Handle objects that might not have a message property
+        errorMessage = JSON.stringify(error);
+      }
+      
       return { 
         success: false, 
-        error: error instanceof Error ? error.message : "Sign in failed" 
+        error: errorMessage
       };
     }
   },

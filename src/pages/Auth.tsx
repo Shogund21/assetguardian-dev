@@ -40,6 +40,8 @@ const Auth = () => {
     try {
       const result = await signIn(loginEmail, loginPassword);
       
+      console.log("Sign in result:", result);
+      
       if (result.success) {
         toast({
           title: "Welcome back!",
@@ -47,9 +49,12 @@ const Auth = () => {
         });
         navigate("/");
       } else {
-        setError(result.error || "Sign in failed");
+        console.error("Sign in failed with error:", result.error);
+        const errorMessage = result.error || "Sign in failed. Please try again.";
+        setError(errorMessage);
       }
     } catch (error) {
+      console.error("Unexpected error during sign in:", error);
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
@@ -64,6 +69,8 @@ const Auth = () => {
     try {
       const result = await signUp(signupEmail, signupPassword, signupFirstName, signupLastName);
       
+      console.log("Sign up result:", result);
+      
       if (result.success) {
         toast({
           title: "Account created!",
@@ -71,9 +78,12 @@ const Auth = () => {
         });
         // Don't navigate immediately - user needs to verify email
       } else {
-        setError(result.error || "Sign up failed");
+        console.error("Sign up failed with error:", result.error);
+        const errorMessage = result.error || "Sign up failed. Please try again.";
+        setError(errorMessage);
       }
     } catch (error) {
+      console.error("Unexpected error during sign up:", error);
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
