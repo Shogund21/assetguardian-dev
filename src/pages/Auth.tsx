@@ -20,6 +20,8 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showResetForm, setShowResetForm] = useState(false);
+  const [isRateLimited, setIsRateLimited] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   
   const navigate = useNavigate();
   const { isAuthenticated, signIn, signUp, resetPassword } = useAuth();
@@ -32,30 +34,50 @@ const Auth = () => {
     }
   }, [isAuthenticated, navigate]);
 
+  const clearMessages = () => {
+    setError("");
+    setSuccessMessage("");
+  };
+
+  const showError = (message: string) => {
+    setError(message);
+    setSuccessMessage("");
+    
+    // Check if rate limited
+    if (message.includes("⏰") || message.toLowerCase().includes("wait")) {
+      setIsRateLimited(true);
+      // Clear rate limit after 5 minutes
+      setTimeout(() => setIsRateLimited(false), 5 * 60 * 1000);
+    }
+  };
+
+  const showSuccess = (message: string) => {
+    setSuccessMessage(message);
+    setError("");
+    setIsRateLimited(false);
+  };
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    clearMessages();
     setLoading(true);
 
     try {
       const result = await signIn(loginEmail, loginPassword);
       
-      console.log("Sign in result:", result);
-      
       if (result.success) {
+        showSuccess("✅ Welcome back! Redirecting...");
         toast({
           title: "Welcome back!",
           description: "You have been signed in successfully.",
         });
         navigate("/");
       } else {
-        console.error("Sign in failed with error:", result.error);
-        const errorMessage = result.error || "Sign in failed. Please try again.";
-        setError(errorMessage);
+        showError(result.error || "Sign in failed. Please try again.");
       }
     } catch (error) {
       console.error("Unexpected error during sign in:", error);
-      setError("An unexpected error occurred. Please try again.");
+      showError("🌐 An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -63,28 +85,30 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    clearMessages();
     setLoading(true);
 
     try {
       const result = await signUp(signupEmail, signupPassword, signupFirstName, signupLastName);
       
-      console.log("Sign up result:", result);
-      
       if (result.success) {
+        showSuccess("🎉 Account created successfully! Check your email for confirmation.");
         toast({
           title: "Account created!",
           description: "Please check your email to verify your account.",
         });
-        // Don't navigate immediately - user needs to verify email
+        
+        // Clear form on success
+        setSignupEmail("");
+        setSignupPassword("");
+        setSignupFirstName("");
+        setSignupLastName("");
       } else {
-        console.error("Sign up failed with error:", result.error);
-        const errorMessage = result.error || "Sign up failed. Please try again.";
-        setError(errorMessage);
+        showError(result.error || "Sign up failed. Please try again.");
       }
     } catch (error) {
       console.error("Unexpected error during sign up:", error);
-      setError("An unexpected error occurred. Please try again.");
+      showError("🌐 An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -92,13 +116,14 @@ const Auth = () => {
 
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    clearMessages();
     setLoading(true);
 
     try {
       const result = await resetPassword(resetEmail);
       
       if (result.success) {
+        showSuccess("📧 Reset link sent! Check your email for instructions.");
         toast({
           title: "Reset link sent!",
           description: "Check your email for password reset instructions.",
@@ -106,10 +131,10 @@ const Auth = () => {
         setShowResetForm(false);
         setResetEmail("");
       } else {
-        setError(result.error || "Password reset failed");
+        showError(result.error || "Password reset failed");
       }
     } catch (error) {
-      setError("An unexpected error occurred. Please try again.");
+      showError("🌐 An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -154,26 +179,28 @@ const Auth = () => {
                   />
                 </div>
 
-                {error && (
-                  <Alert variant="destructive">
-                    <AlertDescription>{error}</AlertDescription>
+                {(error || successMessage) && (
+                  <Alert variant={error ? "destructive" : "default"} className={successMessage ? "border-green-200 bg-green-50 text-green-800" : ""}>
+                    <AlertDescription>
+                      {error || successMessage}
+                    </AlertDescription>
                   </Alert>
                 )}
 
                 <div className="flex gap-2">
                   <Button 
                     type="submit" 
-                    disabled={loading || !resetEmail.trim()}
+                    disabled={loading || !resetEmail.trim() || isRateLimited}
                     className="flex-1"
                   >
-                    {loading ? "Sending..." : "Send Reset Link"}
+                    {loading ? "Sending..." : isRateLimited ? "Please wait..." : "Send Reset Link"}
                   </Button>
                   <Button 
                     type="button" 
                     variant="outline"
                     onClick={() => {
                       setShowResetForm(false);
-                      setError("");
+                      clearMessages();
                       setResetEmail("");
                     }}
                     disabled={loading}
@@ -228,18 +255,18 @@ const Auth = () => {
                       />
                     </div>
 
-                    {error && (
-                      <Alert variant="destructive">
-                        <AlertDescription>{error}</AlertDescription>
+                    {(error || successMessage) && (
+                      <Alert variant={error ? "destructive" : "default"} className={successMessage ? "border-green-200 bg-green-50 text-green-800" : ""}>
+                        <AlertDescription>{error || successMessage}</AlertDescription>
                       </Alert>
                     )}
 
                     <Button 
                       type="submit" 
                       className="w-full" 
-                      disabled={loading || !loginEmail.trim() || !loginPassword.trim()}
+                      disabled={loading || !loginEmail.trim() || !loginPassword.trim() || isRateLimited}
                     >
-                      {loading ? "Signing in..." : "Sign In"}
+                      {loading ? "Signing in..." : isRateLimited ? "Please wait..." : "Sign In"}
                     </Button>
                     
                     <div className="text-center">
@@ -319,18 +346,18 @@ const Auth = () => {
                       </p>
                     </div>
 
-                    {error && (
-                      <Alert variant="destructive">
-                        <AlertDescription>{error}</AlertDescription>
+                    {(error || successMessage) && (
+                      <Alert variant={error ? "destructive" : "default"} className={successMessage ? "border-green-200 bg-green-50 text-green-800" : ""}>
+                        <AlertDescription>{error || successMessage}</AlertDescription>
                       </Alert>
                     )}
 
                     <Button 
                       type="submit" 
                       className="w-full" 
-                      disabled={loading || !signupEmail.trim() || !signupPassword.trim()}
+                      disabled={loading || !signupEmail.trim() || !signupPassword.trim() || isRateLimited}
                     >
-                      {loading ? "Creating account..." : "Create Account"}
+                      {loading ? "Creating account..." : isRateLimited ? "Please wait..." : "Create Account"}
                     </Button>
                   </form>
                 </TabsContent>

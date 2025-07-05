@@ -20,10 +20,91 @@ export interface AuthResult {
 }
 
 export const authService = {
-  // Sign up with email and password
+  // Enhanced error parsing with rate limit detection
+  parseAuthError(error: any): string {
+    console.error("Raw auth error:", JSON.stringify(error, null, 2));
+    
+    // Handle rate limiting specifically
+    if (this.isRateLimited(error)) {
+      return "⏰ Too many attempts. Please wait 5-10 minutes before trying again.";
+    }
+    
+    // Extract error message from various formats
+    let errorMessage = "";
+    
+    if (error?.message) {
+      errorMessage = error.message;
+    } else if (typeof error === 'string') {
+      errorMessage = error;
+    } else if (error?.error_description) {
+      errorMessage = error.error_description;
+    } else if (error?.msg) {
+      errorMessage = error.msg;
+    } else if (error?.error?.message) {
+      errorMessage = error.error.message;
+    }
+    
+    // If still no message, provide fallback
+    if (!errorMessage || errorMessage.trim() === "") {
+      console.warn("Empty error message detected, using fallback");
+      return "Authentication failed. Please check your credentials and try again.";
+    }
+    
+    // Handle specific error cases with user-friendly messages
+    const lowerMsg = errorMessage.toLowerCase();
+    
+    if (lowerMsg.includes('rate limit') || lowerMsg.includes('too many requests')) {
+      return "⏰ Too many attempts. Please wait 5-10 minutes before trying again.";
+    } else if (lowerMsg.includes('invalid email') || lowerMsg.includes('email')) {
+      return "📧 Please enter a valid email address.";
+    } else if (lowerMsg.includes('weak password') || lowerMsg.includes('password')) {
+      return "🔒 Password must be at least 6 characters long.";
+    } else if (lowerMsg.includes('user already registered') || lowerMsg.includes('already exists')) {
+      return "👤 An account with this email already exists. Try signing in instead.";
+    } else if (lowerMsg.includes('invalid login credentials')) {
+      return "❌ Invalid email or password. Please check your credentials.";
+    } else if (lowerMsg.includes('email not confirmed')) {
+      return "📨 Please check your email and click the confirmation link first.";
+    } else if (lowerMsg.includes('network') || lowerMsg.includes('connection')) {
+      return "🌐 Network error. Please check your connection and try again.";
+    }
+    
+    return errorMessage;
+  },
+
+  // Rate limit detection
+  isRateLimited(error: any): boolean {
+    if (!error) return false;
+    
+    const errorStr = JSON.stringify(error).toLowerCase();
+    return errorStr.includes('rate limit') || 
+           errorStr.includes('too many requests') || 
+           errorStr.includes('429') ||
+           (error.status === 429);
+  },
+
+  // Enhanced logging for debugging
+  logAuthAttempt(type: string, email: string, success: boolean, error?: any) {
+    const timestamp = new Date().toISOString();
+    console.log(`[AUTH ${timestamp}] ${type.toUpperCase()} - ${email} - ${success ? 'SUCCESS' : 'FAILED'}`);
+    
+    if (!success && error) {
+      console.error(`[AUTH ERROR] Details:`, {
+        type: typeof error,
+        message: error?.message,
+        status: error?.status,
+        code: error?.code,
+        fullError: error
+      });
+    }
+  },
+
+  // Sign up with enhanced error handling and debugging
   async signUp(email: string, password: string, firstName?: string, lastName?: string): Promise<AuthResult> {
+    const startTime = Date.now();
+    
     try {
-      console.log("Attempting sign up for:", email);
+      this.logAuthAttempt("signup", email, false); // Log attempt start
       
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -37,124 +118,70 @@ export const authService = {
         }
       });
 
+      const duration = Date.now() - startTime;
+      console.log(`[AUTH TIMING] Signup took ${duration}ms`);
+
       if (error) {
-        console.error("Supabase signup error:", error);
-        
-        // Enhanced error parsing
-        let errorMessage = "Sign up failed";
-        
-        if (error.message) {
-          errorMessage = error.message;
-        } else if (typeof error === 'string') {
-          errorMessage = error;
-        } else if ((error as any).error_description) {
-          errorMessage = (error as any).error_description;
-        } else if ((error as any).msg) {
-          errorMessage = (error as any).msg;
-        }
-        
-        // Handle specific error cases
-        if (errorMessage.toLowerCase().includes('rate limit')) {
-          errorMessage = "Too many signup attempts. Please wait a few minutes and try again.";
-        } else if (errorMessage.toLowerCase().includes('invalid email')) {
-          errorMessage = "Please enter a valid email address.";
-        } else if (errorMessage.toLowerCase().includes('weak password')) {
-          errorMessage = "Password is too weak. Please choose a stronger password.";
-        } else if (errorMessage.toLowerCase().includes('user already registered')) {
-          errorMessage = "An account with this email already exists. Try signing in instead.";
-        }
-        
-        return { success: false, error: errorMessage };
+        this.logAuthAttempt("signup", email, false, error);
+        return { 
+          success: false, 
+          error: this.parseAuthError(error)
+        };
       }
 
-      console.log("Sign up successful for:", email);
+      this.logAuthAttempt("signup", email, true);
+      console.log("✅ Sign up successful - Check email for confirmation if required");
+      
       return { 
         success: true, 
         user: data.user, 
         session: data.session 
       };
     } catch (error) {
-      console.error("Unexpected signup error:", error);
-      
-      let errorMessage = "An unexpected error occurred during sign up";
-      
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      } else if (error && typeof error === 'object') {
-        // Handle objects that might not have a message property
-        errorMessage = JSON.stringify(error);
-      }
-      
+      this.logAuthAttempt("signup", email, false, error);
       return { 
         success: false, 
-        error: errorMessage
+        error: this.parseAuthError(error)
       };
     }
   },
 
-  // Sign in with email and password
+  // Sign in with enhanced error handling and debugging
   async signIn(email: string, password: string): Promise<AuthResult> {
+    const startTime = Date.now();
+    
     try {
-      console.log("Attempting sign in for:", email);
+      this.logAuthAttempt("signin", email, false); // Log attempt start
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
+      const duration = Date.now() - startTime;
+      console.log(`[AUTH TIMING] Signin took ${duration}ms`);
+
       if (error) {
-        console.error("Supabase signin error:", error);
-        
-        // Enhanced error parsing
-        let errorMessage = "Sign in failed";
-        
-        if (error.message) {
-          errorMessage = error.message;
-        } else if (typeof error === 'string') {
-          errorMessage = error;
-        } else if ((error as any).error_description) {
-          errorMessage = (error as any).error_description;
-        } else if ((error as any).msg) {
-          errorMessage = (error as any).msg;
-        }
-        
-        // Handle specific error cases
-        if (errorMessage.toLowerCase().includes('invalid login credentials')) {
-          errorMessage = "Invalid email or password. Please check your credentials and try again.";
-        } else if (errorMessage.toLowerCase().includes('rate limit')) {
-          errorMessage = "Too many login attempts. Please wait a few minutes and try again.";
-        } else if (errorMessage.toLowerCase().includes('email not confirmed')) {
-          errorMessage = "Please check your email and click the confirmation link before signing in.";
-        }
-        
-        return { success: false, error: errorMessage };
+        this.logAuthAttempt("signin", email, false, error);
+        return { 
+          success: false, 
+          error: this.parseAuthError(error)
+        };
       }
 
-      console.log("Sign in successful for:", email);
+      this.logAuthAttempt("signin", email, true);
+      console.log("✅ Sign in successful");
+      
       return { 
         success: true, 
         user: data.user, 
         session: data.session 
       };
     } catch (error) {
-      console.error("Unexpected signin error:", error);
-      
-      let errorMessage = "An unexpected error occurred during sign in";
-      
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      } else if (error && typeof error === 'object') {
-        // Handle objects that might not have a message property
-        errorMessage = JSON.stringify(error);
-      }
-      
+      this.logAuthAttempt("signin", email, false, error);
       return { 
         success: false, 
-        error: errorMessage
+        error: this.parseAuthError(error)
       };
     }
   },
