@@ -101,7 +101,7 @@ export const authService = {
   },
 
   // Sign up with enhanced error handling and debugging
-  async signUp(email: string, password: string, firstName?: string, lastName?: string): Promise<AuthResult> {
+  async signUp(email: string, password: string, firstName?: string, lastName?: string, phone?: string, company?: string, purpose?: string): Promise<AuthResult> {
     const startTime = Date.now();
     
     try {
@@ -115,6 +115,9 @@ export const authService = {
           data: {
             first_name: firstName,
             last_name: lastName,
+            phone: phone,
+            company: company,
+            purpose: purpose,
           }
         }
       });

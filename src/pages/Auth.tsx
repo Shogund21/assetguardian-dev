@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,6 +17,9 @@ const Auth = () => {
   const [signupPassword, setSignupPassword] = useState("");
   const [signupFirstName, setSignupFirstName] = useState("");
   const [signupLastName, setSignupLastName] = useState("");
+  const [signupPhone, setSignupPhone] = useState("");
+  const [signupCompany, setSignupCompany] = useState("");
+  const [signupPurpose, setSignupPurpose] = useState("");
   const [resetEmail, setResetEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -89,7 +93,7 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const result = await signUp(signupEmail, signupPassword, signupFirstName, signupLastName);
+      const result = await signUp(signupEmail, signupPassword, signupFirstName, signupLastName, signupPhone, signupCompany, signupPurpose);
       
       if (result.success) {
         showSuccess("🎉 Account created successfully! Check your email for confirmation.");
@@ -103,6 +107,9 @@ const Auth = () => {
         setSignupPassword("");
         setSignupFirstName("");
         setSignupLastName("");
+        setSignupPhone("");
+        setSignupCompany("");
+        setSignupPurpose("");
       } else {
         showError(result.error || "Sign up failed. Please try again.");
       }
@@ -321,11 +328,48 @@ const Auth = () => {
                       <Input
                         id="signupEmail"
                         type="email"
-                        placeholder="Enter your email"
+                        placeholder="Enter your work email"
                         value={signupEmail}
                         onChange={(e) => setSignupEmail(e.target.value)}
                         required
                         disabled={loading}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="signupPhone">Phone Number</Label>
+                      <Input
+                        id="signupPhone"
+                        type="tel"
+                        placeholder="Phone Number (optional)"
+                        value={signupPhone}
+                        onChange={(e) => setSignupPhone(e.target.value)}
+                        disabled={loading}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="signupCompany">Company/Organization</Label>
+                      <Input
+                        id="signupCompany"
+                        type="text"
+                        placeholder="Enter your company or organization"
+                        value={signupCompany}
+                        onChange={(e) => setSignupCompany(e.target.value)}
+                        required
+                        disabled={loading}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="signupPurpose">Purpose</Label>
+                      <Textarea
+                        id="signupPurpose"
+                        placeholder="Briefly explain your role and how you plan to use Asset Guardian"
+                        value={signupPurpose}
+                        onChange={(e) => setSignupPurpose(e.target.value)}
+                        required
+                        disabled={loading}
+                        className="min-h-[80px] resize-none"
                       />
                     </div>
                     
@@ -355,7 +399,7 @@ const Auth = () => {
                     <Button 
                       type="submit" 
                       className="w-full" 
-                      disabled={loading || !signupEmail.trim() || !signupPassword.trim() || isRateLimited}
+                      disabled={loading || !signupEmail.trim() || !signupPassword.trim() || !signupCompany.trim() || !signupPurpose.trim() || isRateLimited}
                     >
                       {loading ? "Creating account..." : isRateLimited ? "Please wait..." : "Create Account"}
                     </Button>
