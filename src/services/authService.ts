@@ -25,7 +25,7 @@ export const authService = {
     console.error("Raw auth error:", JSON.stringify(error, null, 2));
     
     // Handle rate limiting specifically
-    if (this.isRateLimited(error)) {
+    if (authService.isRateLimited(error)) {
       return "⏰ Too many attempts. Please wait 5-10 minutes before trying again.";
     }
     
@@ -104,7 +104,7 @@ export const authService = {
     const startTime = Date.now();
     
     try {
-      this.logAuthAttempt("signup", email, false); // Log attempt start
+      authService.logAuthAttempt("signup", email, false); // Log attempt start
       
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -122,14 +122,14 @@ export const authService = {
       console.log(`[AUTH TIMING] Signup took ${duration}ms`);
 
       if (error) {
-        this.logAuthAttempt("signup", email, false, error);
+        authService.logAuthAttempt("signup", email, false, error);
         return { 
           success: false, 
-          error: this.parseAuthError(error)
+          error: authService.parseAuthError(error)
         };
       }
 
-      this.logAuthAttempt("signup", email, true);
+      authService.logAuthAttempt("signup", email, true);
       console.log("✅ Sign up successful - Check email for confirmation if required");
       
       return { 
@@ -138,10 +138,10 @@ export const authService = {
         session: data.session 
       };
     } catch (error) {
-      this.logAuthAttempt("signup", email, false, error);
+      authService.logAuthAttempt("signup", email, false, error);
       return { 
         success: false, 
-        error: this.parseAuthError(error)
+        error: authService.parseAuthError(error)
       };
     }
   },
@@ -151,7 +151,7 @@ export const authService = {
     const startTime = Date.now();
     
     try {
-      this.logAuthAttempt("signin", email, false); // Log attempt start
+      authService.logAuthAttempt("signin", email, false); // Log attempt start
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -162,14 +162,14 @@ export const authService = {
       console.log(`[AUTH TIMING] Signin took ${duration}ms`);
 
       if (error) {
-        this.logAuthAttempt("signin", email, false, error);
+        authService.logAuthAttempt("signin", email, false, error);
         return { 
           success: false, 
-          error: this.parseAuthError(error)
+          error: authService.parseAuthError(error)
         };
       }
 
-      this.logAuthAttempt("signin", email, true);
+      authService.logAuthAttempt("signin", email, true);
       console.log("✅ Sign in successful");
       
       return { 
@@ -178,10 +178,10 @@ export const authService = {
         session: data.session 
       };
     } catch (error) {
-      this.logAuthAttempt("signin", email, false, error);
+      authService.logAuthAttempt("signin", email, false, error);
       return { 
         success: false, 
-        error: this.parseAuthError(error)
+        error: authService.parseAuthError(error)
       };
     }
   },
@@ -298,7 +298,7 @@ export const authService = {
 
   // Check if user has specific permission
   hasPermission(userProfile: UserProfile | null, permission: string): boolean {
-    if (this.isAdmin(userProfile)) return true;
+    if (authService.isAdmin(userProfile)) return true;
     
     // Add specific permission logic based on user role
     const rolePermissions = {
