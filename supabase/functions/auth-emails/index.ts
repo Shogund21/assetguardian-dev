@@ -11,6 +11,7 @@ const corsHeaders = {
 };
 
 interface AuthEmailPayload {
+  type?: string; // Our database trigger format
   user: {
     id: string;
     email: string;
@@ -153,11 +154,25 @@ const handler = async (req: Request): Promise<Response> => {
       data = wh.verify(payload, headers) as AuthEmailPayload;
     }
 
-    const { user, email_data } = data;
-    const { token, token_hash, redirect_to, email_action_type, site_url } = email_data;
+    // Handle both payload formats: database trigger vs direct webhook
+    const { user, email_data, type } = data;
+    let { token, token_hash, redirect_to, email_action_type, site_url } = email_data;
+    
+    // If we have a 'type' field from our database trigger, map it to email_action_type
+    if (type) {
+      console.log("Database trigger format detected, type:", type);
+      if (type === "user.signup") {
+        email_action_type = "signup";
+      } else if (type === "user.password_recovery") {
+        email_action_type = "recovery";
+      } else {
+        console.warn("Unknown event type from database trigger:", type);
+      }
+    }
     
     console.log("Processing email for action:", email_action_type);
     console.log("User email:", user.email);
+    console.log("Payload format:", type ? "Database trigger" : "Direct webhook");
 
     const firstName = user.user_metadata?.first_name || "";
     let subject: string;
