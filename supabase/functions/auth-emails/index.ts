@@ -179,6 +179,7 @@ const handler = async (req: Request): Promise<Response> => {
     if ('type' in data && data.type && data.user && !('email_data' in data)) {
       const webhook = data as SupabaseAuthWebhook;
       console.log("Supabase auth webhook format detected, type:", webhook.type);
+      console.log("Full webhook payload:", JSON.stringify(webhook, null, 2));
       
       // Only handle signup and password recovery events
       if (webhook.type !== 'user.created' && webhook.type !== 'user.recovery_requested') {
@@ -199,26 +200,42 @@ const handler = async (req: Request): Promise<Response> => {
         // Note: Email confirmation is usually handled by Supabase's built-in system
         subject = "Welcome to Asset Guardian!";
         html = generateConfirmationEmail(firstName, siteUrl, '');
+        console.log("Generated welcome email for:", webhook.user.email);
       } else if (webhook.type === 'user.recovery_requested') {
-        // For password recovery, we need to construct the reset URL
-        // The actual token would be handled by Supabase's built-in system
-        const resetUrl = `${siteUrl}/reset-password`;
+        // For password recovery, construct the reset URL with proper token handling
+        // Supabase auth webhooks should include recovery token information
+        console.log("Processing password recovery for:", webhook.user.email);
+        
+        // Try to extract recovery token from the webhook
+        // Note: The exact structure depends on Supabase's webhook implementation
+        const recoveryToken = webhook.user.recovery_token || '';
+        const resetUrl = recoveryToken 
+          ? `${siteUrl}/reset-password?token=${recoveryToken}&type=recovery`
+          : `${siteUrl}/reset-password`;
+        
+        console.log("Generated recovery URL:", resetUrl);
         subject = "Reset Your Asset Guardian Password";
-        html = generatePasswordResetEmail(firstName, resetUrl, '');
+        html = generatePasswordResetEmail(firstName, resetUrl, recoveryToken);
       } else {
         throw new Error(`Unsupported webhook type: ${webhook.type}`);
       }
 
       const emailResponse = await resend.emails.send({
-        from: "Asset Guardian <noreply@assetguardian.com>",
+        from: "Asset Guardian <noreply@assetguardian.ai>",
         to: [webhook.user.email],
         subject,
         html,
       });
 
       console.log("Email sent successfully:", emailResponse);
+      console.log("Resend response:", JSON.stringify(emailResponse, null, 2));
 
-      return new Response(JSON.stringify({ success: true, emailId: emailResponse.data?.id }), {
+      return new Response(JSON.stringify({ 
+        success: true, 
+        emailId: emailResponse.data?.id,
+        recipient: webhook.user.email,
+        type: webhook.type 
+      }), {
         status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
@@ -267,15 +284,21 @@ const handler = async (req: Request): Promise<Response> => {
       }
 
       const emailResponse = await resend.emails.send({
-        from: "Asset Guardian <noreply@assetguardian.com>",
+        from: "Asset Guardian <noreply@assetguardian.ai>",
         to: [legacy.user.email],
         subject,
         html,
       });
 
       console.log("Email sent successfully:", emailResponse);
+      console.log("Resend response:", JSON.stringify(emailResponse, null, 2));
 
-      return new Response(JSON.stringify({ success: true, emailId: emailResponse.data?.id }), {
+      return new Response(JSON.stringify({ 
+        success: true, 
+        emailId: emailResponse.data?.id,
+        recipient: legacy.user.email,
+        type: legacy.type || email_action_type 
+      }), {
         status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
