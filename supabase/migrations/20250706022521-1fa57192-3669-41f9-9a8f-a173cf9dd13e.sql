@@ -13,8 +13,17 @@ SECURITY DEFINER
 AS $$
 DECLARE
   webhook_url text := 'https://bqxdbvrtohgkusmdmjxd.supabase.co/functions/v1/auth-emails';
+  service_role_key text;
   payload jsonb;
 BEGIN
+  -- Get service role key from settings
+  BEGIN
+    service_role_key := current_setting('app.settings.service_role_key', false);
+  EXCEPTION WHEN OTHERS THEN
+    -- Fallback: use a placeholder that will be replaced by Supabase
+    service_role_key := 'SUPABASE_SERVICE_ROLE_KEY';
+  END;
+  
   -- Build the webhook payload
   payload := jsonb_build_object(
     'type', event_type,
@@ -27,7 +36,7 @@ BEGIN
     url := webhook_url,
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
-      'Authorization', 'Bearer ' || current_setting('app.settings.service_role_key', true)
+      'Authorization', 'Bearer ' || service_role_key
     ),
     body := payload
   );
@@ -44,7 +53,7 @@ DECLARE
   user_data jsonb;
   email_data jsonb;
   event_type text;
-  site_url text := 'https://asset-guardian.lovable.app';
+  site_url text := 'https://www.assetguardian.ai';
 BEGIN
   -- Determine event type based on trigger
   IF TG_OP = 'INSERT' AND NEW.email_confirmed_at IS NULL THEN
@@ -79,6 +88,15 @@ BEGIN
       'token_hash', COALESCE(NEW.recovery_token, ''),
       'redirect_to', site_url || '/reset-password',
       'email_action_type', 'recovery',
+      'site_url', site_url
+    );
+  ELSE
+    -- Default email data to prevent null issues
+    email_data := jsonb_build_object(
+      'token', '',
+      'token_hash', '',
+      'redirect_to', site_url,
+      'email_action_type', 'unknown',
       'site_url', site_url
     );
   END IF;

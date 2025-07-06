@@ -156,6 +156,16 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Handle both payload formats: database trigger vs direct webhook
     const { user, email_data, type } = data;
+    
+    // Validate required fields
+    if (!user || !user.email) {
+      throw new Error("Missing user or user email in payload");
+    }
+    
+    if (!email_data) {
+      throw new Error("Missing email_data in payload");
+    }
+    
     let { token, token_hash, redirect_to, email_action_type, site_url } = email_data;
     
     // If we have a 'type' field from our database trigger, map it to email_action_type
@@ -167,7 +177,13 @@ const handler = async (req: Request): Promise<Response> => {
         email_action_type = "recovery";
       } else {
         console.warn("Unknown event type from database trigger:", type);
+        throw new Error(`Unknown event type: ${type}`);
       }
+    }
+    
+    // Validate email action type
+    if (!email_action_type || (email_action_type !== "signup" && email_action_type !== "recovery")) {
+      throw new Error(`Invalid or missing email_action_type: ${email_action_type}`);
     }
     
     console.log("Processing email for action:", email_action_type);
