@@ -221,7 +221,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
 
       const emailResponse = await resend.emails.send({
-        from: "Asset Guardian <noreply@assetguardian.ai>",
+        from: "Asset Guardian <edward@shogunaillc.com>",
         to: [webhook.user.email],
         subject,
         html,
@@ -284,7 +284,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
 
       const emailResponse = await resend.emails.send({
-        from: "Asset Guardian <noreply@assetguardian.ai>",
+        from: "Asset Guardian <edward@shogunaillc.com>",
         to: [legacy.user.email],
         subject,
         html,
