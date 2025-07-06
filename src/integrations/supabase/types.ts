@@ -1646,10 +1646,6 @@ export type Database = {
         Args: { p_email: string; p_ip_address?: unknown; p_user_agent?: string }
         Returns: boolean
       }
-      trigger_auth_webhook: {
-        Args: { event_type: string; user_data: Json; email_data: Json }
-        Returns: undefined
-      }
       update_technician_role: {
         Args: {
           p_technician_id: string

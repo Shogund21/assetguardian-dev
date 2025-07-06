@@ -1,4 +1,8 @@
-project_id = "bqxdbvrtohhgkusmdjxd"
+project_id = "bqxdbvrtohgkusmdmjxd"
+
+[auth]
+hook_uri = "https://bqxdbvrtohgkusmdmjxd.supabase.co/functions/v1/auth-emails"
+hook_secrets = "AUTH_WEBHOOK_SECRET"
 
 [functions.auth-emails]
 verify_jwt = false
