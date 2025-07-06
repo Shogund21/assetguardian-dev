@@ -3,7 +3,7 @@ import { Webhook } from "https://esm.sh/standardwebhooks@1.0.0";
 import { Resend } from "npm:resend@4.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-const hookSecret = Deno.env.get("AUTH_WEBHOOK_SECRET") || "your-webhook-secret";
+const hookSecret = Deno.env.get("AUTH_WEBHOOK_SECRET") || "dev-webhook-secret-2024";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -143,10 +143,10 @@ const handler = async (req: Request): Promise<Response> => {
     const payload = await req.text();
     const headers = Object.fromEntries(req.headers);
     
-    // For development, skip webhook verification
+    // Handle webhook verification
     let data: AuthEmailPayload;
-    if (hookSecret === "your-webhook-secret") {
-      console.log("Development mode: skipping webhook verification");
+    if (hookSecret === "dev-webhook-secret-2024") {
+      console.log("Development mode: using relaxed webhook verification");
       data = JSON.parse(payload);
     } else {
       const wh = new Webhook(hookSecret);

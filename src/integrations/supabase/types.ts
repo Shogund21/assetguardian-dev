@@ -858,6 +858,42 @@ export type Database = {
           },
         ]
       }
+      password_reset_requests: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          ip_address: unknown | null
+          is_used: boolean | null
+          reset_token: string
+          used_at: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          ip_address?: unknown | null
+          is_used?: boolean | null
+          reset_token: string
+          used_at?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ip_address?: unknown | null
+          is_used?: boolean | null
+          reset_token?: string
+          used_at?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       performance_metrics: {
         Row: {
           api_endpoint: string | null
@@ -1581,6 +1617,18 @@ export type Database = {
         Args: { p_email: string; p_user_id: string }
         Returns: undefined
       }
+      request_password_reset: {
+        Args: {
+          email_address: string
+          client_ip?: unknown
+          user_agent?: string
+        }
+        Returns: Json
+      }
+      reset_password: {
+        Args: { reset_token: string; new_password: string }
+        Returns: Json
+      }
       set_claim: {
         Args: { uid: string; claim: string; value: string }
         Returns: undefined
@@ -1598,6 +1646,10 @@ export type Database = {
         Args: { p_email: string; p_ip_address?: unknown; p_user_agent?: string }
         Returns: boolean
       }
+      trigger_auth_webhook: {
+        Args: { event_type: string; user_data: Json; email_data: Json }
+        Returns: undefined
+      }
       update_technician_role: {
         Args: {
           p_technician_id: string
@@ -1605,6 +1657,10 @@ export type Database = {
           p_is_admin?: boolean
         }
         Returns: undefined
+      }
+      verify_password_reset_token: {
+        Args: { reset_token: string }
+        Returns: Json
       }
     }
     Enums: {
