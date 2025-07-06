@@ -154,7 +154,9 @@ const generatePasswordResetEmail = (
 `;
 
 const handler = async (req: Request): Promise<Response> => {
-  console.log("Auth email webhook triggered");
+  console.log("=== AUTH EMAIL WEBHOOK TRIGGERED ===");
+  console.log("Request method:", req.method);
+  console.log("Request headers:", Object.fromEntries(req.headers.entries()));
 
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -162,7 +164,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const payload = await req.text();
-    console.log("Received payload:", payload);
+    console.log("=== RECEIVED PAYLOAD ===", payload);
     
     let data: SupabaseAuthWebhook | LegacyAuthEmailPayload;
     
