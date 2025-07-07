@@ -65,11 +65,12 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Invalid user token");
     }
 
-    // Check if user is admin
+    // Check if user is admin - try both UUID and email since company_users.user_id contains emails
     const { data: adminCheck } = await supabase
       .from('company_users')
       .select('is_admin')
-      .eq('user_id', user.id)
+      .or(`user_id.eq.${user.id},user_id.eq.${user.email}`)
+      .eq('is_admin', true)
       .single();
 
     if (!adminCheck?.is_admin) {
