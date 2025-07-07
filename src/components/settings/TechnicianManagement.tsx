@@ -57,7 +57,9 @@ const TechnicianManagement = () => {
         isAdmin: tech.is_admin || false,
         company_name: tech.company_name,
         status: tech.status || 'active',
-        isAvailable: tech.isAvailable !== false
+        isAvailable: tech.isAvailable !== false,
+        account_status: tech.account_status || 'no_account',
+        user_id: tech.user_id
       })) || [];
     },
   });

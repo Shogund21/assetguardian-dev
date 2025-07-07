@@ -24,6 +24,22 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Parse request body for parameters
+    let requestBody = {};
+    let technicianIds: string[] | null = null;
+    let single = false;
+    
+    try {
+      const bodyText = await req.text();
+      if (bodyText) {
+        requestBody = JSON.parse(bodyText);
+        technicianIds = (requestBody as any).technicianIds;
+        single = (requestBody as any).single || false;
+      }
+    } catch (e) {
+      // Ignore JSON parse errors for backward compatibility
+    }
+
     // Initialize Supabase client with service role for admin operations
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -62,17 +78,30 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Admin verification passed for user:", user.email);
 
-    // Get all active technicians
-    const { data: technicians, error: techError } = await supabase
+    // Get technicians based on request parameters
+    let technicianQuery = supabase
       .from('technicians')
-      .select('id, email, firstName, lastName, status')
-      .eq('status', 'active');
+      .select('id, email, firstName, lastName, status, account_status');
+
+    if (technicianIds && technicianIds.length > 0) {
+      // Single or specific technicians
+      technicianQuery = technicianQuery.in('id', technicianIds);
+      console.log(`Processing specific technicians: ${technicianIds.join(', ')}`);
+    } else {
+      // Bulk mode - all active technicians without accounts
+      technicianQuery = technicianQuery
+        .eq('status', 'active')
+        .eq('account_status', 'no_account');
+      console.log("Processing all active technicians without accounts");
+    }
+
+    const { data: technicians, error: techError } = await technicianQuery;
 
     if (techError) {
       throw new Error(`Failed to fetch technicians: ${techError.message}`);
     }
 
-    console.log(`Found ${technicians?.length || 0} active technicians`);
+    console.log(`Found ${technicians?.length || 0} technicians to process`);
 
     const results: CreateAccountsResult['results'] = {
       created: 0,
@@ -86,16 +115,37 @@ const handler = async (req: Request): Promise<Response> => {
       try {
         console.log(`Processing technician: ${technician.email}`);
 
+        // Skip if already has account (unless specifically requested)
+        if (technician.account_status === 'has_account' && !technicianIds) {
+          results.skipped++;
+          results.details.push({
+            email: technician.email,
+            status: 'skipped',
+            message: 'Already has account'
+          });
+          continue;
+        }
+
         // Check if user already exists
         const { data: existingUser } = await supabase.auth.admin.getUserByEmail(technician.email);
         
         if (existingUser.user) {
           console.log(`User already exists: ${technician.email}`);
+          
+          // Update technician record to reflect existing account
+          await supabase
+            .from('technicians')
+            .update({ 
+              user_id: existingUser.user.id,
+              account_status: 'has_account'
+            })
+            .eq('id', technician.id);
+          
           results.skipped++;
           results.details.push({
             email: technician.email,
             status: 'skipped',
-            message: 'Account already exists'
+            message: 'Account already exists - linked to technician'
           });
           continue;
         }
@@ -126,10 +176,13 @@ const handler = async (req: Request): Promise<Response> => {
         }
 
         if (newUser.user) {
-          // Update technician record with new user_id
+          // Update technician record with new user_id and account status
           const { error: updateError } = await supabase
             .from('technicians')
-            .update({ user_id: newUser.user.id })
+            .update({ 
+              user_id: newUser.user.id,
+              account_status: 'has_account'
+            })
             .eq('id', technician.id);
 
           if (updateError) {
@@ -168,7 +221,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    console.log("Bulk account creation completed:", results);
+    console.log("Account creation completed:", results);
 
     const response: CreateAccountsResult = {
       success: true,

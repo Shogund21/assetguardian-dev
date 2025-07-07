@@ -5,6 +5,7 @@ import { Shield, User, UserCheck, UserX } from "lucide-react";
 import { Technician } from "@/types/technician";
 import EditTechnicianDialog from "./EditTechnicianDialog";
 import EditRoleDialog from "./EditRoleDialog";
+import IndividualAccountManager from "./IndividualAccountManager";
 
 interface TechnicianListProps {
   technicians: Technician[];
@@ -21,10 +22,12 @@ const TechnicianList = ({ technicians, onStatusToggle, onUpdate, onRoleUpdate }:
         {technicians?.map((technician) => (
           <div
             key={technician.id}
-            className={`flex items-center justify-between py-4 ${technician.status === 'inactive' ? 'opacity-60' : ''}`}
+            className={`flex flex-col lg:flex-row items-start lg:items-center justify-between py-4 gap-4 ${
+              technician.status === 'inactive' ? 'opacity-60' : ''
+            }`}
           >
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-2">
                 <p className="font-medium">
                   {technician.firstName} {technician.lastName}
                 </p>
@@ -37,19 +40,27 @@ const TechnicianList = ({ technicians, onStatusToggle, onUpdate, onRoleUpdate }:
                   {technician.status === 'active' ? 'Active' : 'Inactive'}
                 </Badge>
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground mb-1">
                 {technician.specialization}
               </p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground mb-2">
                 {technician.email} • {technician.phone}
               </p>
               {technician.company_name && (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground mb-2">
                   Company: {technician.company_name}
                 </p>
               )}
+              
+              {/* Account Status Section */}
+              <div className="mb-2">
+                <p className="text-xs text-muted-foreground mb-1">Account Status:</p>
+                <IndividualAccountManager technician={technician} />
+              </div>
             </div>
-            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+            
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-2 shrink-0">
               <EditTechnicianDialog 
                 technician={technician}
                 onUpdate={onUpdate}

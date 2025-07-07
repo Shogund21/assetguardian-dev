@@ -1559,6 +1559,8 @@ export type Database = {
           company_name: string
           status: string
           isAvailable: boolean
+          account_status: string
+          user_id: string
         }[]
       }
       get_trial_info: {
