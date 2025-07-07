@@ -66,14 +66,23 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Check if user is admin - try both UUID and email since company_users.user_id contains emails
-    const { data: adminCheck } = await supabase
+    console.log("Checking admin status for user:", user.email, "UUID:", user.id);
+    
+    const { data: adminCheck, error: adminError } = await supabase
       .from('company_users')
-      .select('is_admin')
+      .select('is_admin, user_id, company_id')
       .or(`user_id.eq.${user.id},user_id.eq.${user.email}`)
       .eq('is_admin', true)
-      .single();
+      .maybeSingle();
 
-    if (!adminCheck?.is_admin) {
+    console.log("Admin check result:", { adminCheck, adminError });
+
+    // Also check if user is super admin as fallback
+    const isSuper = user.email === 'edward@shogunaillc.com';
+    console.log("Super admin check:", isSuper);
+
+    if (!adminCheck?.is_admin && !isSuper) {
+      console.log("Access denied - not admin or super admin");
       throw new Error("Access denied: Admin privileges required");
     }
 
