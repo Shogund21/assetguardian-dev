@@ -6,8 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { AuditService } from "@/services/auditService";
 import { Technician } from "@/types/technician";
 import { useCompany } from "@/contexts/CompanyContext";
+import { useAuth } from "@/hooks/useAuth";
 import TechnicianForm from "./technician/TechnicianForm";
 import TechnicianList from "./technician/TechnicianList";
+import BulkAccountCreator from "./technician/BulkAccountCreator";
 
 interface TechnicianFormData {
   firstName: string;
@@ -24,6 +26,7 @@ const TechnicianManagement = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { companies } = useCompany();
+  const { isAdmin } = useAuth();
   const [formData, setFormData] = useState<TechnicianFormData>({
     firstName: "",
     lastName: "",
@@ -270,6 +273,7 @@ const TechnicianManagement = () => {
 
   return (
     <div className="space-y-6">
+      {isAdmin() && <BulkAccountCreator />}
       <TechnicianForm
         formData={formData}
         onInputChange={handleInputChange}

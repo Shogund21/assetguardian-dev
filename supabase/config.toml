@@ -6,3 +6,6 @@ hook_secrets = "AUTH_WEBHOOK_SECRET"
 
 [functions.auth-emails]
 verify_jwt = false
+
+[functions.create-technician-accounts]
+verify_jwt = false
