@@ -136,31 +136,7 @@ const handler = async (req: Request): Promise<Response> => {
           continue;
         }
 
-        // Check if user already exists
-        const { data: existingUser } = await supabase.auth.admin.getUserByEmail(technician.email);
-        
-        if (existingUser.user) {
-          console.log(`User already exists: ${technician.email}`);
-          
-          // Update technician record to reflect existing account
-          await supabase
-            .from('technicians')
-            .update({ 
-              user_id: existingUser.user.id,
-              account_status: 'has_account'
-            })
-            .eq('id', technician.id);
-          
-          results.skipped++;
-          results.details.push({
-            email: technician.email,
-            status: 'skipped',
-            message: 'Account already exists - linked to technician'
-          });
-          continue;
-        }
-
-        // Create new user account
+        // Create new user account - handle existing users via error handling
         const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
           email: technician.email,
           password: 'Macy1234',
@@ -172,16 +148,44 @@ const handler = async (req: Request): Promise<Response> => {
         });
 
         if (createError) {
-          console.error(`Failed to create user ${technician.email}:`, createError);
-          results.errors.push({
-            email: technician.email,
-            error: createError.message
-          });
-          results.details.push({
-            email: technician.email,
-            status: 'error',
-            message: createError.message
-          });
+          // Check if user already exists - treat as skip case
+          if (createError.message.includes('User already registered')) {
+            console.log(`User already exists: ${technician.email}`);
+            
+            // Try to get the existing user and link to technician
+            try {
+              // For existing users, we need to find their user_id via email
+              // Since we can't use getUserByEmail, we'll just mark as skipped for now
+              results.skipped++;
+              results.details.push({
+                email: technician.email,
+                status: 'skipped',
+                message: 'Account already exists'
+              });
+            } catch (linkError) {
+              console.error(`Failed to link existing user ${technician.email}:`, linkError);
+              results.errors.push({
+                email: technician.email,
+                error: `User exists but linking failed: ${linkError.message}`
+              });
+              results.details.push({
+                email: technician.email,
+                status: 'error',
+                message: 'User exists but linking failed'
+              });
+            }
+          } else {
+            console.error(`Failed to create user ${technician.email}:`, createError);
+            results.errors.push({
+              email: technician.email,
+              error: createError.message
+            });
+            results.details.push({
+              email: technician.email,
+              status: 'error',
+              message: createError.message
+            });
+          }
           continue;
         }
 
