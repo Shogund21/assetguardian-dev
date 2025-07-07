@@ -37,9 +37,10 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Setting up super admin account for:", superAdminEmail);
 
     // Check if user already exists
-    const { data: existingUser } = await supabase.auth.admin.getUserByEmail(superAdminEmail);
+    const { data: existingUsers } = await supabase.auth.admin.listUsers();
+    const existingUser = existingUsers.users?.find(user => user.email === superAdminEmail);
     
-    if (existingUser.user) {
+    if (existingUser) {
       console.log("Super admin account already exists");
       return new Response(
         JSON.stringify({ 
