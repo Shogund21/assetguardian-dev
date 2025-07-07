@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Auth = () => {
   const [loginEmail, setLoginEmail] = useState("");
@@ -26,6 +27,8 @@ const Auth = () => {
   const [showResetForm, setShowResetForm] = useState(false);
   const [isRateLimited, setIsRateLimited] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [setupLoading, setSetupLoading] = useState(false);
+  const [showSetupButton, setShowSetupButton] = useState(true);
   
   const navigate = useNavigate();
   const { isAuthenticated, signIn, signUp, resetPassword } = useAuth();
@@ -144,6 +147,35 @@ const Auth = () => {
       showError("🌐 An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSuperAdminSetup = async () => {
+    setSetupLoading(true);
+    clearMessages();
+
+    try {
+      const { data, error } = await supabase.functions.invoke("setup-super-admin");
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.success) {
+        showSuccess("✅ Super admin account created! You can now sign in with edward@shogunaillc.com");
+        setShowSetupButton(false);
+        toast({
+          title: "Setup Complete!",
+          description: "Super admin account is ready. You can now sign in.",
+        });
+      } else {
+        showError(data.message || "Setup failed");
+      }
+    } catch (error: any) {
+      console.error("Super admin setup error:", error);
+      showError("Setup failed: " + (error.message || "Unknown error"));
+    } finally {
+      setSetupLoading(false);
     }
   };
 
@@ -425,6 +457,25 @@ const Auth = () => {
             </Link>
           </p>
         </div>
+
+        {/* Super Admin Setup */}
+        {showSetupButton && (
+          <div className="text-center pt-4 border-t border-border">
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">
+                System Setup Required
+              </p>
+              <Button
+                onClick={handleSuperAdminSetup}
+                disabled={setupLoading}
+                variant="outline"
+                size="sm"
+              >
+                {setupLoading ? "Setting up..." : "Setup Super Admin"}
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
