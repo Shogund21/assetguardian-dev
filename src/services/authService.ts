@@ -335,6 +335,11 @@ export const authService = {
     return userProfile?.is_admin === true || userProfile?.email === 'edward@shogunaillc.com';
   },
 
+  // Check if user is super admin
+  isSuperAdmin(userProfile: UserProfile | null): boolean {
+    return userProfile?.email === 'edward@shogunaillc.com';
+  },
+
   // Check if user has specific permission
   hasPermission(userProfile: UserProfile | null, permission: string): boolean {
     if (authService.isAdmin(userProfile)) return true;

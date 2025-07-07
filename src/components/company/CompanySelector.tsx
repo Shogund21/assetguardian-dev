@@ -1,7 +1,9 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useCompany } from "@/contexts/CompanyContext";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   Select,
   SelectContent,
@@ -13,11 +15,34 @@ import { Building2 } from "lucide-react";
 
 export const CompanySelector = () => {
   const { currentCompany, companies, setCurrentCompany } = useCompany();
+  const { userProfile } = useAuth();
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
-  if (companies.length <= 1) {
-    return null; // Don't render the selector if there's only one or no company
+  // Check if user is super admin
+  useEffect(() => {
+    const checkSuperAdmin = async () => {
+      if (userProfile?.email === 'edward@shogunaillc.com') {
+        setIsSuperAdmin(true);
+        return;
+      }
+      
+      try {
+        const { data } = await supabase.rpc('is_super_admin');
+        setIsSuperAdmin(data || false);
+      } catch (error) {
+        console.error('Error checking super admin status:', error);
+        setIsSuperAdmin(false);
+      }
+    };
+
+    checkSuperAdmin();
+  }, [userProfile]);
+
+  // Always show selector for super admin, even with one company
+  if (companies.length <= 1 && !isSuperAdmin) {
+    return null; // Don't render the selector if there's only one or no company (unless super admin)
   }
 
   const handleValueChange = (value: string) => {

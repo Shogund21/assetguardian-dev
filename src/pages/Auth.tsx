@@ -28,11 +28,34 @@ const Auth = () => {
   const [isRateLimited, setIsRateLimited] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [setupLoading, setSetupLoading] = useState(false);
-  const [showSetupButton, setShowSetupButton] = useState(true);
+  const [showSetupButton, setShowSetupButton] = useState(false);
+  const [checkingSuperAdmin, setCheckingSuperAdmin] = useState(true);
   
   const navigate = useNavigate();
   const { isAuthenticated, signIn, signUp, resetPassword } = useAuth();
   const { toast } = useToast();
+
+  // Check if super admin exists
+  useEffect(() => {
+    const checkSuperAdminExists = async () => {
+      try {
+        const { data, error } = await supabase.rpc('super_admin_exists');
+        if (error) {
+          console.error('Error checking super admin:', error);
+          setShowSetupButton(true); // Show on error to be safe
+        } else {
+          setShowSetupButton(!data); // Show setup button only if super admin doesn't exist
+        }
+      } catch (error) {
+        console.error('Error checking super admin:', error);
+        setShowSetupButton(true); // Show on error to be safe
+      } finally {
+        setCheckingSuperAdmin(false);
+      }
+    };
+
+    checkSuperAdminExists();
+  }, []);
 
   // Redirect authenticated users to dashboard
   useEffect(() => {
@@ -458,8 +481,8 @@ const Auth = () => {
           </p>
         </div>
 
-        {/* Super Admin Setup */}
-        {showSetupButton && (
+        {/* Super Admin Setup - Only show if account doesn't exist */}
+        {!checkingSuperAdmin && showSetupButton && (
           <div className="text-center pt-4 border-t border-border">
             <div className="space-y-2">
               <p className="text-xs text-muted-foreground">

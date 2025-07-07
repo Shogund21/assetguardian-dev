@@ -53,10 +53,28 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         return;
       }
 
-      const { data, error } = await supabase
-        .from("companies")
-        .select("*")
-        .order("name");
+      // Check if user is super admin
+      const { data: isSuperAdmin, error: superAdminError } = await supabase.rpc('is_super_admin');
+      
+      let data, error;
+      
+      if (isSuperAdmin) {
+        // Super admin can see all companies
+        const result = await supabase
+          .from("companies")
+          .select("*")
+          .order("name");
+        data = result.data;
+        error = result.error;
+      } else {
+        // Regular users see only their companies
+        const result = await supabase
+          .from("companies")
+          .select("*")
+          .order("name");
+        data = result.data;
+        error = result.error;
+      }
 
       if (error) throw error;
       

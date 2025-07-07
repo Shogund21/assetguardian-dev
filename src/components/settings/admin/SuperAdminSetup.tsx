@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +18,47 @@ const SuperAdminSetup = () => {
   const [setupComplete, setSetupComplete] = useState(false);
   const [result, setResult] = useState<SetupResult | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [superAdminExists, setSuperAdminExists] = useState<boolean | null>(null);
   const { toast } = useToast();
+
+  // Check if super admin account already exists
+  useEffect(() => {
+    const checkSuperAdminExists = async () => {
+      try {
+        const { data, error } = await supabase.rpc('super_admin_exists');
+        if (error) {
+          console.error('Error checking super admin:', error);
+          setSuperAdminExists(false);
+        } else {
+          setSuperAdminExists(data || false);
+        }
+      } catch (error) {
+        console.error('Error checking super admin:', error);
+        setSuperAdminExists(false);
+      }
+    };
+
+    checkSuperAdminExists();
+  }, []);
+
+  // Don't render if super admin already exists
+  if (superAdminExists === true) {
+    return null;
+  }
+
+  // Show loading state while checking
+  if (superAdminExists === null) {
+    return (
+      <Card className="mb-6">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center">
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            <span className="text-sm text-muted-foreground">Checking setup status...</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const handleSetupSuperAdmin = async () => {
     if (!showConfirmation) {
@@ -40,6 +80,7 @@ const SuperAdminSetup = () => {
       
       if (data.success) {
         setSetupComplete(true);
+        setSuperAdminExists(true); // Update state so component hides
         toast({
           title: "Super Admin Setup Complete",
           description: "Super admin account has been created successfully",

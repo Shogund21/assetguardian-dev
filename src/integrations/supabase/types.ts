@@ -1502,6 +1502,19 @@ export type Database = {
         Args: { p_company_id: string; p_company_name: string }
         Returns: undefined
       }
+      get_all_companies_for_super_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          name: string
+          logo_url: string
+          address: string
+          contact_email: string
+          contact_phone: string
+          created_at: string
+          updated_at: string
+        }[]
+      }
       get_current_user_company: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -1646,6 +1659,10 @@ export type Database = {
           p_user_agent?: string
         }
         Returns: string
+      }
+      super_admin_exists: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
       }
       track_failed_login: {
         Args: { p_email: string; p_ip_address?: unknown; p_user_agent?: string }
