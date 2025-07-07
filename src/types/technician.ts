@@ -11,6 +11,8 @@ export interface Technician {
   company_id?: string;
   company_name?: string;
   status?: string;
+  account_status?: 'no_account' | 'has_account' | 'account_disabled';
+  user_id?: string;
   createdAt?: string;
   updatedAt?: string;
 }

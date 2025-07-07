@@ -1153,6 +1153,7 @@ export type Database = {
       }
       technicians: {
         Row: {
+          account_status: string | null
           company_id: string | null
           company_name: string | null
           createdAt: string | null
@@ -1170,6 +1171,7 @@ export type Database = {
           user_role: string | null
         }
         Insert: {
+          account_status?: string | null
           company_id?: string | null
           company_name?: string | null
           createdAt?: string | null
@@ -1187,6 +1189,7 @@ export type Database = {
           user_role?: string | null
         }
         Update: {
+          account_status?: string | null
           company_id?: string | null
           company_name?: string | null
           createdAt?: string | null
