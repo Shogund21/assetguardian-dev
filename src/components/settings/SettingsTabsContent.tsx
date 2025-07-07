@@ -11,6 +11,7 @@ import { CompaniesSection } from "./sections/CompaniesSection";
 import { AuditSection } from "./sections/AuditSection";
 import { UserMetricsSection } from "./sections/UserMetricsSection";
 import AccessRequestManagement from "./access/AccessRequestManagement";
+import SuperAdminSetup from "./admin/SuperAdminSetup";
 import { useAuth } from "@/hooks/useAuth";
 
 const ErrorFallback = ({ sectionName }: { sectionName: string }) => (
@@ -58,6 +59,7 @@ const SettingsTabsContent = ({ isMobile, isDemoUser }: SettingsTabsContentProps)
       )}
       
       <TabsContent value="general" className="mt-0">
+        <SuperAdminSetup />
         <SectionWrapper sectionName="General">
           <GeneralSection />
         </SectionWrapper>
