@@ -171,8 +171,8 @@ const TechnicianManagement = () => {
     },
   });
 
-  const deleteTechnicianMutation = useMutation({
-    mutationFn: async (id: string) => {
+  const toggleStatusMutation = useMutation({
+    mutationFn: async ({ id, newStatus }: { id: string; newStatus: string }) => {
       // Get technician data for audit log
       const { data: technician } = await supabase
         .from("technicians")
@@ -180,28 +180,32 @@ const TechnicianManagement = () => {
         .eq("id", id)
         .single();
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("technicians")
-        .delete()
-        .eq("id", id);
+        .update({ status: newStatus })
+        .eq("id", id)
+        .select()
+        .single();
       if (error) throw error;
       
-      // Log the deletion for audit
+      // Log the status change for audit
       if (technician) {
-        await AuditService.logDelete('technicians', id, technician, 'Removed technician from system');
+        await AuditService.logUpdate('technicians', id, { status: technician.status }, { status: newStatus }, `Status changed to ${newStatus}`);
       }
+      
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["technicians"] });
       toast({
         title: "Success",
-        description: "Technician removed successfully",
+        description: `Technician ${variables.newStatus === 'active' ? 'activated' : 'deactivated'} successfully`,
       });
     },
     onError: (error) => {
       toast({
         title: "Error",
-        description: "Failed to remove technician: " + error.message,
+        description: "Failed to update technician status: " + error.message,
         variant: "destructive",
       });
     },
@@ -261,9 +265,10 @@ const TechnicianManagement = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm("Are you sure you want to remove this technician?")) {
-      deleteTechnicianMutation.mutate(id);
+  const handleStatusToggle = async (id: string, newStatus: string) => {
+    const action = newStatus === 'active' ? 'activate' : 'deactivate';
+    if (window.confirm(`Are you sure you want to ${action} this technician?`)) {
+      toggleStatusMutation.mutate({ id, newStatus });
     }
   };
 
@@ -283,7 +288,7 @@ const TechnicianManagement = () => {
       />
       <TechnicianList
         technicians={technicians || []}
-        onDelete={handleDelete}
+        onStatusToggle={handleStatusToggle}
         onUpdate={handleUpdate}
         onRoleUpdate={handleRoleUpdate}
       />
