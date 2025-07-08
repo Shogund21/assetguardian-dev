@@ -6,20 +6,28 @@ import { ProjectList } from "@/components/projects/ProjectList";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 const Projects = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { applyCompanyFilter } = useCompanyFilter();
 
   const { data: projects, isLoading, refetch } = useQuery({
     queryKey: ["projects"],
     queryFn: async () => {
       console.log("Fetching projects from Supabase...");
       try {
-        const { data, error } = await supabase
+        let query = supabase
           .from("projects")
-          .select("*")
-          .order("createdat", { ascending: false });
+          .select("*");
+        
+        // Apply company filtering
+        query = applyCompanyFilter(query);
+        
+        query = query.order("createdat", { ascending: false });
+        
+        const { data, error } = await query;
 
         if (error) {
           console.error("Supabase error fetching projects:", error);

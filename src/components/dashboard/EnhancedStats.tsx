@@ -4,20 +4,27 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { toast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 
 const EnhancedStats = () => {
   const [hasError, setHasError] = useState(false);
+  const { applyCompanyFilter } = useCompanyFilter();
 
   // Fetch equipment data with error handling
   const { data: equipmentData, isLoading: equipmentLoading, error: equipmentError } = useQuery({
     queryKey: ['equipment'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase
+        let query = supabase
           .from('equipment')
           .select('*');
+        
+        // Apply company filtering
+        query = applyCompanyFilter(query);
+        
+        const { data, error } = await query;
         
         if (error) {
           console.error('Error fetching equipment:', error);
@@ -37,9 +44,14 @@ const EnhancedStats = () => {
     queryKey: ['projects'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase
+        let query = supabase
           .from('projects')
           .select('*');
+        
+        // Apply company filtering
+        query = applyCompanyFilter(query);
+        
+        const { data, error } = await query;
         
         if (error) {
           console.error('Error fetching projects:', error);
@@ -59,9 +71,14 @@ const EnhancedStats = () => {
     queryKey: ['maintenance_checks'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase
+        let query = supabase
           .from('hvac_maintenance_checks')
           .select('*');
+        
+        // Apply company filtering
+        query = applyCompanyFilter(query);
+        
+        const { data, error } = await query;
         
         if (error) {
           console.error('Error fetching maintenance checks:', error);
@@ -81,9 +98,14 @@ const EnhancedStats = () => {
     queryKey: ['technicians'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase
+        let query = supabase
           .from('technicians')
           .select('*');
+        
+        // Apply company filtering
+        query = applyCompanyFilter(query);
+        
+        const { data, error } = await query;
         
         if (error) {
           console.error('Error fetching technicians:', error);

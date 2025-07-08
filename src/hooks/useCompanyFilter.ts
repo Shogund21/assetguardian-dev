@@ -18,7 +18,7 @@ export const useCompanyFilter = () => {
 
   const applyCompanyFilter = <T>(
     query: any,
-    skipFilter = true // Default to skipping the filter
+    skipFilter = false // Default to applying the filter
   ): any => {
     if (skipFilter) {
       console.log('applyCompanyFilter: Skipping filter as requested');

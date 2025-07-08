@@ -8,18 +8,26 @@ import { supabase } from "@/integrations/supabase/client";
 import { EquipmentList } from "@/components/equipment/EquipmentList";
 import { EquipmentAuth } from "@/components/equipment/EquipmentAuth";
 import { useEquipmentStatus } from "@/hooks/equipment/useEquipmentStatus";
+import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 const Equipment = () => {
   const navigate = useNavigate();
   const { handleStatusChange, handleDelete } = useEquipmentStatus();
+  const { applyCompanyFilter } = useCompanyFilter();
 
   const { data: equipment, isLoading } = useQuery({
     queryKey: ['equipment'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('equipment')
-        .select('id, name, model, serial_number, location, status, type, company_id, created_at, updated_at')
-        .order('name', { ascending: true }); // Sort by name (equipment type) alphabetically
+        .select('id, name, model, serial_number, location, status, type, company_id, created_at, updated_at');
+      
+      // Apply company filtering
+      query = applyCompanyFilter(query);
+      
+      query = query.order('name', { ascending: true }); // Sort by name (equipment type) alphabetically
+      
+      const { data, error } = await query;
       
       if (error) {
         console.error('Error fetching equipment:', error);

@@ -9,20 +9,29 @@ import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
+import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 const EnhancedEquipmentOverview = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const { applyCompanyFilter } = useCompanyFilter();
   
   const { data: equipmentData, isLoading: equipmentLoading } = useQuery({
     queryKey: ['equipment'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('equipment')
-        .select('id, name, model, serial_number, location, status, type, company_id, created_at, updated_at')
+        .select('id, name, model, serial_number, location, status, type, company_id, created_at, updated_at');
+      
+      // Apply company filtering
+      query = applyCompanyFilter(query);
+      
+      query = query
         .order('location', { ascending: true })
         .order('name');
+      
+      const { data, error } = await query;
       
       if (error) {
         console.error('Error fetching equipment:', error);

@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { offlineStorage } from "@/services/offlineStorageService";
+import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { getEquipmentReadingTemplate } from "@/utils/equipmentTemplates";
 import { getSortedEquipmentList } from "@/utils/equipmentSorting";
 
@@ -22,17 +23,24 @@ const PredictiveMaintenanceDashboard = () => {
   const [selectedEquipmentId, setSelectedEquipmentId] = useState<string>("");
   const [activeTab, setActiveTab] = useState<string>("readings");
   const { isOnline, cacheEquipmentData } = useOfflineSync();
+  const { applyCompanyFilter } = useCompanyFilter();
 
   // Fetch equipment list with offline caching
   const { data: equipment = [] } = useQuery({
     queryKey: ['equipment'],
     queryFn: async () => {
       if (isOnline) {
-        // Online - fetch from Supabase
-        const { data, error } = await supabase
+        // Online - fetch from Supabase with company filtering
+        let query = supabase
           .from('equipment')
-          .select('*')
-          .order('name');
+          .select('*');
+        
+        // Apply company filtering
+        query = applyCompanyFilter(query);
+        
+        query = query.order('name');
+        
+        const { data, error } = await query;
         
         if (error) throw error;
         

@@ -3,9 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Equipment } from "@/types/equipment";
+import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 export const useEquipmentQuery = (locationId: string) => {
   const { toast } = useToast();
+  const { applyCompanyFilter } = useCompanyFilter();
   
   return useQuery({
     queryKey: ['equipment', locationId],
@@ -47,11 +49,17 @@ export const useEquipmentQuery = (locationId: string) => {
 
         console.log('Location data retrieved successfully:', locationData);
 
-        // Fetch all equipment - NO FILTERING BY LOCATION
-        const { data: equipment, error: equipmentError } = await supabase
+        // Fetch all equipment - NO FILTERING BY LOCATION but filter by company
+        let query = supabase
           .from('equipment')
-          .select('id, name, model, serial_number, location, status, type, company_id, created_at, updated_at')
-          .order('name');
+          .select('id, name, model, serial_number, location, status, type, company_id, created_at, updated_at');
+        
+        // Apply company filtering
+        query = applyCompanyFilter(query);
+        
+        query = query.order('name');
+        
+        const { data: equipment, error: equipmentError } = await query;
         
         if (equipmentError) {
           console.error('Equipment fetch error:', equipmentError);
