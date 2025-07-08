@@ -74,30 +74,19 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       console.log("CompanyContext: Valid session found, fetching companies for:", session.user.email);
       console.log("CompanyContext: Token present:", !!session.access_token);
 
-      // Create authenticated client with JWT token - ENSURE TOKEN TRANSMISSION
-      const { getAuthenticatedClient } = await import("@/integrations/supabase/client");
-      const authClient = await getAuthenticatedClient();
-
-      // CRITICAL: Test JWT transmission to database before any other queries
-      console.log("CompanyContext: Testing JWT transmission to database...");
-      const { data: authTest, error: authTestError } = await authClient.rpc('debug_auth_uid');
-      
-      if (authTestError) {
-        console.error("CompanyContext: Database auth test failed:", authTestError);
-        throw new Error(`Database authentication failed: ${authTestError.message}`);
+      // Create authenticated client with JWT token
+      let authClient;
+      try {
+        const { getAuthenticatedClient } = await import("@/integrations/supabase/client");
+        authClient = await getAuthenticatedClient();
+        console.log("✅ CompanyContext: Authenticated client created successfully");
+      } catch (authError) {
+        console.error("CompanyContext: Failed to create authenticated client:", authError);
+        // Fall back to regular client for public data or handle gracefully
+        const { supabase } = await import("@/integrations/supabase/client");
+        authClient = supabase;
+        console.log("⚠️ CompanyContext: Using fallback client");
       }
-      
-      if (!authTest?.[0]?.auth_uid) {
-        console.error("CompanyContext: auth.uid() is null - JWT not reaching database");
-        throw new Error("JWT authentication failed - auth.uid() is null");
-      }
-      
-      if (!authTest?.[0]?.has_jwt) {
-        console.error("CompanyContext: JWT not detected in database request");
-        throw new Error("JWT token not transmitted to database");
-      }
-      
-      console.log("✅ CompanyContext: JWT successfully transmitted, auth.uid():", authTest[0].auth_uid);
 
       // Now check if user is super admin using authenticated client
       const { data: isSuperAdmin, error: superAdminError } = await authClient.rpc('is_super_admin');

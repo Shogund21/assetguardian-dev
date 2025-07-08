@@ -16,20 +16,13 @@ const EnhancedEquipmentOverview = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const { applyCompanyFilter } = useCompanyFilter();
-  const { supabase: authSupabase, isReady } = useAuthenticatedSupabase();
+  const { supabase: authSupabase, isReady, hasValidJWT } = useAuthenticatedSupabase();
   
   const { data: equipmentData, isLoading: equipmentLoading } = useQuery({
     queryKey: ['equipment'],
     queryFn: async () => {
-      if (!isReady) {
-        console.log('EnhancedEquipmentOverview: Auth client not ready');
-        return [];
-      }
-      
-      // Test JWT transmission before query
-      const { data: authTest } = await authSupabase.rpc('debug_auth_uid');
-      if (!authTest?.[0]?.auth_uid) {
-        console.warn('EnhancedEquipmentOverview: JWT not transmitted');
+      if (!isReady || !hasValidJWT) {
+        console.log('EnhancedEquipmentOverview: Auth client not ready or JWT invalid');
         return [];
       }
       
@@ -52,7 +45,7 @@ const EnhancedEquipmentOverview = () => {
       }
       return data;
     },
-    enabled: isReady,
+    enabled: isReady && hasValidJWT,
     retry: 1,
   });
 

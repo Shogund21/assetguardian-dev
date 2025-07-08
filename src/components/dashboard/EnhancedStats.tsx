@@ -11,24 +11,18 @@ import { useAuthenticatedSupabase } from "@/hooks/useAuthenticatedSupabase";
 const EnhancedStats = () => {
   const [hasError, setHasError] = useState(false);
   const { applyCompanyFilter } = useCompanyFilter();
-  const { supabase: authSupabase, isReady } = useAuthenticatedSupabase();
+  const { supabase: authSupabase, isReady, hasValidJWT } = useAuthenticatedSupabase();
 
   // Fetch equipment data with error handling
   const { data: equipmentData, isLoading: equipmentLoading, error: equipmentError } = useQuery({
     queryKey: ['equipment'],
     queryFn: async () => {
-      if (!isReady) {
-        console.log('EnhancedStats: Auth client not ready, skipping equipment query');
+      if (!isReady || !hasValidJWT) {
+        console.log('EnhancedStats: Auth client not ready or JWT invalid, skipping equipment query');
         return [];
       }
       
       try {
-        // Test JWT transmission before query
-        const { data: authTest } = await authSupabase.rpc('debug_auth_uid');
-        if (!authTest?.[0]?.auth_uid) {
-          console.warn('EnhancedStats: JWT not transmitted for equipment query');
-          return [];
-        }
         
         let query = authSupabase
           .from('equipment')
@@ -50,7 +44,7 @@ const EnhancedStats = () => {
         return [];
       }
     },
-    enabled: isReady,
+    enabled: isReady && hasValidJWT,
     retry: 1,
   });
 
@@ -58,18 +52,12 @@ const EnhancedStats = () => {
   const { data: projectsData, isLoading: projectsLoading, error: projectsError } = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
-      if (!isReady) {
-        console.log('EnhancedStats: Auth client not ready, skipping projects query');
+      if (!isReady || !hasValidJWT) {
+        console.log('EnhancedStats: Auth client not ready or JWT invalid, skipping projects query');
         return [];
       }
       
       try {
-        // Test JWT transmission before query
-        const { data: authTest } = await authSupabase.rpc('debug_auth_uid');
-        if (!authTest?.[0]?.auth_uid) {
-          console.warn('EnhancedStats: JWT not transmitted for projects query');
-          return [];
-        }
         
         let query = authSupabase
           .from('projects')
@@ -91,7 +79,7 @@ const EnhancedStats = () => {
         return [];
       }
     },
-    enabled: isReady,
+    enabled: isReady && hasValidJWT,
     retry: 1,
   });
 
@@ -99,18 +87,12 @@ const EnhancedStats = () => {
   const { data: maintenanceData, isLoading: maintenanceLoading, error: maintenanceError } = useQuery({
     queryKey: ['maintenance_checks'],
     queryFn: async () => {
-      if (!isReady) {
-        console.log('EnhancedStats: Auth client not ready, skipping maintenance query');
+      if (!isReady || !hasValidJWT) {
+        console.log('EnhancedStats: Auth client not ready or JWT invalid, skipping maintenance query');
         return [];
       }
       
       try {
-        // Test JWT transmission before query
-        const { data: authTest } = await authSupabase.rpc('debug_auth_uid');
-        if (!authTest?.[0]?.auth_uid) {
-          console.warn('EnhancedStats: JWT not transmitted for maintenance query');
-          return [];
-        }
         
         let query = authSupabase
           .from('hvac_maintenance_checks')
@@ -132,7 +114,7 @@ const EnhancedStats = () => {
         return [];
       }
     },
-    enabled: isReady,
+    enabled: isReady && hasValidJWT,
     retry: 1,
   });
 
@@ -140,18 +122,12 @@ const EnhancedStats = () => {
   const { data: techniciansData, isLoading: techniciansLoading, error: techniciansError } = useQuery({
     queryKey: ['technicians'],
     queryFn: async () => {
-      if (!isReady) {
-        console.log('EnhancedStats: Auth client not ready, skipping technicians query');
+      if (!isReady || !hasValidJWT) {
+        console.log('EnhancedStats: Auth client not ready or JWT invalid, skipping technicians query');
         return [];
       }
       
       try {
-        // Test JWT transmission before query
-        const { data: authTest } = await authSupabase.rpc('debug_auth_uid');
-        if (!authTest?.[0]?.auth_uid) {
-          console.warn('EnhancedStats: JWT not transmitted for technicians query');
-          return [];
-        }
         
         let query = authSupabase
           .from('technicians')
@@ -173,7 +149,7 @@ const EnhancedStats = () => {
         return [];
       }
     },
-    enabled: isReady,
+    enabled: isReady && hasValidJWT,
     retry: 1,
   });
 

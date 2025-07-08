@@ -5,6 +5,7 @@ import Stats from "@/components/dashboard/Stats";
 import RecentActivities from "@/components/dashboard/RecentActivities";
 import EquipmentOverview from "@/components/dashboard/EquipmentOverview";
 import { FilterChangesOverview } from "@/components/dashboard/FilterChangesOverview";
+import { AuthDebugInfo } from "@/components/auth/AuthDebugInfo";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -98,6 +99,9 @@ const Index = () => {
           </div>
         ) : (
           <div className="space-y-6">
+            {/* Auth Debug Info - Temporary for troubleshooting */}
+            <AuthDebugInfo />
+            
             {/* Enhanced KPI Section */}
             <div className="my-6">
               <Stats />

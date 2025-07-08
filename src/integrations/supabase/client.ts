@@ -23,6 +23,8 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
 
 // Create a token-aware client that ensures JWT is always included
 export const createAuthenticatedClient = (accessToken: string) => {
+  console.log("🔑 Creating authenticated client with token:", accessToken.substring(0, 20) + "...");
+  
   return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     auth: {
       autoRefreshToken: true,
@@ -32,7 +34,9 @@ export const createAuthenticatedClient = (accessToken: string) => {
     global: {
       headers: {
         'apikey': SUPABASE_PUBLISHABLE_KEY,
-        'Authorization': `Bearer ${accessToken}`
+        'Authorization': `Bearer ${accessToken}`,
+        // Ensure JWT is in request for RLS
+        'X-Supabase-JWT': accessToken
       }
     }
   });
@@ -43,10 +47,36 @@ export const getAuthenticatedClient = async () => {
   const { data: { session } } = await supabase.auth.getSession();
   
   if (!session?.access_token) {
-    console.warn("No access token available for authenticated client");
-    return supabase; // Fallback to regular client
+    console.warn("❌ No access token available for authenticated client");
+    throw new Error("No valid session for authenticated client");
   }
   
-  console.log("Creating authenticated client with token:", session.access_token.substring(0, 20) + "...");
-  return createAuthenticatedClient(session.access_token);
+  // Validate the session is complete
+  if (!session.user?.id) {
+    console.warn("❌ Incomplete session data");
+    throw new Error("Incomplete session data");
+  }
+  
+  console.log("✅ Creating authenticated client with valid token");
+  const client = createAuthenticatedClient(session.access_token);
+  
+  // Test the client immediately
+  try {
+    const { data: authTest, error } = await client.rpc('debug_auth_uid');
+    if (error) {
+      console.error("❌ JWT validation failed:", error);
+      throw new Error(`JWT validation failed: ${error.message}`);
+    }
+    
+    if (!authTest?.[0]?.auth_uid) {
+      console.error("❌ auth.uid() is null - JWT not transmitted");
+      throw new Error("JWT token not properly transmitted to database");
+    }
+    
+    console.log("✅ JWT successfully validated:", authTest[0].auth_uid);
+    return client;
+  } catch (error) {
+    console.error("❌ Auth client validation failed:", error);
+    throw error;
+  }
 };
