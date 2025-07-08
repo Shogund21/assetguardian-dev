@@ -45,20 +45,39 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       // Check if user is authenticated first
       const { data: { session } } = await supabase.auth.getSession();
       
+      console.log("CompanyContext: Session check:", session ? "authenticated" : "not authenticated");
+      
       // If not authenticated, don't try to fetch companies (for landing page)
       if (!session) {
+        console.log("CompanyContext: No session, clearing companies");
         setCompanies([]);
         setCurrentCompany(null);
         setIsLoading(false);
         return;
       }
 
+      // Validate session token
+      if (!session.access_token) {
+        console.error("CompanyContext: Invalid session - no access token");
+        setCompanies([]);
+        setCurrentCompany(null);
+        setIsLoading(false);
+        return;
+      }
+
+      console.log("CompanyContext: Fetching companies for user:", session.user.email);
+
       // Check if user is super admin
       const { data: isSuperAdmin, error: superAdminError } = await supabase.rpc('is_super_admin');
+      
+      if (superAdminError) {
+        console.error("CompanyContext: Error checking super admin status:", superAdminError);
+      }
       
       let data, error;
       
       if (isSuperAdmin) {
+        console.log("CompanyContext: User is super admin, fetching all companies");
         // Super admin can see all companies
         const result = await supabase
           .from("companies")
@@ -67,17 +86,51 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         data = result.data;
         error = result.error;
       } else {
-        // Regular users see only their companies
-        const result = await supabase
-          .from("companies")
-          .select("*")
-          .order("name");
-        data = result.data;
-        error = result.error;
+        console.log("CompanyContext: Regular user, fetching user's companies");
+        // Regular users see only companies they're members of
+        // First get company IDs the user is a member of
+        const { data: userCompanies, error: userCompaniesError } = await supabase
+          .from('company_users')
+          .select('company_id')
+          .eq('user_id', session.user.id);
+          
+        if (userCompaniesError) {
+          console.error("CompanyContext: Error fetching user companies:", userCompaniesError);
+          throw userCompaniesError;
+        }
+        
+        const companyIds = userCompanies?.map(uc => uc.company_id) || [];
+        
+        if (companyIds.length === 0) {
+          console.log("CompanyContext: User is not a member of any companies");
+          data = [];
+          error = null;
+        } else {
+          const result = await supabase
+            .from("companies")
+            .select(`
+              id,
+              name,
+              logo_url,
+              address,
+              contact_email,
+              contact_phone,
+              created_at,
+              updated_at
+            `)
+            .in('id', companyIds)
+            .order("name");
+          data = result.data;
+          error = result.error;
+        }
       }
 
-      if (error) throw error;
+      if (error) {
+        console.error("CompanyContext: Database error:", error);
+        throw error;
+      }
       
+      console.log("CompanyContext: Found companies:", data?.length || 0);
       setCompanies(data || []);
       
       // Set first company as default if we have companies and no current selection
@@ -87,12 +140,15 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (savedCompanyId) {
           const savedCompany = data.find(c => c.id === savedCompanyId);
           if (savedCompany) {
+            console.log("CompanyContext: Restoring saved company:", savedCompany.name);
             setCurrentCompany(savedCompany);
           } else {
+            console.log("CompanyContext: Saved company not found, using first available:", data[0].name);
             setCurrentCompany(data[0]);
             localStorage.setItem("selectedCompanyId", data[0].id);
           }
         } else {
+          console.log("CompanyContext: No saved company, using first available:", data[0].name);
           setCurrentCompany(data[0]);
           localStorage.setItem("selectedCompanyId", data[0].id);
         }

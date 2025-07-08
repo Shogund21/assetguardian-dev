@@ -15,6 +15,19 @@ export const useAuth = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log("Auth state changed:", event, session?.user?.email);
+        console.log("Session details:", {
+          hasSession: !!session,
+          hasAccessToken: !!session?.access_token,
+          hasUser: !!session?.user,
+          userId: session?.user?.id
+        });
+        
+        // Validate session integrity
+        if (session && (!session.access_token || !session.user)) {
+          console.error("Invalid session detected, forcing refresh");
+          await supabase.auth.refreshSession();
+          return;
+        }
         
         setSession(session);
         setUser(session?.user ?? null);
@@ -22,9 +35,16 @@ export const useAuth = () => {
         // Load user profile when session is established
         if (session?.user) {
           setTimeout(async () => {
-            const profile = await authService.getUserProfile(session.user.id);
-            setUserProfile(profile);
-            setIsLoading(false);
+            try {
+              const profile = await authService.getUserProfile(session.user.id);
+              console.log("User profile loaded:", profile);
+              setUserProfile(profile);
+              setIsLoading(false);
+            } catch (error) {
+              console.error("Error loading user profile:", error);
+              setUserProfile(null);
+              setIsLoading(false);
+            }
           }, 0);
         } else {
           setUserProfile(null);
@@ -34,16 +54,46 @@ export const useAuth = () => {
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error("Error getting session:", error);
+        setIsLoading(false);
+        return;
+      }
+      
+      console.log("Initial session check:", {
+        hasSession: !!session,
+        hasAccessToken: !!session?.access_token,
+        hasUser: !!session?.user,
+        userEmail: session?.user?.email
+      });
+      
+      // Validate initial session
+      if (session && (!session.access_token || !session.user)) {
+        console.error("Invalid initial session, clearing auth state");
+        setSession(null);
+        setUser(null);
+        setUserProfile(null);
+        setIsLoading(false);
+        return;
+      }
+      
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
         // Load user profile for existing session
         setTimeout(async () => {
-          const profile = await authService.getUserProfile(session.user.id);
-          setUserProfile(profile);
-          setIsLoading(false);
+          try {
+            const profile = await authService.getUserProfile(session.user.id);
+            console.log("Initial user profile loaded:", profile);
+            setUserProfile(profile);
+            setIsLoading(false);
+          } catch (error) {
+            console.error("Error loading initial user profile:", error);
+            setUserProfile(null);
+            setIsLoading(false);
+          }
         }, 0);
       } else {
         setIsLoading(false);

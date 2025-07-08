@@ -30,9 +30,9 @@ export const useCompanyFilter = () => {
       return query.eq('company_id', companyId);
     }
     
-    // If no company ID is selected, don't apply any filter
-    console.log('applyCompanyFilter: No company ID to filter by');
-    return query;
+    // If no company ID is selected, return empty result to prevent unauthorized access
+    console.warn('applyCompanyFilter: No company ID available, blocking query');
+    return query.eq('company_id', 'no-company-selected');
   };
 
   return {
