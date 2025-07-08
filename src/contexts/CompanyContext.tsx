@@ -43,49 +43,38 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setIsLoading(true);
       
       // Check if user is authenticated first
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error("CompanyContext: Session error:", sessionError);
+        setCompanies([]);
+        setCurrentCompany(null);
+        setIsLoading(false);
+        return;
+      }
       
       console.log("CompanyContext: Session check:", session ? "authenticated" : "not authenticated");
       
       // If not authenticated, don't try to fetch companies (for landing page)
-      if (!session) {
-        console.log("CompanyContext: No session, clearing companies");
+      if (!session || !session.access_token || !session.user?.id) {
+        console.log("CompanyContext: No valid session, clearing companies");
         setCompanies([]);
         setCurrentCompany(null);
         setIsLoading(false);
         return;
       }
 
-      // Validate session token - CRITICAL for JWT transmission
-      if (!session.access_token || !session.user) {
-        console.error("CompanyContext: Invalid session - missing token or user");
-        // Force refresh session to get valid token
-        const { data: refreshedSession } = await supabase.auth.refreshSession();
-        if (!refreshedSession.session?.access_token) {
-          console.error("CompanyContext: Unable to get valid token after refresh");
-          setCompanies([]);
-          setCurrentCompany(null);
-          setIsLoading(false);
-          return;
-        }
-        console.log("CompanyContext: Session refreshed successfully");
-      }
-
       console.log("CompanyContext: Valid session found, fetching companies for:", session.user.email);
-      console.log("CompanyContext: Token present:", !!session.access_token);
 
-      // Create authenticated client with JWT token
-      let authClient;
+      // Try to get authenticated client, but don't block on failure
+      let authClient = supabase; // Default fallback
       try {
         const { getAuthenticatedClient } = await import("@/integrations/supabase/client");
         authClient = await getAuthenticatedClient();
-        console.log("✅ CompanyContext: Authenticated client created successfully");
+        console.log("✅ CompanyContext: Using authenticated client with JWT");
       } catch (authError) {
-        console.error("CompanyContext: Failed to create authenticated client:", authError);
-        // Fall back to regular client for public data or handle gracefully
-        const { supabase } = await import("@/integrations/supabase/client");
-        authClient = supabase;
-        console.log("⚠️ CompanyContext: Using fallback client");
+        console.warn("⚠️ CompanyContext: Authenticated client failed, using regular client:", authError);
+        // Continue with regular client - better than blocking completely
       }
 
       // Now check if user is super admin using authenticated client

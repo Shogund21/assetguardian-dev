@@ -9,134 +9,116 @@ export const useAuth = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [authInitialized, setAuthInitialized] = useState(false);
 
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log("Auth state changed:", event, session?.user?.email);
-        console.log("Session details:", {
-          hasSession: !!session,
-          hasAccessToken: !!session?.access_token,
-          hasUser: !!session?.user,
-          userId: session?.user?.id
-        });
-        
-        // Validate session integrity and test auth.uid()
-        if (session && (!session.access_token || !session.user)) {
-          console.error("Invalid session detected, forcing refresh");
-          await supabase.auth.refreshSession();
-          return;
+    console.log("🚀 Initializing authentication...");
+    
+    // Force clear any corrupted session data
+    const clearCorruptedSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session && (!session.access_token || !session.user?.id)) {
+          console.warn("🧹 Clearing corrupted session data");
+          await supabase.auth.signOut();
+          return true;
         }
-        
-        // Test database authentication after session is set
-        if (session) {
-          try {
-            console.log("Testing database authentication with token...");
-            
-            // Log access token (first 20 chars for security)
-            console.log("Access token present:", !!session.access_token);
-            console.log("Token preview:", session.access_token?.substring(0, 20) + "...");
-            
-            // Use authenticated client for the test
-            const { getAuthenticatedClient } = await import("@/integrations/supabase/client");
-            const authClient = await getAuthenticatedClient();
-            const { data: authTest, error: authError } = await authClient.rpc('debug_auth_uid');
-            
-            console.log("Database auth test result:", {
-              authTest,
-              authError,
-              hasAuthUid: !!authTest?.[0]?.auth_uid,
-              hasJwt: authTest?.[0]?.has_jwt
-            });
-            
-            if (authError) {
-              console.error("Database authentication error:", authError);
-              // Don't refresh on first error, let it pass through
-            } else if (!authTest?.[0]?.auth_uid) {
-              console.error("auth.uid() is null despite valid session");
-            } else if (!authTest?.[0]?.has_jwt) {
-              console.error("JWT not detected in database request");
-            } else {
-              console.log("✅ Database authentication successful!");
-            }
-          } catch (error) {
-            console.error("Auth test failed:", error);
-          }
-        }
-        
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        // Load user profile when session is established
-        if (session?.user) {
-          setTimeout(async () => {
-            try {
-              const profile = await authService.getUserProfile(session.user.id);
-              console.log("User profile loaded:", profile);
-              setUserProfile(profile);
-              setIsLoading(false);
-            } catch (error) {
-              console.error("Error loading user profile:", error);
-              setUserProfile(null);
-              setIsLoading(false);
-            }
-          }, 0);
-        } else {
-          setUserProfile(null);
-          setIsLoading(false);
-        }
+        return false;
+      } catch (error) {
+        console.error("Error checking session:", error);
+        return false;
       }
-    );
+    };
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (error) {
-        console.error("Error getting session:", error);
+    const initializeAuth = async () => {
+      // Clear any corrupted sessions first
+      const wasCorrupted = await clearCorruptedSession();
+      if (wasCorrupted) {
         setIsLoading(false);
+        setAuthInitialized(true);
         return;
       }
-      
-      console.log("Initial session check:", {
-        hasSession: !!session,
-        hasAccessToken: !!session?.access_token,
-        hasUser: !!session?.user,
-        userEmail: session?.user?.email
-      });
-      
-      // Validate initial session
-      if (session && (!session.access_token || !session.user)) {
-        console.error("Invalid initial session, clearing auth state");
-        setSession(null);
-        setUser(null);
-        setUserProfile(null);
-        setIsLoading(false);
-        return;
-      }
-      
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        // Load user profile for existing session
-        setTimeout(async () => {
-          try {
-            const profile = await authService.getUserProfile(session.user.id);
-            console.log("Initial user profile loaded:", profile);
-            setUserProfile(profile);
-            setIsLoading(false);
-          } catch (error) {
-            console.error("Error loading initial user profile:", error);
+
+      // Set up auth state listener
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        (event, session) => {
+          console.log("🔄 Auth state changed:", event, session?.user?.email);
+          console.log("Session details:", {
+            hasSession: !!session,
+            hasAccessToken: !!session?.access_token,
+            hasUser: !!session?.user,
+            userId: session?.user?.id,
+            tokenLength: session?.access_token?.length
+          });
+          
+          // Handle session state updates synchronously
+          setSession(session);
+          setUser(session?.user ?? null);
+          
+          // Handle profile loading asynchronously
+          if (session?.user && session.access_token) {
+            // Defer profile loading to avoid blocking auth state
+            setTimeout(async () => {
+              try {
+                const profile = await authService.getUserProfile(session.user.id);
+                console.log("👤 User profile loaded:", profile?.email);
+                setUserProfile(profile);
+                setIsLoading(false);
+              } catch (error) {
+                console.error("❌ Error loading user profile:", error);
+                setUserProfile(null);
+                setIsLoading(false);
+              }
+            }, 100);
+          } else {
             setUserProfile(null);
             setIsLoading(false);
           }
-        }, 0);
-      } else {
-        setIsLoading(false);
-      }
-    });
+          
+          setAuthInitialized(true);
+        }
+      );
 
-    return () => subscription.unsubscribe();
+      // Check for existing session after setting up listener
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("❌ Error getting initial session:", error);
+          setIsLoading(false);
+          setAuthInitialized(true);
+          return;
+        }
+        
+        console.log("🔍 Initial session check:", {
+          hasSession: !!session,
+          hasAccessToken: !!session?.access_token,
+          hasUser: !!session?.user,
+          userEmail: session?.user?.email
+        });
+        
+        // If we have a valid session, the auth state change will handle it
+        // If no session, set loading to false
+        if (!session) {
+          setIsLoading(false);
+          setAuthInitialized(true);
+        }
+        
+      } catch (error) {
+        console.error("❌ Failed to get initial session:", error);
+        setIsLoading(false);
+        setAuthInitialized(true);
+      }
+
+      return () => subscription.unsubscribe();
+    };
+
+    const cleanup = initializeAuth();
+    return () => {
+      if (cleanup instanceof Promise) {
+        cleanup.then(cleanupFn => cleanupFn?.());
+      }
+    };
   }, []);
 
   const getUserDisplayName = () => {
@@ -176,8 +158,9 @@ export const useAuth = () => {
     session,
     userProfile,
     isLoading,
+    authInitialized,
     getUserDisplayName,
-    isAuthenticated: !!user && !!session,
+    isAuthenticated: !!user && !!session && !!session.access_token,
     isAdmin,
     isTechnician,
     hasPermission,

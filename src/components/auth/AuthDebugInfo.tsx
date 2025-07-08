@@ -2,10 +2,26 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAuthenticatedSupabase } from "@/hooks/useAuthenticatedSupabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 export const AuthDebugInfo = () => {
-  const { user, session, isAuthenticated } = useAuth();
+  const { user, session, isAuthenticated, authInitialized } = useAuth();
   const { hasValidJWT, isReady } = useAuthenticatedSupabase();
+
+  const clearAuthState = async () => {
+    console.log("🧹 Clearing authentication state...");
+    
+    // Clear all browser storage
+    localStorage.clear();
+    sessionStorage.clear();
+    
+    // Sign out from Supabase
+    await supabase.auth.signOut();
+    
+    // Reload the page to start fresh
+    window.location.reload();
+  };
 
   return (
     <Card className="w-full max-w-2xl mx-auto mt-4">
@@ -14,6 +30,12 @@ export const AuthDebugInfo = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
+          <div>
+            <span className="font-medium">Auth Initialized:</span>
+            <Badge variant={authInitialized ? "default" : "destructive"} className="ml-2">
+              {authInitialized ? "Yes" : "No"}
+            </Badge>
+          </div>
           <div>
             <span className="font-medium">Authenticated:</span>
             <Badge variant={isAuthenticated ? "default" : "destructive"} className="ml-2">
@@ -37,6 +59,10 @@ export const AuthDebugInfo = () => {
             </Badge>
           </div>
           <div>
+            <span className="font-medium">Token Length:</span>
+            <span className="ml-2 text-sm">{session?.access_token?.length || 0}</span>
+          </div>
+          <div>
             <span className="font-medium">Client Ready:</span>
             <Badge variant={isReady ? "default" : "destructive"} className="ml-2">
               {isReady ? "Yes" : "No"}
@@ -48,6 +74,16 @@ export const AuthDebugInfo = () => {
               {hasValidJWT ? "Yes" : "No"}
             </Badge>
           </div>
+        </div>
+        
+        <div className="mt-4">
+          <Button 
+            onClick={clearAuthState}
+            variant="outline"
+            className="w-full"
+          >
+            🧹 Clear Auth State & Reload
+          </Button>
         </div>
         
         {session?.access_token && (
