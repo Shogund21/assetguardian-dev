@@ -6,25 +6,25 @@ import { useQuery } from "@tanstack/react-query";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { toast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
-import { useAuthenticatedSupabase } from "@/hooks/useAuthenticatedSupabase";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const EnhancedStats = () => {
   const [hasError, setHasError] = useState(false);
   const { applyCompanyFilter } = useCompanyFilter();
-  const { supabase: authSupabase, isReady, hasValidJWT } = useAuthenticatedSupabase();
+  const { isAuthenticated } = useAuth();
 
   // Fetch equipment data with error handling
   const { data: equipmentData, isLoading: equipmentLoading, error: equipmentError } = useQuery({
     queryKey: ['equipment'],
     queryFn: async () => {
-      if (!isReady || !hasValidJWT) {
-        console.log('EnhancedStats: Auth client not ready or JWT invalid, skipping equipment query');
+      if (!isAuthenticated) {
+        console.log('EnhancedStats: User not authenticated, skipping equipment query');
         return [];
       }
       
       try {
-        
-        let query = authSupabase
+        let query = supabase
           .from('equipment')
           .select('*');
         
@@ -44,7 +44,7 @@ const EnhancedStats = () => {
         return [];
       }
     },
-    enabled: isReady && hasValidJWT,
+    enabled: isAuthenticated,
     retry: 1,
   });
 
@@ -52,14 +52,13 @@ const EnhancedStats = () => {
   const { data: projectsData, isLoading: projectsLoading, error: projectsError } = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
-      if (!isReady || !hasValidJWT) {
-        console.log('EnhancedStats: Auth client not ready or JWT invalid, skipping projects query');
+      if (!isAuthenticated) {
+        console.log('EnhancedStats: User not authenticated, skipping projects query');
         return [];
       }
       
       try {
-        
-        let query = authSupabase
+        let query = supabase
           .from('projects')
           .select('*');
         
@@ -79,7 +78,7 @@ const EnhancedStats = () => {
         return [];
       }
     },
-    enabled: isReady && hasValidJWT,
+    enabled: isAuthenticated,
     retry: 1,
   });
 
@@ -87,14 +86,13 @@ const EnhancedStats = () => {
   const { data: maintenanceData, isLoading: maintenanceLoading, error: maintenanceError } = useQuery({
     queryKey: ['maintenance_checks'],
     queryFn: async () => {
-      if (!isReady || !hasValidJWT) {
-        console.log('EnhancedStats: Auth client not ready or JWT invalid, skipping maintenance query');
+      if (!isAuthenticated) {
+        console.log('EnhancedStats: User not authenticated, skipping maintenance query');
         return [];
       }
       
       try {
-        
-        let query = authSupabase
+        let query = supabase
           .from('hvac_maintenance_checks')
           .select('*');
         
@@ -114,7 +112,7 @@ const EnhancedStats = () => {
         return [];
       }
     },
-    enabled: isReady && hasValidJWT,
+    enabled: isAuthenticated,
     retry: 1,
   });
 
@@ -122,14 +120,13 @@ const EnhancedStats = () => {
   const { data: techniciansData, isLoading: techniciansLoading, error: techniciansError } = useQuery({
     queryKey: ['technicians'],
     queryFn: async () => {
-      if (!isReady || !hasValidJWT) {
-        console.log('EnhancedStats: Auth client not ready or JWT invalid, skipping technicians query');
+      if (!isAuthenticated) {
+        console.log('EnhancedStats: User not authenticated, skipping technicians query');
         return [];
       }
       
       try {
-        
-        let query = authSupabase
+        let query = supabase
           .from('technicians')
           .select('*');
         
@@ -149,7 +146,7 @@ const EnhancedStats = () => {
         return [];
       }
     },
-    enabled: isReady && hasValidJWT,
+    enabled: isAuthenticated,
     retry: 1,
   });
 

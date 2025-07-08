@@ -66,19 +66,11 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
       console.log("CompanyContext: Valid session found, fetching companies for:", session.user.email);
 
-      // Try to get authenticated client, but don't block on failure
-      let authClient = supabase; // Default fallback
-      try {
-        const { getAuthenticatedClient } = await import("@/integrations/supabase/client");
-        authClient = await getAuthenticatedClient();
-        console.log("✅ CompanyContext: Using authenticated client with JWT");
-      } catch (authError) {
-        console.warn("⚠️ CompanyContext: Authenticated client failed, using regular client:", authError);
-        // Continue with regular client - better than blocking completely
-      }
+      // Use standard supabase client - it will automatically include JWT when session exists
+      console.log("✅ CompanyContext: Using standard client with session-based authentication");
 
-      // Now check if user is super admin using authenticated client
-      const { data: isSuperAdmin, error: superAdminError } = await authClient.rpc('is_super_admin');
+      // Now check if user is super admin using standard client
+      const { data: isSuperAdmin, error: superAdminError } = await supabase.rpc('is_super_admin');
       
       if (superAdminError) {
         console.error("CompanyContext: Error checking super admin status:", superAdminError);
@@ -89,8 +81,8 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       
       if (isSuperAdmin) {
         console.log("CompanyContext: User is super admin, fetching all companies");
-        // Super admin can see all companies using authenticated client
-        const result = await authClient
+        // Super admin can see all companies using standard client
+        const result = await supabase
           .from("companies")
           .select("*")
           .order("name");
@@ -99,8 +91,8 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       } else {
         console.log("CompanyContext: Regular user, fetching user's companies");
         
-        // Get company IDs the user is a member of using authenticated client
-        const { data: userCompanies, error: userCompaniesError } = await authClient
+        // Get company IDs the user is a member of using standard client
+        const { data: userCompanies, error: userCompaniesError } = await supabase
           .from('company_users')
           .select('company_id')
           .or(`user_id.eq.${session.user.id},user_id.eq.${session.user.email}`);
@@ -117,7 +109,7 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
           data = [];
           error = null;
         } else {
-          const result = await authClient
+          const result = await supabase
             .from("companies")
             .select(`
               id,

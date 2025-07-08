@@ -9,24 +9,25 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
-import { useAuthenticatedSupabase } from "@/hooks/useAuthenticatedSupabase";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const EnhancedEquipmentOverview = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const { applyCompanyFilter } = useCompanyFilter();
-  const { supabase: authSupabase, isReady, hasValidJWT } = useAuthenticatedSupabase();
+  const { isAuthenticated } = useAuth();
   
   const { data: equipmentData, isLoading: equipmentLoading } = useQuery({
     queryKey: ['equipment'],
     queryFn: async () => {
-      if (!isReady || !hasValidJWT) {
-        console.log('EnhancedEquipmentOverview: Auth client not ready or JWT invalid');
+      if (!isAuthenticated) {
+        console.log('EnhancedEquipmentOverview: User not authenticated');
         return [];
       }
       
-      let query = authSupabase
+      let query = supabase
         .from('equipment')
         .select('id, name, model, serial_number, location, status, type, company_id, created_at, updated_at');
       
@@ -45,7 +46,7 @@ const EnhancedEquipmentOverview = () => {
       }
       return data;
     },
-    enabled: isReady && hasValidJWT,
+    enabled: isAuthenticated,
     retry: 1,
   });
 

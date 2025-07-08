@@ -21,97 +21,31 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
   }
 });
 
-// Create a token-aware client that ensures JWT is always included
-export const createAuthenticatedClient = (accessToken: string) => {
-  console.log("🔑 Creating authenticated client with token:", accessToken.substring(0, 20) + "...");
+// Helper function to ensure session is established before database operations
+export const ensureSession = async () => {
+  console.log("🔄 Ensuring session is established...");
   
-  return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true
-    },
-    global: {
-      headers: {
-        'apikey': SUPABASE_PUBLISHABLE_KEY,
-        'Authorization': `Bearer ${accessToken}`,
-        // Ensure JWT is in request for RLS
-        'X-Supabase-JWT': accessToken
-      }
-    }
-  });
-};
-
-// Helper function to get authenticated client with current session
-export const getAuthenticatedClient = async () => {
-  console.log("🔄 Getting authenticated client...");
+  const { data: { session }, error } = await supabase.auth.getSession();
   
-  // Force a fresh session check to ensure we have the latest token
-  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-  
-  if (sessionError) {
-    console.error("❌ Error getting session:", sessionError);
-    throw new Error(`Session error: ${sessionError.message}`);
+  if (error) {
+    console.error("❌ Session error:", error);
+    throw new Error(`Session error: ${error.message}`);
   }
   
   if (!session) {
-    console.warn("❌ No session available for authenticated client");
-    throw new Error("No session available");
+    console.warn("❌ No session available");
+    throw new Error("No session available - user must be authenticated");
   }
   
-  if (!session.access_token) {
-    console.warn("❌ No access token in session");
-    throw new Error("No access token available");
+  if (!session.access_token || !session.user?.id) {
+    console.warn("❌ Invalid session data");
+    throw new Error("Invalid session data");
   }
   
-  if (!session.user?.id) {
-    console.warn("❌ No user ID in session");
-    throw new Error("No user ID in session");
-  }
-  
-  console.log("🔑 Creating authenticated client with token:", {
-    tokenLength: session.access_token.length,
+  console.log("✅ Session validated:", {
     userId: session.user.id,
-    tokenPreview: session.access_token.substring(0, 20) + "..."
+    hasToken: !!session.access_token
   });
   
-  const client = createAuthenticatedClient(session.access_token);
-  
-  // Test the client with a timeout to prevent hanging
-  try {
-    console.log("🧪 Testing JWT transmission to database...");
-    
-    const testPromise = client.rpc('debug_auth_uid');
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error("Database test timeout")), 5000);
-    });
-    
-    const { data: authTest, error } = await Promise.race([testPromise, timeoutPromise]) as any;
-    
-    if (error) {
-      console.error("❌ Database test failed:", error);
-      // Don't throw on database errors, but log them
-      console.warn("⚠️ Continuing with client despite database test failure");
-      return client;
-    }
-    
-    if (!authTest?.[0]?.auth_uid) {
-      console.error("❌ auth.uid() is null - JWT not properly transmitted");
-      // Don't throw, but warn about potential RLS issues
-      console.warn("⚠️ RLS policies may not work correctly");
-      return client;
-    }
-    
-    console.log("✅ JWT transmission validated successfully:", {
-      authUid: authTest[0].auth_uid,
-      hasJwt: authTest[0].has_jwt
-    });
-    
-    return client;
-  } catch (error) {
-    console.error("❌ Client validation failed:", error);
-    // Return client anyway - the connection might work for actual queries
-    console.warn("⚠️ Returning client despite validation failure");
-    return client;
-  }
+  return session;
 };
