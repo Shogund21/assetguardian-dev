@@ -6,6 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import MaintenanceTableRow from "./table/MaintenanceTableRow";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useCompanyFilter } from "@/hooks/useCompanyFilter";
+import { useAuth } from "@/hooks/useAuth";
 
 const MaintenanceHistory = () => {
   const [maintenanceChecks, setMaintenanceChecks] = useState<MaintenanceCheck[]>([]);
@@ -13,6 +15,8 @@ const MaintenanceHistory = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const { applyCompanyFilter } = useCompanyFilter();
+  const { user, isAuthenticated } = useAuth();
 
   const fetchMaintenanceChecks = async () => {
     try {
@@ -20,8 +24,16 @@ const MaintenanceHistory = () => {
       setFetchError(null);
       console.log("Fetching maintenance checks...");
       
+      if (!isAuthenticated) {
+        console.log('MaintenanceHistory: User not authenticated');
+        return;
+      }
+      
+      // Check if user is super admin
+      const isSuperAdmin = user?.email === 'edward@shogunaillc.com';
+      
       // First query to get maintenance checks with equipment and technician details
-      const { data, error } = await supabase
+      let query = supabase
         .from("hvac_maintenance_checks")
         .select(`
           *,
@@ -33,8 +45,14 @@ const MaintenanceHistory = () => {
             firstName,
             lastName
           )
-        `)
-        .order("check_date", { ascending: false });
+        `);
+      
+      // Apply company filtering only for non-super admin users
+      if (!isSuperAdmin) {
+        query = applyCompanyFilter(query);
+      }
+      
+      const { data, error } = await query.order("check_date", { ascending: false });
 
       if (error) {
         console.error("Error fetching maintenance checks:", error);

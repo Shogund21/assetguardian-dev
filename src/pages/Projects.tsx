@@ -6,26 +6,36 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
-import { AuthTest } from "@/components/auth/AuthTest";
-import { useAuthenticatedSupabase } from "@/hooks/useAuthenticatedSupabase";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const Projects = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { applyCompanyFilter } = useCompanyFilter();
-  const { supabase: authSupabase, isReady } = useAuthenticatedSupabase();
+  const { isAuthenticated, user } = useAuth();
 
   const { data: projects, isLoading, refetch } = useQuery({
     queryKey: ["projects"],
     queryFn: async () => {
       console.log("Fetching projects from Supabase...");
+      if (!isAuthenticated) {
+        console.log('Projects: User not authenticated');
+        return [];
+      }
+      
       try {
-        let query = authSupabase
+        // Check if user is super admin
+        const isSuperAdmin = user?.email === 'edward@shogunaillc.com';
+        
+        let query = supabase
           .from("projects")
           .select("*");
         
-        // Apply company filtering
-        query = applyCompanyFilter(query);
+        // Apply company filtering only for non-super admin users
+        if (!isSuperAdmin) {
+          query = applyCompanyFilter(query);
+        }
         
         query = query.order("createdat", { ascending: false });
         
@@ -43,7 +53,7 @@ const Projects = () => {
         throw error;
       }
     },
-    enabled: isReady, // Wait for authenticated client to be ready
+    enabled: isAuthenticated,
     refetchOnWindowFocus: true,
     staleTime: 1000,
   });
@@ -52,7 +62,7 @@ const Projects = () => {
     try {
       console.log("Updating project status:", { projectId, newStatus });
       
-      const { error } = await authSupabase
+      const { error } = await supabase
         .from("projects")
         .update({ 
           status: newStatus,
@@ -85,7 +95,7 @@ const Projects = () => {
     try {
       console.log("Updating project priority:", { projectId, newPriority });
       
-      const { error } = await authSupabase
+      const { error } = await supabase
         .from("projects")
         .update({ 
           priority: newPriority,
@@ -117,7 +127,7 @@ const Projects = () => {
   const handleDelete = async (projectId: string) => {
     try {
       console.log("Deleting project:", projectId);
-      const { error } = await authSupabase
+      const { error } = await supabase
         .from("projects")
         .delete()
         .eq("id", projectId);
@@ -156,7 +166,7 @@ const Projects = () => {
           </Button>
         </div>
 
-        <AuthTest />
+        {/* Removed AuthTest as it was causing permission errors */}
         
         {isLoading ? (
           <div>Loading projects...</div>
