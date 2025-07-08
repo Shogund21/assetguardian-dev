@@ -46,9 +46,15 @@ export const CompanySelector = () => {
   }
 
   const handleValueChange = (value: string) => {
-    const selected = companies.find(c => c.id === value);
-    if (selected) {
-      setCurrentCompany(selected);
+    if (value === "all_companies") {
+      // Super admin selected "All Companies"
+      setCurrentCompany(null);
+      localStorage.removeItem("selectedCompanyId");
+    } else {
+      const selected = companies.find(c => c.id === value);
+      if (selected) {
+        setCurrentCompany(selected);
+      }
     }
     if (isMobile) {
       // Close after selecting on mobile
@@ -63,12 +69,17 @@ export const CompanySelector = () => {
     <div className="flex items-center">
       <Building2 className="h-4 w-4 text-muted-foreground mr-2" />
       <Select
-        value={currentCompany?.id || ""}
+        value={currentCompany?.id || (isSuperAdmin ? "all_companies" : "")}
         onValueChange={handleValueChange}
         open={open}
         onOpenChange={setOpen}
       >
-        <SelectTrigger className={`h-8 bg-white border border-gray-200 rounded-md px-3`} style={{ maxWidth }}><SelectValue placeholder="Select company" className="truncate max-w-full" /></SelectTrigger>
+        <SelectTrigger className={`h-8 bg-white border border-gray-200 rounded-md px-3`} style={{ maxWidth }}>
+          <SelectValue 
+            placeholder={isSuperAdmin ? "All Companies" : "Select company"} 
+            className="truncate max-w-full" 
+          />
+        </SelectTrigger>
         <SelectContent 
           className="bg-white border border-gray-200 shadow-md"
           position={isMobile ? "popper" : "item-aligned"}
@@ -76,6 +87,14 @@ export const CompanySelector = () => {
           align={isMobile ? "center" : "start"}
           avoidCollisions={false}
         >
+          {isSuperAdmin && (
+            <SelectItem 
+              value="all_companies"
+              className="cursor-pointer hover:bg-gray-100 font-medium"
+            >
+              <span className="truncate block">All Companies</span>
+            </SelectItem>
+          )}
           {companies.map((company) => (
             <SelectItem 
               key={company.id} 

@@ -157,13 +157,10 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       
       // For super admin, don't auto-select a company - let them see all data by default
       if (isSuperAdmin) {
-        console.log("CompanyContext: Super admin detected - not auto-selecting company to show all data");
-        const savedCompanyId = localStorage.getItem("selectedCompanyId");
-        if (savedCompanyId && data?.find(c => c.id === savedCompanyId)) {
-          const savedCompany = data.find(c => c.id === savedCompanyId);
-          console.log("CompanyContext: Restoring super admin's saved company selection:", savedCompany?.name);
-          setCurrentCompany(savedCompany!);
-        }
+        console.log("CompanyContext: Super admin detected - clearing any saved company to show all data");
+        // Clear any existing company selection for super admin
+        localStorage.removeItem("selectedCompanyId");
+        setCurrentCompany(null);
         // Don't auto-select first company for super admin - let them see all data
       } else {
         // Set first company as default if we have companies and no current selection (for regular users)

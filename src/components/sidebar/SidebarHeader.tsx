@@ -17,14 +17,17 @@ export function SidebarHeader({ isMobile }: SidebarHeaderProps) {
   
   return (
     <div className="flex h-[60px] items-center justify-between border-b px-4 bg-white">
-      <Link to="/" className="flex items-center gap-2 font-semibold">
-        <img 
-          src="/lovable-uploads/91b3768c-9bf7-4a1c-b2be-aea61a3ff3be.png" 
-          alt="Asset Guardian Logo" 
-          className="h-6 w-6 flex-shrink-0" 
-        />
-        <span className="truncate max-w-[120px]">Asset Guardian</span>
-      </Link>
+      <div className="flex items-center gap-3">
+        <Link to="/" className="flex items-center gap-2 font-semibold">
+          <img 
+            src="/lovable-uploads/91b3768c-9bf7-4a1c-b2be-aea61a3ff3be.png" 
+            alt="Asset Guardian Logo" 
+            className="h-6 w-6 flex-shrink-0" 
+          />
+          <span className="truncate max-w-[120px]">Asset Guardian</span>
+        </Link>
+        <CompanySelector />
+      </div>
       {isMobile ? (
         <Button 
           variant="ghost" 
@@ -37,9 +40,6 @@ export function SidebarHeader({ isMobile }: SidebarHeaderProps) {
         </Button>
       ) : (
         <div className="flex items-center gap-2 z-[100]">
-          <div className="relative z-[100]">
-            <CompanySelector />
-          </div>
           <div className="relative z-[100]">
             <UserDropdown />
           </div>
