@@ -16,12 +16,9 @@ const EnhancedStats = () => {
 
   // Fetch equipment data with error handling
   const { data: equipmentData, isLoading: equipmentLoading, error: equipmentError } = useQuery({
-    queryKey: ['equipment'],
+    queryKey: ['equipment', 'stats'],
     queryFn: async () => {
-      if (!isAuthenticated) {
-        console.log('EnhancedStats: User not authenticated, skipping equipment query');
-        return [];
-      }
+      console.log('EnhancedStats: Fetching equipment data...');
       
       try {
         let query = supabase
@@ -34,12 +31,14 @@ const EnhancedStats = () => {
         const { data, error } = await query;
         
         if (error) {
-          console.error('Error fetching equipment:', error);
+          console.error('EnhancedStats: Error fetching equipment:', error);
           throw error;
         }
+        
+        console.log('EnhancedStats: Equipment data fetched:', data?.length || 0, 'items');
         return data || [];
       } catch (err) {
-        console.error("Equipment query error:", err);
+        console.error("EnhancedStats: Equipment query error:", err);
         setHasError(true);
         return [];
       }
@@ -50,12 +49,9 @@ const EnhancedStats = () => {
 
   // Fetch projects data with error handling
   const { data: projectsData, isLoading: projectsLoading, error: projectsError } = useQuery({
-    queryKey: ['projects'],
+    queryKey: ['projects', 'stats'],
     queryFn: async () => {
-      if (!isAuthenticated) {
-        console.log('EnhancedStats: User not authenticated, skipping projects query');
-        return [];
-      }
+      console.log('EnhancedStats: Fetching projects data...');
       
       try {
         let query = supabase
@@ -68,12 +64,14 @@ const EnhancedStats = () => {
         const { data, error } = await query;
         
         if (error) {
-          console.error('Error fetching projects:', error);
+          console.error('EnhancedStats: Error fetching projects:', error);
           throw error;
         }
+        
+        console.log('EnhancedStats: Projects data fetched:', data?.length || 0, 'items');
         return data || [];
       } catch (err) {
-        console.error("Projects query error:", err);
+        console.error("EnhancedStats: Projects query error:", err);
         setHasError(true);
         return [];
       }
@@ -84,12 +82,9 @@ const EnhancedStats = () => {
 
   // Fetch maintenance checks data
   const { data: maintenanceData, isLoading: maintenanceLoading, error: maintenanceError } = useQuery({
-    queryKey: ['maintenance_checks'],
+    queryKey: ['maintenance_checks', 'stats'],
     queryFn: async () => {
-      if (!isAuthenticated) {
-        console.log('EnhancedStats: User not authenticated, skipping maintenance query');
-        return [];
-      }
+      console.log('EnhancedStats: Fetching maintenance checks data...');
       
       try {
         let query = supabase
@@ -102,12 +97,14 @@ const EnhancedStats = () => {
         const { data, error } = await query;
         
         if (error) {
-          console.error('Error fetching maintenance checks:', error);
+          console.error('EnhancedStats: Error fetching maintenance checks:', error);
           throw error;
         }
+        
+        console.log('EnhancedStats: Maintenance checks data fetched:', data?.length || 0, 'items');
         return data || [];
       } catch (err) {
-        console.error("Maintenance checks query error:", err);
+        console.error("EnhancedStats: Maintenance checks query error:", err);
         setHasError(true);
         return [];
       }
@@ -118,12 +115,9 @@ const EnhancedStats = () => {
 
   // Fetch technicians data
   const { data: techniciansData, isLoading: techniciansLoading, error: techniciansError } = useQuery({
-    queryKey: ['technicians'],
+    queryKey: ['technicians', 'stats'],
     queryFn: async () => {
-      if (!isAuthenticated) {
-        console.log('EnhancedStats: User not authenticated, skipping technicians query');
-        return [];
-      }
+      console.log('EnhancedStats: Fetching technicians data...');
       
       try {
         let query = supabase
@@ -136,12 +130,14 @@ const EnhancedStats = () => {
         const { data, error } = await query;
         
         if (error) {
-          console.error('Error fetching technicians:', error);
+          console.error('EnhancedStats: Error fetching technicians:', error);
           throw error;
         }
+        
+        console.log('EnhancedStats: Technicians data fetched:', data?.length || 0, 'items');
         return data || [];
       } catch (err) {
-        console.error("Technicians query error:", err);
+        console.error("EnhancedStats: Technicians query error:", err);
         setHasError(true);
         return [];
       }

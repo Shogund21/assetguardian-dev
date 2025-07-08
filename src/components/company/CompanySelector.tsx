@@ -48,25 +48,28 @@ export const CompanySelector = () => {
   const handleValueChange = (value: string) => {
     console.log("CompanySelector: Value changed to:", value);
     console.log("CompanySelector: Current user is super admin:", isSuperAdmin);
+    console.log("CompanySelector: Available companies:", companies.length);
     
     if (value === "all_companies") {
       // Super admin selected "All Companies"
-      console.log("CompanySelector: Super admin selected 'All Companies'");
+      console.log("CompanySelector: Super admin selected 'All Companies' - clearing company filter");
       setCurrentCompany(null);
       localStorage.removeItem("selectedCompanyId");
     } else {
       const selected = companies.find(c => c.id === value);
       if (selected) {
-        console.log("CompanySelector: Selected company:", selected.name);
+        console.log("CompanySelector: Selected company:", selected.name, "ID:", selected.id);
         setCurrentCompany(selected);
         localStorage.setItem("selectedCompanyId", selected.id);
       } else {
         console.error("CompanySelector: Could not find company with ID:", value);
+        console.log("CompanySelector: Available company IDs:", companies.map(c => c.id));
       }
     }
+    
+    // Force a brief delay before closing to ensure state updates
     if (isMobile) {
-      // Close after selecting on mobile
-      setTimeout(() => setOpen(false), 100);
+      setTimeout(() => setOpen(false), 150);
     }
   };
 

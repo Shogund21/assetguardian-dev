@@ -20,12 +20,9 @@ const EnhancedEquipmentOverview = () => {
   const { isAuthenticated } = useAuth();
   
   const { data: equipmentData, isLoading: equipmentLoading } = useQuery({
-    queryKey: ['equipment'],
+    queryKey: ['equipment', 'overview'],
     queryFn: async () => {
-      if (!isAuthenticated) {
-        console.log('EnhancedEquipmentOverview: User not authenticated');
-        return [];
-      }
+      console.log('EnhancedEquipmentOverview: Fetching equipment data...');
       
       let query = supabase
         .from('equipment')
@@ -41,9 +38,11 @@ const EnhancedEquipmentOverview = () => {
       const { data, error } = await query;
       
       if (error) {
-        console.error('Error fetching equipment:', error);
+        console.error('EnhancedEquipmentOverview: Error fetching equipment:', error);
         throw error;
       }
+      
+      console.log('EnhancedEquipmentOverview: Equipment data fetched:', data?.length || 0, 'items');
       return data;
     },
     enabled: isAuthenticated && !isCompanyLoading,
