@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
+import { AuthTest } from "@/components/auth/AuthTest";
 
 const Projects = () => {
   const { toast } = useToast();
@@ -153,6 +154,8 @@ const Projects = () => {
           </Button>
         </div>
 
+        <AuthTest />
+        
         {isLoading ? (
           <div>Loading projects...</div>
         ) : (

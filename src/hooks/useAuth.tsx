@@ -22,11 +22,28 @@ export const useAuth = () => {
           userId: session?.user?.id
         });
         
-        // Validate session integrity
+        // Validate session integrity and test auth.uid()
         if (session && (!session.access_token || !session.user)) {
           console.error("Invalid session detected, forcing refresh");
           await supabase.auth.refreshSession();
           return;
+        }
+        
+        // Test database authentication after session is set
+        if (session) {
+          try {
+            console.log("Testing database authentication...");
+            const { data: authTest, error: authError } = await supabase.rpc('debug_auth_uid');
+            console.log("Database auth test:", authTest, authError);
+            
+            if (authError || !authTest?.[0]?.auth_uid) {
+              console.error("Database authentication failed, refreshing session");
+              await supabase.auth.refreshSession();
+              return;
+            }
+          } catch (error) {
+            console.error("Auth test failed:", error);
+          }
         }
         
         setSession(session);

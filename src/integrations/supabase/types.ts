@@ -1489,6 +1489,15 @@ export type Database = {
         }
         Returns: string
       }
+      debug_auth_uid: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          auth_uid: string
+          current_user_name: string
+          session_user_name: string
+          has_jwt: boolean
+        }[]
+      }
       end_user_session: {
         Args: {
           p_session_id: string

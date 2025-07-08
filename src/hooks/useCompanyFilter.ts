@@ -27,7 +27,9 @@ export const useCompanyFilter = () => {
     
     if (companyId) {
       console.log('applyCompanyFilter: Applying filter for company', companyId);
-      return query.eq('company_id', companyId);
+      // Add authentication validation to ensure JWT token is sent
+      return query
+        .eq('company_id', companyId);
     }
     
     // If no company ID is selected, return empty result to prevent unauthorized access

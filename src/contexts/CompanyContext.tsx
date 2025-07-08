@@ -88,11 +88,20 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       } else {
         console.log("CompanyContext: Regular user, fetching user's companies");
         // Regular users see only companies they're members of
-        // First get company IDs the user is a member of
+        // First test database authentication
+        const { data: authTest, error: authTestError } = await supabase.rpc('debug_auth_uid');
+        console.log("CompanyContext: Database auth test:", authTest, authTestError);
+        
+        if (authTestError || !authTest?.[0]?.auth_uid) {
+          console.error("CompanyContext: Database authentication failed");
+          throw new Error("Database authentication failed");
+        }
+        
+        // Get company IDs the user is a member of (try both UUID and email formats)
         const { data: userCompanies, error: userCompaniesError } = await supabase
           .from('company_users')
           .select('company_id')
-          .eq('user_id', session.user.id);
+          .or(`user_id.eq.${session.user.id},user_id.eq.${session.user.email}`);
           
         if (userCompaniesError) {
           console.error("CompanyContext: Error fetching user companies:", userCompaniesError);
