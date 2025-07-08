@@ -12,7 +12,7 @@ interface SidebarHeaderProps {
 }
 
 export function SidebarHeader({ isMobile }: SidebarHeaderProps) {
-  const { currentCompany } = useCompany();
+  const { currentCompany, isCompanyLoading } = useCompany();
   const { toggleSidebar } = useSidebar();
   
   return (

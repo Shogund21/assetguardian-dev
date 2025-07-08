@@ -1,6 +1,5 @@
 
 import React from "react";
-import { SidebarProvider } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileLayout } from "@/components/layout/MobileLayout";
 import { DesktopLayout } from "@/components/layout/DesktopLayout";
@@ -19,19 +18,17 @@ const Layout = ({ children }: LayoutProps) => {
   // Mobile detection is now immediate, no loading state needed
   
   return (
-    <SidebarProvider defaultOpen={!isMobile}>
-      <div className="min-h-screen flex w-full">
-        {isMobile ? (
-          <MobileLayout>
-            {children}
-          </MobileLayout>
-        ) : (
-          <DesktopLayout>
-            {children}
-          </DesktopLayout>
-        )}
-      </div>
-    </SidebarProvider>
+    <div className="min-h-screen flex w-full">
+      {isMobile ? (
+        <MobileLayout>
+          {children}
+        </MobileLayout>
+      ) : (
+        <DesktopLayout>
+          {children}
+        </DesktopLayout>
+      )}
+    </div>
   );
 };
 
