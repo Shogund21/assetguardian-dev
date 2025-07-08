@@ -153,24 +153,27 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
       
       console.log("CompanyContext: Found companies:", data?.length || 0);
+      console.log("CompanyContext: Companies fetched:", data?.map(c => ({ id: c.id, name: c.name })) || []);
       setCompanies(data || []);
       
       // For super admin, don't auto-select a company - let them see all data by default
       if (isSuperAdmin) {
         console.log("CompanyContext: Super admin detected - clearing any saved company to show all data");
-        // Clear any existing company selection for super admin
+        // Clear any existing company selection for super admin to prevent conflicts
         localStorage.removeItem("selectedCompanyId");
+        // Always start with null for super admin (shows "All Companies")
         setCurrentCompany(null);
-        // Don't auto-select first company for super admin - let them see all data
+        console.log("CompanyContext: Super admin currentCompany set to null for 'All Companies' view");
       } else {
         // Set first company as default if we have companies and no current selection (for regular users)
-        if (data && data.length > 0 && !currentCompany) {
+        if (data && data.length > 0) {
           const savedCompanyId = localStorage.getItem("selectedCompanyId");
+          console.log("CompanyContext: Regular user - checking saved company ID:", savedCompanyId);
           
           if (savedCompanyId) {
             const savedCompany = data.find(c => c.id === savedCompanyId);
             if (savedCompany) {
-              console.log("CompanyContext: Restoring saved company:", savedCompany.name);
+              console.log("CompanyContext: Restoring saved company for regular user:", savedCompany.name);
               setCurrentCompany(savedCompany);
             } else {
               console.log("CompanyContext: Saved company not found, using first available:", data[0].name);
@@ -178,10 +181,12 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
               localStorage.setItem("selectedCompanyId", data[0].id);
             }
           } else {
-            console.log("CompanyContext: No saved company, using first available:", data[0].name);
+            console.log("CompanyContext: No saved company for regular user, using first available:", data[0].name);
             setCurrentCompany(data[0]);
             localStorage.setItem("selectedCompanyId", data[0].id);
           }
+        } else {
+          console.warn("CompanyContext: Regular user has no companies assigned!");
         }
       }
     } catch (error) {

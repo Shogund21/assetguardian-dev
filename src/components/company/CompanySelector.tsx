@@ -46,14 +46,22 @@ export const CompanySelector = () => {
   }
 
   const handleValueChange = (value: string) => {
+    console.log("CompanySelector: Value changed to:", value);
+    console.log("CompanySelector: Current user is super admin:", isSuperAdmin);
+    
     if (value === "all_companies") {
       // Super admin selected "All Companies"
+      console.log("CompanySelector: Super admin selected 'All Companies'");
       setCurrentCompany(null);
       localStorage.removeItem("selectedCompanyId");
     } else {
       const selected = companies.find(c => c.id === value);
       if (selected) {
+        console.log("CompanySelector: Selected company:", selected.name);
         setCurrentCompany(selected);
+        localStorage.setItem("selectedCompanyId", selected.id);
+      } else {
+        console.error("CompanySelector: Could not find company with ID:", value);
       }
     }
     if (isMobile) {
