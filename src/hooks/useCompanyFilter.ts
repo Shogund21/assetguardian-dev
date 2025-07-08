@@ -26,11 +26,17 @@ export const useCompanyFilter = () => {
       return query;
     }
     
-    // Check if user is super admin - if so, don't apply any filtering
+    // Check if user is super admin
     const isSuperAdmin = user?.email === 'edward@shogunaillc.com';
     if (isSuperAdmin) {
-      console.log('applyCompanyFilter: Super admin detected, skipping all company filtering');
-      return query;
+      // If super admin has no company selected (currentCompany is null), show all data
+      if (!companyId) {
+        console.log('applyCompanyFilter: Super admin with no company selected, showing all data');
+        return query;
+      }
+      // If super admin has a specific company selected, apply that filter
+      console.log('applyCompanyFilter: Super admin with specific company selected, applying filter for company', companyId);
+      return query.eq('company_id', companyId);
     }
     
     if (companyId) {
