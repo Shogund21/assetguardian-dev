@@ -17,7 +17,19 @@ const EnhancedStats = () => {
   const { data: equipmentData, isLoading: equipmentLoading, error: equipmentError } = useQuery({
     queryKey: ['equipment'],
     queryFn: async () => {
+      if (!isReady) {
+        console.log('EnhancedStats: Auth client not ready, skipping equipment query');
+        return [];
+      }
+      
       try {
+        // Test JWT transmission before query
+        const { data: authTest } = await authSupabase.rpc('debug_auth_uid');
+        if (!authTest?.[0]?.auth_uid) {
+          console.warn('EnhancedStats: JWT not transmitted for equipment query');
+          return [];
+        }
+        
         let query = authSupabase
           .from('equipment')
           .select('*');
@@ -39,13 +51,26 @@ const EnhancedStats = () => {
       }
     },
     enabled: isReady,
+    retry: 1,
   });
 
   // Fetch projects data with error handling
   const { data: projectsData, isLoading: projectsLoading, error: projectsError } = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
+      if (!isReady) {
+        console.log('EnhancedStats: Auth client not ready, skipping projects query');
+        return [];
+      }
+      
       try {
+        // Test JWT transmission before query
+        const { data: authTest } = await authSupabase.rpc('debug_auth_uid');
+        if (!authTest?.[0]?.auth_uid) {
+          console.warn('EnhancedStats: JWT not transmitted for projects query');
+          return [];
+        }
+        
         let query = authSupabase
           .from('projects')
           .select('*');
@@ -67,13 +92,26 @@ const EnhancedStats = () => {
       }
     },
     enabled: isReady,
+    retry: 1,
   });
 
   // Fetch maintenance checks data
   const { data: maintenanceData, isLoading: maintenanceLoading, error: maintenanceError } = useQuery({
     queryKey: ['maintenance_checks'],
     queryFn: async () => {
+      if (!isReady) {
+        console.log('EnhancedStats: Auth client not ready, skipping maintenance query');
+        return [];
+      }
+      
       try {
+        // Test JWT transmission before query
+        const { data: authTest } = await authSupabase.rpc('debug_auth_uid');
+        if (!authTest?.[0]?.auth_uid) {
+          console.warn('EnhancedStats: JWT not transmitted for maintenance query');
+          return [];
+        }
+        
         let query = authSupabase
           .from('hvac_maintenance_checks')
           .select('*');
@@ -95,13 +133,26 @@ const EnhancedStats = () => {
       }
     },
     enabled: isReady,
+    retry: 1,
   });
 
   // Fetch technicians data
   const { data: techniciansData, isLoading: techniciansLoading, error: techniciansError } = useQuery({
     queryKey: ['technicians'],
     queryFn: async () => {
+      if (!isReady) {
+        console.log('EnhancedStats: Auth client not ready, skipping technicians query');
+        return [];
+      }
+      
       try {
+        // Test JWT transmission before query
+        const { data: authTest } = await authSupabase.rpc('debug_auth_uid');
+        if (!authTest?.[0]?.auth_uid) {
+          console.warn('EnhancedStats: JWT not transmitted for technicians query');
+          return [];
+        }
+        
         let query = authSupabase
           .from('technicians')
           .select('*');
@@ -123,6 +174,7 @@ const EnhancedStats = () => {
       }
     },
     enabled: isReady,
+    retry: 1,
   });
 
   // Calculate metrics

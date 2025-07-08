@@ -21,6 +21,18 @@ const EnhancedEquipmentOverview = () => {
   const { data: equipmentData, isLoading: equipmentLoading } = useQuery({
     queryKey: ['equipment'],
     queryFn: async () => {
+      if (!isReady) {
+        console.log('EnhancedEquipmentOverview: Auth client not ready');
+        return [];
+      }
+      
+      // Test JWT transmission before query
+      const { data: authTest } = await authSupabase.rpc('debug_auth_uid');
+      if (!authTest?.[0]?.auth_uid) {
+        console.warn('EnhancedEquipmentOverview: JWT not transmitted');
+        return [];
+      }
+      
       let query = authSupabase
         .from('equipment')
         .select('id, name, model, serial_number, location, status, type, company_id, created_at, updated_at');
@@ -41,6 +53,7 @@ const EnhancedEquipmentOverview = () => {
       return data;
     },
     enabled: isReady,
+    retry: 1,
   });
 
   // Filter equipment based on search and status
