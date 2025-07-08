@@ -11,8 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 const EnhancedStats = () => {
   const [hasError, setHasError] = useState(false);
-  const { applyCompanyFilter, isCompanyLoading } = useCompanyFilter();
-  const { isAuthenticated } = useAuth();
+  const { applyCompanyFilter, isCompanyLoading, hasValidSession, isAuthenticated } = useCompanyFilter();
 
   // Fetch equipment data with error handling
   const { data: equipmentData, isLoading: equipmentLoading, error: equipmentError } = useQuery({
@@ -43,7 +42,7 @@ const EnhancedStats = () => {
         return [];
       }
     },
-    enabled: isAuthenticated && !isCompanyLoading,
+    enabled: isAuthenticated && !isCompanyLoading && hasValidSession,
     retry: 1,
   });
 
@@ -76,7 +75,7 @@ const EnhancedStats = () => {
         return [];
       }
     },
-    enabled: isAuthenticated && !isCompanyLoading,
+    enabled: isAuthenticated && !isCompanyLoading && hasValidSession,
     retry: 1,
   });
 
@@ -109,7 +108,7 @@ const EnhancedStats = () => {
         return [];
       }
     },
-    enabled: isAuthenticated && !isCompanyLoading,
+    enabled: isAuthenticated && !isCompanyLoading && hasValidSession,
     retry: 1,
   });
 
@@ -142,7 +141,7 @@ const EnhancedStats = () => {
         return [];
       }
     },
-    enabled: isAuthenticated && !isCompanyLoading,
+    enabled: isAuthenticated && !isCompanyLoading && hasValidSession,
     retry: 1,
   });
 

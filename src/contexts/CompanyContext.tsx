@@ -19,6 +19,7 @@ interface CompanyContextType {
   companies: Company[];
   isLoading: boolean;
   isCompanyLoading: boolean; // Renamed from isLoading for clarity
+  hasValidSession: boolean;
   setCurrentCompany: (company: Company | null) => void;
   refreshCompanies: () => Promise<void>;
 }
@@ -37,6 +38,7 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [currentCompany, setCurrentCompany] = useState<Company | null>(null);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [isCompanyLoading, setIsCompanyLoading] = useState(true);
+  const [hasValidSession, setHasValidSession] = useState(false);
   const { toast } = useToast();
 
   const fetchCompanies = async () => {
@@ -44,7 +46,7 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setIsCompanyLoading(true);
       console.log("CompanyContext: Starting company fetch...");
       
-      // Check if user is authenticated first
+      // Ensure we have a fresh, valid session with JWT
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError) {
@@ -62,9 +64,35 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         console.log("CompanyContext: No valid session, clearing companies");
         setCompanies([]);
         setCurrentCompany(null);
+        setHasValidSession(false);
         setIsCompanyLoading(false);
         return;
       }
+
+      // Validate JWT is working by testing database connection
+      console.log("CompanyContext: Validating JWT transmission...");
+      const { data: jwtTest, error: jwtError } = await supabase.rpc('debug_auth_uid');
+      
+      if (jwtError || !jwtTest?.[0]?.auth_uid) {
+        console.error("CompanyContext: JWT validation failed:", jwtError);
+        console.log("CompanyContext: Refreshing session...");
+        
+        // Try to refresh the session
+        const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession();
+        
+        if (refreshError || !refreshedSession) {
+          console.error("CompanyContext: Session refresh failed:", refreshError);
+          setHasValidSession(false);
+          setIsCompanyLoading(false);
+          return;
+        }
+        
+        console.log("CompanyContext: Session refreshed successfully");
+      } else {
+        console.log("CompanyContext: JWT validation successful, auth_uid:", jwtTest[0].auth_uid);
+      }
+      
+      setHasValidSession(true);
 
       console.log("CompanyContext: Valid session found, fetching companies for:", session.user.email);
 
@@ -235,6 +263,7 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     companies,
     isLoading: isCompanyLoading, // Keep backward compatibility
     isCompanyLoading,
+    hasValidSession,
     refreshCompanies: fetchCompanies,
   };
 
