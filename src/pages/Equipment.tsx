@@ -8,25 +8,46 @@ import { EquipmentList } from "@/components/equipment/EquipmentList";
 import { EquipmentAuth } from "@/components/equipment/EquipmentAuth";
 import { useEquipmentStatus } from "@/hooks/equipment/useEquipmentStatus";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
-import { useAuthenticatedSupabase } from "@/hooks/useAuthenticatedSupabase";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase, testJWTTransmission } from "@/integrations/supabase/client";
+import { useEffect } from "react";
 
 const Equipment = () => {
   const navigate = useNavigate();
   const { handleStatusChange, handleDelete } = useEquipmentStatus();
   const { applyCompanyFilter } = useCompanyFilter();
-  const { supabase: authSupabase, isReady } = useAuthenticatedSupabase();
+  const { isAuthenticated, user } = useAuth();
+
+  // Test JWT transmission on component mount
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      testJWTTransmission().then(result => {
+        console.log("Equipment page JWT test result:", result);
+      });
+    }
+  }, [isAuthenticated, user]);
 
   const { data: equipment, isLoading } = useQuery({
     queryKey: ['equipment'],
     queryFn: async () => {
-      let query = authSupabase
+      if (!isAuthenticated) {
+        console.log('Equipment: User not authenticated');
+        return [];
+      }
+
+      // Check if user is super admin
+      const isSuperAdmin = user?.email === 'edward@shogunaillc.com';
+      
+      let query = supabase
         .from('equipment')
         .select('id, name, model, serial_number, location, status, type, company_id, created_at, updated_at');
       
-      // Apply company filtering
-      query = applyCompanyFilter(query);
+      // Apply company filtering only for non-super admin users
+      if (!isSuperAdmin) {
+        query = applyCompanyFilter(query);
+      }
       
-      query = query.order('name', { ascending: true }); // Sort by name (equipment type) alphabetically
+      query = query.order('name', { ascending: true });
       
       const { data, error } = await query;
       
@@ -36,7 +57,7 @@ const Equipment = () => {
       }
       return data;
     },
-    enabled: isReady, // Wait for authenticated client to be ready
+    enabled: isAuthenticated,
   });
 
   return (

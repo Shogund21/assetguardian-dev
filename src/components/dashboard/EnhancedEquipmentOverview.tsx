@@ -27,12 +27,18 @@ const EnhancedEquipmentOverview = () => {
         return [];
       }
       
+      // Check if user is super admin
+      const { data: { user } } = await supabase.auth.getUser();
+      const isSuperAdmin = user?.email === 'edward@shogunaillc.com';
+      
       let query = supabase
         .from('equipment')
         .select('id, name, model, serial_number, location, status, type, company_id, created_at, updated_at');
       
-      // Apply company filtering
-      query = applyCompanyFilter(query);
+      // Apply company filtering only for non-super admin users
+      if (!isSuperAdmin) {
+        query = applyCompanyFilter(query);
+      }
       
       query = query
         .order('location', { ascending: true })

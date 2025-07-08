@@ -12,14 +12,65 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: true,
+    storage: window.localStorage,
+    storageKey: 'supabase.auth.token'
   },
   global: {
     headers: {
       'apikey': SUPABASE_PUBLISHABLE_KEY
     }
+  },
+  realtime: {
+    params: {
+      eventsPerSecond: 2
+    }
   }
 });
+
+// Enhanced helper to test JWT transmission
+export const testJWTTransmission = async () => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      console.log("❌ No session for JWT test");
+      return { success: false, error: "No session" };
+    }
+
+    console.log("🔍 Testing JWT transmission to database functions...");
+    
+    // Test debug_auth_uid function
+    const { data: debugData, error: debugError } = await supabase.rpc('debug_auth_uid');
+    
+    if (debugError) {
+      console.error("❌ debug_auth_uid error:", debugError);
+      return { success: false, error: debugError.message };
+    }
+    
+    console.log("🔍 JWT Debug Results:", debugData);
+    
+    // Test is_super_admin function
+    const { data: isSuperAdmin, error: superAdminError } = await supabase.rpc('is_super_admin');
+    
+    if (superAdminError) {
+      console.error("❌ is_super_admin error:", superAdminError);
+      return { success: false, error: superAdminError.message };
+    }
+    
+    console.log("🔍 Super Admin Check:", isSuperAdmin);
+    
+    return { 
+      success: true, 
+      debugData, 
+      isSuperAdmin,
+      hasJWT: debugData?.[0]?.has_jwt || false,
+      authUid: debugData?.[0]?.auth_uid || null
+    };
+  } catch (error) {
+    console.error("❌ JWT transmission test failed:", error);
+    return { success: false, error: error.message };
+  }
+};
 
 // Helper function to ensure session is established before database operations
 export const ensureSession = async () => {

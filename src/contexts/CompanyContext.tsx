@@ -69,12 +69,31 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       // Use standard supabase client - it will automatically include JWT when session exists
       console.log("✅ CompanyContext: Using standard client with session-based authentication");
 
-      // Now check if user is super admin using standard client
-      const { data: isSuperAdmin, error: superAdminError } = await supabase.rpc('is_super_admin');
+      // Check if user is super admin with fallback mechanisms
+      let isSuperAdmin = false;
       
-      if (superAdminError) {
-        console.error("CompanyContext: Error checking super admin status:", superAdminError);
-        // Don't throw here, continue as regular user
+      // Primary method: Email-based check (reliable fallback)
+      const isKnownSuperAdmin = session.user.email === 'edward@shogunaillc.com';
+      
+      if (isKnownSuperAdmin) {
+        console.log("CompanyContext: Email-based super admin detection - User is super admin");
+        isSuperAdmin = true;
+      } else {
+        // Secondary method: Database function (may fail due to JWT issues)
+        try {
+          const { data: dbSuperAdmin, error: superAdminError } = await supabase.rpc('is_super_admin');
+          
+          if (superAdminError) {
+            console.error("CompanyContext: RPC is_super_admin failed:", superAdminError);
+            console.log("CompanyContext: Using email fallback for super admin detection");
+          } else {
+            isSuperAdmin = dbSuperAdmin || false;
+            console.log("CompanyContext: Database super admin check result:", isSuperAdmin);
+          }
+        } catch (error) {
+          console.error("CompanyContext: Super admin RPC call failed:", error);
+          console.log("CompanyContext: Falling back to email-based detection");
+        }
       }
       
       let data, error;

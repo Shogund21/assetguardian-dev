@@ -8,6 +8,7 @@ import { FilterChangesOverview } from "@/components/dashboard/FilterChangesOverv
 import { AuthDebugInfo } from "@/components/auth/AuthDebugInfo";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/hooks/useAuth";
+import { testJWTTransmission } from "@/integrations/supabase/client";
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -22,6 +23,21 @@ const Index = () => {
     
     return () => clearTimeout(timer);
   }, []);
+
+  // Test JWT transmission when user is authenticated
+  useEffect(() => {
+    if (isAuthenticated && userProfile) {
+      console.log("🧪 Dashboard: Testing JWT transmission to database functions...");
+      testJWTTransmission().then(result => {
+        console.log("🧪 Dashboard JWT test result:", result);
+        if (result.success && result.hasJWT) {
+          console.log("✅ JWT transmission to database functions is working!");
+        } else {
+          console.warn("❌ JWT transmission to database functions failed:", result);
+        }
+      });
+    }
+  }, [isAuthenticated, userProfile]);
 
   return (
     <CustomLayout>

@@ -24,12 +24,17 @@ const EnhancedStats = () => {
       }
       
       try {
+        const { data: { user } } = await supabase.auth.getUser();
+        const isSuperAdmin = user?.email === 'edward@shogunaillc.com';
+        
         let query = supabase
           .from('equipment')
           .select('*');
         
-        // Apply company filtering
-        query = applyCompanyFilter(query);
+        // Apply company filtering only for non-super admin users
+        if (!isSuperAdmin) {
+          query = applyCompanyFilter(query);
+        }
         
         const { data, error } = await query;
         
@@ -58,12 +63,17 @@ const EnhancedStats = () => {
       }
       
       try {
+        const { data: { user } } = await supabase.auth.getUser();
+        const isSuperAdmin = user?.email === 'edward@shogunaillc.com';
+        
         let query = supabase
           .from('projects')
           .select('*');
         
-        // Apply company filtering
-        query = applyCompanyFilter(query);
+        // Apply company filtering only for non-super admin users
+        if (!isSuperAdmin) {
+          query = applyCompanyFilter(query);
+        }
         
         const { data, error } = await query;
         
@@ -92,12 +102,17 @@ const EnhancedStats = () => {
       }
       
       try {
+        const { data: { user } } = await supabase.auth.getUser();
+        const isSuperAdmin = user?.email === 'edward@shogunaillc.com';
+        
         let query = supabase
           .from('hvac_maintenance_checks')
           .select('*');
         
-        // Apply company filtering
-        query = applyCompanyFilter(query);
+        // Apply company filtering only for non-super admin users
+        if (!isSuperAdmin) {
+          query = applyCompanyFilter(query);
+        }
         
         const { data, error } = await query;
         
@@ -126,12 +141,17 @@ const EnhancedStats = () => {
       }
       
       try {
+        const { data: { user } } = await supabase.auth.getUser();
+        const isSuperAdmin = user?.email === 'edward@shogunaillc.com';
+        
         let query = supabase
           .from('technicians')
           .select('*');
         
-        // Apply company filtering
-        query = applyCompanyFilter(query);
+        // Apply company filtering only for non-super admin users
+        if (!isSuperAdmin) {
+          query = applyCompanyFilter(query);
+        }
         
         const { data, error } = await query;
         
