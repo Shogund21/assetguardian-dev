@@ -1,8 +1,10 @@
 import { useCompany } from "@/contexts/CompanyContext";
+import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 
 export const useCompanyFilter = () => {
   const { currentCompany } = useCompany();
+  const { user } = useAuth();
   const [companyId, setCompanyId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -24,15 +26,20 @@ export const useCompanyFilter = () => {
       return query;
     }
     
-    if (companyId) {
-      console.log('applyCompanyFilter: Applying filter for company', companyId);
-      // Add authentication validation to ensure JWT token is sent
-      return query
-        .eq('company_id', companyId);
+    // Check if user is super admin - if so, don't apply any filtering
+    const isSuperAdmin = user?.email === 'edward@shogunaillc.com';
+    if (isSuperAdmin) {
+      console.log('applyCompanyFilter: Super admin detected, skipping all company filtering');
+      return query;
     }
     
-    // If no company ID is selected, return empty result to prevent unauthorized access
-    console.warn('applyCompanyFilter: No company ID available, blocking query');
+    if (companyId) {
+      console.log('applyCompanyFilter: Applying filter for company', companyId);
+      return query.eq('company_id', companyId);
+    }
+    
+    // If no company ID is selected for regular users, return empty result to prevent unauthorized access
+    console.warn('applyCompanyFilter: No company ID available, blocking query for regular user');
     return query.eq('company_id', 'no-company-selected');
   };
 

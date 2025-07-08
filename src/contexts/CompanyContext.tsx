@@ -155,24 +155,36 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       console.log("CompanyContext: Found companies:", data?.length || 0);
       setCompanies(data || []);
       
-      // Set first company as default if we have companies and no current selection
-      if (data && data.length > 0 && !currentCompany) {
+      // For super admin, don't auto-select a company - let them see all data by default
+      if (isSuperAdmin) {
+        console.log("CompanyContext: Super admin detected - not auto-selecting company to show all data");
         const savedCompanyId = localStorage.getItem("selectedCompanyId");
-        
-        if (savedCompanyId) {
+        if (savedCompanyId && data?.find(c => c.id === savedCompanyId)) {
           const savedCompany = data.find(c => c.id === savedCompanyId);
-          if (savedCompany) {
-            console.log("CompanyContext: Restoring saved company:", savedCompany.name);
-            setCurrentCompany(savedCompany);
+          console.log("CompanyContext: Restoring super admin's saved company selection:", savedCompany?.name);
+          setCurrentCompany(savedCompany!);
+        }
+        // Don't auto-select first company for super admin - let them see all data
+      } else {
+        // Set first company as default if we have companies and no current selection (for regular users)
+        if (data && data.length > 0 && !currentCompany) {
+          const savedCompanyId = localStorage.getItem("selectedCompanyId");
+          
+          if (savedCompanyId) {
+            const savedCompany = data.find(c => c.id === savedCompanyId);
+            if (savedCompany) {
+              console.log("CompanyContext: Restoring saved company:", savedCompany.name);
+              setCurrentCompany(savedCompany);
+            } else {
+              console.log("CompanyContext: Saved company not found, using first available:", data[0].name);
+              setCurrentCompany(data[0]);
+              localStorage.setItem("selectedCompanyId", data[0].id);
+            }
           } else {
-            console.log("CompanyContext: Saved company not found, using first available:", data[0].name);
+            console.log("CompanyContext: No saved company, using first available:", data[0].name);
             setCurrentCompany(data[0]);
             localStorage.setItem("selectedCompanyId", data[0].id);
           }
-        } else {
-          console.log("CompanyContext: No saved company, using first available:", data[0].name);
-          setCurrentCompany(data[0]);
-          localStorage.setItem("selectedCompanyId", data[0].id);
         }
       }
     } catch (error) {
