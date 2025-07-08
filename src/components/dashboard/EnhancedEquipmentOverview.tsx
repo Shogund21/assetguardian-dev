@@ -1,7 +1,6 @@
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { EquipmentItem } from "@/components/equipment/EquipmentItem";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Search, Filter } from "lucide-react";
@@ -10,17 +9,19 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
+import { useAuthenticatedSupabase } from "@/hooks/useAuthenticatedSupabase";
 
 const EnhancedEquipmentOverview = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const { applyCompanyFilter } = useCompanyFilter();
+  const { supabase: authSupabase, isReady } = useAuthenticatedSupabase();
   
   const { data: equipmentData, isLoading: equipmentLoading } = useQuery({
     queryKey: ['equipment'],
     queryFn: async () => {
-      let query = supabase
+      let query = authSupabase
         .from('equipment')
         .select('id, name, model, serial_number, location, status, type, company_id, created_at, updated_at');
       
@@ -39,6 +40,7 @@ const EnhancedEquipmentOverview = () => {
       }
       return data;
     },
+    enabled: isReady,
   });
 
   // Filter equipment based on search and status

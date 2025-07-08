@@ -1,4 +1,3 @@
-
 import { useCompany } from "@/contexts/CompanyContext";
 import { useEffect, useState } from "react";
 

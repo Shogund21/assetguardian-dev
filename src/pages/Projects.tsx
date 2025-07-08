@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import Layout from "@/components/Layout";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ProjectList } from "@/components/projects/ProjectList";
 import { Button } from "@/components/ui/button";
@@ -8,18 +7,20 @@ import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { AuthTest } from "@/components/auth/AuthTest";
+import { useAuthenticatedSupabase } from "@/hooks/useAuthenticatedSupabase";
 
 const Projects = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { applyCompanyFilter } = useCompanyFilter();
+  const { supabase: authSupabase, isReady } = useAuthenticatedSupabase();
 
   const { data: projects, isLoading, refetch } = useQuery({
     queryKey: ["projects"],
     queryFn: async () => {
       console.log("Fetching projects from Supabase...");
       try {
-        let query = supabase
+        let query = authSupabase
           .from("projects")
           .select("*");
         
@@ -42,6 +43,7 @@ const Projects = () => {
         throw error;
       }
     },
+    enabled: isReady, // Wait for authenticated client to be ready
     refetchOnWindowFocus: true,
     staleTime: 1000,
   });
@@ -50,7 +52,7 @@ const Projects = () => {
     try {
       console.log("Updating project status:", { projectId, newStatus });
       
-      const { error } = await supabase
+      const { error } = await authSupabase
         .from("projects")
         .update({ 
           status: newStatus,
@@ -83,7 +85,7 @@ const Projects = () => {
     try {
       console.log("Updating project priority:", { projectId, newPriority });
       
-      const { error } = await supabase
+      const { error } = await authSupabase
         .from("projects")
         .update({ 
           priority: newPriority,
@@ -115,7 +117,7 @@ const Projects = () => {
   const handleDelete = async (projectId: string) => {
     try {
       console.log("Deleting project:", projectId);
-      const { error } = await supabase
+      const { error } = await authSupabase
         .from("projects")
         .delete()
         .eq("id", projectId);

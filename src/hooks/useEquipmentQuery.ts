@@ -1,13 +1,14 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Equipment } from "@/types/equipment";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
+import { useAuthenticatedSupabase } from "@/hooks/useAuthenticatedSupabase";
 
 export const useEquipmentQuery = (locationId: string) => {
   const { toast } = useToast();
   const { applyCompanyFilter } = useCompanyFilter();
+  const { supabase: authSupabase, isReady } = useAuthenticatedSupabase();
   
   return useQuery({
     queryKey: ['equipment', locationId],
@@ -21,7 +22,7 @@ export const useEquipmentQuery = (locationId: string) => {
 
       try {
         // Get location data first (still useful for logging purposes)
-        const { data: locationData, error: locationError } = await supabase
+        const { data: locationData, error: locationError } = await authSupabase
           .from('locations')
           .select('*')
           .eq('id', locationId)
@@ -50,7 +51,7 @@ export const useEquipmentQuery = (locationId: string) => {
         console.log('Location data retrieved successfully:', locationData);
 
         // Fetch all equipment - NO FILTERING BY LOCATION but filter by company
-        let query = supabase
+        let query = authSupabase
           .from('equipment')
           .select('id, name, model, serial_number, location, status, type, company_id, created_at, updated_at');
         
@@ -115,7 +116,7 @@ export const useEquipmentQuery = (locationId: string) => {
         throw error;
       }
     },
-    enabled: !!locationId,
+    enabled: !!locationId && isReady, // Wait for both location and auth client
     // Don't refetch unnecessarily - this helps prevent UI flickering
     staleTime: 60000, // 1 minute
     refetchOnWindowFocus: false,

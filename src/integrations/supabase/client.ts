@@ -8,4 +8,45 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  },
+  global: {
+    headers: {
+      'apikey': SUPABASE_PUBLISHABLE_KEY
+    }
+  }
+});
+
+// Create a token-aware client that ensures JWT is always included
+export const createAuthenticatedClient = (accessToken: string) => {
+  return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true
+    },
+    global: {
+      headers: {
+        'apikey': SUPABASE_PUBLISHABLE_KEY,
+        'Authorization': `Bearer ${accessToken}`
+      }
+    }
+  });
+};
+
+// Helper function to get authenticated client with current session
+export const getAuthenticatedClient = async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  if (!session?.access_token) {
+    console.warn("No access token available for authenticated client");
+    return supabase; // Fallback to regular client
+  }
+  
+  console.log("Creating authenticated client with token:", session.access_token.substring(0, 20) + "...");
+  return createAuthenticatedClient(session.access_token);
+};

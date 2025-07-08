@@ -32,14 +32,33 @@ export const useAuth = () => {
         // Test database authentication after session is set
         if (session) {
           try {
-            console.log("Testing database authentication...");
-            const { data: authTest, error: authError } = await supabase.rpc('debug_auth_uid');
-            console.log("Database auth test:", authTest, authError);
+            console.log("Testing database authentication with token...");
             
-            if (authError || !authTest?.[0]?.auth_uid) {
-              console.error("Database authentication failed, refreshing session");
-              await supabase.auth.refreshSession();
-              return;
+            // Log access token (first 20 chars for security)
+            console.log("Access token present:", !!session.access_token);
+            console.log("Token preview:", session.access_token?.substring(0, 20) + "...");
+            
+            // Use authenticated client for the test
+            const { getAuthenticatedClient } = await import("@/integrations/supabase/client");
+            const authClient = await getAuthenticatedClient();
+            const { data: authTest, error: authError } = await authClient.rpc('debug_auth_uid');
+            
+            console.log("Database auth test result:", {
+              authTest,
+              authError,
+              hasAuthUid: !!authTest?.[0]?.auth_uid,
+              hasJwt: authTest?.[0]?.has_jwt
+            });
+            
+            if (authError) {
+              console.error("Database authentication error:", authError);
+              // Don't refresh on first error, let it pass through
+            } else if (!authTest?.[0]?.auth_uid) {
+              console.error("auth.uid() is null despite valid session");
+            } else if (!authTest?.[0]?.has_jwt) {
+              console.error("JWT not detected in database request");
+            } else {
+              console.log("✅ Database authentication successful!");
             }
           } catch (error) {
             console.error("Auth test failed:", error);

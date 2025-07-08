@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { supabase } from "@/integrations/supabase/client";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { offlineStorage } from "@/services/offlineStorageService";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
+import { useAuthenticatedSupabase } from "@/hooks/useAuthenticatedSupabase";
 import { getEquipmentReadingTemplate } from "@/utils/equipmentTemplates";
 import { getSortedEquipmentList } from "@/utils/equipmentSorting";
 
@@ -24,6 +24,7 @@ const PredictiveMaintenanceDashboard = () => {
   const [activeTab, setActiveTab] = useState<string>("readings");
   const { isOnline, cacheEquipmentData } = useOfflineSync();
   const { applyCompanyFilter } = useCompanyFilter();
+  const { supabase: authSupabase } = useAuthenticatedSupabase();
 
   // Fetch equipment list with offline caching
   const { data: equipment = [] } = useQuery({
@@ -31,7 +32,7 @@ const PredictiveMaintenanceDashboard = () => {
     queryFn: async () => {
       if (isOnline) {
         // Online - fetch from Supabase with company filtering
-        let query = supabase
+        let query = authSupabase
           .from('equipment')
           .select('*');
         

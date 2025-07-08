@@ -4,21 +4,22 @@ import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout";
-import { supabase } from "@/integrations/supabase/client";
 import { EquipmentList } from "@/components/equipment/EquipmentList";
 import { EquipmentAuth } from "@/components/equipment/EquipmentAuth";
 import { useEquipmentStatus } from "@/hooks/equipment/useEquipmentStatus";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
+import { useAuthenticatedSupabase } from "@/hooks/useAuthenticatedSupabase";
 
 const Equipment = () => {
   const navigate = useNavigate();
   const { handleStatusChange, handleDelete } = useEquipmentStatus();
   const { applyCompanyFilter } = useCompanyFilter();
+  const { supabase: authSupabase, isReady } = useAuthenticatedSupabase();
 
   const { data: equipment, isLoading } = useQuery({
     queryKey: ['equipment'],
     queryFn: async () => {
-      let query = supabase
+      let query = authSupabase
         .from('equipment')
         .select('id, name, model, serial_number, location, status, type, company_id, created_at, updated_at');
       
@@ -35,6 +36,7 @@ const Equipment = () => {
       }
       return data;
     },
+    enabled: isReady, // Wait for authenticated client to be ready
   });
 
   return (

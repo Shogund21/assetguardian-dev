@@ -67,8 +67,12 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
       console.log("CompanyContext: Fetching companies for user:", session.user.email);
 
-      // Check if user is super admin
-      const { data: isSuperAdmin, error: superAdminError } = await supabase.rpc('is_super_admin');
+      // Create authenticated client with JWT token
+      const { getAuthenticatedClient } = await import("@/integrations/supabase/client");
+      const authClient = await getAuthenticatedClient();
+
+      // Check if user is super admin using authenticated client
+      const { data: isSuperAdmin, error: superAdminError } = await authClient.rpc('is_super_admin');
       
       if (superAdminError) {
         console.error("CompanyContext: Error checking super admin status:", superAdminError);
@@ -78,8 +82,8 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       
       if (isSuperAdmin) {
         console.log("CompanyContext: User is super admin, fetching all companies");
-        // Super admin can see all companies
-        const result = await supabase
+        // Super admin can see all companies using authenticated client
+        const result = await authClient
           .from("companies")
           .select("*")
           .order("name");
@@ -88,8 +92,8 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       } else {
         console.log("CompanyContext: Regular user, fetching user's companies");
         // Regular users see only companies they're members of
-        // First test database authentication
-        const { data: authTest, error: authTestError } = await supabase.rpc('debug_auth_uid');
+        // First test database authentication with authenticated client
+        const { data: authTest, error: authTestError } = await authClient.rpc('debug_auth_uid');
         console.log("CompanyContext: Database auth test:", authTest, authTestError);
         
         if (authTestError || !authTest?.[0]?.auth_uid) {
@@ -97,8 +101,15 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
           throw new Error("Database authentication failed");
         }
         
-        // Get company IDs the user is a member of (try both UUID and email formats)
-        const { data: userCompanies, error: userCompaniesError } = await supabase
+        if (!authTest?.[0]?.has_jwt) {
+          console.error("CompanyContext: JWT not present in database context");
+          throw new Error("JWT token not transmitted to database");
+        }
+        
+        console.log("✅ CompanyContext: JWT successfully transmitted to database");
+        
+        // Get company IDs the user is a member of using authenticated client
+        const { data: userCompanies, error: userCompaniesError } = await authClient
           .from('company_users')
           .select('company_id')
           .or(`user_id.eq.${session.user.id},user_id.eq.${session.user.email}`);
@@ -115,7 +126,7 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
           data = [];
           error = null;
         } else {
-          const result = await supabase
+          const result = await authClient
             .from("companies")
             .select(`
               id,

@@ -3,21 +3,22 @@ import { Wrench, Briefcase, Clock, AlertCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { toast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
+import { useAuthenticatedSupabase } from "@/hooks/useAuthenticatedSupabase";
 
 const EnhancedStats = () => {
   const [hasError, setHasError] = useState(false);
   const { applyCompanyFilter } = useCompanyFilter();
+  const { supabase: authSupabase, isReady } = useAuthenticatedSupabase();
 
   // Fetch equipment data with error handling
   const { data: equipmentData, isLoading: equipmentLoading, error: equipmentError } = useQuery({
     queryKey: ['equipment'],
     queryFn: async () => {
       try {
-        let query = supabase
+        let query = authSupabase
           .from('equipment')
           .select('*');
         
@@ -37,6 +38,7 @@ const EnhancedStats = () => {
         return [];
       }
     },
+    enabled: isReady,
   });
 
   // Fetch projects data with error handling
@@ -44,7 +46,7 @@ const EnhancedStats = () => {
     queryKey: ['projects'],
     queryFn: async () => {
       try {
-        let query = supabase
+        let query = authSupabase
           .from('projects')
           .select('*');
         
@@ -64,6 +66,7 @@ const EnhancedStats = () => {
         return [];
       }
     },
+    enabled: isReady,
   });
 
   // Fetch maintenance checks data
@@ -71,7 +74,7 @@ const EnhancedStats = () => {
     queryKey: ['maintenance_checks'],
     queryFn: async () => {
       try {
-        let query = supabase
+        let query = authSupabase
           .from('hvac_maintenance_checks')
           .select('*');
         
@@ -91,6 +94,7 @@ const EnhancedStats = () => {
         return [];
       }
     },
+    enabled: isReady,
   });
 
   // Fetch technicians data
@@ -98,7 +102,7 @@ const EnhancedStats = () => {
     queryKey: ['technicians'],
     queryFn: async () => {
       try {
-        let query = supabase
+        let query = authSupabase
           .from('technicians')
           .select('*');
         
@@ -118,6 +122,7 @@ const EnhancedStats = () => {
         return [];
       }
     },
+    enabled: isReady,
   });
 
   // Calculate metrics
