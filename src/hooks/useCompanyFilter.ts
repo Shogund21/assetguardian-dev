@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 
 export const useCompanyFilter = () => {
-  const { currentCompany } = useCompany();
+  const { currentCompany, isCompanyLoading } = useCompany();
   const { user } = useAuth();
   const [companyId, setCompanyId] = useState<string | null>(null);
 
@@ -54,6 +54,7 @@ export const useCompanyFilter = () => {
 
   return {
     companyId,
+    isCompanyLoading,
     applyCompanyFilter,
   };
 };

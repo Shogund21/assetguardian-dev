@@ -18,6 +18,7 @@ interface CompanyContextType {
   currentCompany: Company | null;
   companies: Company[];
   isLoading: boolean;
+  isCompanyLoading: boolean; // Renamed from isLoading for clarity
   setCurrentCompany: (company: Company | null) => void;
   refreshCompanies: () => Promise<void>;
 }
@@ -35,12 +36,13 @@ export const useCompany = () => {
 export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentCompany, setCurrentCompany] = useState<Company | null>(null);
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isCompanyLoading, setIsCompanyLoading] = useState(true);
   const { toast } = useToast();
 
   const fetchCompanies = async () => {
     try {
-      setIsLoading(true);
+      setIsCompanyLoading(true);
+      console.log("CompanyContext: Starting company fetch...");
       
       // Check if user is authenticated first
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -49,7 +51,7 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         console.error("CompanyContext: Session error:", sessionError);
         setCompanies([]);
         setCurrentCompany(null);
-        setIsLoading(false);
+        setIsCompanyLoading(false);
         return;
       }
       
@@ -60,7 +62,7 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         console.log("CompanyContext: No valid session, clearing companies");
         setCompanies([]);
         setCurrentCompany(null);
-        setIsLoading(false);
+        setIsCompanyLoading(false);
         return;
       }
 
@@ -201,7 +203,8 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         });
       }
     } finally {
-      setIsLoading(false);
+      setIsCompanyLoading(false);
+      console.log("CompanyContext: Company fetch completed");
     }
   };
 
@@ -230,7 +233,8 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     currentCompany,
     setCurrentCompany,
     companies,
-    isLoading,
+    isLoading: isCompanyLoading, // Keep backward compatibility
+    isCompanyLoading,
     refreshCompanies: fetchCompanies,
   };
 

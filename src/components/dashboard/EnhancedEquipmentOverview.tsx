@@ -16,7 +16,7 @@ const EnhancedEquipmentOverview = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const { applyCompanyFilter } = useCompanyFilter();
+  const { applyCompanyFilter, isCompanyLoading } = useCompanyFilter();
   const { isAuthenticated } = useAuth();
   
   const { data: equipmentData, isLoading: equipmentLoading } = useQuery({
@@ -46,7 +46,7 @@ const EnhancedEquipmentOverview = () => {
       }
       return data;
     },
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && !isCompanyLoading,
     retry: 1,
   });
 
