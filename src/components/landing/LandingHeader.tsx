@@ -14,7 +14,12 @@ export const LandingHeader = () => {
           <h1 className="logo">Asset Guardian</h1>
         </div>
         <div className="landing-nav__links">
-          <Link to="/auth" className="landing-nav__link">Sign In</Link>
+          <Link 
+            to="/auth" 
+            className="bg-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+          >
+            Sign In
+          </Link>
         </div>
       </nav>
     </header>

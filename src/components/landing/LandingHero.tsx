@@ -27,7 +27,7 @@ export const LandingHero = ({ onRequestAccess }: LandingHeroProps) => {
         </p>
         
         <div className="landing-hero__actions">
-          <div className="flex justify-center">
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Button
               onClick={onRequestAccess}
               size="lg"
@@ -35,10 +35,19 @@ export const LandingHero = ({ onRequestAccess }: LandingHeroProps) => {
             >
               Request Access
             </Button>
+            <Link to="/auth">
+              <Button
+                variant="outline"
+                size="lg"
+                className="bg-transparent border-2 border-white text-white hover:bg-white/10 text-lg px-8 py-4 h-auto font-semibold w-full"
+              >
+                Sign In
+              </Button>
+            </Link>
           </div>
           
           <p className="landing-hero__form-note mt-6">
-            Enterprise-grade AI platform • Access requests will be reviewed by our team
+            Enterprise-grade AI platform • New users request access • Existing users sign in
           </p>
         </div>
       </div>
