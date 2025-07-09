@@ -11,166 +11,63 @@ import { useAuth } from "@/hooks/useAuth";
 
 const EnhancedStats = () => {
   const [hasError, setHasError] = useState(false);
-  const { applyCompanyFilter, isCompanyLoading, hasValidSession, isAuthenticated } = useCompanyFilter();
+  const { hasValidSession, isAuthenticated } = useCompanyFilter();
 
-  // Fetch equipment data with error handling
-  const { data: equipmentData, isLoading: equipmentLoading, error: equipmentError } = useQuery({
-    queryKey: ['equipment', 'stats'],
+  // Single dashboard payload query
+  const { data: dashboardData, isLoading, error: dashboardError } = useQuery({
+    queryKey: ['dashboard-payload'],
     queryFn: async () => {
-      console.log('EnhancedStats: Fetching equipment data...');
+      console.log('EnhancedStats: Fetching dashboard payload...');
       
       try {
-        let query = supabase
-          .from('equipment')
-          .select('*');
-        
-        // Apply company filtering - useCompanyFilter handles super admin logic
-        query = applyCompanyFilter(query);
-        
-        const { data, error } = await query;
+        const { data, error } = await supabase.rpc('dashboard_payload');
         
         if (error) {
-          console.error('EnhancedStats: Error fetching equipment:', error);
+          console.error('EnhancedStats: Error fetching dashboard payload:', error);
           throw error;
         }
         
-        console.log('EnhancedStats: Equipment data fetched:', data?.length || 0, 'items');
-        return data || [];
+        console.log('EnhancedStats: Dashboard payload fetched:', data);
+        return data;
       } catch (err) {
-        console.error("EnhancedStats: Equipment query error:", err);
+        console.error("EnhancedStats: Dashboard payload query error:", err);
         setHasError(true);
-        return [];
+        return null;
       }
     },
-    enabled: isAuthenticated && !isCompanyLoading && hasValidSession,
+    enabled: isAuthenticated && hasValidSession,
     retry: 1,
   });
 
-  // Fetch projects data with error handling
-  const { data: projectsData, isLoading: projectsLoading, error: projectsError } = useQuery({
-    queryKey: ['projects', 'stats'],
-    queryFn: async () => {
-      console.log('EnhancedStats: Fetching projects data...');
-      
-      try {
-        let query = supabase
-          .from('projects')
-          .select('*');
-        
-        // Apply company filtering - useCompanyFilter handles super admin logic
-        query = applyCompanyFilter(query);
-        
-        const { data, error } = await query;
-        
-        if (error) {
-          console.error('EnhancedStats: Error fetching projects:', error);
-          throw error;
-        }
-        
-        console.log('EnhancedStats: Projects data fetched:', data?.length || 0, 'items');
-        return data || [];
-      } catch (err) {
-        console.error("EnhancedStats: Projects query error:", err);
-        setHasError(true);
-        return [];
-      }
-    },
-    enabled: isAuthenticated && !isCompanyLoading && hasValidSession,
-    retry: 1,
-  });
-
-  // Fetch maintenance checks data
-  const { data: maintenanceData, isLoading: maintenanceLoading, error: maintenanceError } = useQuery({
-    queryKey: ['maintenance_checks', 'stats'],
-    queryFn: async () => {
-      console.log('EnhancedStats: Fetching maintenance checks data...');
-      
-      try {
-        let query = supabase
-          .from('hvac_maintenance_checks')
-          .select('*');
-        
-        // Apply company filtering - useCompanyFilter handles super admin logic
-        query = applyCompanyFilter(query);
-        
-        const { data, error } = await query;
-        
-        if (error) {
-          console.error('EnhancedStats: Error fetching maintenance checks:', error);
-          throw error;
-        }
-        
-        console.log('EnhancedStats: Maintenance checks data fetched:', data?.length || 0, 'items');
-        return data || [];
-      } catch (err) {
-        console.error("EnhancedStats: Maintenance checks query error:", err);
-        setHasError(true);
-        return [];
-      }
-    },
-    enabled: isAuthenticated && !isCompanyLoading && hasValidSession,
-    retry: 1,
-  });
-
-  // Fetch technicians data
-  const { data: techniciansData, isLoading: techniciansLoading, error: techniciansError } = useQuery({
-    queryKey: ['technicians', 'stats'],
-    queryFn: async () => {
-      console.log('EnhancedStats: Fetching technicians data...');
-      
-      try {
-        let query = supabase
-          .from('technicians')
-          .select('*');
-        
-        // Apply company filtering - useCompanyFilter handles super admin logic
-        query = applyCompanyFilter(query);
-        
-        const { data, error } = await query;
-        
-        if (error) {
-          console.error('EnhancedStats: Error fetching technicians:', error);
-          throw error;
-        }
-        
-        console.log('EnhancedStats: Technicians data fetched:', data?.length || 0, 'items');
-        return data || [];
-      } catch (err) {
-        console.error("EnhancedStats: Technicians query error:", err);
-        setHasError(true);
-        return [];
-      }
-    },
-    enabled: isAuthenticated && !isCompanyLoading && hasValidSession,
-    retry: 1,
-  });
-
-  // Calculate metrics
-  const activeProjectsCount = projectsData?.filter(project => 
-    project.status?.toLowerCase() === 'in progress' || 
-    project.status?.toLowerCase() === 'ongoing'
-  ).length || 0;
-
-  const pendingTasksCount = maintenanceData?.filter(check => 
-    check.status === 'pending'
-  ).length || 0;
+  // Extract metrics from dashboard payload with type assertion
+  const payload = dashboardData as {
+    equipment_count?: number;
+    active_projects_count?: number;
+    pending_tasks_count?: number;
+    technician_count?: number;
+  } | null;
+  
+  const equipmentCount = payload?.equipment_count || 0;
+  const activeProjectsCount = payload?.active_projects_count || 0;
+  const pendingTasksCount = payload?.pending_tasks_count || 0;
+  const availableTechniciansCount = payload?.technician_count || 0;
 
   // Show any errors
   useEffect(() => {
-    if (equipmentError || projectsError || maintenanceError || techniciansError) {
+    if (dashboardError) {
       setHasError(true);
       toast({
         title: "Data Loading Error",
-        description: "Some dashboard data failed to load. The display may be incomplete.",
+        description: "Dashboard data failed to load. Please try refreshing the page.",
         variant: "destructive"
       });
     }
-  }, [equipmentError, projectsError, maintenanceError, techniciansError]);
+  }, [dashboardError]);
 
   const stats = [
     {
       name: "Total Equipment",
-      value: equipmentLoading ? "..." : (equipmentData?.length || 0).toString(),
+      value: isLoading ? "..." : equipmentCount.toString(),
       icon: Wrench,
       change: "+4.75%",
       changeType: "positive" as const,
@@ -180,7 +77,7 @@ const EnhancedStats = () => {
     },
     {
       name: "Active Projects",
-      value: projectsLoading ? "..." : activeProjectsCount.toString(),
+      value: isLoading ? "..." : activeProjectsCount.toString(),
       icon: Briefcase,
       change: "-0.5%",
       changeType: "negative" as const,
@@ -190,7 +87,7 @@ const EnhancedStats = () => {
     },
     {
       name: "Pending Tasks",
-      value: maintenanceLoading ? "..." : pendingTasksCount.toString(),
+      value: isLoading ? "..." : pendingTasksCount.toString(),
       icon: Clock,
       change: "+2.1%",
       changeType: "positive" as const,
@@ -200,9 +97,7 @@ const EnhancedStats = () => {
     },
     {
       name: "Available Technicians",
-      value: techniciansLoading 
-        ? "..." 
-        : (techniciansData?.filter(tech => tech.isAvailable).length || 0).toString(),
+      value: isLoading ? "..." : availableTechniciansCount.toString(),
       icon: AlertCircle,
       change: "0%",
       changeType: "neutral" as const,

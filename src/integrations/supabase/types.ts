@@ -1489,6 +1489,10 @@ export type Database = {
         }
         Returns: string
       }
+      dashboard_payload: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       debug_auth_uid: {
         Args: Record<PropertyKey, never>
         Returns: {
