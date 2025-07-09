@@ -25,21 +25,12 @@ const Projects = () => {
       }
       
       try {
-        // Check if user is super admin
-        const isSuperAdmin = user?.email === 'edward@shogunaillc.com';
-        
-        let query = supabase
-          .from("projects")
-          .select("*");
-        
-        // Apply company filtering only for non-super admin users
-        if (!isSuperAdmin) {
-          query = applyCompanyFilter(query);
-        }
-        
-        query = query.order("createdat", { ascending: false });
-        
-        const { data, error } = await query;
+        const { data, error } = await supabase.rpc('get_projects_data', {
+          p_company_id: null,
+          p_limit: 1000,
+          p_offset: 0,
+          p_search: ''
+        });
 
         if (error) {
           console.error("Supabase error fetching projects:", error);

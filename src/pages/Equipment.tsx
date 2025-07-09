@@ -35,27 +35,18 @@ const Equipment = () => {
         return [];
       }
 
-      // Check if user is super admin
-      const isSuperAdmin = user?.email === 'edward@shogunaillc.com';
-      
-      let query = supabase
-        .from('equipment')
-        .select('id, name, model, serial_number, location, status, type, company_id, created_at, updated_at');
-      
-      // Apply company filtering only for non-super admin users
-      if (!isSuperAdmin) {
-        query = applyCompanyFilter(query);
-      }
-      
-      query = query.order('name', { ascending: true });
-      
-      const { data, error } = await query;
+      const { data, error } = await supabase.rpc('get_equipment_data', {
+        p_company_id: null,
+        p_limit: 1000,
+        p_offset: 0,
+        p_search: ''
+      });
       
       if (error) {
         console.error('Error fetching equipment:', error);
         throw error;
       }
-      return data;
+      return data || [];
     },
     enabled: isAuthenticated,
   });

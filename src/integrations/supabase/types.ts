@@ -1510,6 +1510,13 @@ export type Database = {
         }
         Returns: undefined
       }
+      equipment_dropdown: {
+        Args: { p_company_id?: string; p_search?: string }
+        Returns: {
+          id: string
+          name: string
+        }[]
+      }
       extend_trial: {
         Args: { p_company_id: string; p_additional_days?: number }
         Returns: string
@@ -1543,6 +1550,49 @@ export type Database = {
       get_demo_company_id: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_equipment_data: {
+        Args: {
+          p_company_id?: string
+          p_limit?: number
+          p_offset?: number
+          p_search?: string
+        }
+        Returns: {
+          id: string
+          name: string
+          type: string
+          model: string
+          serial_number: string
+          location: string
+          status: string
+          lastMaintenance: string
+          nextMaintenance: string
+          company_id: string
+          created_at: string
+          updated_at: string
+        }[]
+      }
+      get_projects_data: {
+        Args: {
+          p_company_id?: string
+          p_limit?: number
+          p_offset?: number
+          p_search?: string
+        }
+        Returns: {
+          id: string
+          name: string
+          description: string
+          status: string
+          priority: string
+          location: string
+          startdate: string
+          enddate: string
+          createdat: string
+          updatedat: string
+          company_id: string
+        }[]
       }
       get_sensor_analysis: {
         Args: { p_equipment_id: string; p_hours?: number }
