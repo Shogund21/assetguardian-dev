@@ -200,11 +200,12 @@ export const AuditDashboard = () => {
                     {filters.startDate ? format(filters.startDate, 'PPP') : 'Pick a date'}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
+                <PopoverContent className="w-auto p-0 z-50 bg-popover border pointer-events-auto">
                   <Calendar
                     mode="single"
                     selected={filters.startDate}
                     onSelect={(date) => setFilters(prev => ({ ...prev, startDate: date }))}
+                    className="pointer-events-auto"
                   />
                 </PopoverContent>
               </Popover>
@@ -219,11 +220,12 @@ export const AuditDashboard = () => {
                     {filters.endDate ? format(filters.endDate, 'PPP') : 'Pick a date'}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
+                <PopoverContent className="w-auto p-0 z-50 bg-popover border pointer-events-auto">
                   <Calendar
                     mode="single"
                     selected={filters.endDate}
                     onSelect={(date) => setFilters(prev => ({ ...prev, endDate: date }))}
+                    className="pointer-events-auto"
                   />
                 </PopoverContent>
               </Popover>

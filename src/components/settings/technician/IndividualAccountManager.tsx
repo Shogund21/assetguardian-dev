@@ -79,11 +79,14 @@ const IndividualAccountManager = ({ technician }: IndividualAccountManagerProps)
     setIsToggling(true);
     try {
       const newStatus = technician.account_status === 'has_account' ? 'account_disabled' : 'has_account';
+      const userEnabled = newStatus === 'has_account';
       
-      const { error } = await supabase
-        .from("technicians")
-        .update({ account_status: newStatus })
-        .eq("id", technician.id);
+      const { error } = await supabase.rpc('set_technician_status', {
+        p_technician_id: technician.id,
+        p_new_status: technician.status,
+        p_account_status: newStatus,
+        p_user_enabled: userEnabled
+      });
 
       if (error) throw error;
 

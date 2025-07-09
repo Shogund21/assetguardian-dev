@@ -175,27 +175,12 @@ const TechnicianManagement = () => {
 
   const toggleStatusMutation = useMutation({
     mutationFn: async ({ id, newStatus }: { id: string; newStatus: string }) => {
-      // Get technician data for audit log
-      const { data: technician } = await supabase
-        .from("technicians")
-        .select("*")
-        .eq("id", id)
-        .single();
+      const { error } = await supabase.rpc('set_technician_status', {
+        p_technician_id: id,
+        p_new_status: newStatus
+      });
 
-      const { data, error } = await supabase
-        .from("technicians")
-        .update({ status: newStatus })
-        .eq("id", id)
-        .select()
-        .single();
       if (error) throw error;
-      
-      // Log the status change for audit
-      if (technician) {
-        await AuditService.logUpdate('technicians', id, { status: technician.status }, { status: newStatus }, `Status changed to ${newStatus}`);
-      }
-      
-      return data;
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["technicians"] });
