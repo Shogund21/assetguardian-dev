@@ -1719,6 +1719,15 @@ export type Database = {
         Args: { uid: string; claim: string; value: string }
         Returns: undefined
       }
+      set_technician_status: {
+        Args: {
+          p_technician_id: string
+          p_new_status: string
+          p_account_status?: string
+          p_user_enabled?: boolean
+        }
+        Returns: undefined
+      }
       start_user_session: {
         Args: {
           p_user_id: string
