@@ -1573,6 +1573,22 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_maintenance_history: {
+        Args: { p_equipment_id?: string; p_limit?: number; p_offset?: number }
+        Returns: {
+          id: string
+          equipment_id: string
+          technician_id: string
+          check_date: string
+          status: Database["public"]["Enums"]["maintenance_check_status"]
+          equipment_name: string
+          equipment_type: string
+          equipment_location: string
+          technician_name: string
+          notes: string
+          company_id: string
+        }[]
+      }
       get_projects_data: {
         Args: {
           p_company_id?: string
@@ -1717,6 +1733,10 @@ export type Database = {
       }
       set_claim: {
         Args: { uid: string; claim: string; value: string }
+        Returns: undefined
+      }
+      set_equipment_status: {
+        Args: { p_equipment_id: string; p_status: string }
         Returns: undefined
       }
       set_technician_status: {
