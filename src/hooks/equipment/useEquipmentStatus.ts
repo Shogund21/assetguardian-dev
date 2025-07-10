@@ -8,10 +8,10 @@ export const useEquipmentStatus = () => {
 
   const handleStatusChange = async (equipmentId: string, newStatus: string) => {
     try {
-      const { error } = await supabase
-        .from("equipment")
-        .update({ status: newStatus })
-        .eq("id", equipmentId);
+      const { error } = await supabase.rpc('set_equipment_status', {
+        p_equipment_id: equipmentId,
+        p_status: newStatus
+      });
 
       if (error) throw error;
 

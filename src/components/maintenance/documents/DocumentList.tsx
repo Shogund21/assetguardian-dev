@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { MaintenanceDocument } from "@/types/maintenance";
-import { DocumentCard } from "./DocumentCard";
+import { DocumentLink } from "./DocumentLink";
 import { fetchDocuments, downloadDocument, deleteDocument } from "./documentUtils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -83,10 +83,10 @@ const DocumentList = ({ equipmentId, maintenanceCheckId, category }: DocumentLis
   }
 
   return (
-    <div className={`grid ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2 lg:grid-cols-3'} gap-4`}>
+    <div className="space-y-2">
       {documents.length > 0 ? (
         documents.map((document) => (
-          <DocumentCard
+          <DocumentLink
             key={document.id}
             document={document}
             onDownload={handleDownload}
@@ -94,7 +94,7 @@ const DocumentList = ({ equipmentId, maintenanceCheckId, category }: DocumentLis
           />
         ))
       ) : (
-        <div className={`text-center py-8 text-gray-500 ${isMobile ? '' : 'col-span-full'}`}>
+        <div className="text-center py-8 text-muted-foreground">
           No documents found
         </div>
       )}
