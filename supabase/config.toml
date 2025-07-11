@@ -1,16 +1,9 @@
 project_id = "bqxdbvrtohhgkusmdjxd"
 
 [auth]
-# Temporarily disable custom auth webhook to use Supabase's built-in email system
-# This resolves the "No API key found" error users are experiencing with password reset
-# hook_uri = "https://bqxdbvrtohhgkusmdjxd.supabase.co/functions/v1/auth-emails"
-# hook_secrets = "AUTH_WEBHOOK_SECRET"
-
-# Configure built-in email settings
-[auth.email]
-enable_signup = true
-double_confirm_changes = true
-enable_confirmations = true
+# Re-enable custom auth webhook now that RESEND_API_KEY is configured
+hook_uri = "https://bqxdbvrtohhgkusmdjxd.supabase.co/functions/v1/auth-emails"
+hook_secrets = "AUTH_WEBHOOK_SECRET"
 
 [functions.auth-emails]
 verify_jwt = false
