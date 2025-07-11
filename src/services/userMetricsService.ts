@@ -197,21 +197,21 @@ export class UserMetricsService {
 
   static async getUserSessions(limit = 10) {
     try {
-      const { data, error } = await supabase
-        .from('user_sessions')
-        .select(`
-          *,
-          profiles:user_id (
-            first_name,
-            last_name,
-            email
-          )
-        `)
-        .order('started_at', { ascending: false })
-        .limit(limit);
+      const { data, error } = await supabase.rpc('get_user_sessions_with_profiles', {
+        p_limit: limit
+      });
 
       if (error) throw error;
-      return data;
+
+      // Transform the data to match the expected format with nested profiles
+      return data?.map((session: any) => ({
+        ...session,
+        profiles: session.user_first_name || session.user_last_name || session.user_email ? {
+          first_name: session.user_first_name,
+          last_name: session.user_last_name,
+          email: session.user_email
+        } : null
+      })) || [];
     } catch (error) {
       console.error('Error fetching user sessions:', error);
       return [];
@@ -220,21 +220,21 @@ export class UserMetricsService {
 
   static async getUserActivities(limit = 50) {
     try {
-      const { data, error } = await supabase
-        .from('user_activities')
-        .select(`
-          *,
-          profiles:user_id (
-            first_name,
-            last_name,
-            email
-          )
-        `)
-        .order('timestamp_utc', { ascending: false })
-        .limit(limit);
+      const { data, error } = await supabase.rpc('get_user_activities_with_profiles', {
+        p_limit: limit
+      });
 
       if (error) throw error;
-      return data;
+
+      // Transform the data to match the expected format with nested profiles
+      return data?.map((activity: any) => ({
+        ...activity,
+        profiles: activity.user_first_name || activity.user_last_name || activity.user_email ? {
+          first_name: activity.user_first_name,
+          last_name: activity.user_last_name,
+          email: activity.user_email
+        } : null
+      })) || [];
     } catch (error) {
       console.error('Error fetching user activities:', error);
       return [];
@@ -243,21 +243,21 @@ export class UserMetricsService {
 
   static async getPerformanceMetrics(limit = 50) {
     try {
-      const { data, error } = await supabase
-        .from('performance_metrics')
-        .select(`
-          *,
-          profiles:user_id (
-            first_name,
-            last_name,
-            email
-          )
-        `)
-        .order('timestamp_utc', { ascending: false })
-        .limit(limit);
+      const { data, error } = await supabase.rpc('get_performance_metrics_with_profiles', {
+        p_limit: limit
+      });
 
       if (error) throw error;
-      return data;
+
+      // Transform the data to match the expected format with nested profiles
+      return data?.map((metric: any) => ({
+        ...metric,
+        profiles: metric.user_first_name || metric.user_last_name || metric.user_email ? {
+          first_name: metric.user_first_name,
+          last_name: metric.user_last_name,
+          email: metric.user_email
+        } : null
+      })) || [];
     } catch (error) {
       console.error('Error fetching performance metrics:', error);
       return [];

@@ -149,49 +149,33 @@ export class AuditService {
     userId?: string;
     limit?: number;
   }) {
-    let query = supabase
-      .from('audit_logs')
-      .select(`
-        *,
-        profiles:user_id (
-          first_name,
-          last_name,
-          email
-        )
-      `)
-      .order('created_at', { ascending: false });
+    try {
+      const { data, error } = await supabase.rpc('get_audit_logs_with_profiles', {
+        p_start_date: filters?.startDate || null,
+        p_end_date: filters?.endDate || null,
+        p_table_name: filters?.tableName || null,
+        p_action: filters?.action || null,
+        p_user_id: filters?.userId || null,
+        p_limit: filters?.limit || 50
+      });
 
-    if (filters?.startDate) {
-      query = query.gte('created_at', filters.startDate);
-    }
+      if (error) {
+        console.error('Error fetching audit logs:', error);
+        throw error;
+      }
 
-    if (filters?.endDate) {
-      query = query.lte('created_at', filters.endDate);
-    }
-
-    if (filters?.tableName) {
-      query = query.eq('table_name', filters.tableName);
-    }
-
-    if (filters?.action) {
-      query = query.eq('action', filters.action);
-    }
-
-    if (filters?.userId) {
-      query = query.eq('user_id', filters.userId);
-    }
-
-    if (filters?.limit) {
-      query = query.limit(filters.limit);
-    }
-
-    const { data, error } = await query;
-
-    if (error) {
-      console.error('Error fetching audit logs:', error);
+      // Transform the data to match the expected format with nested profiles
+      return data?.map((log: any) => ({
+        ...log,
+        profiles: log.user_first_name || log.user_last_name || log.user_email ? {
+          first_name: log.user_first_name,
+          last_name: log.user_last_name,
+          email: log.user_email
+        } : null
+      })) || [];
+    } catch (error) {
+      console.error('Error in getAuditLogs:', error);
       throw error;
     }
-
-    return data;
   }
 }

@@ -1538,6 +1538,34 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_audit_logs_with_profiles: {
+        Args: {
+          p_start_date?: string
+          p_end_date?: string
+          p_table_name?: string
+          p_action?: string
+          p_user_id?: string
+          p_limit?: number
+        }
+        Returns: {
+          id: string
+          user_id: string
+          action: string
+          table_name: string
+          record_id: string
+          old_values: Json
+          new_values: Json
+          reason: string
+          metadata: Json
+          created_at: string
+          ip_address: unknown
+          user_agent: string
+          session_id: string
+          user_first_name: string
+          user_last_name: string
+          user_email: string
+        }[]
+      }
       get_current_user_company: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -1587,6 +1615,26 @@ export type Database = {
           technician_name: string
           notes: string
           company_id: string
+        }[]
+      }
+      get_performance_metrics_with_profiles: {
+        Args: { p_limit?: number }
+        Returns: {
+          id: string
+          user_id: string
+          session_id: string
+          metric_type: string
+          page_route: string
+          load_time_ms: number
+          api_endpoint: string
+          response_time_ms: number
+          error_occurred: boolean
+          error_message: string
+          timestamp_utc: string
+          created_at: string
+          user_first_name: string
+          user_last_name: string
+          user_email: string
         }[]
       }
       get_projects_data: {
@@ -1661,10 +1709,47 @@ export type Database = {
           is_expired: boolean
         }[]
       }
+      get_user_activities_with_profiles: {
+        Args: { p_limit?: number }
+        Returns: {
+          id: string
+          user_id: string
+          session_id: string
+          activity_type: string
+          page_route: string
+          feature_name: string
+          component_name: string
+          action_details: Json
+          timestamp_utc: string
+          created_at: string
+          user_first_name: string
+          user_last_name: string
+          user_email: string
+        }[]
+      }
       get_user_company: {
         Args: Record<PropertyKey, never>
         Returns: {
           company: Json
+        }[]
+      }
+      get_user_sessions_with_profiles: {
+        Args: { p_limit?: number }
+        Returns: {
+          id: string
+          user_id: string
+          session_id: string
+          started_at: string
+          ended_at: string
+          duration_seconds: number
+          pages_visited: number
+          actions_count: number
+          ip_address: unknown
+          user_agent: string
+          created_at: string
+          user_first_name: string
+          user_last_name: string
+          user_email: string
         }[]
       }
       is_current_user_admin: {
