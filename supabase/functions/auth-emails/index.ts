@@ -157,14 +157,21 @@ const handler = async (req: Request): Promise<Response> => {
   console.log("=== AUTH EMAIL WEBHOOK TRIGGERED ===");
   console.log("Request method:", req.method);
   console.log("Request headers:", Object.fromEntries(req.headers.entries()));
-  
-  // Check if RESEND_API_KEY is available
-  const resendApiKey = Deno.env.get("RESEND_API_KEY");
-  console.log("RESEND_API_KEY available:", !!resendApiKey);
-  console.log("RESEND_API_KEY length:", resendApiKey?.length || 0);
 
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Verify webhook secret for security
+  const webhookSecret = Deno.env.get("AUTH_WEBHOOK_SECRET");
+  const authHeader = req.headers.get("authorization");
+  
+  if (webhookSecret && authHeader !== `Bearer ${webhookSecret}`) {
+    console.log("Webhook secret validation failed");
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 
   try {
