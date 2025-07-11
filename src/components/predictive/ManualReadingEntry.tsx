@@ -15,7 +15,7 @@ import AIImageReader from "@/components/maintenance/form/AIImageReader";
 import { ReadingModeSelector } from "./form/ReadingModeSelector";
 import { ExtractedReadingsSelector } from "./form/ExtractedReadingsSelector";
 import { ReadingForm } from "./form/ReadingForm";
-import { EquipmentDebugInfo } from "./components/EquipmentDebugInfo";
+
 import { ConnectionStatus } from "./components/ConnectionStatus";
 
 const readingSchema = z.object({
@@ -225,12 +225,6 @@ const ManualReadingEntry = ({ equipmentId, equipmentType, onSuccess }: ManualRea
             Record Reading
             <ConnectionStatus isOnline={isOnline} />
           </CardTitle>
-          <EquipmentDebugInfo
-            detectedEquipmentType={detectedEquipmentType}
-            templateCount={readingTemplate.length}
-            readingMode={readingMode}
-            form={form}
-          />
         </CardHeader>
 
         <CardContent className="space-y-6 w-full bg-white overflow-y-auto">
