@@ -1,7 +1,7 @@
 
-# Mac's Facilities Maintenance System
+# Asset Guardian - Advanced Facilities Maintenance System
 
-A comprehensive facility management system built with modern web technologies, designed to streamline maintenance operations, equipment tracking, and predictive maintenance with AI-powered capabilities.
+A comprehensive facility management system built with modern web technologies, designed to streamline maintenance operations, equipment tracking, project management, and predictive maintenance with AI-powered capabilities. Features secure multi-tenant architecture with role-based access control and robust data protection.
 
 ## 🚀 Key Features
 
@@ -75,13 +75,17 @@ A comprehensive facility management system built with modern web technologies, d
 - **Access Request Workflow**: Streamlined user onboarding and approval process
 
 ### Project Management
-- **Project Lifecycle Tracking**: Manage projects from inception to completion
-- **Priority-Based Organization**: High, Medium, Low priority classification
-- **Status Management**: Customizable project statuses with quick updates
-- **Timeline Visualization**: Project timelines with start and end dates
-- **Task Assignment**: Assign projects to specific technicians or teams
-- **Progress Monitoring**: Track project completion and performance metrics
-- **Printable Reports**: Generate project summaries for offline reference
+- **Comprehensive Project Lifecycle**: Manage projects from inception to completion with detailed tracking
+- **Priority-Based Organization**: High, Medium, Low priority classification with visual indicators
+- **Real-time Status Management**: Instant status updates with confirmation and error handling
+- **Secure Delete Operations**: Database-level delete functions with permission checks and audit logging
+- **Timeline Visualization**: Project timelines with start and end dates for better planning
+- **Task Assignment**: Assign projects to specific technicians or teams with workload balancing
+- **Progress Monitoring**: Track project completion and performance metrics with analytics
+- **Audit Trail**: Complete logging of all project operations including creation, updates, and deletions
+- **Permission-Based Access**: Role-specific project management with company-level data isolation
+- **Loading States**: Real-time feedback during operations to prevent duplicate actions
+- **Error Handling**: Comprehensive error messages with specific guidance for different failure scenarios
 
 ### Technician Management & Role-Based Access Control
 - **Enhanced Role-Based System**: Two-tier system with Admin and Technician roles plus access request workflow
@@ -163,15 +167,20 @@ A comprehensive facility management system built with modern web technologies, d
 
 ## 🔒 Security Features
 
-- **Row Level Security (RLS)**: Database-level security for multi-tenant data protection
-- **Role-Based Access Control**: Admin and Technician roles with different permission levels
-- **Secure Role Management**: Database functions ensure safe role assignment and updates
-- **Password Protection**: Secure access to sensitive equipment management areas
-- **Company Data Isolation**: Complete separation of data between companies with role scoping
-- **API Key Management**: Secure storage and management of third-party API keys
-- **Authentication & Authorization**: Supabase Auth for secure user management
-- **Audit Trails**: Track all user actions, role changes, and data modifications
-- **Permission-Based UI**: Interface adapts based on user role and permissions
+- **Advanced Row Level Security (RLS)**: Database-level security for multi-tenant data protection with comprehensive policies
+- **Secure Database Functions**: All critical operations use `SECURITY DEFINER` functions with proper permission checks
+- **Role-Based Access Control**: Admin and Technician roles with granular permission levels and company-scoped access
+- **Secure Delete Operations**: Database-level delete functions with permission verification and audit logging
+- **Company Data Isolation**: Complete separation of data between companies with role scoping and access validation
+- **Real-time Permission Checks**: Dynamic permission validation for all CRUD operations
+- **Comprehensive Audit Trails**: Track all user actions, role changes, data modifications, and delete operations
+- **Permission-Based UI**: Interface adapts based on user role and permissions with consistent authentication
+- **API Key Management**: Secure storage and management of third-party API keys in Edge Function secrets
+- **Authentication & Authorization**: Supabase Auth for secure user management with JWT-based authentication
+- **Error Handling Security**: Detailed error messages for admins while maintaining security for unauthorized users
+- **Database Integrity**: Row count verification and transaction rollback for failed operations
+- **User Context Validation**: Continuous validation of user authentication and company membership
+- **Secure State Management**: Client-side state updates only after successful database operations
 
 ## 🚀 Getting Started
 
@@ -242,15 +251,21 @@ A comprehensive facility management system built with modern web technologies, d
 - `automated_work_orders` - System-generated work orders
 
 ### Role Management & Security
-- `company_users` - User-company relationships and role assignments
-- `technicians` - Enhanced with `user_role` column for role tracking
-- `update_technician_role()` - Secure function for role assignment
+- `company_users` - User-company relationships and role assignments with secure access control
+- `technicians` - Enhanced with `user_role` column for role tracking and permission management
+- `update_technician_role()` - Secure function for role assignment with audit logging
 - `get_technicians_with_roles()` - Function to retrieve users with role information
+- `delete_project()` - Secure project deletion with permission checks and audit logging
+- `delete_equipment()` - Secure equipment deletion with permission checks and audit logging
+- `is_member_of()` - Function to verify user membership in companies
+- `can_access_all_data()` - Super admin permission checking function
 
 ### Additional Features
-- `filter_changes` - Filter maintenance tracking
-- `maintenance_documents` - Document storage and management
-- `audit_logs` - Complete audit trail for all system activities
+- `filter_changes` - Filter maintenance tracking with automated status calculations
+- `maintenance_documents` - Document storage and management with company-level access control
+- `audit_logs` - Complete audit trail for all system activities including CRUD operations
+- `user_activities` - User engagement tracking and performance analytics
+- `performance_metrics` - System performance monitoring and optimization data
 
 ## 🔧 Configuration
 
@@ -319,28 +334,44 @@ Comprehensive guides available in the application:
 ## 📋 API Documentation
 
 ### Supabase Integration
-- Real-time subscriptions for live data updates
-- Row Level Security for multi-tenant data protection
-- Edge Functions for custom business logic
-- File storage for documents and images
+- **Real-time subscriptions** for live data updates across all components
+- **Row Level Security** for multi-tenant data protection with comprehensive policies
+- **Secure Database Functions** for all critical operations with proper permission validation
+- **Edge Functions** for custom business logic and AI integration
+- **File storage** for documents and images with role-based access control
+
+### Database Functions (RPCs)
+- `get_projects_data()` - Retrieve projects with company-level filtering
+- `delete_project(project_id)` - Secure project deletion with permission checks
+- `delete_equipment(equipment_id)` - Secure equipment deletion with permission checks
+- `get_equipment_data()` - Retrieve equipment with filtering and search capabilities
+- `get_current_user_company()` - Get user's company information and role
+- `is_member_of(company_id)` - Verify user membership in specific company
+- `log_audit_event()` - Record audit events for all significant operations
 
 ### AI Integration Endpoints
-- `/functions/v1/predictive-ai-analysis` - Equipment health analysis
-- `/functions/v1/extract-readings-from-image` - AI image reading extraction
+- `/functions/v1/predictive-ai-analysis` - Equipment health analysis with confidence scoring
+- `/functions/v1/extract-readings-from-image` - AI image reading extraction using OpenAI
 
 ## 🔍 Troubleshooting
 
 ### Common Issues
-- **Offline Storage Issues**: Clear browser storage and refresh
-- **AI Integration Problems**: Verify OpenAI API key configuration
-- **Mobile App Build Errors**: Ensure Capacitor dependencies are installed
+- **Delete Operations Failing**: Verify user has proper permissions and is authenticated
+- **Offline Storage Issues**: Clear browser storage and refresh application
+- **AI Integration Problems**: Verify OpenAI API key configuration in Edge Function secrets
+- **Mobile App Build Errors**: Ensure Capacitor dependencies are properly installed
 - **Database Connection**: Check Supabase credentials and network connection
+- **Permission Denied Errors**: Verify user role assignments and company membership
+- **RLS Policy Issues**: Check Row Level Security policies for proper access configuration
 
 ### Performance Optimization
-- Enable browser caching for static assets
-- Use image compression for equipment photos
-- Implement lazy loading for large datasets
-- Optimize database queries with proper indexing
+- **Database Queries**: Use proper indexing and company-level filtering for optimal performance
+- **Real-time Updates**: Implement efficient state management to minimize unnecessary re-renders
+- **Image Handling**: Use image compression for equipment photos and implement lazy loading
+- **Audit Logging**: Implement efficient audit log rotation and archival strategies
+- **Loading States**: Provide immediate feedback to users during long-running operations
+- **Error Boundaries**: Implement React error boundaries for graceful error handling
+- **Memory Management**: Optimize state management to prevent memory leaks in long-running sessions
 
 ## 📞 Support & Resources
 
@@ -367,6 +398,6 @@ This project is proprietary software. All rights reserved.
 
 ---
 
-**Project URL**: https://lovable.dev/projects/504bf57f-2335-4e76-894e-5b151c1fbbad
+**Project URL**: https://www.assetguardian.ai
 
 **Built with ❤️ using [Lovable](https://lovable.dev) - The AI-powered web development platform**
