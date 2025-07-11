@@ -111,8 +111,11 @@ const MaintenanceHistory = () => {
   };
 
   useEffect(() => {
-    fetchMaintenanceChecks();
-  }, []);
+    // Only fetch if user is authenticated to avoid premature calls
+    if (isAuthenticated) {
+      fetchMaintenanceChecks();
+    }
+  }, [isAuthenticated]);
 
   return (
     <div className="space-y-4">
