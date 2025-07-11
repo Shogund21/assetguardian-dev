@@ -1610,6 +1610,16 @@ export type Database = {
           company_id: string
         }[]
       }
+      get_recent_activities: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          title: string
+          description: string
+          timestamp_val: string
+          type: string
+        }[]
+      }
       get_sensor_analysis: {
         Args: { p_equipment_id: string; p_hours?: number }
         Returns: {
@@ -1737,6 +1747,10 @@ export type Database = {
       }
       set_equipment_status: {
         Args: { p_equipment_id: string; p_status: string }
+        Returns: undefined
+      }
+      set_project_status: {
+        Args: { p_project_id: string; p_status: string }
         Returns: undefined
       }
       set_technician_status: {
