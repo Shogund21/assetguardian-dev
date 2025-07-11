@@ -1,5 +1,5 @@
 
-# Asset Guardian - Advanced Facilities Maintenance System
+# AssetGuardian - Advanced Facilities Maintenance System
 
 A comprehensive facility management system built with modern web technologies, designed to streamline maintenance operations, equipment tracking, project management, and predictive maintenance with AI-powered capabilities. Features secure multi-tenant architecture with role-based access control and robust data protection.
 
