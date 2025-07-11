@@ -1749,6 +1749,10 @@ export type Database = {
         Args: { p_equipment_id: string; p_status: string }
         Returns: undefined
       }
+      set_project_priority: {
+        Args: { p_project_id: string; p_priority: string }
+        Returns: undefined
+      }
       set_project_status: {
         Args: { p_project_id: string; p_status: string }
         Returns: undefined

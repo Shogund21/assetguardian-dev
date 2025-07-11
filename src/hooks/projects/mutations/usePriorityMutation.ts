@@ -13,13 +13,10 @@ export const usePriorityMutation = (
       const timestamp = new Date().toISOString();
       console.log("Updating project priority:", { projectId, newPriority });
       
-      const { error } = await supabase
-        .from("projects")
-        .update({ 
-          priority: newPriority,
-          updatedat: timestamp
-        })
-        .eq("id", projectId);
+      const { error } = await supabase.rpc('set_project_priority', {
+        p_project_id: projectId,
+        p_priority: newPriority
+      });
 
       if (error) {
         console.error("Error updating project priority:", error);

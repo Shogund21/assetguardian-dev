@@ -13,13 +13,10 @@ export const useStatusMutation = (
       const timestamp = new Date().toISOString();
       console.log("Updating project status:", { projectId, newStatus });
       
-      const { error } = await supabase
-        .from("projects")
-        .update({ 
-          status: newStatus,
-          updatedat: timestamp
-        })
-        .eq("id", projectId);
+      const { error } = await supabase.rpc('set_project_status', {
+        p_project_id: projectId,
+        p_status: newStatus
+      });
 
       if (error) {
         console.error("Error updating project status:", error);
