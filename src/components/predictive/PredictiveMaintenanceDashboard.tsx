@@ -17,6 +17,7 @@ import ReadingHistory from "./ReadingHistory";
 import EnhancedAIAnalysis from "./EnhancedAIAnalysis";
 import AnalysisResultsHistory from "./AnalysisResultsHistory";
 import DatabaseStatus from "./DatabaseStatus";
+import MultipleImageAnalysis from "./MultipleImageAnalysis";
 import { EquipmentSelector } from "./dashboard/EquipmentSelector";
 
 const PredictiveMaintenanceDashboard = () => {
@@ -106,7 +107,7 @@ const PredictiveMaintenanceDashboard = () => {
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 mb-4 h-auto">
+        <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 mb-4 h-auto">
           <TabsTrigger value="readings" className="touch-manipulation text-xs md:text-sm py-2">
             Record
           </TabsTrigger>
@@ -115,6 +116,9 @@ const PredictiveMaintenanceDashboard = () => {
           </TabsTrigger>
           <TabsTrigger value="analysis" className="touch-manipulation text-xs md:text-sm py-2">
             Analysis
+          </TabsTrigger>
+          <TabsTrigger value="multi-image" className="touch-manipulation text-xs md:text-sm py-2">
+            Multi-Image
           </TabsTrigger>
           <TabsTrigger value="results" className="touch-manipulation text-xs md:text-sm py-2">
             Results
@@ -125,11 +129,11 @@ const PredictiveMaintenanceDashboard = () => {
         </TabsList>
 
         {/* Universal equipment selector - visible for tabs that need equipment selection */}
-        {(activeTab === "history" || activeTab === "analysis") && (
+        {(activeTab === "history" || activeTab === "analysis" || activeTab === "multi-image") && (
           <div className="mb-4 px-2">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
               <p className="text-sm text-blue-800 font-medium mb-2">
-                📋 Select equipment to view {activeTab === "history" ? "reading history" : "AI analysis"}
+                📋 Select equipment to view {activeTab === "history" ? "reading history" : activeTab === "analysis" ? "AI analysis" : "multi-image analysis"}
               </p>
               <EquipmentSelector
                 equipment={sortedEquipment}
@@ -184,6 +188,24 @@ const PredictiveMaintenanceDashboard = () => {
               <h3 className="text-lg font-medium text-gray-900 mb-2">No Equipment Selected</h3>
               <p className="text-gray-600 max-w-md mx-auto">
                 Select equipment above to run AI-powered predictive analysis
+              </p>
+            </div>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="multi-image" className="mt-2">
+          {selectedEquipment ? (
+            <MultipleImageAnalysis 
+              equipmentId={selectedEquipmentId}
+              equipmentType={equipmentType}
+              equipmentName={selectedEquipment?.name || ''}
+            />
+          ) : (
+            <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+              <div className="text-4xl mb-4">📷</div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No Equipment Selected</h3>
+              <p className="text-gray-600 max-w-md mx-auto">
+                Select equipment above to upload multiple images for AI analysis
               </p>
             </div>
           )}
