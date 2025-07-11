@@ -157,6 +157,11 @@ const handler = async (req: Request): Promise<Response> => {
   console.log("=== AUTH EMAIL WEBHOOK TRIGGERED ===");
   console.log("Request method:", req.method);
   console.log("Request headers:", Object.fromEntries(req.headers.entries()));
+  
+  // Check if RESEND_API_KEY is available
+  const resendApiKey = Deno.env.get("RESEND_API_KEY");
+  console.log("RESEND_API_KEY available:", !!resendApiKey);
+  console.log("RESEND_API_KEY length:", resendApiKey?.length || 0);
 
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
