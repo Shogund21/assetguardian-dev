@@ -151,7 +151,14 @@ export class AuditService {
   }) {
     let query = supabase
       .from('audit_logs')
-      .select('*')
+      .select(`
+        *,
+        profiles:user_id (
+          first_name,
+          last_name,
+          email
+        )
+      `)
       .order('created_at', { ascending: false });
 
     if (filters?.startDate) {

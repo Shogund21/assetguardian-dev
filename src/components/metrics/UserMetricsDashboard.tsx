@@ -15,6 +15,11 @@ interface UserSession {
   pages_visited: number;
   actions_count: number;
   user_agent: string | null;
+  profiles?: {
+    first_name: string | null;
+    last_name: string | null;
+    email: string;
+  } | null;
 }
 
 interface UserActivity {
@@ -25,6 +30,11 @@ interface UserActivity {
   component_name: string | null;
   timestamp_utc: string;
   action_details: any;
+  profiles?: {
+    first_name: string | null;
+    last_name: string | null;
+    email: string;
+  } | null;
 }
 
 interface PerformanceMetric {
@@ -37,6 +47,11 @@ interface PerformanceMetric {
   error_occurred: boolean;
   error_message: string | null;
   timestamp_utc: string;
+  profiles?: {
+    first_name: string | null;
+    last_name: string | null;
+    email: string;
+  } | null;
 }
 
 const UserMetricsDashboard = () => {
@@ -61,9 +76,9 @@ const UserMetricsDashboard = () => {
         UserMetricsService.getPerformanceMetrics(50)
       ]);
 
-      setSessions(sessionsData);
-      setActivities(activitiesData);
-      setMetrics(metricsData);
+      setSessions(sessionsData as unknown as UserSession[]);
+      setActivities(activitiesData as unknown as UserActivity[]);
+      setMetrics(metricsData as unknown as PerformanceMetric[]);
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
     } finally {
@@ -92,6 +107,12 @@ const UserMetricsDashboard = () => {
     if (metric.error_occurred) return 'bg-red-100 text-red-800';
     if (metric.load_time_ms && metric.load_time_ms > 3000) return 'bg-yellow-100 text-yellow-800';
     return 'bg-green-100 text-green-800';
+  };
+
+  const formatUserName = (profiles: any) => {
+    if (!profiles) return 'Unknown User';
+    const fullName = [profiles.first_name, profiles.last_name].filter(Boolean).join(' ');
+    return fullName || profiles.email || 'Unknown User';
   };
 
   if (loading) {
@@ -175,8 +196,11 @@ const UserMetricsDashboard = () => {
                 {sessions.map((session) => (
                   <div key={session.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
-                      <div className="font-medium">Session {session.session_id.slice(-8)}</div>
+                      <div className="font-medium">
+                        {formatUserName(session.profiles)} - Session {session.session_id.slice(-8)}
+                      </div>
                       <div className="text-sm text-muted-foreground">
+                        {session.profiles?.email && `${session.profiles.email} • `}
                         Started: {new Date(session.started_at).toLocaleString()}
                       </div>
                       {session.ended_at && (
@@ -215,10 +239,14 @@ const UserMetricsDashboard = () => {
                       </Badge>
                       <div>
                         <div className="font-medium">
-                          {activity.feature_name || activity.component_name || activity.page_route || 'Unknown'}
+                          {formatUserName(activity.profiles)} performed {activity.activity_type.replace('_', ' ')}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {activity.feature_name || activity.component_name || activity.page_route || 'Unknown action'}
+                          {activity.profiles?.email && ` • ${activity.profiles.email}`}
                         </div>
                         {activity.page_route && (
-                          <div className="text-sm text-muted-foreground">{activity.page_route}</div>
+                          <div className="text-xs text-muted-foreground">Route: {activity.page_route}</div>
                         )}
                       </div>
                     </div>
@@ -248,6 +276,10 @@ const UserMetricsDashboard = () => {
                       <div>
                         <div className="font-medium">
                           {metric.page_route || metric.api_endpoint || 'Unknown'}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          User: {formatUserName(metric.profiles)}
+                          {metric.profiles?.email && ` (${metric.profiles.email})`}
                         </div>
                         {metric.error_message && (
                           <div className="text-sm text-red-600">{metric.error_message}</div>

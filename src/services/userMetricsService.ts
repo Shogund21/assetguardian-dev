@@ -199,7 +199,14 @@ export class UserMetricsService {
     try {
       const { data, error } = await supabase
         .from('user_sessions')
-        .select('*')
+        .select(`
+          *,
+          profiles:user_id (
+            first_name,
+            last_name,
+            email
+          )
+        `)
         .order('started_at', { ascending: false })
         .limit(limit);
 
@@ -215,7 +222,14 @@ export class UserMetricsService {
     try {
       const { data, error } = await supabase
         .from('user_activities')
-        .select('*')
+        .select(`
+          *,
+          profiles:user_id (
+            first_name,
+            last_name,
+            email
+          )
+        `)
         .order('timestamp_utc', { ascending: false })
         .limit(limit);
 
@@ -231,7 +245,14 @@ export class UserMetricsService {
     try {
       const { data, error } = await supabase
         .from('performance_metrics')
-        .select('*')
+        .select(`
+          *,
+          profiles:user_id (
+            first_name,
+            last_name,
+            email
+          )
+        `)
         .order('timestamp_utc', { ascending: false })
         .limit(limit);
 

@@ -23,6 +23,11 @@ interface AuditLog {
   reason: string | null;
   metadata: any;
   created_at: string;
+  profiles?: {
+    first_name: string | null;
+    last_name: string | null;
+    email: string;
+  } | null;
 }
 
 interface AuditFilters {
@@ -59,7 +64,7 @@ export const AuditDashboard = () => {
       };
 
       const logs = await AuditService.getAuditLogs(filterParams);
-      setAuditLogs(logs || []);
+      setAuditLogs((logs as unknown as AuditLog[]) || []);
       
       // Calculate stats
       const today = new Date().toDateString();
@@ -94,10 +99,10 @@ export const AuditDashboard = () => {
 
   const exportAuditLogs = () => {
     const csvContent = [
-      ['Timestamp', 'User ID', 'Action', 'Table', 'Record ID', 'Reason', 'Details'].join(','),
+      ['Timestamp', 'User', 'Action', 'Table', 'Record ID', 'Reason', 'Details'].join(','),
       ...auditLogs.map(log => [
         log.created_at,
-        log.user_id || 'System',
+        formatUserName(log.profiles, log.user_id),
         log.action,
         log.table_name,
         log.record_id || '',
@@ -126,6 +131,15 @@ export const AuditDashboard = () => {
       case 'FEATURE_ACCESS': return 'secondary';
       default: return 'outline';
     }
+  };
+
+  const formatUserName = (profiles: any, userId: string | null) => {
+    if (!profiles && !userId) return 'System';
+    if (!profiles) return `User ID: ${userId?.slice(0, 8)}...`;
+    
+    const fullName = [profiles.first_name, profiles.last_name].filter(Boolean).join(' ');
+    const displayName = fullName || profiles.email;
+    return `${displayName} (${profiles.email})`;
   };
 
   return (
@@ -316,7 +330,7 @@ export const AuditDashboard = () => {
                 <Separator />
                 
                 <div className="text-xs text-muted-foreground">
-                  User: {log.user_id || 'System'} | 
+                  User: {formatUserName(log.profiles, log.user_id)} | 
                   Timestamp: {log.created_at}
                 </div>
               </div>
