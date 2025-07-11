@@ -6,13 +6,15 @@ interface ProjectListProps {
   onStatusChange: (projectId: string, newStatus: string) => Promise<void>;
   onPriorityChange: (projectId: string, newPriority: string) => Promise<void>;
   onDelete: (projectId: string) => Promise<void>;
+  isDeleting?: boolean;
 }
 
 export const ProjectList = ({ 
   projects,
   onStatusChange,
   onPriorityChange,
-  onDelete
+  onDelete,
+  isDeleting = false
 }: ProjectListProps) => {
   console.log("ProjectList rendering with projects:", projects);
 
@@ -31,6 +33,7 @@ export const ProjectList = ({
             onStatusChange={onStatusChange}
             onPriorityChange={onPriorityChange}
             onDelete={onDelete}
+            isDeleting={isDeleting}
           />
         );
       })}

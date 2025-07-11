@@ -11,7 +11,8 @@ export const useProjects = () => {
   const { 
     handleStatusChange, 
     handlePriorityChange, 
-    handleDelete 
+    handleDelete,
+    isDeleting
   } = useProjectMutations(projects, setProjects);
 
   useEffect(() => {
@@ -29,6 +30,7 @@ export const useProjects = () => {
     loading,
     handleStatusChange,
     handlePriorityChange,
-    handleDelete
+    handleDelete,
+    isDeleting
   };
 };

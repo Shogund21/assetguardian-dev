@@ -17,9 +17,10 @@ import { useState } from "react";
 interface ProjectHeaderProps {
   name: string;
   onDelete: () => Promise<void>;
+  isDeleting?: boolean;
 }
 
-export const ProjectHeader = ({ name, onDelete }: ProjectHeaderProps) => {
+export const ProjectHeader = ({ name, onDelete, isDeleting = false }: ProjectHeaderProps) => {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   
   return (
@@ -31,6 +32,7 @@ export const ProjectHeader = ({ name, onDelete }: ProjectHeaderProps) => {
             variant="ghost" 
             size="icon" 
             className="text-red-500 hover:text-red-600 hover:bg-red-50"
+            disabled={isDeleting}
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -47,8 +49,9 @@ export const ProjectHeader = ({ name, onDelete }: ProjectHeaderProps) => {
             <AlertDialogAction 
               onClick={onDelete}
               className="bg-red-500 hover:bg-red-600 text-white"
+              disabled={isDeleting}
             >
-              Delete
+              {isDeleting ? "Deleting..." : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

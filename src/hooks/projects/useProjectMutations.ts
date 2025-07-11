@@ -9,11 +9,12 @@ export const useProjectMutations = (
 ) => {
   const { handleStatusChange } = useStatusMutation(projects, setProjects);
   const { handlePriorityChange } = usePriorityMutation(projects, setProjects);
-  const { handleDelete } = useDeleteMutation(projects, setProjects);
+  const { handleDelete, isDeleting } = useDeleteMutation(projects, setProjects);
 
   return {
     handleStatusChange,
     handlePriorityChange,
-    handleDelete
+    handleDelete,
+    isDeleting
   };
 };

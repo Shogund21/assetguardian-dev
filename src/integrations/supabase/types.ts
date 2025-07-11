@@ -1502,6 +1502,14 @@ export type Database = {
           has_jwt: boolean
         }[]
       }
+      delete_equipment: {
+        Args: { p_equipment_id: string }
+        Returns: Json
+      }
+      delete_project: {
+        Args: { p_project_id: string }
+        Returns: Json
+      }
       end_user_session: {
         Args: {
           p_session_id: string

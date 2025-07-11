@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useProjects } from "@/hooks/useProjects";
 
 const Projects = () => {
   const { toast } = useToast();
@@ -15,7 +16,18 @@ const Projects = () => {
   const { applyCompanyFilter } = useCompanyFilter();
   const { isAuthenticated, user } = useAuth();
 
-  const { data: projects, isLoading, refetch } = useQuery({
+  // Use the improved useProjects hook that includes secure delete functionality
+  const { 
+    projects, 
+    loading: isLoading, 
+    handleStatusChange, 
+    handlePriorityChange, 
+    handleDelete,
+    isDeleting 
+  } = useProjects();
+
+  // Keep the old data fetching for status and priority updates only
+  const { refetch } = useQuery({
     queryKey: ["projects"],
     queryFn: async () => {
       console.log("Fetching projects from Supabase...");
@@ -49,7 +61,8 @@ const Projects = () => {
     staleTime: 1000,
   });
 
-  const handleStatusChange = async (projectId: string, newStatus: string) => {
+  // Status and priority updates still use direct Supabase calls
+  const handleStatusChangeLocal = async (projectId: string, newStatus: string) => {
     try {
       console.log("Updating project status:", { projectId, newStatus });
       
@@ -82,7 +95,7 @@ const Projects = () => {
     }
   };
 
-  const handlePriorityChange = async (projectId: string, newPriority: string) => {
+  const handlePriorityChangeLocal = async (projectId: string, newPriority: string) => {
     try {
       console.log("Updating project priority:", { projectId, newPriority });
       
@@ -115,35 +128,6 @@ const Projects = () => {
     }
   };
 
-  const handleDelete = async (projectId: string) => {
-    try {
-      console.log("Deleting project:", projectId);
-      const { error } = await supabase
-        .from("projects")
-        .delete()
-        .eq("id", projectId);
-
-      if (error) {
-        console.error("Error deleting project:", error);
-        throw error;
-      }
-
-      await refetch();
-      
-      toast({
-        title: "Success",
-        description: "Project deleted successfully",
-      });
-    } catch (error) {
-      console.error("Error in handleDelete:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to delete project",
-      });
-    }
-  };
-
   return (
     <Layout>
       <div className="container mx-auto py-6">
@@ -164,9 +148,10 @@ const Projects = () => {
         ) : (
           <ProjectList
             projects={projects || []}
-            onStatusChange={handleStatusChange}
-            onPriorityChange={handlePriorityChange}
+            onStatusChange={handleStatusChangeLocal}
+            onPriorityChange={handlePriorityChangeLocal}
             onDelete={handleDelete}
+            isDeleting={isDeleting}
           />
         )}
       </div>

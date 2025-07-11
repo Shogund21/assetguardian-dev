@@ -11,13 +11,15 @@ interface ProjectCardProps {
   onStatusChange: (projectId: string, newStatus: string) => Promise<void>;
   onPriorityChange: (projectId: string, newPriority: string) => Promise<void>;
   onDelete: (projectId: string) => Promise<void>;
+  isDeleting?: boolean;
 }
 
 export const ProjectCard = ({ 
   project, 
   onStatusChange, 
   onPriorityChange,
-  onDelete
+  onDelete,
+  isDeleting = false
 }: ProjectCardProps) => {
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const {
@@ -37,6 +39,7 @@ export const ProjectCard = ({
       <ProjectHeader 
         name={project.name}
         onDelete={() => onDelete(project.id)}
+        isDeleting={isDeleting}
       />
       <div className="mt-4 space-y-2">
         <ProjectControls
