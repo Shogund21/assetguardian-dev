@@ -7,6 +7,7 @@ export const maintenanceFormSchema = z.object({
   location_id: z.string().min(1, "Location is required"),
   equipment_id: z.string().min(1, "Equipment is required"),
   technician_id: z.string().min(1, "Technician is required"),
+  company_id: z.string().optional(), // Added for RLS policy compliance
   notes: z.string().optional(),
   reading_mode: z.enum(["standard", "manual", "ai_image"]).optional(),
   

@@ -1,5 +1,6 @@
 
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { MaintenanceCheck } from "@/types/maintenance";
 import { MaintenanceFormValues } from "./schema/maintenanceFormSchema";
 import { detectEquipmentType, isValidEquipmentType } from "./utils/equipmentTypeDetection";
@@ -14,6 +15,7 @@ export const useMaintenanceFormSubmit = (
   initialData?: MaintenanceCheck
 ) => {
   const { toast } = useToast();
+  const { userProfile, isAuthenticated, session } = useAuth();
 
   /**
    * Handle form submission
@@ -25,6 +27,35 @@ export const useMaintenanceFormSubmit = (
       console.log('Update mode:', !!initialData);
       console.log('Location ID in form values:', values.location_id);
       
+      // CRITICAL FIX: Verify authentication first
+      if (!isAuthenticated || !session || !userProfile) {
+        console.error('User not authenticated or missing profile');
+        toast({
+          variant: "destructive",
+          title: "Authentication Required",
+          description: "Please log in to submit maintenance checks.",
+        });
+        throw new Error('Authentication required');
+      }
+
+      // CRITICAL FIX: Verify user has company_id
+      if (!userProfile.company_id) {
+        console.error('User profile missing company_id:', userProfile);
+        toast({
+          variant: "destructive",
+          title: "Company Association Required",
+          description: "Your account must be associated with a company to submit maintenance checks.",
+        });
+        throw new Error('Company association required');
+      }
+
+      console.log('Authentication verified:', {
+        userId: userProfile.id,
+        email: userProfile.email,
+        companyId: userProfile.company_id,
+        companyName: userProfile.company_name
+      });
+
       // CRITICAL FIX: Create a stable deep copy of the form values to prevent any reference issues
       const formValues = JSON.parse(JSON.stringify(values));
       
@@ -103,10 +134,11 @@ export const useMaintenanceFormSubmit = (
       }
       
       // Map form data to database schema - using the original user-selected location_id
-      // Make sure to pass the user-selected location_id in the values
+      // CRITICAL FIX: Include user's company_id in the submission data
       const submissionData = mapMaintenanceData({
         ...formValues,
-        location_id: originalLocationId // Ensure user selection is used
+        location_id: originalLocationId, // Ensure user selection is used
+        company_id: userProfile.company_id // CRITICAL: Include user's company_id for RLS
       }, equipmentType, !!initialData);
       
       // CRITICAL FIX: Final verification before database submission
