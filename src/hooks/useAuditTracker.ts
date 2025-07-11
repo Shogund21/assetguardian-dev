@@ -25,21 +25,59 @@ export const useAuditTracker = () => {
   const location = useLocation();
   const { isAuthenticated, user } = useAuth();
   const sessionStartTime = useRef<number>(Date.now());
-  const sessionId = useRef<string>(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
+  const sessionId = useRef<string | null>(null);
   const lastRoute = useRef<string>('');
+  const pageLoadStart = useRef<number>(Date.now());
 
-  // Track session start
+  // Track session start and initialize user metrics
   useEffect(() => {
     if (isAuthenticated && user) {
-      AuditService.logSessionStart(sessionId.current);
-      sessionStartTime.current = Date.now();
+      const initializeSession = async () => {
+        try {
+          // Start user metrics session first
+          const userMetricsSessionId = await UserMetricsService.startSession();
+          
+          if (userMetricsSessionId) {
+            sessionId.current = userMetricsSessionId;
+            
+            // Use the same session ID for audit service
+            AuditService.logSessionStart(userMetricsSessionId);
+            sessionStartTime.current = Date.now();
+            
+            console.log('Session initialized:', userMetricsSessionId);
+          } else {
+            // Fallback to local session ID if user metrics fails
+            const fallbackId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            sessionId.current = fallbackId;
+            AuditService.logSessionStart(fallbackId);
+            sessionStartTime.current = Date.now();
+            
+            console.warn('Using fallback session ID');
+          }
+        } catch (error) {
+          console.error('Failed to initialize session:', error);
+          // Fallback session handling
+          const fallbackId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+          sessionId.current = fallbackId;
+          AuditService.logSessionStart(fallbackId);
+          sessionStartTime.current = Date.now();
+        }
+      };
+
+      initializeSession();
     }
   }, [isAuthenticated, user]);
 
-  // Track navigation/feature access
+  // Track navigation/feature access and page views
   useEffect(() => {
     if (isAuthenticated && user && location.pathname !== lastRoute.current) {
       const featureName = getFeatureName(location.pathname);
+      
+      // Log page load time if this is a route change (not initial load)
+      if (lastRoute.current) {
+        const loadTime = Date.now() - pageLoadStart.current;
+        UserMetricsService.logPageLoadTime(location.pathname, loadTime);
+      }
       
       // Log to both audit service and user metrics service
       AuditService.logFeatureAccess(featureName, location.pathname, {
@@ -52,16 +90,23 @@ export const useAuditTracker = () => {
         sessionId: sessionId.current
       });
       
+      // Log page view
+      UserMetricsService.logPageView(location.pathname, featureName);
+      
       lastRoute.current = location.pathname;
+      pageLoadStart.current = Date.now(); // Reset for next page
     }
   }, [location.pathname, isAuthenticated, user]);
 
   // Track session end on page unload
   useEffect(() => {
     const handleBeforeUnload = () => {
-      if (isAuthenticated && user) {
+      if (isAuthenticated && user && sessionId.current) {
         const duration = Date.now() - sessionStartTime.current;
+        
+        // End both audit and user metrics sessions
         AuditService.logSessionEnd(sessionId.current, duration);
+        UserMetricsService.endSession();
       }
     };
 
