@@ -204,20 +204,46 @@ const handler = async (req: Request): Promise<Response> => {
         html = generateConfirmationEmail(firstName, siteUrl, '');
         console.log("Generated welcome email for:", webhook.user.email);
       } else if (webhook.type === 'user.recovery_requested') {
-        // For password recovery, construct the reset URL with proper token handling
-        // Supabase auth webhooks should include recovery token information
+        // For password recovery, we need to return a message directing users to use Supabase's built-in recovery
+        // since the webhook doesn't contain the necessary token information
         console.log("Processing password recovery for:", webhook.user.email);
         
-        // Try to extract recovery token from the webhook
-        // Note: The exact structure depends on Supabase's webhook implementation
-        const recoveryToken = webhook.user.recovery_token || '';
-        const resetUrl = recoveryToken 
-          ? `${siteUrl}/reset-password?token=${recoveryToken}&type=recovery`
-          : `${siteUrl}/reset-password`;
-        
-        console.log("Generated recovery URL:", resetUrl);
         subject = "Reset Your Asset Guardian Password";
-        html = generatePasswordResetEmail(firstName, resetUrl, recoveryToken);
+        html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reset Your Asset Guardian Password</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="text-align: center; margin-bottom: 40px;">
+    <img src="https://bqxdbvrtohgkusmdmjxd.supabase.co/storage/v1/object/public/company-assets/91b3768c-9bf7-4a1c-b2be-aea61a3ff3be.png" alt="Asset Guardian" style="height: 60px; width: 60px;">
+    <h1 style="color: #dc2626; margin-top: 20px;">Password Reset Request</h1>
+  </div>
+  
+  <div style="background: #fef2f2; padding: 30px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #dc2626;">
+    <h2 style="margin-top: 0; color: #1e293b;">Hi ${firstName || 'there'}!</h2>
+    <p style="font-size: 16px; margin-bottom: 25px;">
+      We received a request to reset your password for your Asset Guardian account. Please check your email for the official password reset link from Supabase.
+    </p>
+    
+    <p style="font-size: 14px; color: #6b7280; margin-top: 20px;">
+      If you don't receive the reset email within a few minutes, please check your spam folder or contact support.
+    </p>
+  </div>
+  
+  <div style="text-align: center; font-size: 14px; color: #64748b;">
+    <p><strong>If you didn't request this password reset, please ignore this email.</strong></p>
+    <p>Your password will remain unchanged.</p>
+    <p style="margin-top: 30px;">
+      Need help? Contact us at <a href="mailto:support@assetguardian.com" style="color: #2563eb;">support@assetguardian.com</a>
+    </p>
+  </div>
+</body>
+</html>
+        `;
       } else {
         throw new Error(`Unsupported webhook type: ${webhook.type}`);
       }
