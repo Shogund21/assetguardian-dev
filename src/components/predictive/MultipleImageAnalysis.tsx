@@ -177,7 +177,26 @@ const MultipleImageAnalysis = ({ equipmentId, equipmentType, equipmentName }: Mu
 
           if (error) throw error;
 
-          if (data.status === 'success' && data.readings && data.readings.length > 0) {
+          // Handle Phase 1 enhanced responses
+          if (data.status === 'needs_better_image') {
+            const confidenceIssues = data.confidence_issues || [];
+            const issueText = confidenceIssues.map((issue: any) => 
+              `${issue.type}: ${issue.confidence}%`
+            ).join(', ');
+            
+            setImages(prev => prev.map(img => 
+              img.id === image.id ? { 
+                ...img, 
+                status: 'error' as const,
+                error: `Image quality insufficient for 98%+ confidence. Issues: ${issueText}`
+              } : img
+            ));
+          } else if (data.status === 'success' && data.readings && data.readings.length > 0) {
+            // Log Phase 1 analytics
+            if (data.phase1_analytics) {
+              console.log('Phase 1 Analytics for', image.fileName, ':', data.phase1_analytics);
+            }
+
             // Save readings to staging table
             const stagingData = data.readings.map((reading: ExtractedReading) => ({
               batch_id: batch.id,
@@ -199,6 +218,7 @@ const MultipleImageAnalysis = ({ equipmentId, equipmentType, equipmentName }: Mu
                 ...img, 
                 status: 'completed' as const, 
                 readings: data.readings,
+                phase1Analytics: data.phase1_analytics,
                 error: undefined
               } : img
             ));
@@ -207,7 +227,9 @@ const MultipleImageAnalysis = ({ equipmentId, equipmentType, equipmentName }: Mu
               img.id === image.id ? { 
                 ...img, 
                 status: 'error' as const,
-                error: 'No clear readings detected'
+                error: data.status === 'no_readings' ? 
+                  'No clear readings detected in image. Try a closer or clearer photo.' : 
+                  'No clear readings detected'
               } : img
             ));
           }
@@ -529,11 +551,17 @@ const MultipleImageAnalysis = ({ equipmentId, equipmentType, equipmentName }: Mu
                           {image.readings.slice(0, 3).map((reading, readingIndex) => (
                             <div key={readingIndex} className="text-xs bg-green-50 p-1 rounded">
                               <span className="font-medium">{reading.type}:</span> {reading.value} {reading.unit}
+                              <span className="text-green-600 ml-1">({Math.round(reading.confidence * 100)}%)</span>
                             </div>
                           ))}
                           {image.readings.length > 3 && (
                             <div className="text-xs text-muted-foreground">
                               +{image.readings.length - 3} more...
+                            </div>
+                          )}
+                          {(image as any).phase1Analytics && (
+                            <div className="text-xs text-blue-600 bg-blue-50 p-1 rounded mt-1">
+                              ✓ Multi-model validation • {(image as any).phase1Analytics.models_used} models • {Math.round((image as any).phase1Analytics.average_confidence * 100)}% avg confidence
                             </div>
                           )}
                         </div>
