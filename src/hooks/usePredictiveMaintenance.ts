@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PredictiveMaintenanceService } from '@/services/predictiveMaintenanceService';
 import { EnhancedPredictiveService, ReadingSource } from '@/services/enhancedPredictiveService';
 import { equipmentDataIntegrityService } from '@/services/equipmentDataIntegrityService';
+import { ImageAnalysisService } from '@/services/imageAnalysisService';
 import { PredictiveAlert, SensorReading } from '@/types/predictive';
 import { useToast } from '@/hooks/use-toast';
 
@@ -90,6 +91,26 @@ export const usePredictiveMaintenance = () => {
     },
   });
 
+  // Query for user's image analysis batches
+  const useImageAnalysisBatches = (limit: number = 10) => {
+    return useQuery({
+      queryKey: ['image-analysis-batches', limit],
+      queryFn: () => ImageAnalysisService.getUserBatches(limit),
+      staleTime: 60000, // Cache for 1 minute
+    });
+  };
+
+  // Mutation for saving staged readings
+  const saveStagedReadings = useMutation({
+    mutationFn: ImageAnalysisService.saveStagedReadings,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sensor-readings'] });
+      queryClient.invalidateQueries({ queryKey: ['reading-counts'] });
+      queryClient.invalidateQueries({ queryKey: ['image-analysis-batches'] });
+      queryClient.invalidateQueries({ queryKey: ['predictive-alerts'] });
+    },
+  });
+
   return {
     // Data
     alerts: alerts || [],
@@ -100,11 +121,14 @@ export const usePredictiveMaintenance = () => {
     analyzeEquipment: analyzeEquipment.mutate,
     isAnalyzing: analyzeEquipment.isPending,
     storeSensorReading: storeSensorReading.mutate,
+    saveStagedReadings: saveStagedReadings.mutate,
+    isSavingStagedReadings: saveStagedReadings.isPending,
     
     // Hooks
     useSensorReadings,
     useReadingCounts,
     useDataIntegrityCheck,
+    useImageAnalysisBatches,
   };
 };
 

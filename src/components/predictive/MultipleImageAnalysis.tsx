@@ -13,10 +13,13 @@ import {
   X, 
   Download,
   FileText,
-  Images
+  Images,
+  Save,
+  Database
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { ImageAnalysisService, type ImageAnalysisBatch } from "@/services/imageAnalysisService";
 
 interface ExtractedReading {
   type: string;
@@ -44,6 +47,8 @@ interface MultipleImageAnalysisProps {
 const MultipleImageAnalysis = ({ equipmentId, equipmentType, equipmentName }: MultipleImageAnalysisProps) => {
   const [images, setImages] = useState<ProcessedImage[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [currentBatch, setCurrentBatch] = useState<ImageAnalysisBatch | null>(null);
   const [currentProcessingIndex, setCurrentProcessingIndex] = useState(-1);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -132,72 +137,153 @@ const MultipleImageAnalysis = ({ equipmentId, equipmentType, equipmentName }: Mu
 
     setIsProcessing(true);
     const pendingImages = images.filter(img => img.status === 'pending' || img.status === 'error');
+    let totalReadings = 0;
 
-    for (let i = 0; i < pendingImages.length; i++) {
-      const image = pendingImages[i];
-      setCurrentProcessingIndex(i);
-      
-      // Update status to processing
-      setImages(prev => prev.map(img => 
-        img.id === image.id ? { ...img, status: 'processing' as const } : img
-      ));
+    try {
+      // Create a batch for this processing session
+      const batch = await ImageAnalysisService.createBatch({
+        equipment_id: equipmentId,
+        equipment_name: equipmentName,
+        equipment_type: equipmentType,
+        batch_name: `Image Analysis - ${new Date().toLocaleString()}`,
+        total_images: pendingImages.length,
+        company_id: undefined // Will be set by the service based on user context
+      });
+      setCurrentBatch(batch);
 
-      try {
-        console.log(`Processing image ${i + 1}/${pendingImages.length}:`, image.fileName);
+      for (let i = 0; i < pendingImages.length; i++) {
+        const image = pendingImages[i];
+        setCurrentProcessingIndex(i);
         
-        const { data, error } = await supabase.functions.invoke('extract-readings-from-image', {
-          body: {
-            image: image.imageData,
-            equipmentType: equipmentType || 'general',
-            fileName: image.fileName
+        // Update status to processing
+        setImages(prev => prev.map(img => 
+          img.id === image.id ? { ...img, status: 'processing' as const } : img
+        ));
+
+        try {
+          console.log(`Processing image ${i + 1}/${pendingImages.length}:`, image.fileName);
+          
+          const { data, error } = await supabase.functions.invoke('extract-readings-from-image', {
+            body: {
+              image: image.imageData,
+              equipmentType: equipmentType || 'general',
+              fileName: image.fileName
+            }
+          });
+
+          if (error) throw error;
+
+          if (data.status === 'success' && data.readings && data.readings.length > 0) {
+            // Save readings to staging table
+            const stagingData = data.readings.map((reading: ExtractedReading) => ({
+              batch_id: batch.id,
+              image_id: image.id,
+              image_filename: image.fileName,
+              equipment_id: equipmentId,
+              sensor_type: reading.type,
+              value: parseFloat(reading.value),
+              unit: reading.unit,
+              confidence: reading.confidence,
+              location_on_image: reading.location
+            }));
+
+            await ImageAnalysisService.addStagedReadings(stagingData);
+            totalReadings += data.readings.length;
+
+            setImages(prev => prev.map(img => 
+              img.id === image.id ? { 
+                ...img, 
+                status: 'completed' as const, 
+                readings: data.readings,
+                error: undefined
+              } : img
+            ));
+          } else {
+            setImages(prev => prev.map(img => 
+              img.id === image.id ? { 
+                ...img, 
+                status: 'error' as const,
+                error: 'No clear readings detected'
+              } : img
+            ));
           }
-        });
-
-        if (error) throw error;
-
-        if (data.status === 'success' && data.readings && data.readings.length > 0) {
-          setImages(prev => prev.map(img => 
-            img.id === image.id ? { 
-              ...img, 
-              status: 'completed' as const, 
-              readings: data.readings,
-              error: undefined
-            } : img
-          ));
-        } else {
+        } catch (error) {
+          console.error(`Error processing image ${image.fileName}:`, error);
           setImages(prev => prev.map(img => 
             img.id === image.id ? { 
               ...img, 
               status: 'error' as const,
-              error: 'No clear readings detected'
+              error: 'Failed to process image'
             } : img
           ));
         }
-      } catch (error) {
-        console.error(`Error processing image ${image.fileName}:`, error);
-        setImages(prev => prev.map(img => 
-          img.id === image.id ? { 
-            ...img, 
-            status: 'error' as const,
-            error: 'Failed to process image'
-          } : img
-        ));
+
+        // Small delay between processing
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
 
-      // Small delay between processing
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Update batch with final counts
+      await ImageAnalysisService.updateBatchProgress(batch.id, {
+        processed_images: pendingImages.length,
+        total_readings: totalReadings,
+        status: 'completed'
+      });
+
+    } catch (error) {
+      console.error('Error creating batch:', error);
+      toast({
+        title: "Batch Creation Failed",
+        description: "Failed to create processing batch",
+        variant: "destructive",
+      });
     }
 
     setIsProcessing(false);
     setCurrentProcessingIndex(-1);
 
     const completedImages = images.filter(img => img.status === 'completed');
-    const totalReadings = completedImages.reduce((sum, img) => sum + img.readings.length, 0);
     
     toast({
       title: "Batch Processing Complete",
       description: `Processed ${pendingImages.length} images and extracted ${totalReadings} readings.`,
     });
+  };
+
+  const saveAllReadings = async () => {
+    if (!currentBatch) {
+      toast({
+        title: "No Batch Found",
+        description: "Please process images first to create a batch",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const result = await ImageAnalysisService.saveStagedReadings(currentBatch.id);
+      
+      if (result.success) {
+        toast({
+          title: "Readings Saved Successfully",
+          description: `Saved ${result.saved_count} readings to the database and created maintenance check`,
+        });
+        
+        // Reset the current batch after successful save
+        setCurrentBatch(null);
+      } else {
+        throw new Error(result.error || 'Failed to save readings');
+      }
+    } catch (error) {
+      console.error('Error saving readings:', error);
+      toast({
+        title: "Save Failed",
+        description: error instanceof Error ? error.message : "Failed to save readings to database",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const removeImage = (imageId: string) => {
@@ -350,17 +436,34 @@ const MultipleImageAnalysis = ({ equipmentId, equipmentType, equipmentName }: Mu
                 <div className="text-sm text-muted-foreground">
                   {images.length} images • {completedImages.length} processed • {totalReadings} readings extracted
                 </div>
-                {completedImages.length > 0 && (
-                  <Button
-                    onClick={exportResults}
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-1"
-                  >
-                    <Download className="h-3 w-3" />
-                    Export
-                  </Button>
-                )}
+                <div className="flex gap-2">
+                  {currentBatch && totalReadings > 0 && (
+                    <Button
+                      onClick={saveAllReadings}
+                      disabled={isSaving}
+                      size="sm"
+                      className="flex items-center gap-1"
+                    >
+                      {isSaving ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <Save className="h-3 w-3" />
+                      )}
+                      Save All Readings
+                    </Button>
+                  )}
+                  {completedImages.length > 0 && (
+                    <Button
+                      onClick={exportResults}
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-1"
+                    >
+                      <Download className="h-3 w-3" />
+                      Export
+                    </Button>
+                  )}
+                </div>
               </div>
 
               {isProcessing && (
@@ -449,7 +552,15 @@ const MultipleImageAnalysis = ({ equipmentId, equipmentType, equipmentName }: Mu
               <Separator />
               <Card className="border-green-200 bg-green-50">
                 <CardContent className="p-4">
-                  <h4 className="font-medium text-green-800 mb-2">Analysis Summary</h4>
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium text-green-800">Analysis Summary</h4>
+                    {currentBatch && (
+                      <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                        <Database className="h-3 w-3 mr-1" />
+                        Batch Created - Ready to Save
+                      </Badge>
+                    )}
+                  </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div>
                       <div className="text-2xl font-bold text-green-700">{images.length}</div>
@@ -470,6 +581,12 @@ const MultipleImageAnalysis = ({ equipmentId, equipmentType, equipmentName }: Mu
                       <div className="text-green-600">Avg/Image</div>
                     </div>
                   </div>
+                  {currentBatch && (
+                    <div className="mt-3 text-xs text-blue-700 bg-blue-50 p-2 rounded">
+                      <strong>Batch:</strong> {currentBatch.batch_name}<br/>
+                      <strong>Status:</strong> Ready to save {totalReadings} readings to database
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </>

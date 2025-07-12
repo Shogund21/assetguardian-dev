@@ -383,6 +383,62 @@ export type Database = {
         }
         Relationships: []
       }
+      extracted_readings_staging: {
+        Row: {
+          batch_id: string | null
+          confidence: number | null
+          created_at: string
+          equipment_id: string | null
+          extracted_at: string
+          id: string
+          image_filename: string
+          image_id: string
+          is_saved: boolean | null
+          location_on_image: string | null
+          sensor_type: string
+          unit: string
+          value: number
+        }
+        Insert: {
+          batch_id?: string | null
+          confidence?: number | null
+          created_at?: string
+          equipment_id?: string | null
+          extracted_at?: string
+          id?: string
+          image_filename: string
+          image_id: string
+          is_saved?: boolean | null
+          location_on_image?: string | null
+          sensor_type: string
+          unit: string
+          value: number
+        }
+        Update: {
+          batch_id?: string | null
+          confidence?: number | null
+          created_at?: string
+          equipment_id?: string | null
+          extracted_at?: string
+          id?: string
+          image_filename?: string
+          image_id?: string
+          is_saved?: boolean | null
+          location_on_image?: string | null
+          sensor_type?: string
+          unit?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "extracted_readings_staging_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "image_analysis_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       failed_login_attempts: {
         Row: {
           attempt_count: number | null
@@ -727,6 +783,65 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      image_analysis_batches: {
+        Row: {
+          batch_name: string
+          company_id: string | null
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          equipment_id: string | null
+          equipment_name: string | null
+          equipment_type: string | null
+          id: string
+          metadata: Json | null
+          processed_images: number
+          status: string
+          total_images: number
+          total_readings: number
+        }
+        Insert: {
+          batch_name: string
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          equipment_id?: string | null
+          equipment_name?: string | null
+          equipment_type?: string | null
+          id?: string
+          metadata?: Json | null
+          processed_images?: number
+          status?: string
+          total_images?: number
+          total_readings?: number
+        }
+        Update: {
+          batch_name?: string
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          equipment_id?: string | null
+          equipment_name?: string | null
+          equipment_type?: string | null
+          id?: string
+          metadata?: Json | null
+          processed_images?: number
+          status?: string
+          total_images?: number
+          total_readings?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "image_analysis_batches_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "equipment"
             referencedColumns: ["id"]
           },
         ]
@@ -1832,6 +1947,10 @@ export type Database = {
       }
       reset_password: {
         Args: { reset_token: string; new_password: string }
+        Returns: Json
+      }
+      save_staged_readings_to_sensors: {
+        Args: { p_batch_id: string }
         Returns: Json
       }
       set_claim: {
