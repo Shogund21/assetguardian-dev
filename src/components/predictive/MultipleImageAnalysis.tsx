@@ -140,6 +140,8 @@ const MultipleImageAnalysis = ({ equipmentId, equipmentType, equipmentName }: Mu
     let totalReadings = 0;
 
     try {
+      console.log('Starting batch creation for equipment:', { equipmentId, equipmentName, equipmentType });
+      
       // Create a batch for this processing session
       const batch = await ImageAnalysisService.createBatch({
         equipment_id: equipmentId,
@@ -149,6 +151,8 @@ const MultipleImageAnalysis = ({ equipmentId, equipmentType, equipmentName }: Mu
         total_images: pendingImages.length,
         company_id: undefined // Will be set by the service based on user context
       });
+      
+      console.log('Batch created successfully:', batch);
       setCurrentBatch(batch);
 
       for (let i = 0; i < pendingImages.length; i++) {

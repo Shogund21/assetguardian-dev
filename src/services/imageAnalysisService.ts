@@ -43,17 +43,59 @@ export class ImageAnalysisService {
     total_images: number;
     company_id?: string;
   }): Promise<ImageAnalysisBatch> {
-    const { data, error } = await supabase
-      .from('image_analysis_batches')
-      .insert({
+    console.log('Creating batch with data:', batchData);
+    
+    try {
+      // Get current user
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError) {
+        console.error('Error getting user:', userError);
+        throw new Error('Authentication required');
+      }
+      
+      console.log('Current user:', userData.user?.id, userData.user?.email);
+      
+      // Get user's company if not provided
+      let companyId = batchData.company_id;
+      if (!companyId) {
+        console.log('No company_id provided, fetching user company...');
+        const { data: companyData, error: companyError } = await supabase.rpc('get_user_company');
+        if (companyError) {
+          console.error('Error getting user company:', companyError);
+          // For super admin, allow null company_id
+          console.log('Allowing null company_id for super admin');
+        } else if (companyData && companyData.length > 0) {
+          const company = companyData[0].company as { id: string; name: string };
+          companyId = company.id;
+          console.log('Found user company:', companyId);
+        }
+      }
+      
+      const insertData = {
         ...batchData,
-        created_by: (await supabase.auth.getUser()).data.user?.id
-      })
-      .select()
-      .single();
+        company_id: companyId,
+        created_by: userData.user?.id
+      };
+      
+      console.log('Inserting batch data:', insertData);
+      
+      const { data, error } = await supabase
+        .from('image_analysis_batches')
+        .insert(insertData)
+        .select()
+        .single();
 
-    if (error) throw error;
-    return data;
+      if (error) {
+        console.error('Database error creating batch:', error);
+        throw error;
+      }
+      
+      console.log('Successfully created batch:', data);
+      return data;
+    } catch (error) {
+      console.error('Error in createBatch:', error);
+      throw error;
+    }
   }
 
   // Update batch progress
