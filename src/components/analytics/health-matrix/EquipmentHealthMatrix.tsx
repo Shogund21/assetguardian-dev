@@ -61,8 +61,18 @@ const EquipmentHealthMatrix = () => {
 
   if (!healthData.length) {
     return (
-      <div className="w-full py-8 text-center text-muted-foreground">
-        <p>No equipment data available for locations. Make sure equipment is assigned to valid store numbers.</p>
+      <div className="w-full py-8 text-center space-y-3">
+        <p className="text-muted-foreground">
+          No equipment data available for health matrix.
+        </p>
+        <div className="text-sm text-muted-foreground space-y-1">
+          <p>Possible causes:</p>
+          <ul className="list-disc list-inside space-y-1">
+            <li>No equipment found in the system</li>
+            <li>Equipment locations don't match store numbers in the locations table</li>
+            <li>Date filter is too restrictive</li>
+          </ul>
+        </div>
       </div>
     );
   }
@@ -73,11 +83,11 @@ const EquipmentHealthMatrix = () => {
         <Table className="min-w-[650px]">
           <TableHeader className="bg-muted/30">
             <TableRow>
-              <TableHead className="w-[200px]">Store Number</TableHead>
+              <TableHead className="w-[200px]">Location</TableHead>
               <TableHead className="text-center">Operational</TableHead>
               <TableHead className="text-center">Needs Maintenance</TableHead>
               <TableHead className="text-center">Out of Service</TableHead>
-              <TableHead className="text-center w-[120px]">Risk Score</TableHead>
+              <TableHead className="text-center w-[120px]">Health Score</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -94,10 +104,20 @@ const EquipmentHealthMatrix = () => {
                       </span>
                     </TooltipTrigger>
                     <TooltipContent side="right" className="z-50">
-                      <p>Store #{item.location}</p>
+                      <p>
+                        {item.location.includes('(unmatched)') 
+                          ? `Location: ${item.location.replace(' (unmatched)', '')}`
+                          : `Store #${item.location}`
+                        }
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         {item.total} pieces of equipment
                       </p>
+                      {item.location.includes('(unmatched)') && (
+                        <p className="text-xs text-orange-600">
+                          Location not matched to store
+                        </p>
+                      )}
                     </TooltipContent>
                   </Tooltip>
                 </TableCell>

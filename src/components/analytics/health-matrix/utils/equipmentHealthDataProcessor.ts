@@ -1,10 +1,9 @@
 
 import { EquipmentHealthItem } from "../types";
-import { normalizeString } from "@/utils/locationMatching";
+import { normalizeString, fuzzyMatch } from "@/utils/locationMatching";
 
 /**
- * Matches equipment locations to store numbers from the database
- * with enhanced pattern matching to handle different location formats
+ * Enhanced matching function with reverse matching, fuzzy matching, and better logging
  */
 export const matchEquipmentToStoreNumber = (
   equipment: any, 
@@ -17,37 +16,71 @@ export const matchEquipmentToStoreNumber = (
   
   const normalizedEquipLocation = normalizeString(equipment.location);
   
-  // Try direct match with store number first
-  const directMatch = locationsData.find(loc => 
+  // 1. Try exact match with store number
+  const exactMatch = locationsData.find(loc => 
     normalizedEquipLocation === normalizeString(loc.store_number)
   );
   
-  if (directMatch) {
-    console.log(`Direct match found for "${equipment.name}": ${directMatch.store_number}`);
-    return directMatch.store_number;
+  if (exactMatch) {
+    console.log(`✓ Exact match found for "${equipment.name}": ${exactMatch.store_number}`);
+    return exactMatch.store_number;
   }
   
-  // Try to find a location where equipment location contains the store number
+  // 2. Try reverse match - check if store number contains equipment location
+  const reverseMatch = locationsData.find(loc => 
+    loc.store_number && normalizeString(loc.store_number).includes(normalizedEquipLocation)
+  );
+  
+  if (reverseMatch) {
+    console.log(`✓ Reverse match found for "${equipment.name}": ${reverseMatch.store_number}`);
+    return reverseMatch.store_number;
+  }
+  
+  // 3. Try equipment location contains store number
   const containsMatch = locationsData.find(loc => 
     loc.store_number && normalizedEquipLocation.includes(normalizeString(loc.store_number))
   );
   
   if (containsMatch) {
-    console.log(`Contains match found for "${equipment.name}": ${containsMatch.store_number}`);
+    console.log(`✓ Contains match found for "${equipment.name}": ${containsMatch.store_number}`);
     return containsMatch.store_number;
   }
   
-  // Try to match with location name
-  const nameMatch = locationsData.find(loc => 
-    loc.name && normalizedEquipLocation.includes(normalizeString(loc.name))
+  // 4. Try exact match with location name
+  const nameExactMatch = locationsData.find(loc => 
+    loc.name && normalizedEquipLocation === normalizeString(loc.name)
   );
   
-  if (nameMatch) {
-    console.log(`Name match found for "${equipment.name}": ${nameMatch.store_number}`);
-    return nameMatch.store_number;
+  if (nameExactMatch) {
+    console.log(`✓ Name exact match found for "${equipment.name}": ${nameExactMatch.store_number}`);
+    return nameExactMatch.store_number;
   }
   
-  console.log(`No match found for location "${equipment.location}" (equipment: ${equipment.name})`);
+  // 5. Try partial match with location name
+  const nameContainsMatch = locationsData.find(loc => 
+    loc.name && (
+      normalizedEquipLocation.includes(normalizeString(loc.name)) ||
+      normalizeString(loc.name).includes(normalizedEquipLocation)
+    )
+  );
+  
+  if (nameContainsMatch) {
+    console.log(`✓ Name contains match found for "${equipment.name}": ${nameContainsMatch.store_number}`);
+    return nameContainsMatch.store_number;
+  }
+  
+  // 6. Try fuzzy matching as last resort
+  const fuzzyMatchResult = locationsData.find(loc => {
+    return (loc.store_number && fuzzyMatch(equipment.location, loc.store_number, 0.7)) ||
+           (loc.name && fuzzyMatch(equipment.location, loc.name, 0.7));
+  });
+  
+  if (fuzzyMatchResult) {
+    console.log(`✓ Fuzzy match found for "${equipment.name}": ${fuzzyMatchResult.store_number}`);
+    return fuzzyMatchResult.store_number;
+  }
+  
+  console.log(`✗ No match found for location "${equipment.location}" (equipment: ${equipment.name})`);
   return undefined;
 };
 
@@ -70,8 +103,57 @@ export const calculateRiskMetrics = (operational: number, total: number): { risk
 };
 
 /**
+ * Process unmatched equipment into fallback location groups
+ */
+export const processUnmatchedEquipment = (
+  equipmentData: any[]
+): EquipmentHealthItem[] => {
+  const locationMap = new Map<string, EquipmentHealthItem>();
+  
+  equipmentData.forEach(equipment => {
+    if (!equipment.location) return;
+    
+    const location = equipment.location;
+    
+    if (!locationMap.has(location)) {
+      locationMap.set(location, {
+        location: `${location} (unmatched)`,
+        operational: 0,
+        needsMaintenance: 0,
+        outOfService: 0,
+        total: 0,
+        riskScore: 0,
+        riskLevel: "low"
+      });
+    }
+    
+    const locationData = locationMap.get(location)!;
+    locationData.total += 1;
+    
+    if (equipment.status === "Operational") {
+      locationData.operational += 1;
+    } else if (equipment.status === "Needs Maintenance") {
+      locationData.needsMaintenance += 1;
+    } else if (equipment.status === "Out of Service") {
+      locationData.outOfService += 1;
+    }
+  });
+  
+  // Calculate risk scores
+  locationMap.forEach(location => {
+    if (location.total > 0) {
+      const { riskScore, riskLevel } = calculateRiskMetrics(location.operational, location.total);
+      location.riskScore = riskScore;
+      location.riskLevel = riskLevel;
+    }
+  });
+  
+  return Array.from(locationMap.values()).sort((a, b) => a.riskScore - b.riskScore);
+};
+
+/**
  * Process equipment data and location data into health matrix format
- * with improved matching logic to handle various location formats
+ * with improved matching logic and fallback for unmatched equipment
  */
 export const processEquipmentHealthData = (
   equipmentData: any[],
@@ -126,24 +208,30 @@ export const processEquipmentHealthData = (
     });
   });
   
-  // Map equipment to store numbers and count by status
-  let matchedCount = 0;
-  let unmatchedCount = 0;
+  // Separate matched and unmatched equipment
+  const matchedEquipment: any[] = [];
+  const unmatchedEquipment: any[] = [];
   
   equipmentData.forEach(equipment => {
     const matchedStoreNumber = matchEquipmentToStoreNumber(equipment, locationsData);
     
-    if (!matchedStoreNumber) {
-      unmatchedCount++;
-      return;
+    if (matchedStoreNumber) {
+      matchedEquipment.push({ ...equipment, matchedStoreNumber });
+    } else {
+      unmatchedEquipment.push(equipment);
     }
-    
-    matchedCount++;
+  });
+  
+  console.log(`Equipment matching results: ${matchedEquipment.length} matched, ${unmatchedEquipment.length} unmatched`);
+  
+  // Process matched equipment
+  matchedEquipment.forEach(equipment => {
+    const storeNumber = equipment.matchedStoreNumber;
     
     // Get or create the health data entry for this store number
-    if (!storeNumberMap.has(matchedStoreNumber)) {
-      storeNumberMap.set(matchedStoreNumber, {
-        location: matchedStoreNumber,
+    if (!storeNumberMap.has(storeNumber)) {
+      storeNumberMap.set(storeNumber, {
+        location: storeNumber,
         operational: 0,
         needsMaintenance: 0,
         outOfService: 0,
@@ -153,7 +241,7 @@ export const processEquipmentHealthData = (
       });
     }
     
-    const locationData = storeNumberMap.get(matchedStoreNumber)!;
+    const locationData = storeNumberMap.get(storeNumber)!;
     locationData.total += 1;
     
     // Count by status
@@ -166,8 +254,6 @@ export const processEquipmentHealthData = (
     }
   });
   
-  console.log(`Equipment matching results: ${matchedCount} matched, ${unmatchedCount} unmatched`);
-  
   // Calculate risk scores and levels for each location
   storeNumberMap.forEach(location => {
     if (location.total > 0) {
@@ -178,14 +264,25 @@ export const processEquipmentHealthData = (
   });
   
   // Convert map to array and sort by risk score (ascending) so highest risk is first
-  const processedData = Array.from(storeNumberMap.values())
+  const matchedData = Array.from(storeNumberMap.values())
     .filter(item => item.total > 0) // Only show store numbers with equipment
     .sort((a, b) => a.riskScore - b.riskScore);
   
-  console.log('Final processed health data:', processedData.length, 'locations with equipment');
-  processedData.forEach(data => {
-    console.log(`Store ${data.location}: ${data.operational} operational, ${data.needsMaintenance} needs maintenance, ${data.outOfService} out of service`);
+  // Process unmatched equipment as fallback locations
+  const unmatchedData = unmatchedEquipment.length > 0 
+    ? processUnmatchedEquipment(unmatchedEquipment)
+    : [];
+  
+  // Combine matched and unmatched data
+  const allData = [...matchedData, ...unmatchedData].sort((a, b) => a.riskScore - b.riskScore);
+  
+  console.log('Final processed health data:', allData.length, 'total locations');
+  console.log(`  - ${matchedData.length} matched store locations`);
+  console.log(`  - ${unmatchedData.length} unmatched location groups`);
+  
+  allData.forEach(data => {
+    console.log(`Location ${data.location}: ${data.operational} operational, ${data.needsMaintenance} needs maintenance, ${data.outOfService} out of service`);
   });
   
-  return processedData;
+  return allData;
 };
