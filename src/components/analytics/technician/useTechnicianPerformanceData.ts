@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAnalyticsFilters } from "../AnalyticsFilterContext";
+import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { BarChartDataItem } from "@/components/charts/BarChart";
 
 interface TechnicianStats extends BarChartDataItem {
@@ -16,16 +17,20 @@ interface TechnicianStats extends BarChartDataItem {
 
 export function useTechnicianPerformanceData() {
   const { dateRange } = useAnalyticsFilters();
+  const { companyId } = useCompanyFilter();
   const [chartData, setChartData] = useState<TechnicianStats[]>([]);
   const isMobile = useIsMobile();
 
   // Fetch technicians for names
   const { data: technicians } = useQuery({
-    queryKey: ['technicians'],
+    queryKey: ['technicians', companyId],
     queryFn: async () => {
+      if (!companyId) return [];
+      
       const { data, error } = await supabase
         .from('technicians')
-        .select('*');
+        .select('*')
+        .eq('company_id', companyId);
       
       if (error) {
         console.error('Error fetching technicians:', error);
@@ -33,15 +38,19 @@ export function useTechnicianPerformanceData() {
       }
       return data || [];
     },
+    enabled: !!companyId
   });
 
   // Fetch maintenance checks
   const { data: maintenanceData, isLoading } = useQuery({
-    queryKey: ['maintenance_checks_by_technician', dateRange],
+    queryKey: ['maintenance_checks_by_technician', companyId, dateRange],
     queryFn: async () => {
+      if (!companyId) return [];
+      
       let query = supabase
         .from('hvac_maintenance_checks')
-        .select('*');
+        .select('*')
+        .eq('company_id', companyId);
       
       if (dateRange.from) {
         query = query.gte('check_date', dateRange.from.toISOString());
@@ -59,6 +68,7 @@ export function useTechnicianPerformanceData() {
       }
       return data || [];
     },
+    enabled: !!companyId
   });
 
   useEffect(() => {
