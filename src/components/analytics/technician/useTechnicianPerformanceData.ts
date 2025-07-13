@@ -21,22 +21,21 @@ export function useTechnicianPerformanceData() {
   const [chartData, setChartData] = useState<TechnicianStats[]>([]);
   const isMobile = useIsMobile();
 
-  // Fetch technicians for names
+  // Fetch technicians using the proper function that handles RLS
   const { data: technicians } = useQuery({
-    queryKey: ['technicians', companyId],
+    queryKey: ['technicians_with_roles', companyId],
     queryFn: async () => {
       if (!companyId) return [];
       
-      const { data, error } = await supabase
-        .from('technicians')
-        .select('*')
-        .eq('company_id', companyId);
+      const { data, error } = await supabase.rpc('get_technicians_with_roles');
       
       if (error) {
         console.error('Error fetching technicians:', error);
         throw error;
       }
-      return data || [];
+      
+      // Filter by company_id since the function returns all technicians
+      return (data || []).filter(tech => tech.company_id === companyId);
     },
     enabled: !!companyId
   });
