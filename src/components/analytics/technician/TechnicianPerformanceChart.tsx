@@ -30,12 +30,14 @@ const TechnicianPerformanceChart: React.FC<TechnicianPerformanceChartProps> = ({
   const isMobile = useIsMobile();
   const [truncatedNames, setTruncatedNames] = useState<Record<string, boolean>>({});
   
-  // Process data to include percentage
-  const totalCompleted = data.reduce((sum, tech) => sum + tech.completed, 0);
+  // Process data to include percentage based on total tasks
   const processedData = data.map(tech => ({
     ...tech,
-    percentage: totalCompleted > 0 ? Math.round((tech.completed / totalCompleted) * 100) : 0
+    percentage: tech.total > 0 ? Math.round((tech.completed / tech.total) * 100) : 0
   }));
+  
+  console.log('Chart data received:', data);
+  console.log('Processed chart data:', processedData);
   
   // Function to check if a name is truncated and store the result
   const checkIfTruncated = (name: string) => {
@@ -137,7 +139,11 @@ const TechnicianPerformanceChart: React.FC<TechnicianPerformanceChartProps> = ({
             }} 
             formatter={(value, name) => {
               if (name === "completed") {
-                return [`${value} tasks`, 'Completed Tasks'];
+                return [`${value} tasks`, 'Completed'];
+              } else if (name === "pending") {
+                return [`${value} tasks`, 'Pending'];
+              } else if (name === "issues") {
+                return [`${value} tasks`, 'Issues Found'];
               }
               return [value, name];
             }}
@@ -145,20 +151,32 @@ const TechnicianPerformanceChart: React.FC<TechnicianPerformanceChartProps> = ({
           />
           <Bar 
             dataKey="completed" 
-            name="Completed Tasks" 
-            fill="#4CAF50" 
-            radius={[3, 3, 0, 0]}
+            stackId="tasks"
+            name="completed" 
+            fill="#22c55e" 
+          />
+          <Bar 
+            dataKey="pending" 
+            stackId="tasks"
+            name="pending" 
+            fill="#f59e0b" 
+          />
+          <Bar 
+            dataKey="issues" 
+            stackId="tasks"
+            name="issues" 
+            fill="#ef4444" 
           >
             <LabelList 
-              dataKey="percentage" 
+              dataKey="total" 
               position="right" 
               style={{ 
                 fontSize: 11,
                 fontWeight: 'bold',
                 fill: '#333'
               }}
-              formatter={(value: number) => `${value}%`}
-              offset={16}
+              formatter={(value: number) => `${value} total`}
+              offset={10}
             />
           </Bar>
         </BarChart>

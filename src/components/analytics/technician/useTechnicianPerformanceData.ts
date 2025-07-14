@@ -150,6 +150,7 @@ export function useTechnicianPerformanceData() {
         .slice(0, 5); // Always show top 5
       
       console.log('Final formatted data:', formattedData);
+      console.log('Setting chart data with:', formattedData.length, 'technicians');
       
       if (formattedData.length > 0) {
         setChartData(formattedData);
