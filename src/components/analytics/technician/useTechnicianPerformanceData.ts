@@ -71,6 +71,13 @@ export function useTechnicianPerformanceData() {
   });
 
   useEffect(() => {
+    console.log('Processing technician performance data:', {
+      technicianCount: technicians?.length || 0,
+      maintenanceDataCount: maintenanceData?.length || 0,
+      companyId,
+      dateRange
+    });
+
     // Sample data that will be used when no data is available
     const sampleData = [
       { name: "Jorge Salazar", completed: 24, pending: 8, issues: 6, total: 38 },
@@ -80,59 +87,81 @@ export function useTechnicianPerformanceData() {
       { name: "Ana Martinez", completed: 10, pending: 2, issues: 0, total: 12 }
     ];
     
-    if (maintenanceData && technicians) {
-      // Process real data if available
-      try {
-        // Create a lookup map for technician names
-        const technicianMap = new Map();
-        technicians.forEach(tech => {
-          technicianMap.set(tech.id, `${tech.firstName} ${tech.lastName}`);
-        });
-        
-        // Group maintenance checks by technician
-        const techPerformance: Record<string, { completed: number; pending: number; issues: number }> = {};
+    if (technicians && technicians.length > 0) {
+      console.log('Available technicians:', technicians.map(t => ({ id: t.id, name: `${t.firstName} ${t.lastName}` })));
+      
+      // Create a lookup map for technician names
+      const technicianMap = new Map();
+      technicians.forEach(tech => {
+        technicianMap.set(tech.id, `${tech.firstName} ${tech.lastName}`);
+      });
+      
+      // Initialize performance data for all technicians
+      const techPerformance: Record<string, { completed: number; pending: number; issues: number }> = {};
+      technicians.forEach(tech => {
+        techPerformance[tech.id] = { completed: 0, pending: 0, issues: 0 };
+      });
+      
+      // Process maintenance data if available
+      if (maintenanceData && maintenanceData.length > 0) {
+        console.log('Processing maintenance checks:', maintenanceData.length);
         
         maintenanceData.forEach(check => {
+          console.log('Processing check:', {
+            id: check.id,
+            technician_id: check.technician_id,
+            status: check.status,
+            check_date: check.check_date
+          });
+          
           if (!check.technician_id) return;
           
           const techId = check.technician_id;
           if (!techPerformance[techId]) {
-            techPerformance[techId] = { completed: 0, pending: 0, issues: 0 };
+            console.log(`Technician ${techId} not found in company technicians, skipping`);
+            return;
           }
           
+          // Handle all possible status values
           if (check.status === 'completed') {
             techPerformance[techId].completed += 1;
           } else if (check.status === 'pending') {
             techPerformance[techId].pending += 1;
           } else if (check.status === 'issue_found') {
             techPerformance[techId].issues += 1;
+          } else {
+            console.log(`Unknown status: ${check.status}, treating as pending`);
+            techPerformance[techId].pending += 1;
           }
         });
-        
-        // Format for chart - convert to array, add names, and sort by completed tasks (not total)
-        const formattedData = Object.entries(techPerformance)
-          .map(([techId, stats]) => ({
-            name: technicianMap.get(techId) || 'Unknown Technician',
-            ...stats,
-            total: stats.completed + stats.pending + stats.issues
-          }))
-          .sort((a, b) => b.completed - a.completed) // Sort by completed tasks, not total
-          .slice(0, 5); // Always show top 5 regardless of screen size
-        
-        if (formattedData.length > 0) {
-          setChartData(formattedData);
-        } else {
-          setChartData(sampleData);
-        }
-      } catch (error) {
-        console.error("Error processing technician data:", error);
+      } else {
+        console.log('No maintenance data available');
+      }
+      
+      // Format for chart - convert to array, add names, and sort by total tasks
+      const formattedData = Object.entries(techPerformance)
+        .map(([techId, stats]) => ({
+          name: technicianMap.get(techId) || 'Unknown Technician',
+          ...stats,
+          total: stats.completed + stats.pending + stats.issues
+        }))
+        .filter(tech => tech.total > 0 || technicians.length <= 5) // Show all if few technicians, or only those with tasks
+        .sort((a, b) => b.total - a.total) // Sort by total tasks
+        .slice(0, 5); // Always show top 5
+      
+      console.log('Final formatted data:', formattedData);
+      
+      if (formattedData.length > 0) {
+        setChartData(formattedData);
+      } else {
+        console.log('No performance data available, using sample data');
         setChartData(sampleData);
       }
     } else {
-      // Always use sample data if no real data is available
+      console.log('No technicians available, using sample data');
       setChartData(sampleData);
     }
-  }, [maintenanceData, technicians, isMobile]);
+  }, [maintenanceData, technicians, companyId, dateRange]);
 
   return { chartData, isLoading };
 }
