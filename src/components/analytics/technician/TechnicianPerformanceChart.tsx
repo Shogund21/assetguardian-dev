@@ -36,8 +36,13 @@ const TechnicianPerformanceChart: React.FC<TechnicianPerformanceChartProps> = ({
     percentage: tech.total > 0 ? Math.round((tech.completed / tech.total) * 100) : 0
   }));
   
-  console.log('Chart data received:', data);
-  console.log('Processed chart data:', processedData);
+  if (data.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64 text-muted-foreground">
+        No technician performance data available
+      </div>
+    );
+  }
   
   // Function to check if a name is truncated and store the result
   const checkIfTruncated = (name: string) => {
@@ -166,19 +171,7 @@ const TechnicianPerformanceChart: React.FC<TechnicianPerformanceChartProps> = ({
             stackId="tasks"
             name="issues" 
             fill="#ef4444" 
-          >
-            <LabelList 
-              dataKey="total" 
-              position="right" 
-              style={{ 
-                fontSize: 11,
-                fontWeight: 'bold',
-                fill: '#333'
-              }}
-              formatter={(value: number) => `${value} total`}
-              offset={10}
-            />
-          </Bar>
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>
