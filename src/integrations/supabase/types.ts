@@ -290,6 +290,80 @@ export type Database = {
           },
         ]
       }
+      condenser_maintenance: {
+        Row: {
+          approach_temperature: number | null
+          chemicals_used: string[] | null
+          cleaning_method: string | null
+          coil_condition_after: string | null
+          coil_condition_before: string | null
+          created_at: string | null
+          efficiency_improvement_percent: number | null
+          equipment_id: string
+          id: string
+          next_service_date: string | null
+          notes: string | null
+          service_cost: number | null
+          service_date: string
+          service_type: string
+          technician_name: string | null
+          updated_at: string | null
+          water_flow_rate_gpm: number | null
+          water_temperature_in: number | null
+          water_temperature_out: number | null
+        }
+        Insert: {
+          approach_temperature?: number | null
+          chemicals_used?: string[] | null
+          cleaning_method?: string | null
+          coil_condition_after?: string | null
+          coil_condition_before?: string | null
+          created_at?: string | null
+          efficiency_improvement_percent?: number | null
+          equipment_id: string
+          id?: string
+          next_service_date?: string | null
+          notes?: string | null
+          service_cost?: number | null
+          service_date: string
+          service_type: string
+          technician_name?: string | null
+          updated_at?: string | null
+          water_flow_rate_gpm?: number | null
+          water_temperature_in?: number | null
+          water_temperature_out?: number | null
+        }
+        Update: {
+          approach_temperature?: number | null
+          chemicals_used?: string[] | null
+          cleaning_method?: string | null
+          coil_condition_after?: string | null
+          coil_condition_before?: string | null
+          created_at?: string | null
+          efficiency_improvement_percent?: number | null
+          equipment_id?: string
+          id?: string
+          next_service_date?: string | null
+          notes?: string | null
+          service_cost?: number | null
+          service_date?: string
+          service_type?: string
+          technician_name?: string | null
+          updated_at?: string | null
+          water_flow_rate_gpm?: number | null
+          water_temperature_in?: number | null
+          water_temperature_out?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "condenser_maintenance_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "equipment"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       equipment: {
         Row: {
           company_id: string | null
@@ -528,6 +602,71 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hvac_diagnostic_sessions: {
+        Row: {
+          analyst_notes: string | null
+          confidence_score: number | null
+          cost_analysis: Json | null
+          created_at: string | null
+          created_by: string | null
+          critical_findings: string[] | null
+          data_sources_used: string[] | null
+          diagnostic_type: string
+          equipment_id: string
+          estimated_remaining_life_months: number | null
+          id: string
+          maintenance_priority: string | null
+          overall_health_score: number | null
+          recommendations: string[] | null
+          session_date: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          analyst_notes?: string | null
+          confidence_score?: number | null
+          cost_analysis?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          critical_findings?: string[] | null
+          data_sources_used?: string[] | null
+          diagnostic_type: string
+          equipment_id: string
+          estimated_remaining_life_months?: number | null
+          id?: string
+          maintenance_priority?: string | null
+          overall_health_score?: number | null
+          recommendations?: string[] | null
+          session_date?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          analyst_notes?: string | null
+          confidence_score?: number | null
+          cost_analysis?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          critical_findings?: string[] | null
+          data_sources_used?: string[] | null
+          diagnostic_type?: string
+          equipment_id?: string
+          estimated_remaining_life_months?: number | null
+          id?: string
+          maintenance_priority?: string | null
+          overall_health_score?: number | null
+          recommendations?: string[] | null
+          session_date?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hvac_diagnostic_sessions_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "equipment"
             referencedColumns: ["id"]
           },
         ]
@@ -978,6 +1117,65 @@ export type Database = {
           },
         ]
       }
+      manual_maintenance_logs: {
+        Row: {
+          cost_usd: number | null
+          created_at: string | null
+          description: string
+          equipment_id: string
+          follow_up_date: string | null
+          follow_up_required: boolean | null
+          id: string
+          labor_hours: number | null
+          log_date: string
+          maintenance_type: string
+          parts_replaced: string[] | null
+          severity: string | null
+          technician_name: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cost_usd?: number | null
+          created_at?: string | null
+          description: string
+          equipment_id: string
+          follow_up_date?: string | null
+          follow_up_required?: boolean | null
+          id?: string
+          labor_hours?: number | null
+          log_date: string
+          maintenance_type: string
+          parts_replaced?: string[] | null
+          severity?: string | null
+          technician_name?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cost_usd?: number | null
+          created_at?: string | null
+          description?: string
+          equipment_id?: string
+          follow_up_date?: string | null
+          follow_up_required?: boolean | null
+          id?: string
+          labor_hours?: number | null
+          log_date?: string
+          maintenance_type?: string
+          parts_replaced?: string[] | null
+          severity?: string | null
+          technician_name?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manual_maintenance_logs_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "equipment"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       password_reset_requests: {
         Row: {
           created_at: string
@@ -1230,6 +1428,74 @@ export type Database = {
         }
         Relationships: []
       }
+      refrigerant_reports: {
+        Row: {
+          certification_number: string | null
+          charge_amount_lbs: number | null
+          created_at: string | null
+          equipment_id: string
+          id: string
+          leak_locations: string[] | null
+          leak_severity: string | null
+          leak_test_passed: boolean
+          next_test_date: string | null
+          pressure_high_side: number | null
+          pressure_low_side: number | null
+          refrigerant_type: string
+          report_date: string
+          subcooling_temp: number | null
+          superheat_temp: number | null
+          technician_name: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          certification_number?: string | null
+          charge_amount_lbs?: number | null
+          created_at?: string | null
+          equipment_id: string
+          id?: string
+          leak_locations?: string[] | null
+          leak_severity?: string | null
+          leak_test_passed: boolean
+          next_test_date?: string | null
+          pressure_high_side?: number | null
+          pressure_low_side?: number | null
+          refrigerant_type: string
+          report_date: string
+          subcooling_temp?: number | null
+          superheat_temp?: number | null
+          technician_name?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          certification_number?: string | null
+          charge_amount_lbs?: number | null
+          created_at?: string | null
+          equipment_id?: string
+          id?: string
+          leak_locations?: string[] | null
+          leak_severity?: string | null
+          leak_test_passed?: boolean
+          next_test_date?: string | null
+          pressure_high_side?: number | null
+          pressure_low_side?: number | null
+          refrigerant_type?: string
+          report_date?: string
+          subcooling_temp?: number | null
+          superheat_temp?: number | null
+          technician_name?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "refrigerant_reports_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "equipment"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sensor_readings: {
         Row: {
           created_at: string
@@ -1463,6 +1729,74 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      vibration_analysis: {
+        Row: {
+          alignment_status: string | null
+          amplitude_mils: number | null
+          analysis_date: string
+          analyst_name: string | null
+          bearing_condition: string | null
+          created_at: string | null
+          equipment_id: string
+          frequency_hz: number | null
+          id: string
+          measurement_location: string
+          motor_condition: string | null
+          next_analysis_date: string | null
+          overall_condition: string | null
+          recommendations: string | null
+          updated_at: string | null
+          vibration_acceleration: number | null
+          vibration_velocity: number | null
+        }
+        Insert: {
+          alignment_status?: string | null
+          amplitude_mils?: number | null
+          analysis_date: string
+          analyst_name?: string | null
+          bearing_condition?: string | null
+          created_at?: string | null
+          equipment_id: string
+          frequency_hz?: number | null
+          id?: string
+          measurement_location: string
+          motor_condition?: string | null
+          next_analysis_date?: string | null
+          overall_condition?: string | null
+          recommendations?: string | null
+          updated_at?: string | null
+          vibration_acceleration?: number | null
+          vibration_velocity?: number | null
+        }
+        Update: {
+          alignment_status?: string | null
+          amplitude_mils?: number | null
+          analysis_date?: string
+          analyst_name?: string | null
+          bearing_condition?: string | null
+          created_at?: string | null
+          equipment_id?: string
+          frequency_hz?: number | null
+          id?: string
+          measurement_location?: string
+          motor_condition?: string | null
+          next_analysis_date?: string | null
+          overall_condition?: string | null
+          recommendations?: string | null
+          updated_at?: string | null
+          vibration_acceleration?: number | null
+          vibration_velocity?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vibration_analysis_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "equipment"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
