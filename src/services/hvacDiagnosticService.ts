@@ -34,7 +34,7 @@ export class HvacDiagnosticService {
   /**
    * Comprehensive HVAC diagnostic analysis that integrates all supplemental data sources
    */
-  static async performComprehensiveDiagnostic(equipmentId: string): Promise<DiagnosticSession> {
+  static async performComprehensiveDiagnostic(equipmentId: string): Promise<{session: DiagnosticSession, fullResult: any}> {
     try {
       console.log('Starting comprehensive HVAC diagnostic for equipment:', equipmentId);
 
@@ -55,7 +55,10 @@ export class HvacDiagnosticService {
       );
       
       console.log('Comprehensive diagnostic completed:', diagnosticSession.id);
-      return diagnosticSession;
+      return {
+        session: diagnosticSession,
+        fullResult: analysisResult
+      };
       
     } catch (error) {
       console.error('Comprehensive diagnostic failed:', error);

@@ -101,9 +101,10 @@ const ChillerHealthDiagnostic: React.FC<ChillerHealthDiagnosticProps> = ({
     try {
       setIsAnalyzing(true);
       
-      const diagnosticSession = await HvacDiagnosticService.performComprehensiveDiagnostic(equipmentId);
+      // Get both the session and full AI analysis result
+      const { session: diagnosticSession, fullResult } = await HvacDiagnosticService.performComprehensiveDiagnostic(equipmentId);
       
-      // The diagnostic session contains the AI analysis results
+      // Convert the AI result to our display format
       const result = {
         asset_id: diagnosticSession.equipment_id,
         diagnostic_type: diagnosticSession.diagnostic_type,
@@ -114,8 +115,14 @@ const ChillerHealthDiagnostic: React.FC<ChillerHealthDiagnosticProps> = ({
         maintenance_priority: diagnosticSession.maintenance_priority,
         critical_findings: diagnosticSession.critical_findings,
         recommendations: diagnosticSession.recommendations,
-        component_analysis: diagnosticSession.cost_analysis?.component_analysis || {},
-        predictive_timeline: [],
+        component_analysis: fullResult?.component_analysis || {
+          compressor: { condition: 'good', failure_probability_12_months: 0, key_indicators: [], recommended_action: 'No detailed analysis available' },
+          bearing_system: { condition: 'good', failure_probability_12_months: 0, key_indicators: [], recommended_action: 'No detailed analysis available' },
+          refrigerant_system: { condition: 'good', failure_probability_12_months: 0, key_indicators: [], recommended_action: 'No detailed analysis available' },
+          motor: { condition: 'good', failure_probability_12_months: 0, key_indicators: [], recommended_action: 'No detailed analysis available' },
+          condenser: { condition: 'good', failure_probability_12_months: 0, key_indicators: [], recommended_action: 'No detailed analysis available' }
+        },
+        predictive_timeline: fullResult?.predictive_timeline || [],
         cost_analysis: diagnosticSession.cost_analysis || {},
         data_sources_used: diagnosticSession.data_sources_used,
         analyst_notes: diagnosticSession.analyst_notes,
