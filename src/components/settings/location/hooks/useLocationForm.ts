@@ -62,9 +62,6 @@ export const useLocationForm = (
       // Use the store_number as the name if name is empty or just whitespace
       const locationName = values.name?.trim() || values.store_number;
       
-      // Get authenticated user from supabase
-      const user = sessionData.session.user;
-      
       // Get the company_id from initialData, context, or use null
       const company_id = initialData?.company_id || currentCompany?.id || null;
       
@@ -72,9 +69,7 @@ export const useLocationForm = (
         store_number: values.store_number,
         name: locationName,
         is_active: values.is_active,
-        company_id,
-        // Only add created_by on new records, not updates
-        ...(initialData?.id ? {} : { created_by: user.id })
+        company_id
       };
 
       console.log("Prepared location data:", locationData);
