@@ -1,4 +1,3 @@
-
 export interface MaintenanceCheck {
   id: string;
   equipment_id: string;
@@ -25,7 +24,7 @@ export interface MaintenanceCheck {
     lastName: string;
   };
   
-  // Location relationship
+  // Location relationship - this will now properly contain the selected location
   location?: MaintenanceLocation;
 
   // Standard HVAC fields

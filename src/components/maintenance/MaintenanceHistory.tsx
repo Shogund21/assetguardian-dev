@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { MaintenanceCheck, MaintenanceLocation } from "@/types/maintenance";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,7 +28,7 @@ const MaintenanceHistory = () => {
         return;
       }
       
-      // Use the new RPC function for better security and performance
+      // Use the updated RPC function for better security and performance
       const { data, error } = await supabase.rpc('get_maintenance_history', {
         p_equipment_id: null,
         p_limit: 500,
@@ -45,7 +44,6 @@ const MaintenanceHistory = () => {
       console.log("Fetched maintenance data via RPC:", data);
 
       // Transform the RPC data to match MaintenanceCheck interface
-      // Preserve ALL fields from the maintenance check record
       const processedData = (data || []).map(check => ({
         // Spread all fields from the check to preserve equipment-specific data
         ...check,
@@ -57,6 +55,7 @@ const MaintenanceHistory = () => {
         status: check.status,
         notes: check.notes,
         company_id: check.company_id,
+        location_id: check.location_id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         equipment: {
@@ -68,6 +67,11 @@ const MaintenanceHistory = () => {
           firstName: check.technician_name?.split(' ')[0] || '',
           lastName: check.technician_name?.split(' ').slice(1).join(' ') || ''
         },
+        // Create location object from the proper location data
+        location: check.location_name ? {
+          name: check.location_name,
+          store_number: check.location_store_number
+        } : undefined,
         // All equipment-specific fields are now properly returned from the RPC function
       })) as MaintenanceCheck[];
       
