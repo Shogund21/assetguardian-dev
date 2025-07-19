@@ -45,7 +45,11 @@ const MaintenanceHistory = () => {
       console.log("Fetched maintenance data via RPC:", data);
 
       // Transform the RPC data to match MaintenanceCheck interface
+      // Preserve ALL fields from the maintenance check record
       const processedData = (data || []).map(check => ({
+        // Spread all fields from the check to preserve equipment-specific data
+        ...check,
+        // Override specific fields that need transformation
         id: check.id,
         equipment_id: check.equipment_id,
         technician_id: check.technician_id,
@@ -64,9 +68,9 @@ const MaintenanceHistory = () => {
           firstName: check.technician_name?.split(' ')[0] || '',
           lastName: check.technician_name?.split(' ').slice(1).join(' ') || ''
         },
-        // Ensure required elevator fields are present with default values
-        unusual_noise_elevator: false,
-        vibration_elevator: false,
+        // Ensure required elevator fields are present with default values if not in data
+        unusual_noise_elevator: check.unusual_noise_elevator || false,
+        vibration_elevator: check.vibration_elevator || false,
       })) as MaintenanceCheck[];
       
       setMaintenanceChecks(processedData);
