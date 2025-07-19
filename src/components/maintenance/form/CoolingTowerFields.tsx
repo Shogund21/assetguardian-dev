@@ -1,5 +1,6 @@
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 
 interface CoolingTowerFieldsProps {
@@ -63,6 +64,52 @@ const CoolingTowerFields = ({ form }: CoolingTowerFieldsProps) => {
             )}
           />
         ))}
+      </div>
+      
+      {/* Conductivity Measurements Section */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">Water Conductivity Measurements</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField
+            control={form.control}
+            name="city_conductivity_us_cm"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>City Conductivity (μS/cm)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Enter city conductivity"
+                    className="bg-white"
+                    {...field}
+                    onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="tower_conductivity_us_cm"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tower Conductivity (μS/cm)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Enter tower conductivity"
+                    className="bg-white"
+                    {...field}
+                    onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
       </div>
     </div>
   );

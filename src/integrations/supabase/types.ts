@@ -681,6 +681,7 @@ export type Database = {
           check_date: string | null
           chiller_pressure_reading: number | null
           chiller_temperature_reading: number | null
+          city_conductivity_us_cm: number | null
           cleanliness_level: string | null
           coils_condition: string | null
           company_id: string | null
@@ -733,6 +734,7 @@ export type Database = {
           technician_id: string | null
           toilet_paper_supply: string | null
           toilet_status: string | null
+          tower_conductivity_us_cm: number | null
           troubleshooting_notes: string | null
           unusual_noise: boolean | null
           unusual_noise_description: string | null
@@ -754,6 +756,7 @@ export type Database = {
           check_date?: string | null
           chiller_pressure_reading?: number | null
           chiller_temperature_reading?: number | null
+          city_conductivity_us_cm?: number | null
           cleanliness_level?: string | null
           coils_condition?: string | null
           company_id?: string | null
@@ -808,6 +811,7 @@ export type Database = {
           technician_id?: string | null
           toilet_paper_supply?: string | null
           toilet_status?: string | null
+          tower_conductivity_us_cm?: number | null
           troubleshooting_notes?: string | null
           unusual_noise?: boolean | null
           unusual_noise_description?: string | null
@@ -829,6 +833,7 @@ export type Database = {
           check_date?: string | null
           chiller_pressure_reading?: number | null
           chiller_temperature_reading?: number | null
+          city_conductivity_us_cm?: number | null
           cleanliness_level?: string | null
           coils_condition?: string | null
           company_id?: string | null
@@ -883,6 +888,7 @@ export type Database = {
           technician_id?: string | null
           toilet_paper_supply?: string | null
           toilet_status?: string | null
+          tower_conductivity_us_cm?: number | null
           troubleshooting_notes?: string | null
           unusual_noise?: boolean | null
           unusual_noise_description?: string | null
