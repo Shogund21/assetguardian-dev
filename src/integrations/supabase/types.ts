@@ -2079,6 +2079,8 @@ export type Database = {
           notes: string
           company_id: string
           location_id: string
+          location_name: string
+          location_store_number: string
           maintenance_frequency: string
           reading_mode: string
           chiller_pressure_reading: number
