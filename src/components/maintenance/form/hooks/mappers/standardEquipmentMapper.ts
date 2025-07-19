@@ -6,10 +6,10 @@ import { MaintenanceFormValues } from "../useMaintenanceForm";
  * Maps form values to standard HVAC equipment database fields
  */
 export const mapStandardEquipmentData = (values: MaintenanceFormValues, equipmentType: string) => {
-  // Skip if equipment is of specialized type
+  // Skip if equipment is of specialized type that has its own mapper
   if (equipmentType === 'elevator' || equipmentType === 'restroom') return {};
   
-  return {
+  const baseFields = {
     // Convert string values to numbers where appropriate
     chiller_pressure_reading: processNumberField(values.chiller_pressure_reading),
     chiller_temperature_reading: processNumberField(values.chiller_temperature_reading),
@@ -40,4 +40,31 @@ export const mapStandardEquipmentData = (values: MaintenanceFormValues, equipmen
     corrective_actions: processField(values.corrective_actions),
     maintenance_recommendations: processField(values.maintenance_recommendations)
   };
+
+  // Add cooling tower specific fields if equipment type is cooling_tower
+  if (equipmentType === 'cooling_tower') {
+    return {
+      ...baseFields,
+      // Cooling tower specific fields
+      fill_media_condition: processField(values.fill_media_condition),
+      drift_eliminators_condition: processField(values.drift_eliminators_condition),
+      fan_assembly_status: processField(values.fan_assembly_status),
+      motor_lubrication_status: processField(values.motor_lubrication_status),
+      pump_seals_condition: processField(values.pump_seals_condition),
+      strainer_status: processField(values.strainer_status),
+      sump_basin_condition: processField(values.sump_basin_condition),
+      water_system_status: processField(values.water_system_status),
+      drainage_system_status: processField(values.drainage_system_status),
+      control_system_status: processField(values.control_system_status),
+      sensor_status: processField(values.sensor_status),
+      seasonal_preparation_status: processField(values.seasonal_preparation_status),
+      vibration_monitoring: processField(values.vibration_monitoring),
+      emergency_shutdown_status: processField(values.emergency_shutdown_status),
+      // Conductivity readings
+      city_conductivity_us_cm: processNumberField(values.city_conductivity_us_cm),
+      tower_conductivity_us_cm: processNumberField(values.tower_conductivity_us_cm)
+    };
+  }
+
+  return baseFields;
 };
