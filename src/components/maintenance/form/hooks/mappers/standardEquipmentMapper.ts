@@ -61,8 +61,8 @@ export const mapStandardEquipmentData = (values: MaintenanceFormValues, equipmen
       vibration_monitoring: processField(values.vibration_monitoring),
       emergency_shutdown_status: processField(values.emergency_shutdown_status),
       // Conductivity readings
-      city_conductivity_us_cm: processNumberField(values.city_conductivity_us_cm),
-      tower_conductivity_us_cm: processNumberField(values.tower_conductivity_us_cm)
+      city_conductivity_us_cm: processField(values.city_conductivity_us_cm),
+      tower_conductivity_us_cm: processField(values.tower_conductivity_us_cm)
     };
   }
 
