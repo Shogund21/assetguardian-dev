@@ -68,9 +68,9 @@ const MaintenanceHistory = () => {
           lastName: check.technician_name?.split(' ').slice(1).join(' ') || ''
         },
         // Create location object from the proper location data
-        location: check.location_name ? {
-          name: check.location_name,
-          store_number: check.location_store_number
+        location: (check as any).location_name ? {
+          name: (check as any).location_name,
+          store_number: (check as any).location_store_number
         } : undefined,
         // All equipment-specific fields are now properly returned from the RPC function
       })) as MaintenanceCheck[];
