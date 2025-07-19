@@ -55,7 +55,7 @@ const MaintenanceCheckDetails = ({ check, open, onOpenChange }: MaintenanceCheck
     { label: "Sensors Operation", value: check.sensors_operation },
     { label: "Motor Condition", value: check.motor_condition },
     { label: "Drain Pan Status", value: check.drain_pan_status },
-  ];
+  ].filter(field => field.value !== null && field.value !== undefined && field.value !== "");
 
   if (check.airflow_reading) {
     ahuFields.push({ 
@@ -71,7 +71,7 @@ const MaintenanceCheckDetails = ({ check, open, onOpenChange }: MaintenanceCheck
     { label: "Emergency Phone", value: check.emergency_phone },
     { label: "Elevator Lighting", value: check.elevator_lighting },
     { label: "Safety Features Status", value: check.safety_features_status },
-  ].filter(field => field.value);
+  ].filter(field => field.value !== null && field.value !== undefined && field.value !== "");
 
   // Restroom-specific fields
   const restroomFields = [
@@ -83,7 +83,7 @@ const MaintenanceCheckDetails = ({ check, open, onOpenChange }: MaintenanceCheck
     { label: "Soap Supply", value: check.soap_supply },
     { label: "Toilet Paper Supply", value: check.toilet_paper_supply },
     { label: "Floor Condition", value: check.floor_condition },
-  ].filter(field => field.value);
+  ].filter(field => field.value !== null && field.value !== undefined && field.value !== "");
 
   // Cooling Tower fields
   const coolingTowerFields = [
@@ -112,7 +112,7 @@ const MaintenanceCheckDetails = ({ check, open, onOpenChange }: MaintenanceCheck
     { label: "Air Filter Status", value: check.air_filter_status },
     { label: "Belt Condition", value: check.belt_condition },
     { label: "Refrigerant Level", value: check.refrigerant_level },
-  ].filter(field => field.value);
+  ].filter(field => field.value !== null && field.value !== undefined && field.value !== "");
 
   const observationFields = [
     { label: "Unusual Noise", value: check.unusual_noise },
@@ -121,7 +121,7 @@ const MaintenanceCheckDetails = ({ check, open, onOpenChange }: MaintenanceCheck
     ...(check.vibration_observed ? [{ label: "Vibration Description", value: check.vibration_description }] : []),
     { label: "Oil Level Status", value: check.oil_level_status },
     { label: "Condenser Condition", value: check.condenser_condition },
-  ].filter(field => field.value);
+  ].filter(field => field.value !== null && field.value !== undefined && field.value !== "");
 
   const notesFields = [
     { label: "Troubleshooting Notes", value: check.troubleshooting_notes },
@@ -129,7 +129,8 @@ const MaintenanceCheckDetails = ({ check, open, onOpenChange }: MaintenanceCheck
     { label: "Maintenance Recommendations", value: check.maintenance_recommendations },
     { label: "Restroom Notes", value: check.restroom_notes },
     { label: "Elevator Notes", value: check.elevator_notes },
-  ].filter(field => field.value);
+    { label: "General Notes", value: check.notes },
+  ].filter(field => field.value !== null && field.value !== undefined && field.value !== "");
 
   const getNotes = () => {
     if (equipmentType === 'restroom' && check.restroom_notes) {
