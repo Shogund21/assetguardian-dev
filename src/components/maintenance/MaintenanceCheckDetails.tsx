@@ -36,6 +36,7 @@ const MaintenanceCheckDetails = ({ check, open, onOpenChange }: MaintenanceCheck
 
   // Determine equipment type
   const equipmentType = check.equipment_type || 'general';
+  console.log('Equipment type for details:', equipmentType, 'Check data:', check);
 
   const basicFields = [
     { label: "Date", value: new Date(check.check_date || "") },
@@ -147,26 +148,33 @@ const MaintenanceCheckDetails = ({ check, open, onOpenChange }: MaintenanceCheck
 
   // Get the appropriate fields based on equipment type
   const getEquipmentSpecificFields = () => {
+    console.log('Getting equipment specific fields for type:', equipmentType.toLowerCase());
+    
     switch (equipmentType.toLowerCase()) {
       case 'ahu':
+        console.log('Showing AHU fields, count:', ahuFields.length);
         return (
           <MaintenanceDetailsSection title="AHU Specific Checks" fields={ahuFields} />
         );
       case 'elevator':
+        console.log('Showing Elevator fields, count:', elevatorFields.length);
         return (
           <MaintenanceDetailsSection title="Elevator Inspection" fields={elevatorFields} />
         );
       case 'restroom':
+        console.log('Showing Restroom fields, count:', restroomFields.length);
         return (
           <MaintenanceDetailsSection title="Restroom Inspection" fields={restroomFields} />
         );
       case 'cooling_tower':
+        console.log('Showing Cooling Tower fields, count:', coolingTowerFields.length);
         return (
           <MaintenanceDetailsSection title="Cooling Tower Inspection" fields={coolingTowerFields} />
         );
       case 'chiller':
       case 'general':
       default:
+        console.log('Showing Standard/General fields. Standard count:', standardFields.length, 'Observation count:', observationFields.length);
         return (
           <>
             {standardFields.length > 0 && (
