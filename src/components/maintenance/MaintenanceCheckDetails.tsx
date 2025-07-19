@@ -1,4 +1,3 @@
-
 import {
   Dialog,
   DialogContent,
@@ -45,84 +44,127 @@ const MaintenanceCheckDetails = ({ check, open, onOpenChange }: MaintenanceCheck
     { label: "Technician", value: getTechnicianName() },
   ];
 
-  // AHU-specific fields
-  const ahuFields = [
-    { label: "Air Filter Cleaned", value: check.air_filter_cleaned },
-    { label: "Fan Belt Condition", value: check.fan_belt_condition },
-    { label: "Fan Bearings Lubricated", value: check.fan_bearings_lubricated },
-    { label: "Fan Noise Level", value: check.fan_noise_level },
-    { label: "Dampers Operation", value: check.dampers_operation },
-    { label: "Coils Condition", value: check.coils_condition },
-    { label: "Sensors Operation", value: check.sensors_operation },
-    { label: "Motor Condition", value: check.motor_condition },
-    { label: "Drain Pan Status", value: check.drain_pan_status },
-  ].filter(field => field.value !== null && field.value !== undefined && field.value !== "");
+  // Helper function to create field objects that include null values
+  const createFieldsArray = (fieldDefinitions: Array<{ label: string; key: string; isNumeric?: boolean }>) => {
+    return fieldDefinitions.map(({ label, key, isNumeric }) => {
+      const value = (check as any)[key];
+      return { label, value: value !== undefined ? value : null };
+    }).filter(field => {
+      // Only filter out undefined values, keep null values to show as "Not Checked"
+      return field.value !== undefined;
+    });
+  };
 
-  if (check.airflow_reading) {
+  // AHU-specific fields
+  const ahuFieldDefinitions = [
+    { label: "Air Filter Cleaned", key: "air_filter_cleaned" },
+    { label: "Fan Belt Condition", key: "fan_belt_condition" },
+    { label: "Fan Bearings Lubricated", key: "fan_bearings_lubricated" },
+    { label: "Fan Noise Level", key: "fan_noise_level" },
+    { label: "Dampers Operation", key: "dampers_operation" },
+    { label: "Coils Condition", key: "coils_condition" },
+    { label: "Sensors Operation", key: "sensors_operation" },
+    { label: "Motor Condition", key: "motor_condition" },
+    { label: "Drain Pan Status", key: "drain_pan_status" },
+  ];
+
+  const ahuFields = createFieldsArray(ahuFieldDefinitions);
+  
+  if (check.airflow_reading !== undefined && check.airflow_reading !== null) {
     ahuFields.push({ 
       label: "Airflow Reading", 
-      value: `${check.airflow_reading} ${check.airflow_unit}` 
+      value: `${check.airflow_reading} ${check.airflow_unit || ''}`.trim()
     });
   }
 
   // Elevator-specific fields
-  const elevatorFields = [
-    { label: "Elevator Operation", value: check.elevator_operation },
-    { label: "Door Operation", value: check.door_operation },
-    { label: "Emergency Phone", value: check.emergency_phone },
-    { label: "Elevator Lighting", value: check.elevator_lighting },
-    { label: "Safety Features Status", value: check.safety_features_status },
-  ].filter(field => field.value !== null && field.value !== undefined && field.value !== "");
+  const elevatorFieldDefinitions = [
+    { label: "Elevator Operation", key: "elevator_operation" },
+    { label: "Door Operation", key: "door_operation" },
+    { label: "Emergency Phone", key: "emergency_phone" },
+    { label: "Elevator Lighting", key: "elevator_lighting" },
+    { label: "Safety Features Status", key: "safety_features_status" },
+  ];
+
+  const elevatorFields = createFieldsArray(elevatorFieldDefinitions);
 
   // Restroom-specific fields
-  const restroomFields = [
-    { label: "Sink Status", value: check.sink_status },
-    { label: "Toilet Status", value: check.toilet_status },
-    { label: "Urinal Status", value: check.urinal_status },
-    { label: "Hand Dryer Status", value: check.hand_dryer_status },
-    { label: "Cleanliness Level", value: check.cleanliness_level },
-    { label: "Soap Supply", value: check.soap_supply },
-    { label: "Toilet Paper Supply", value: check.toilet_paper_supply },
-    { label: "Floor Condition", value: check.floor_condition },
-  ].filter(field => field.value !== null && field.value !== undefined && field.value !== "");
+  const restroomFieldDefinitions = [
+    { label: "Sink Status", key: "sink_status" },
+    { label: "Toilet Status", key: "toilet_status" },
+    { label: "Urinal Status", key: "urinal_status" },
+    { label: "Hand Dryer Status", key: "hand_dryer_status" },
+    { label: "Cleanliness Level", key: "cleanliness_level" },
+    { label: "Soap Supply", key: "soap_supply" },
+    { label: "Toilet Paper Supply", key: "toilet_paper_supply" },
+    { label: "Floor Condition", key: "floor_condition" },
+  ];
 
-  // Cooling Tower fields
-  const coolingTowerFields = [
-    { label: "Fill Media Condition", value: check.fill_media_condition },
-    { label: "Drift Eliminators Condition", value: check.drift_eliminators_condition },
-    { label: "Fan Assembly Status", value: check.fan_assembly_status },
-    { label: "Motor Lubrication Status", value: check.motor_lubrication_status },
-    { label: "Pump Seals Condition", value: check.pump_seals_condition },
-    { label: "Strainer Status", value: check.strainer_status },
-    { label: "Sump Basin Condition", value: check.sump_basin_condition },
-    { label: "Water System Status", value: check.water_system_status },
-    { label: "Drainage System Status", value: check.drainage_system_status },
-    { label: "Control System Status", value: check.control_system_status },
-    { label: "Sensor Status", value: check.sensor_status },
-    { label: "Seasonal Preparation Status", value: check.seasonal_preparation_status },
-    { label: "Vibration Monitoring", value: check.vibration_monitoring },
-    { label: "Emergency Shutdown Status", value: check.emergency_shutdown_status },
-    { label: "City Conductivity (μS/cm)", value: check.city_conductivity_us_cm },
-    { label: "Tower Conductivity (μS/cm)", value: check.tower_conductivity_us_cm },
-  ].filter(field => field.value !== null && field.value !== undefined && field.value !== "");
+  const restroomFields = createFieldsArray(restroomFieldDefinitions);
+
+  // Cooling Tower fields - this is the main fix
+  const coolingTowerFieldDefinitions = [
+    { label: "Fill Media Condition", key: "fill_media_condition" },
+    { label: "Drift Eliminators Condition", key: "drift_eliminators_condition" },
+    { label: "Fan Assembly Status", key: "fan_assembly_status" },
+    { label: "Motor Lubrication Status", key: "motor_lubrication_status" },
+    { label: "Pump Seals Condition", key: "pump_seals_condition" },
+    { label: "Strainer Status", key: "strainer_status" },
+    { label: "Sump Basin Condition", key: "sump_basin_condition" },
+    { label: "Water System Status", key: "water_system_status" },
+    { label: "Drainage System Status", key: "drainage_system_status" },
+    { label: "Control System Status", key: "control_system_status" },
+    { label: "Sensor Status", key: "sensor_status" },
+    { label: "Seasonal Preparation Status", key: "seasonal_preparation_status" },
+    { label: "Vibration Monitoring", key: "vibration_monitoring" },
+    { label: "Emergency Shutdown Status", key: "emergency_shutdown_status" },
+  ];
+
+  const coolingTowerFields = createFieldsArray(coolingTowerFieldDefinitions);
+  
+  // Add numeric fields for cooling tower
+  if (check.city_conductivity_us_cm !== undefined) {
+    coolingTowerFields.push({ 
+      label: "City Conductivity (μS/cm)", 
+      value: check.city_conductivity_us_cm 
+    });
+  }
+  
+  if (check.tower_conductivity_us_cm !== undefined) {
+    coolingTowerFields.push({ 
+      label: "Tower Conductivity (μS/cm)", 
+      value: check.tower_conductivity_us_cm 
+    });
+  }
 
   // Standard HVAC fields (chiller and general)
-  const standardFields = [
-    { label: "Chiller Pressure (PSI)", value: check.chiller_pressure_reading },
-    { label: "Chiller Temperature (°F)", value: check.chiller_temperature_reading },
-    { label: "Air Filter Status", value: check.air_filter_status },
-    { label: "Belt Condition", value: check.belt_condition },
-    { label: "Refrigerant Level", value: check.refrigerant_level },
-  ].filter(field => field.value !== null && field.value !== undefined && field.value !== "");
+  const standardFieldDefinitions = [
+    { label: "Chiller Pressure (PSI)", key: "chiller_pressure_reading", isNumeric: true },
+    { label: "Chiller Temperature (°F)", key: "chiller_temperature_reading", isNumeric: true },
+    { label: "Air Filter Status", key: "air_filter_status" },
+    { label: "Belt Condition", key: "belt_condition" },
+    { label: "Refrigerant Level", key: "refrigerant_level" },
+  ];
 
-  const observationFields = [
-    { label: "Unusual Noise", value: check.unusual_noise },
-    ...(check.unusual_noise ? [{ label: "Noise Description", value: check.unusual_noise_description }] : []),
-    { label: "Vibration Observed", value: check.vibration_observed },
-    ...(check.vibration_observed ? [{ label: "Vibration Description", value: check.vibration_description }] : []),
-    { label: "Oil Level Status", value: check.oil_level_status },
-    { label: "Condenser Condition", value: check.condenser_condition },
-  ].filter(field => field.value !== null && field.value !== undefined && field.value !== "");
+  const standardFields = createFieldsArray(standardFieldDefinitions);
+
+  const observationFieldDefinitions = [
+    { label: "Unusual Noise", key: "unusual_noise" },
+    { label: "Vibration Observed", key: "vibration_observed" },
+    { label: "Oil Level Status", key: "oil_level_status" },
+    { label: "Condenser Condition", key: "condenser_condition" },
+  ];
+
+  const observationFields = createFieldsArray(observationFieldDefinitions);
+  
+  // Add description fields if the main field is true
+  if (check.unusual_noise && check.unusual_noise_description) {
+    observationFields.push({ label: "Noise Description", value: check.unusual_noise_description });
+  }
+  
+  if (check.vibration_observed && check.vibration_description) {
+    observationFields.push({ label: "Vibration Description", value: check.vibration_description });
+  }
 
   const notesFields = [
     { label: "Troubleshooting Notes", value: check.troubleshooting_notes },
