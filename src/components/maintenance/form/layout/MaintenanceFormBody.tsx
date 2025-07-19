@@ -5,6 +5,7 @@ import MaintenanceBasicInfo from '../MaintenanceBasicInfo';
 import { useMaintenanceFormContext } from '../../context/MaintenanceFormContext';
 import DocumentManager from '../../documents/DocumentManager';
 import EquipmentTypeFields from './EquipmentTypeFields';
+import CommentsSection from '../CommentsSection';
 
 const MaintenanceFormBody = () => {
   const { form, equipment, technicians } = useMaintenanceFormContext();
@@ -25,6 +26,10 @@ const MaintenanceFormBody = () => {
 
       <FormSection title="Documents">
         <DocumentManager equipmentId={form.watch('equipment_id')} />
+      </FormSection>
+
+      <FormSection title="Comments & Notes">
+        <CommentsSection />
       </FormSection>
     </>
   );
