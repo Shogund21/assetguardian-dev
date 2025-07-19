@@ -95,7 +95,15 @@ const MaintenanceCheckDetails = ({ check, open, onOpenChange }: MaintenanceCheck
     { label: "Strainer Status", value: check.strainer_status },
     { label: "Sump Basin Condition", value: check.sump_basin_condition },
     { label: "Water System Status", value: check.water_system_status },
-  ].filter(field => field.value);
+    { label: "Drainage System Status", value: check.drainage_system_status },
+    { label: "Control System Status", value: check.control_system_status },
+    { label: "Sensor Status", value: check.sensor_status },
+    { label: "Seasonal Preparation Status", value: check.seasonal_preparation_status },
+    { label: "Vibration Monitoring", value: check.vibration_monitoring },
+    { label: "Emergency Shutdown Status", value: check.emergency_shutdown_status },
+    { label: "City Conductivity (μS/cm)", value: check.city_conductivity_us_cm },
+    { label: "Tower Conductivity (μS/cm)", value: check.tower_conductivity_us_cm },
+  ].filter(field => field.value !== null && field.value !== undefined && field.value !== "");
 
   // Standard HVAC fields (chiller and general)
   const standardFields = [
