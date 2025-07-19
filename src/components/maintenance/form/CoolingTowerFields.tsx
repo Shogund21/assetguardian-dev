@@ -1,3 +1,4 @@
+
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -45,7 +46,7 @@ const CoolingTowerFields = ({ form }: CoolingTowerFieldsProps) => {
             render={({ field: formField }) => (
               <FormItem>
                 <FormLabel>{field.label}</FormLabel>
-                <Select onValueChange={formField.onChange} defaultValue={formField.value}>
+                <Select onValueChange={formField.onChange} value={formField.value || ""}>
                   <FormControl>
                     <SelectTrigger className="bg-white">
                       <SelectValue placeholder={`Select ${field.label}`} />
