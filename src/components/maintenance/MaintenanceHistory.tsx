@@ -68,9 +68,7 @@ const MaintenanceHistory = () => {
           firstName: check.technician_name?.split(' ')[0] || '',
           lastName: check.technician_name?.split(' ').slice(1).join(' ') || ''
         },
-        // Ensure required elevator fields are present with default values if not in data
-        unusual_noise_elevator: (check as any).unusual_noise_elevator || false,
-        vibration_elevator: (check as any).vibration_elevator || false,
+        // All equipment-specific fields are now properly returned from the RPC function
       })) as MaintenanceCheck[];
       
       setMaintenanceChecks(processedData);

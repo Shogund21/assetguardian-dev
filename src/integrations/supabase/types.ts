@@ -2078,6 +2078,69 @@ export type Database = {
           technician_name: string
           notes: string
           company_id: string
+          location_id: string
+          maintenance_frequency: string
+          reading_mode: string
+          chiller_pressure_reading: number
+          chiller_temperature_reading: number
+          air_filter_status: string
+          belt_condition: string
+          refrigerant_level: string
+          unusual_noise: boolean
+          vibration_observed: boolean
+          oil_level_status: string
+          condenser_condition: string
+          unusual_noise_description: string
+          vibration_description: string
+          air_filter_cleaned: boolean
+          fan_belt_condition: string
+          fan_bearings_lubricated: boolean
+          fan_noise_level: string
+          dampers_operation: string
+          coils_condition: string
+          sensors_operation: string
+          motor_condition: string
+          drain_pan_status: string
+          airflow_reading: number
+          airflow_unit: string
+          troubleshooting_notes: string
+          corrective_actions: string
+          maintenance_recommendations: string
+          elevator_operation: string
+          door_operation: string
+          unusual_noise_elevator: boolean
+          vibration_elevator: boolean
+          emergency_phone: string
+          elevator_lighting: string
+          elevator_notes: string
+          safety_features_status: string
+          sink_status: string
+          toilet_status: string
+          urinal_status: string
+          hand_dryer_status: string
+          cleanliness_level: string
+          soap_supply: string
+          toilet_paper_supply: string
+          floor_condition: string
+          restroom_notes: string
+          fill_media_condition: string
+          drift_eliminators_condition: string
+          fan_assembly_status: string
+          motor_lubrication_status: string
+          pump_seals_condition: string
+          strainer_status: string
+          sump_basin_condition: string
+          water_system_status: string
+          drainage_system_status: string
+          control_system_status: string
+          sensor_status: string
+          seasonal_preparation_status: string
+          vibration_monitoring: string
+          emergency_shutdown_status: string
+          city_conductivity_us_cm: number
+          tower_conductivity_us_cm: number
+          general_inspection: string
+          images: string[]
         }[]
       }
       get_performance_metrics_with_profiles: {
