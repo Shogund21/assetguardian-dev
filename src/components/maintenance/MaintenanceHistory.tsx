@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { MaintenanceCheck, MaintenanceLocation } from "@/types/maintenance";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,15 +8,21 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { useAuth } from "@/hooks/useAuth";
+import PasswordProtectionModal from "@/components/equipment/PasswordProtectionModal";
 
 const MaintenanceHistory = () => {
   const [maintenanceChecks, setMaintenanceChecks] = useState<MaintenanceCheck[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [selectedCheckId, setSelectedCheckId] = useState<string | null>(null);
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const [fetchError, setFetchError] = useState<string | null>(null);
   const { applyCompanyFilter } = useCompanyFilter();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, userProfile, isAdmin } = useAuth();
+
+  // Check if user is admin or super admin
+  const isAdminUser = isAdmin() || userProfile?.email === "edward@shogunaillc.com";
 
   const fetchMaintenanceChecks = async () => {
     try {
@@ -116,6 +123,50 @@ const MaintenanceHistory = () => {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!isAdminUser) {
+      toast({
+        title: "Access Denied",
+        description: "Only administrators can delete maintenance records.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setSelectedCheckId(id);
+    setIsPasswordModalOpen(true);
+  };
+
+  const handlePasswordSuccess = async () => {
+    if (!selectedCheckId) return;
+
+    try {
+      const { error } = await supabase
+        .from("hvac_maintenance_checks")
+        .delete()
+        .eq("id", selectedCheckId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Maintenance check deleted successfully.",
+      });
+
+      fetchMaintenanceChecks();
+    } catch (error) {
+      console.error("Error deleting maintenance check:", error);
+      toast({
+        title: "Error deleting maintenance check",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsPasswordModalOpen(false);
+      setSelectedCheckId(null);
+    }
+  };
+
   useEffect(() => {
     // Only fetch if user is authenticated to avoid premature calls
     if (isAuthenticated) {
@@ -148,10 +199,20 @@ const MaintenanceHistory = () => {
               key={check.id}
               check={check}
               onStatusChange={handleStatusChange}
+              onDelete={isAdminUser ? handleDelete : undefined}
             />
           ))
         )}
       </div>
+
+      <PasswordProtectionModal
+        isOpen={isPasswordModalOpen}
+        onClose={() => {
+          setIsPasswordModalOpen(false);
+          setSelectedCheckId(null);
+        }}
+        onSuccess={handlePasswordSuccess}
+      />
     </div>
   );
 };

@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Shield, User, UserCheck, UserX } from "lucide-react";
+import { Shield, User, UserCheck, UserX, Trash2 } from "lucide-react";
 import { Technician } from "@/types/technician";
 import EditTechnicianDialog from "./EditTechnicianDialog";
 import EditRoleDialog from "./EditRoleDialog";
@@ -12,9 +12,18 @@ interface TechnicianListProps {
   onStatusToggle: (id: string, newStatus: string) => void;
   onUpdate: (id: string, updatedData: Omit<Technician, 'id'>) => void;
   onRoleUpdate: (id: string, role: string, isAdmin: boolean) => void;
+  onDelete?: (id: string) => void;
+  showDeleteButton?: boolean;
 }
 
-const TechnicianList = ({ technicians, onStatusToggle, onUpdate, onRoleUpdate }: TechnicianListProps) => {
+const TechnicianList = ({ 
+  technicians, 
+  onStatusToggle, 
+  onUpdate, 
+  onRoleUpdate, 
+  onDelete, 
+  showDeleteButton = false 
+}: TechnicianListProps) => {
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-medium">Current Technicians</h3>
@@ -86,6 +95,20 @@ const TechnicianList = ({ technicians, onStatusToggle, onUpdate, onRoleUpdate }:
                   </>
                 )}
               </Button>
+              {showDeleteButton && onDelete && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => {
+                    if (window.confirm(`Are you sure you want to delete ${technician.firstName} ${technician.lastName}? This action cannot be undone.`)) {
+                      onDelete(technician.id);
+                    }
+                  }}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </Button>
+              )}
             </div>
           </div>
         ))}

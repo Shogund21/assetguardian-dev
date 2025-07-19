@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import TechnicianForm from "./technician/TechnicianForm";
 import TechnicianList from "./technician/TechnicianList";
 import BulkAccountCreator from "./technician/BulkAccountCreator";
+import PasswordProtectionModal from "@/components/equipment/PasswordProtectionModal";
 
 interface TechnicianFormData {
   firstName: string;
@@ -26,7 +27,9 @@ const TechnicianManagement = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { companies } = useCompany();
-  const { isAdmin } = useAuth();
+  const { isAdmin, userProfile } = useAuth();
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [selectedTechnicianId, setSelectedTechnicianId] = useState<string | null>(null);
   const [formData, setFormData] = useState<TechnicianFormData>({
     firstName: "",
     lastName: "",
@@ -37,6 +40,9 @@ const TechnicianManagement = () => {
     company_id: "none",
     company_name: "",
   });
+
+  // Check if user is admin or super admin
+  const isAdminUser = isAdmin() || userProfile?.email === "edward@shogunaillc.com";
 
   const { data: technicians, isLoading } = useQuery({
     queryKey: ["technicians"],
@@ -173,6 +179,34 @@ const TechnicianManagement = () => {
     },
   });
 
+  const deleteTechnicianMutation = useMutation({
+    mutationFn: async (technicianId: string) => {
+      const { error } = await supabase
+        .from("technicians")
+        .delete()
+        .eq("id", technicianId);
+      
+      if (error) throw error;
+      
+      // Log the deletion for audit
+      await AuditService.logDelete('technicians', technicianId, {}, 'Deleted technician');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["technicians"] });
+      toast({
+        title: "Success",
+        description: "Technician deleted successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to delete technician: " + error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const toggleStatusMutation = useMutation({
     mutationFn: async ({ id, newStatus }: { id: string; newStatus: string }) => {
       const { error } = await supabase.rpc('set_technician_status', {
@@ -259,13 +293,40 @@ const TechnicianManagement = () => {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!isAdminUser) {
+      toast({
+        title: "Access Denied",
+        description: "Only administrators can delete technicians.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setSelectedTechnicianId(id);
+    setIsPasswordModalOpen(true);
+  };
+
+  const handlePasswordSuccess = async () => {
+    if (!selectedTechnicianId) return;
+
+    try {
+      await deleteTechnicianMutation.mutateAsync(selectedTechnicianId);
+    } catch (error) {
+      // Error is already handled in the mutation
+    } finally {
+      setIsPasswordModalOpen(false);
+      setSelectedTechnicianId(null);
+    }
+  };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
   return (
     <div className="space-y-6">
-      {isAdmin() && <BulkAccountCreator />}
+      {isAdminUser && <BulkAccountCreator />}
       <TechnicianForm
         formData={formData}
         onInputChange={handleInputChange}
@@ -278,6 +339,17 @@ const TechnicianManagement = () => {
         onStatusToggle={handleStatusToggle}
         onUpdate={handleUpdate}
         onRoleUpdate={handleRoleUpdate}
+        onDelete={isAdminUser ? handleDelete : undefined}
+        showDeleteButton={isAdminUser}
+      />
+
+      <PasswordProtectionModal
+        isOpen={isPasswordModalOpen}
+        onClose={() => {
+          setIsPasswordModalOpen(false);
+          setSelectedTechnicianId(null);
+        }}
+        onSuccess={handlePasswordSuccess}
       />
     </div>
   );

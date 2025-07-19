@@ -1,3 +1,4 @@
+
 import { format } from "date-fns";
 import { MaintenanceCheck } from "@/types/maintenance";
 import { Badge } from "@/components/ui/badge";
@@ -8,9 +9,10 @@ interface MaintenanceCheckItemProps {
   check: MaintenanceCheck;
   onEdit: (check: MaintenanceCheck) => void;
   onDelete: (check: MaintenanceCheck) => void;
+  showDeleteButton?: boolean;
 }
 
-const MaintenanceCheckItem = ({ check, onEdit, onDelete }: MaintenanceCheckItemProps) => {
+const MaintenanceCheckItem = ({ check, onEdit, onDelete, showDeleteButton = false }: MaintenanceCheckItemProps) => {
   const getStatusBadge = (status: string | null) => {
     const statusColors = {
       completed: "bg-green-500",
@@ -58,14 +60,16 @@ const MaintenanceCheckItem = ({ check, onEdit, onDelete }: MaintenanceCheckItemP
           >
             <Pencil className="h-4 w-4 text-blue-600" />
           </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => onDelete(check)}
-            className="hover:bg-red-50"
-          >
-            <Trash2 className="h-4 w-4 text-red-600" />
-          </Button>
+          {showDeleteButton && (
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => onDelete(check)}
+              className="hover:bg-red-50"
+            >
+              <Trash2 className="h-4 w-4 text-red-600" />
+            </Button>
+          )}
         </div>
       </div>
     </div>

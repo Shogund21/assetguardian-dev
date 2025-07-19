@@ -9,6 +9,7 @@ import EditMaintenanceDialog from "@/components/maintenance/EditMaintenanceDialo
 import { MaintenanceCheck } from "@/types/maintenance";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import MaintenanceCheckItem from "../maintenance/MaintenanceCheckItem";
+import { useAuth } from "@/hooks/useAuth";
 
 export const MaintenanceSection = () => {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -16,6 +17,10 @@ export const MaintenanceSection = () => {
   const [selectedCheck, setSelectedCheck] = useState<MaintenanceCheck | null>(null);
   const [actionType, setActionType] = useState<'edit' | 'delete'>('edit');
   const { toast } = useToast();
+  const { userProfile, isAdmin } = useAuth();
+
+  // Check if user is admin or super admin
+  const isAdminUser = isAdmin() || userProfile?.email === "edward@shogunaillc.com";
 
   const { data: checks = [], refetch } = useQuery({
     queryKey: ['maintenance-checks'],
@@ -46,6 +51,15 @@ export const MaintenanceSection = () => {
   });
 
   const handleDelete = async (check: MaintenanceCheck) => {
+    if (!isAdminUser) {
+      toast({
+        title: "Access Denied",
+        description: "Only administrators can delete maintenance records.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setSelectedCheck(check);
     setActionType('delete');
     setIsPasswordModalOpen(true);
@@ -106,6 +120,7 @@ export const MaintenanceSection = () => {
                 check={check}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                showDeleteButton={isAdminUser}
               />
             ))}
           </div>

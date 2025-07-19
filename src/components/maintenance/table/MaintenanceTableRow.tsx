@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Eye } from "lucide-react";
+import { Eye, Trash2 } from "lucide-react";
 import { useState } from "react";
 import MaintenanceCheckDetails from "../MaintenanceCheckDetails";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -127,15 +127,28 @@ const MaintenanceTableRow = ({
                 </SelectItem>
               </SelectContent>
             </Select>
-            <Button
-              variant="outline"
-              size={isMobile ? "default" : "icon"}
-              onClick={() => setShowDetails(true)}
-              className={`hover:bg-blue-50 ${isMobile ? 'w-full' : ''}`}
-            >
-              <Eye className="h-4 w-4 text-blue-600 mr-2" />
-              {isMobile && "View Details"}
-            </Button>
+            <div className={`flex gap-2 ${isMobile ? 'w-full' : ''}`}>
+              <Button
+                variant="outline"
+                size={isMobile ? "default" : "icon"}
+                onClick={() => setShowDetails(true)}
+                className={`hover:bg-blue-50 ${isMobile ? 'flex-1' : ''}`}
+              >
+                <Eye className="h-4 w-4 text-blue-600 mr-2" />
+                {isMobile && "View Details"}
+              </Button>
+              {onDelete && (
+                <Button
+                  variant="outline"
+                  size={isMobile ? "default" : "icon"}
+                  onClick={() => onDelete(check.id)}
+                  className={`hover:bg-red-50 ${isMobile ? 'flex-1' : ''}`}
+                >
+                  <Trash2 className="h-4 w-4 text-red-600 mr-2" />
+                  {isMobile && "Delete"}
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>
