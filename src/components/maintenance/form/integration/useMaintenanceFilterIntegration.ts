@@ -23,6 +23,10 @@ export const useMaintenanceFilterIntegration = () => {
     equipmentName: string,
     maintenanceData: MaintenanceData
   ) => {
+    if (!equipmentId || !equipmentName || !maintenanceData) {
+      return false;
+    }
+
     const hasFilterAction = 
       maintenanceData.air_filter_cleaned === true ||
       maintenanceData.air_filter_status === 'needs_replacement' ||

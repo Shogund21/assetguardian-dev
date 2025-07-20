@@ -120,6 +120,7 @@ const FilterChangePromptDialog = ({
         onOpenChange={setShowFilterForm}
         equipmentId={equipmentId}
         onComplete={handleFilterFormComplete}
+        maintenanceTriggered={true}
       />
     </>
   );
