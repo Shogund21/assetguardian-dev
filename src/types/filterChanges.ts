@@ -33,6 +33,7 @@ export interface FilterChange {
 
 export interface FilterChangeFormValues {
   equipment_id: string;
+  location_id: string;
   filter_type: string;
   filter_size: string;
   installation_date: Date;

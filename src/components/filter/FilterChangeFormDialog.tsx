@@ -16,6 +16,7 @@ import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { getDefaultFilterSpec } from "../maintenance/form/integration/filterEquipmentMapper";
+import LocationSelect from "../maintenance/form/selectors/LocationSelect";
 
 interface FilterChangeFormDialogProps {
   filterChange?: FilterChange;
@@ -62,6 +63,7 @@ const FilterChangeFormDialog = ({
   const form = useForm<FilterChangeFormValues>({
     defaultValues: {
       equipment_id: equipmentId || filterChange?.equipment_id || "",
+      location_id: "",
       filter_type: filterChange?.filter_type || defaultFilterSpec.type,
       filter_size: filterChange?.filter_size || defaultFilterSpec.size,
       installation_date: filterChange?.installation_date ? new Date(filterChange.installation_date) : new Date(),
@@ -78,6 +80,7 @@ const FilterChangeFormDialog = ({
     if (open) {
       form.reset({
         equipment_id: equipmentId || filterChange?.equipment_id || "",
+        location_id: "",
         filter_type: filterChange?.filter_type || defaultFilterSpec.type,
         filter_size: filterChange?.filter_size || defaultFilterSpec.size,
         installation_date: filterChange?.installation_date ? new Date(filterChange.installation_date) : new Date(),
@@ -189,6 +192,8 @@ const FilterChangeFormDialog = ({
                 </FormItem>
               )}
             />
+
+            <LocationSelect form={form} />
 
             <div className="grid grid-cols-2 gap-4">
               <FormField
