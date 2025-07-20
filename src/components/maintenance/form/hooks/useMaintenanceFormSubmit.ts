@@ -12,7 +12,8 @@ import { maintenanceDbService } from "./services/maintenanceDbService";
  */
 export const useMaintenanceFormSubmit = (
   onComplete: () => void,
-  initialData?: MaintenanceCheck
+  initialData?: MaintenanceCheck,
+  onFilterPromptNeeded?: (equipmentId: string, equipmentName: string, maintenanceData: any) => boolean
 ) => {
   const { toast } = useToast();
   const { userProfile, isAuthenticated, session } = useAuth();
@@ -169,13 +170,23 @@ export const useMaintenanceFormSubmit = (
         throw dbResponse.error;
       }
 
-      // Show success toast and complete
+      // Show success toast
       toast({
         title: "Success",
         description: `Maintenance check ${initialData ? 'updated' : 'recorded'} successfully`,
       });
       
-      onComplete();
+      // Check for filter-related actions and trigger prompt if needed
+      const filterPromptTriggered = onFilterPromptNeeded && onFilterPromptNeeded(
+        equipment.id,
+        equipment.name,
+        formValues
+      );
+      
+      // Only complete if no filter prompt is shown
+      if (!filterPromptTriggered) {
+        onComplete();
+      }
     } catch (error: any) {
       console.error('Error submitting maintenance check:', error);
       toast({

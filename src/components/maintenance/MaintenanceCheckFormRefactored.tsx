@@ -12,6 +12,8 @@ import { MaintenanceFormProvider } from "./context/MaintenanceFormContext";
 import MaintenanceFormHeader from "./form/layout/MaintenanceFormHeader";
 import MaintenanceFormBody from "./form/layout/MaintenanceFormBody";
 import FormActions from "./form/FormActions";
+import { useMaintenanceFilterIntegration } from "./form/integration/useMaintenanceFilterIntegration";
+import FilterChangePromptDialog from "./form/integration/FilterChangePromptDialog";
 
 interface MaintenanceCheckFormProps {
   onComplete: () => void;
@@ -30,8 +32,20 @@ const MaintenanceCheckForm = ({
   const isSubmitting = externalIsSubmitting !== undefined ? externalIsSubmitting : internalIsSubmitting;
   const setIsSubmitting = externalSetIsSubmitting || setInternalIsSubmitting;
   
+  const {
+    showFilterPrompt,
+    promptData,
+    checkForFilterActions,
+    handlePromptComplete,
+    handlePromptClose
+  } = useMaintenanceFilterIntegration();
+
   const form = useMaintenanceForm(initialData);
-  const handleSubmit = useMaintenanceFormSubmit(onComplete, initialData);
+  const handleSubmit = useMaintenanceFormSubmit(
+    onComplete, 
+    initialData,
+    checkForFilterActions
+  );
   const validateForm = useFormValidation();
   const isMobile = useIsMobile();
 
@@ -186,35 +200,49 @@ const MaintenanceCheckForm = ({
   }
 
   return (
-    <MaintenanceFormProvider
-      form={form}
-      initialData={initialData}
-      isSubmitting={isSubmitting}
-      setIsSubmitting={setIsSubmitting}
-      equipment={equipment}
-      technicians={technicians}
-      selectedEquipment={selectedEquipment}
-      equipmentType={equipmentType}
-      isMobile={isMobile}
-    >
-      <Form {...form}>
-        <form 
-          onSubmit={form.handleSubmit(onSubmitForm)} 
-          className={`space-y-6 ${isMobile ? 'mobile-form-container' : ''}`}
-        >
-          <div className="grid gap-6">
-            <MaintenanceFormHeader initialData={initialData} isMobile={isMobile} />
-            <MaintenanceFormBody />
-            <FormActions 
-              onCancel={onComplete}
-              isEditing={!!initialData}
-              isSubmitting={isSubmitting}
-              onSubmit={manualSubmit}
-            />
-          </div>
-        </form>
-      </Form>
-    </MaintenanceFormProvider>
+    <>
+      <MaintenanceFormProvider
+        form={form}
+        initialData={initialData}
+        isSubmitting={isSubmitting}
+        setIsSubmitting={setIsSubmitting}
+        equipment={equipment}
+        technicians={technicians}
+        selectedEquipment={selectedEquipment}
+        equipmentType={equipmentType}
+        isMobile={isMobile}
+      >
+        <Form {...form}>
+          <form 
+            onSubmit={form.handleSubmit(onSubmitForm)} 
+            className={`space-y-6 ${isMobile ? 'mobile-form-container' : ''}`}
+          >
+            <div className="grid gap-6">
+              <MaintenanceFormHeader initialData={initialData} isMobile={isMobile} />
+              <MaintenanceFormBody />
+              <FormActions 
+                onCancel={onComplete}
+                isEditing={!!initialData}
+                isSubmitting={isSubmitting}
+                onSubmit={manualSubmit}
+              />
+            </div>
+          </form>
+        </Form>
+      </MaintenanceFormProvider>
+
+      {/* Filter Change Integration */}
+      {showFilterPrompt && promptData && (
+        <FilterChangePromptDialog
+          open={showFilterPrompt}
+          onOpenChange={handlePromptClose}
+          equipmentId={promptData.equipmentId}
+          equipmentName={promptData.equipmentName}
+          maintenanceData={promptData.maintenanceData}
+          onComplete={handlePromptComplete}
+        />
+      )}
+    </>
   );
 };
 

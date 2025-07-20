@@ -15,12 +15,15 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon, Loader2 } from "lucide-react";
+import { getDefaultFilterSpec } from "../maintenance/form/integration/filterEquipmentMapper";
 
 interface FilterChangeFormDialogProps {
   filterChange?: FilterChange;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   equipmentId?: string;
+  onComplete?: () => void;
+  maintenanceTriggered?: boolean;
 }
 
 const FilterChangeFormDialog = ({
@@ -28,21 +31,45 @@ const FilterChangeFormDialog = ({
   open,
   onOpenChange,
   equipmentId,
+  onComplete,
+  maintenanceTriggered = false,
 }: FilterChangeFormDialogProps) => {
   const isEditing = !!filterChange;
   const { create, update } = useFilterChangeMutations();
 
+  // Get equipment details for pre-filling filter specs
+  const { data: selectedEquipment } = useQuery({
+    queryKey: ['equipment', equipmentId],
+    queryFn: async () => {
+      if (!equipmentId) return null;
+      const { data, error } = await supabase
+        .from('equipment')
+        .select('*')
+        .eq('id', equipmentId)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!equipmentId,
+  });
+
+  // Get default filter specs based on equipment
+  const defaultFilterSpec = selectedEquipment 
+    ? getDefaultFilterSpec(selectedEquipment.type, selectedEquipment.name)
+    : { type: 'MERV-13', size: '20x25x2' };
+
   const form = useForm<FilterChangeFormValues>({
     defaultValues: {
       equipment_id: equipmentId || filterChange?.equipment_id || "",
-      filter_type: filterChange?.filter_type || "",
-      filter_size: filterChange?.filter_size || "",
+      filter_type: filterChange?.filter_type || defaultFilterSpec.type,
+      filter_size: filterChange?.filter_size || defaultFilterSpec.size,
       installation_date: filterChange?.installation_date ? new Date(filterChange.installation_date) : new Date(),
       due_date: filterChange?.due_date ? new Date(filterChange.due_date) : new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 90 days from now
       technician_id: filterChange?.technician_id || null,
       status: filterChange?.status || "active",
-      filter_condition: filterChange?.filter_condition || null,
-      notes: filterChange?.notes || null,
+      filter_condition: filterChange?.filter_condition || (maintenanceTriggered ? "New" : null),
+      notes: filterChange?.notes || (maintenanceTriggered ? "Created from maintenance check" : null),
     },
   });
 
@@ -51,17 +78,17 @@ const FilterChangeFormDialog = ({
     if (open) {
       form.reset({
         equipment_id: equipmentId || filterChange?.equipment_id || "",
-        filter_type: filterChange?.filter_type || "",
-        filter_size: filterChange?.filter_size || "",
+        filter_type: filterChange?.filter_type || defaultFilterSpec.type,
+        filter_size: filterChange?.filter_size || defaultFilterSpec.size,
         installation_date: filterChange?.installation_date ? new Date(filterChange.installation_date) : new Date(),
         due_date: filterChange?.due_date ? new Date(filterChange.due_date) : new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
         technician_id: filterChange?.technician_id || null,
         status: filterChange?.status || "active",
-        filter_condition: filterChange?.filter_condition || null,
-        notes: filterChange?.notes || null,
+        filter_condition: filterChange?.filter_condition || (maintenanceTriggered ? "New" : null),
+        notes: filterChange?.notes || (maintenanceTriggered ? "Created from maintenance check" : null),
       });
     }
-  }, [filterChange, equipmentId, open, form]);
+  }, [filterChange, equipmentId, open, form, defaultFilterSpec, maintenanceTriggered]);
 
   const { data: equipment = [] } = useQuery({
     queryKey: ['equipment'],
@@ -101,6 +128,7 @@ const FilterChangeFormDialog = ({
         await create.mutateAsync(values);
       }
       onOpenChange(false);
+      onComplete?.();
     } catch (error) {
       console.error("Error saving filter change:", error);
     }
@@ -111,8 +139,18 @@ const FilterChangeFormDialog = ({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? "Edit Filter Change" : "Add Filter Change"}
+            {maintenanceTriggered 
+              ? "Create Filter Change Record"
+              : isEditing 
+                ? "Edit Filter Change" 
+                : "Add Filter Change"
+            }
           </DialogTitle>
+          {maintenanceTriggered && (
+            <p className="text-sm text-blue-600">
+              Pre-filled based on your maintenance check
+            </p>
+          )}
         </DialogHeader>
 
         <Form {...form}>
@@ -124,7 +162,7 @@ const FilterChangeFormDialog = ({
                 <FormItem>
                   <FormLabel>Equipment</FormLabel>
                   <Select 
-                    disabled={!!equipmentId}
+                    disabled={!!equipmentId || maintenanceTriggered}
                     value={field.value} 
                     onValueChange={field.onChange}
                   >
