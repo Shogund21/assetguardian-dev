@@ -1,5 +1,5 @@
 
-import { Calendar, Home, Inbox, Search, Settings, Wrench, Building2, ClipboardList, BarChart4, FileText, LogOut, Brain } from "lucide-react";
+import { Calendar, Home, Inbox, Search, Settings, Wrench, Building2, ClipboardList, BarChart4, FileText, LogOut, Brain, Filter } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import {
   SidebarGroup,
@@ -33,6 +33,11 @@ const items = [
     title: "Maintenance",
     url: "/maintenance-checks",
     icon: ClipboardList,
+  },
+  {
+    title: "Filter Changes",
+    url: "/filter-changes",
+    icon: Filter,
   },
   {
     title: "Predictive Maintenance",

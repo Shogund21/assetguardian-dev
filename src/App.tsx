@@ -23,6 +23,7 @@ import Register from "./pages/Register";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import PredictiveMaintenance from "./pages/PredictiveMaintenance";
+import FilterChanges from "./pages/FilterChanges";
 import PrintView from "./pages/PrintView";
 
 const queryClient = new QueryClient();
@@ -42,6 +43,7 @@ const AppContent = () => {
       <Route path="/add-equipment" element={<AddEquipment />} />
       <Route path="/projects" element={<Projects />} />
       <Route path="/maintenance-checks" element={<MaintenanceChecks />} />
+      <Route path="/filter-changes" element={<FilterChanges />} />
       <Route path="/predictive-maintenance" element={<PredictiveMaintenance />} />
       <Route path="/analytics" element={<Analytics />} />
       <Route path="/settings" element={<Settings />} />
