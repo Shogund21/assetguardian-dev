@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FilterChange, FilterChangeFormValues } from "@/types/filterChanges";
@@ -17,6 +18,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { getDefaultFilterSpec } from "../maintenance/form/integration/filterEquipmentMapper";
 import LocationSelect from "../maintenance/form/selectors/LocationSelect";
+import EquipmentSelect from "../maintenance/form/selectors/EquipmentSelect";
 
 interface FilterChangeFormDialogProps {
   filterChange?: FilterChange;
@@ -75,6 +77,9 @@ const FilterChangeFormDialog = ({
     },
   });
 
+  // Watch the location_id for EquipmentSelect
+  const selectedLocationId = form.watch('location_id');
+
   // Reset form when filterChange or equipmentId changes
   useEffect(() => {
     if (open) {
@@ -92,19 +97,6 @@ const FilterChangeFormDialog = ({
       });
     }
   }, [filterChange, equipmentId, open, form, defaultFilterSpec, maintenanceTriggered]);
-
-  const { data: equipment = [] } = useQuery({
-    queryKey: ['equipment'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('equipment')
-        .select('id, name')
-        .order('name');
-      
-      if (error) throw error;
-      return data || [];
-    },
-  });
 
   const { data: technicians = [] } = useQuery({
     queryKey: ['technicians'],
@@ -158,46 +150,12 @@ const FilterChangeFormDialog = ({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="equipment_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Equipment</FormLabel>
-                  <Select 
-                    disabled={!!equipmentId || maintenanceTriggered}
-                    value={field.value || ""} 
-                    onValueChange={field.onChange}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="w-full bg-white border-gray-200 h-12">
-                        <SelectValue placeholder="Select equipment" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="z-[1000] bg-white max-h-[300px] overflow-y-auto">
-                      {equipment.length > 0 ? (
-                        equipment.map((item) => (
-                          <SelectItem 
-                            key={item.id} 
-                            value={item.id}
-                            className="py-3 text-sm cursor-pointer hover:bg-gray-100"
-                          >
-                            {item.name}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        <SelectItem value="no-equipment" disabled className="py-3 text-sm">
-                          No equipment available
-                        </SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <LocationSelect form={form} />
+
+            <EquipmentSelect 
+              form={form} 
+              locationId={selectedLocationId || ""} 
+            />
 
             <div className="grid grid-cols-2 gap-4">
               <FormField
