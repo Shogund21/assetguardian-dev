@@ -166,23 +166,27 @@ const FilterChangeFormDialog = ({
                   <FormLabel>Equipment</FormLabel>
                   <Select 
                     disabled={!!equipmentId || maintenanceTriggered}
-                    value={field.value} 
+                    value={field.value || ""} 
                     onValueChange={field.onChange}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full bg-white border-gray-200 h-12">
                         <SelectValue placeholder="Select equipment" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="z-[1000] bg-white max-h-[300px] overflow-y-auto">
                       {equipment.length > 0 ? (
                         equipment.map((item) => (
-                          <SelectItem key={item.id} value={item.id}>
+                          <SelectItem 
+                            key={item.id} 
+                            value={item.id}
+                            className="py-3 text-sm cursor-pointer hover:bg-gray-100"
+                          >
                             {item.name}
                           </SelectItem>
                         ))
                       ) : (
-                        <SelectItem value="no-equipment" disabled>
+                        <SelectItem value="no-equipment" disabled className="py-3 text-sm">
                           No equipment available
                         </SelectItem>
                       )}
