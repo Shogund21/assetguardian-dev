@@ -19,9 +19,9 @@ export const useMaintenanceFilterIntegration = () => {
   } | null>(null);
 
   const checkForFilterActions = useCallback((
-    maintenanceData: MaintenanceData,
     equipmentId: string,
-    equipmentName: string
+    equipmentName: string,
+    maintenanceData: MaintenanceData
   ) => {
     const hasFilterAction = 
       maintenanceData.air_filter_cleaned === true ||
