@@ -3,7 +3,6 @@ import React from "react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import MobileHint from "@/components/MobileHint";
 import Sidebar from "@/components/Sidebar";
-import { MobileDropdownMenu } from "@/components/navigation/MobileDropdownMenu";
 
 interface MobileLayoutProps {
   children: React.ReactNode;
@@ -18,11 +17,6 @@ export const MobileLayout = ({ children }: MobileLayoutProps) => {
           className="bg-white shadow-lg h-12 w-12 touch-manipulation hover:bg-gray-100 rounded-lg"
           aria-label="Toggle Menu"
         />
-      </div>
-      
-      {/* Mobile dropdown menu */}
-      <div className="fixed top-4 right-4 z-[200]">
-        <MobileDropdownMenu />
       </div>
       
       <MobileHint />
