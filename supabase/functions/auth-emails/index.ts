@@ -163,15 +163,31 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   // Verify webhook secret for security
+  // Supabase sends the webhook secret in different possible headers
   const webhookSecret = Deno.env.get("AUTH_WEBHOOK_SECRET");
-  const authHeader = req.headers.get("authorization");
-  
-  if (webhookSecret && authHeader !== `Bearer ${webhookSecret}`) {
-    console.log("Webhook secret validation failed");
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+  if (webhookSecret) {
+    const authHeader = req.headers.get("authorization");
+    const webhookSecretHeader = req.headers.get("webhook-secret");
+    const apiKeyHeader = req.headers.get("apikey");
+    
+    // Check various possible authentication methods
+    const isValidAuth = 
+      authHeader === `Bearer ${webhookSecret}` ||
+      webhookSecretHeader === webhookSecret ||
+      apiKeyHeader === webhookSecret ||
+      authHeader === webhookSecret;
+    
+    if (!isValidAuth) {
+      console.log("Webhook secret validation failed");
+      console.log("Expected:", webhookSecret);
+      console.log("Auth header:", authHeader);
+      console.log("Webhook secret header:", webhookSecretHeader);
+      console.log("API key header:", apiKeyHeader);
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
   }
 
   try {
