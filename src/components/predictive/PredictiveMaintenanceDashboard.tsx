@@ -20,6 +20,7 @@ import DatabaseStatus from "./DatabaseStatus";
 import MultipleImageAnalysis from "./MultipleImageAnalysis";
 import { EquipmentSelector } from "./dashboard/EquipmentSelector";
 import ChillerHealthDiagnostic from "../hvac/ChillerHealthDiagnostic";
+import ChillerEnergyDashboard from "./energy/ChillerEnergyDashboard";
 
 const PredictiveMaintenanceDashboard = () => {
   const [selectedEquipmentId, setSelectedEquipmentId] = useState<string>("");
@@ -108,7 +109,7 @@ const PredictiveMaintenanceDashboard = () => {
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 md:grid-cols-7 mb-4 h-auto">
+        <TabsList className="grid w-full grid-cols-3 md:grid-cols-8 mb-4 h-auto">
           <TabsTrigger value="readings" className="touch-manipulation text-xs md:text-sm py-2">
             Record
           </TabsTrigger>
@@ -117,6 +118,9 @@ const PredictiveMaintenanceDashboard = () => {
           </TabsTrigger>
           <TabsTrigger value="analysis" className="touch-manipulation text-xs md:text-sm py-2">
             Analysis
+          </TabsTrigger>
+          <TabsTrigger value="energy" className="touch-manipulation text-xs md:text-sm py-2">
+            Energy
           </TabsTrigger>
           <TabsTrigger value="hvac-diagnostic" className="touch-manipulation text-xs md:text-sm py-2">
             HVAC Diag
@@ -133,11 +137,11 @@ const PredictiveMaintenanceDashboard = () => {
         </TabsList>
 
         {/* Universal equipment selector - visible for tabs that need equipment selection */}
-        {(activeTab === "history" || activeTab === "analysis" || activeTab === "hvac-diagnostic" || activeTab === "multi-image") && (
+        {(activeTab === "history" || activeTab === "analysis" || activeTab === "energy" || activeTab === "hvac-diagnostic" || activeTab === "multi-image") && (
           <div className="mb-4 px-2">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
               <p className="text-sm text-blue-800 font-medium mb-2">
-                📋 Select equipment to view {activeTab === "history" ? "reading history" : activeTab === "analysis" ? "AI analysis" : activeTab === "hvac-diagnostic" ? "HVAC diagnostic" : "multi-image analysis"}
+                📋 Select equipment to view {activeTab === "history" ? "reading history" : activeTab === "analysis" ? "AI analysis" : activeTab === "energy" ? "energy efficiency" : activeTab === "hvac-diagnostic" ? "HVAC diagnostic" : "multi-image analysis"}
               </p>
               <EquipmentSelector
                 equipment={sortedEquipment}
@@ -192,6 +196,23 @@ const PredictiveMaintenanceDashboard = () => {
               <h3 className="text-lg font-medium text-gray-900 mb-2">No Equipment Selected</h3>
               <p className="text-gray-600 max-w-md mx-auto">
                 Select equipment above to run AI-powered predictive analysis
+              </p>
+            </div>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="energy" className="mt-2">
+          {selectedEquipment ? (
+            <ChillerEnergyDashboard 
+              equipmentId={selectedEquipmentId}
+              equipmentName={selectedEquipment?.name || ''}
+            />
+          ) : (
+            <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+              <div className="text-4xl mb-4">⚡</div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No Equipment Selected</h3>
+              <p className="text-gray-600 max-w-md mx-auto">
+                Select equipment above to view energy consumption and efficiency recommendations
               </p>
             </div>
           )}
