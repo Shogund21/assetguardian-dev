@@ -62,6 +62,33 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_passwords: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          is_active: boolean | null
+          password_hash: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          is_active?: boolean | null
+          password_hash: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          is_active?: boolean | null
+          password_hash?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       admin_users: {
         Row: {
           created_at: string | null
@@ -2407,6 +2434,10 @@ export type Database = {
           p_is_admin?: boolean
         }
         Returns: undefined
+      }
+      verify_admin_access: {
+        Args: { user_email: string; provided_password: string }
+        Returns: Json
       }
       verify_password_reset_token: {
         Args: { reset_token: string }

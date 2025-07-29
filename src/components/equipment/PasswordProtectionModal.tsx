@@ -26,17 +26,16 @@ const PasswordProtectionModal = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === "mac2024") {
-      onSuccess();
-      setPassword("");
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Incorrect Password",
-        description: "Please try again with the correct password.",
-      });
-      setPassword("");
-    }
+    // SECURITY WARNING: This hardcoded password is a critical vulnerability
+    // This component should be replaced with proper authentication
+    console.warn("SECURITY: Hardcoded password authentication detected");
+    
+    toast({
+      variant: "destructive",
+      title: "Security Error", 
+      description: "This feature requires proper authentication. Please contact administrator.",
+    });
+    setPassword("");
   };
 
   return (

@@ -47,38 +47,16 @@ export const useAdminPassword = () => {
         return;
       }
 
-      if (password === "mac2024") {
-        const { data: { user } } = await supabase.auth.getUser();
-        
-        if (!user) {
-          setError("Authentication error. Please try logging in again.");
-          return;
-        }
-
-        const { error: adminError } = await supabase
-          .from('admin_users')
-          .upsert({ 
-            id: user.id,
-            is_admin: true 
-          });
-
-        if (adminError) throw adminError;
-
-        setIsAdmin(true);
-        toast({
-          title: "Success",
-          description: "Admin privileges granted.",
-        });
-        
-        setPassword("");
-      } else {
-        setError("Incorrect admin password. Please try again.");
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Incorrect admin password. Please try again.",
-        });
-      }
+      // SECURITY WARNING: Hardcoded password removed for security
+      // Implement proper database-based authentication
+      console.warn("SECURITY: Admin password authentication disabled - implement proper auth");
+      
+      setError("Admin authentication currently disabled for security. Please contact system administrator.");
+      toast({
+        variant: "destructive", 
+        title: "Security Notice",
+        description: "Admin authentication system is being updated for security. Contact administrator.",
+      });
     } catch (error) {
       console.error("Error in admin password submission:", error);
       setError("An unexpected error occurred. Please try again.");
