@@ -1,4 +1,5 @@
 
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -26,7 +27,14 @@ import PredictiveMaintenance from "./pages/PredictiveMaintenance";
 import FilterChanges from "./pages/FilterChanges";
 import PrintView from "./pages/PrintView";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+    },
+  },
+});
 
 const AppContent = () => {
   useAuditTracker(); // Enable automatic audit tracking
@@ -53,22 +61,24 @@ const AppContent = () => {
   );
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <CompanyProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <SidebarProvider>
-            <PageTransition>
-              <AppContent />
-            </PageTransition>
-          </SidebarProvider>
-        </BrowserRouter>
-      </TooltipProvider>
-    </CompanyProvider>
-  </QueryClientProvider>
-);
+const App: React.FC = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <CompanyProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <SidebarProvider>
+              <PageTransition>
+                <AppContent />
+              </PageTransition>
+            </SidebarProvider>
+          </BrowserRouter>
+        </TooltipProvider>
+      </CompanyProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

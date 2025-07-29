@@ -10,15 +10,15 @@ import './index.css'
 const rootElement = document.getElementById('root');
 
 if (!rootElement) {
-  // Create root element if it doesn't exist (extreme fallback)
-  const newRoot = document.createElement('div');
-  newRoot.id = 'root';
-  document.body.appendChild(newRoot);
-  console.error("Root element was missing - created fallback root");
+  throw new Error("Root element not found. Please ensure your HTML has a div with id='root'");
 }
 
-// Get root element and render App within React's control
-ReactDOM.createRoot(rootElement || document.getElementById('root')!).render(<App />);
+// Render App with React.StrictMode wrapper
+ReactDOM.createRoot(rootElement).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
 
 // Set viewport height for mobile devices
 const setViewportHeight = () => {
