@@ -65,7 +65,7 @@ const FilterChangeFormDialog = ({
   const form = useForm<FilterChangeFormValues>({
     defaultValues: {
       equipment_id: equipmentId || filterChange?.equipment_id || "",
-      location_id: "",
+      location_id: filterChange?.location_id || "",
       filter_type: filterChange?.filter_type || defaultFilterSpec.type,
       filter_size: filterChange?.filter_size || defaultFilterSpec.size,
       installation_date: filterChange?.installation_date ? new Date(filterChange.installation_date) : new Date(),
@@ -83,9 +83,9 @@ const FilterChangeFormDialog = ({
   // Reset form when filterChange or equipmentId changes
   useEffect(() => {
     if (open) {
-      form.reset({
+      const resetValues = {
         equipment_id: equipmentId || filterChange?.equipment_id || "",
-        location_id: "",
+        location_id: filterChange?.location_id || "",
         filter_type: filterChange?.filter_type || defaultFilterSpec.type,
         filter_size: filterChange?.filter_size || defaultFilterSpec.size,
         installation_date: filterChange?.installation_date ? new Date(filterChange.installation_date) : new Date(),
@@ -94,7 +94,9 @@ const FilterChangeFormDialog = ({
         status: filterChange?.status || "active",
         filter_condition: filterChange?.filter_condition || (maintenanceTriggered ? "New" : null),
         notes: filterChange?.notes || (maintenanceTriggered ? "Created from maintenance check" : null),
-      });
+      };
+      console.log("FilterChangeFormDialog: Resetting form with values:", resetValues);
+      form.reset(resetValues);
     }
   }, [filterChange, equipmentId, open, form, defaultFilterSpec, maintenanceTriggered]);
 
@@ -113,13 +115,16 @@ const FilterChangeFormDialog = ({
   });
 
   const onSubmit = async (values: FilterChangeFormValues) => {
+    console.log("FilterChangeFormDialog: Submitting form with values:", values);
     try {
       if (isEditing && filterChange) {
+        console.log("FilterChangeFormDialog: Updating existing filter change:", filterChange.id);
         await update.mutateAsync({
           id: filterChange.id,
           values
         });
       } else {
+        console.log("FilterChangeFormDialog: Creating new filter change");
         await create.mutateAsync(values);
       }
       onOpenChange(false);
