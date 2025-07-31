@@ -14,6 +14,7 @@ export function useFilterChangeMutations() {
         .from('filter_changes')
         .insert([{
           equipment_id: values.equipment_id,
+          location_id: values.location_id,
           filter_type: values.filter_type,
           filter_size: values.filter_size,
           installation_date: values.installation_date.toISOString(),

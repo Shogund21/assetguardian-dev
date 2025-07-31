@@ -583,6 +583,7 @@ export type Database = {
           filter_type: string
           id: string
           installation_date: string
+          location_id: string | null
           notes: string | null
           status: Database["public"]["Enums"]["filter_change_status"]
           technician_id: string | null
@@ -597,6 +598,7 @@ export type Database = {
           filter_type: string
           id?: string
           installation_date?: string
+          location_id?: string | null
           notes?: string | null
           status?: Database["public"]["Enums"]["filter_change_status"]
           technician_id?: string | null
@@ -611,6 +613,7 @@ export type Database = {
           filter_type?: string
           id?: string
           installation_date?: string
+          location_id?: string | null
           notes?: string | null
           status?: Database["public"]["Enums"]["filter_change_status"]
           technician_id?: string | null
@@ -622,6 +625,13 @@ export type Database = {
             columns: ["equipment_id"]
             isOneToOne: false
             referencedRelation: "equipment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "filter_changes_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
             referencedColumns: ["id"]
           },
           {

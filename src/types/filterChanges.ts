@@ -14,6 +14,7 @@ export interface FilterChange {
   status: FilterChangeStatus;
   filter_condition: string | null;
   notes: string | null;
+  location_id: string | null;
   created_at: string;
   updated_at: string;
   
