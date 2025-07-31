@@ -1,5 +1,5 @@
 
-import { useEffect } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FilterChange, FilterChangeFormValues } from "@/types/filterChanges";
 import { useForm } from "react-hook-form";
@@ -39,6 +39,10 @@ const FilterChangeFormDialog = ({
 }: FilterChangeFormDialogProps) => {
   const isEditing = !!filterChange;
   const { create, update } = useFilterChangeMutations();
+  
+  // Track form initialization and user modifications
+  const [formInitialized, setFormInitialized] = useState(false);
+  const [userModified, setUserModified] = useState(false);
 
   // Get equipment details for pre-filling filter specs
   const { data: selectedEquipment } = useQuery({
@@ -57,10 +61,12 @@ const FilterChangeFormDialog = ({
     enabled: !!equipmentId,
   });
 
-  // Get default filter specs based on equipment
-  const defaultFilterSpec = selectedEquipment 
-    ? getDefaultFilterSpec(selectedEquipment.type, selectedEquipment.name)
-    : { type: 'MERV-13', size: '20x25x2' };
+  // Get default filter specs based on equipment (memoized to prevent unnecessary resets)
+  const defaultFilterSpec = useMemo(() => 
+    selectedEquipment 
+      ? getDefaultFilterSpec(selectedEquipment.type, selectedEquipment.name)
+      : { type: 'MERV-13', size: '20x25x2' }
+  , [selectedEquipment]);
 
   const form = useForm<FilterChangeFormValues>({
     defaultValues: {
@@ -80,12 +86,13 @@ const FilterChangeFormDialog = ({
   // Watch the location_id for EquipmentSelect
   const selectedLocationId = form.watch('location_id');
 
-  // Reset form when filterChange or equipmentId changes
+  // Reset form only when necessary (initial open or changing records)
   useEffect(() => {
-    if (open) {
+    if (open && (!formInitialized || !userModified)) {
+      const currentValues = form.getValues();
       const resetValues = {
         equipment_id: equipmentId || filterChange?.equipment_id || "",
-        location_id: filterChange?.location_id || "",
+        location_id: filterChange?.location_id || (userModified ? currentValues.location_id : ""),
         filter_type: filterChange?.filter_type || defaultFilterSpec.type,
         filter_size: filterChange?.filter_size || defaultFilterSpec.size,
         installation_date: filterChange?.installation_date ? new Date(filterChange.installation_date) : new Date(),
@@ -95,10 +102,29 @@ const FilterChangeFormDialog = ({
         filter_condition: filterChange?.filter_condition || (maintenanceTriggered ? "New" : null),
         notes: filterChange?.notes || (maintenanceTriggered ? "Created from maintenance check" : null),
       };
+      
       console.log("FilterChangeFormDialog: Resetting form with values:", resetValues);
       form.reset(resetValues);
+      setFormInitialized(true);
     }
-  }, [filterChange, equipmentId, open, defaultFilterSpec, maintenanceTriggered]);
+    
+    // Reset states when dialog closes
+    if (!open) {
+      setFormInitialized(false);
+      setUserModified(false);
+    }
+  }, [filterChange?.id, equipmentId, open, formInitialized, userModified]);
+
+  // Track when user modifies the form
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (formInitialized && name && (name === 'location_id' || name === 'equipment_id')) {
+        setUserModified(true);
+      }
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [form, formInitialized]);
 
   const { data: technicians = [] } = useQuery({
     queryKey: ['technicians'],
