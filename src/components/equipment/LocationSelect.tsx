@@ -38,7 +38,7 @@ const LocationSelect = ({ form }: LocationSelectProps) => {
   return (
     <FormField
       control={form.control}
-      name="location"
+      name="location_id"
       render={({ field }) => (
         <FormItem className="w-full">
           <FormLabel className="text-base font-semibold">Location</FormLabel>
@@ -61,7 +61,7 @@ const LocationSelect = ({ form }: LocationSelectProps) => {
                 locations.map((location) => (
                   <SelectItem 
                     key={location.id} 
-                    value={location.name}
+                    value={location.id}
                     className="py-3 text-sm cursor-pointer hover:bg-gray-100"
                   >
                     {location.name} - {location.store_number}

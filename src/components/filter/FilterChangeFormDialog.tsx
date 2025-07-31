@@ -17,7 +17,7 @@ import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { getDefaultFilterSpec } from "../maintenance/form/integration/filterEquipmentMapper";
-import LocationSelect from "../maintenance/form/selectors/LocationSelect";
+import LocationSelect from "../equipment/LocationSelect";
 import EquipmentSelect from "../maintenance/form/selectors/EquipmentSelect";
 
 interface FilterChangeFormDialogProps {
@@ -98,7 +98,7 @@ const FilterChangeFormDialog = ({
       console.log("FilterChangeFormDialog: Resetting form with values:", resetValues);
       form.reset(resetValues);
     }
-  }, [filterChange, equipmentId, open, form, defaultFilterSpec, maintenanceTriggered]);
+  }, [filterChange, equipmentId, open, defaultFilterSpec, maintenanceTriggered]);
 
   const { data: technicians = [] } = useQuery({
     queryKey: ['technicians'],
