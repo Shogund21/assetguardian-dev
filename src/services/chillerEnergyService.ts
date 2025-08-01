@@ -37,20 +37,55 @@ export class ChillerEnergyService {
   private static readonly OPTIMAL_EER = 12; // Energy Efficiency Ratio baseline
   private static readonly OPTIMAL_COP = 3.5; // Coefficient of Performance baseline
 
+  // Sensor mapping configurations to handle different naming conventions
+  private static readonly CURRENT_SENSOR_TYPES = [
+    'compressor_1_current', 'compressor_2_current', // Original expected names
+    'starter_motor_current_l1', 'starter_motor_current_l2', 'starter_motor_current_l3', // Actual database names
+    'compressor_current_a', 'compressor_current_b', 'compressor_current_c', // Alternative naming
+    'motor_current_phase_1', 'motor_current_phase_2', 'motor_current_phase_3' // Another alternative
+  ];
+
+  private static readonly TEMPERATURE_SENSOR_TYPES = {
+    entering: [
+      'evaporator_entering_temp', // Original expected name
+      'evaporator_entering_water_temperature', // Actual database name
+      'chilled_water_entering_temp',
+      'evap_entering_temp'
+    ],
+    leaving: [
+      'evaporator_leaving_temp', // Original expected name
+      'evaporator_leaving_water_temperature', // Actual database name
+      'chilled_water_leaving_temp',
+      'evap_leaving_temp'
+    ]
+  };
+
+  // Helper method to find available sensor readings with fallback types
+  private static async getSensorReadings(equipmentId: string, sensorTypes: string[], timeRange: number = 30) {
+    const { data: readings } = await supabase
+      .from('sensor_readings')
+      .select('sensor_type, value, timestamp_utc')
+      .eq('equipment_id', equipmentId)
+      .in('sensor_type', sensorTypes)
+      .gte('timestamp_utc', new Date(Date.now() - 1000 * 60 * timeRange).toISOString())
+      .order('timestamp_utc', { ascending: false });
+
+    return readings || [];
+  }
+
   static async calculateCurrentEnergyConsumption(equipmentId: string): Promise<number> {
     try {
-      // Get recent motor current readings to calculate power consumption
-      const { data: currentReadings } = await supabase
-        .from('sensor_readings')
-        .select('value, timestamp_utc')
-        .eq('equipment_id', equipmentId)
-        .in('sensor_type', ['compressor_1_current', 'compressor_2_current'])
-        .gte('timestamp_utc', new Date(Date.now() - 1000 * 60 * 30).toISOString()) // Last 30 minutes
-        .order('timestamp_utc', { ascending: false });
+      // Get recent motor current readings with fallback sensor types
+      const currentReadings = await this.getSensorReadings(equipmentId, this.CURRENT_SENSOR_TYPES, 30);
 
-      if (!currentReadings || currentReadings.length === 0) {
+      if (currentReadings.length === 0) {
+        console.log(`No current sensor readings found for equipment ${equipmentId}. Tried sensor types:`, this.CURRENT_SENSOR_TYPES);
         return 0;
       }
+
+      // Log which sensor types were found for debugging
+      const foundSensorTypes = [...new Set(currentReadings.map(r => r.sensor_type))];
+      console.log(`Found current readings from sensor types: ${foundSensorTypes.join(', ')} for equipment ${equipmentId}`);
 
       // Calculate average current and estimate power consumption
       // Typical chiller: Power (kW) ≈ Current (A) × Voltage (480V) × √3 × Power Factor (0.85) / 1000
@@ -66,21 +101,38 @@ export class ChillerEnergyService {
 
   static async calculateEfficiencyRatio(equipmentId: string): Promise<number> {
     try {
-      // Get recent temperature readings to calculate cooling capacity
-      const { data: tempReadings } = await supabase
-        .from('sensor_readings')
-        .select('sensor_type, value, timestamp_utc')
-        .eq('equipment_id', equipmentId)
-        .in('sensor_type', ['evaporator_entering_temp', 'evaporator_leaving_temp'])
-        .gte('timestamp_utc', new Date(Date.now() - 1000 * 60 * 30).toISOString())
-        .order('timestamp_utc', { ascending: false });
+      // Get recent temperature readings with fallback sensor types
+      const allTempTypes = [...this.TEMPERATURE_SENSOR_TYPES.entering, ...this.TEMPERATURE_SENSOR_TYPES.leaving];
+      const tempReadings = await this.getSensorReadings(equipmentId, allTempTypes, 30);
 
-      if (!tempReadings || tempReadings.length < 2) {
+      if (tempReadings.length === 0) {
+        console.log(`No temperature sensor readings found for equipment ${equipmentId}. Tried sensor types:`, allTempTypes);
         return this.OPTIMAL_EER; // Return baseline if no data
       }
 
-      const enteringTemp = tempReadings.find(r => r.sensor_type === 'evaporator_entering_temp')?.value || 55;
-      const leavingTemp = tempReadings.find(r => r.sensor_type === 'evaporator_leaving_temp')?.value || 45;
+      // Find entering and leaving temperatures using flexible sensor name matching
+      let enteringTemp = 55; // Default fallback
+      let leavingTemp = 45; // Default fallback
+
+      // Try to find entering temperature from available readings
+      for (const sensorType of this.TEMPERATURE_SENSOR_TYPES.entering) {
+        const reading = tempReadings.find(r => r.sensor_type === sensorType);
+        if (reading) {
+          enteringTemp = reading.value;
+          console.log(`Found entering temp from sensor: ${sensorType} = ${enteringTemp}°F`);
+          break;
+        }
+      }
+
+      // Try to find leaving temperature from available readings
+      for (const sensorType of this.TEMPERATURE_SENSOR_TYPES.leaving) {
+        const reading = tempReadings.find(r => r.sensor_type === sensorType);
+        if (reading) {
+          leavingTemp = reading.value;
+          console.log(`Found leaving temp from sensor: ${sensorType} = ${leavingTemp}°F`);
+          break;
+        }
+      }
       
       // Calculate cooling capacity (simplified)
       const tempDiff = enteringTemp - leavingTemp;
@@ -190,16 +242,10 @@ export class ChillerEnergyService {
 
   private static async calculateTrends(equipmentId: string): Promise<EnergyEfficiencyData['trends']> {
     try {
-      // Get power consumption trend from current readings over the last 7 days
-      const { data: weeklyReadings } = await supabase
-        .from('sensor_readings')
-        .select('value, timestamp_utc')
-        .eq('equipment_id', equipmentId)
-        .in('sensor_type', ['compressor_1_current', 'compressor_2_current'])
-        .gte('timestamp_utc', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
-        .order('timestamp_utc', { ascending: true });
+      // Get power consumption trend from current readings over the last 7 days with fallback sensor types
+      const weeklyReadings = await this.getSensorReadings(equipmentId, this.CURRENT_SENSOR_TYPES, 7 * 24 * 60);
 
-      if (!weeklyReadings || weeklyReadings.length < 10) {
+      if (weeklyReadings.length < 10) {
         return {
           powerTrend: 'stable',
           efficiencyTrend: 'stable',
@@ -233,15 +279,9 @@ export class ChillerEnergyService {
 
   static async getEnergyHistory(equipmentId: string, days: number = 7): Promise<EnergyReading[]> {
     try {
-      const { data: readings } = await supabase
-        .from('sensor_readings')
-        .select('value, timestamp_utc, sensor_type')
-        .eq('equipment_id', equipmentId)
-        .in('sensor_type', ['compressor_1_current', 'compressor_2_current'])
-        .gte('timestamp_utc', new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString())
-        .order('timestamp_utc', { ascending: true });
+      const readings = await this.getSensorReadings(equipmentId, this.CURRENT_SENSOR_TYPES, days * 24 * 60);
 
-      if (!readings) return [];
+      if (readings.length === 0) return [];
 
       // Group readings by hour and calculate energy metrics
       const hourlyData = new Map<string, number[]>();
