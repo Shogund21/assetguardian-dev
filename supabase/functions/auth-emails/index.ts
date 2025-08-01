@@ -32,6 +32,12 @@ interface EmailHookPayload {
   };
 }
 
+// Helper function to clean URLs and prevent duplicate paths
+const cleanUrl = (url: string): string => {
+  // Remove duplicate /auth/v1 segments that can occur with incorrect site_url configuration
+  return url.replace(/\/auth\/v1\/auth\/v1/g, '/auth/v1');
+};
+
 const generateConfirmationEmail = (
   firstName: string,
   confirmationUrl: string
@@ -198,7 +204,7 @@ const handler = async (req: Request): Promise<Response> => {
         emailType = 'Welcome & Email Confirmation';
         emailHtml = generateConfirmationEmail(
           user.user_metadata?.first_name || 'User',
-          `${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}&apikey=${supabaseAnonKey}`
+          cleanUrl(`${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}&apikey=${supabaseAnonKey}`)
         );
         break;
         
@@ -206,7 +212,7 @@ const handler = async (req: Request): Promise<Response> => {
         emailType = 'Password Reset';
         emailHtml = generatePasswordResetEmail(
           user.user_metadata?.first_name || 'User',
-          `${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}&apikey=${supabaseAnonKey}`
+          cleanUrl(`${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}&apikey=${supabaseAnonKey}`)
         );
         break;
         
@@ -214,7 +220,7 @@ const handler = async (req: Request): Promise<Response> => {
         emailType = 'Magic Link Login';
         emailHtml = generateConfirmationEmail(
           user.user_metadata?.first_name || 'User',
-          `${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}&apikey=${supabaseAnonKey}`
+          cleanUrl(`${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}&apikey=${supabaseAnonKey}`)
         );
         break;
         
@@ -222,7 +228,7 @@ const handler = async (req: Request): Promise<Response> => {
         emailType = 'Email Change Confirmation';
         emailHtml = generateConfirmationEmail(
           user.user_metadata?.first_name || 'User',
-          `${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}&apikey=${supabaseAnonKey}`
+          cleanUrl(`${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}&apikey=${supabaseAnonKey}`)
         );
         break;
         
