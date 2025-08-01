@@ -39,36 +39,70 @@ export class ChillerEnergyService {
 
   // Sensor mapping configurations to handle different naming conventions
   private static readonly CURRENT_SENSOR_TYPES = [
-    'compressor_1_current', 'compressor_2_current', // Original expected names
-    'starter_motor_current_l1', 'starter_motor_current_l2', 'starter_motor_current_l3', // Actual database names
-    'compressor_current_a', 'compressor_current_b', 'compressor_current_c', // Alternative naming
-    'motor_current_phase_1', 'motor_current_phase_2', 'motor_current_phase_3' // Another alternative
+    // Actual database sensor types found in the system
+    'amperage_l1', 'amperage_l2', 'amperage_l3',
+    'compressor_current_l1', 'compressor_current_l2', 'compressor_current_l3',
+    'percent_rla_l1', 'percent_rla_l2', 'percent_rla_l3',
+    // Original expected names (fallbacks)
+    'compressor_1_current', 'compressor_2_current',
+    'starter_motor_current_l1', 'starter_motor_current_l2', 'starter_motor_current_l3',
+    'compressor_current_a', 'compressor_current_b', 'compressor_current_c',
+    'motor_current_phase_1', 'motor_current_phase_2', 'motor_current_phase_3'
   ];
 
   private static readonly TEMPERATURE_SENSOR_TYPES = {
     entering: [
-      'evaporator_entering_temp', // Original expected name
       'evaporator_entering_water_temperature', // Actual database name
+      'condenser_entering_water_temperature', // Alternative for calculation
       'chilled_water_entering_temp',
+      'evaporator_entering_temp', // Original expected name
       'evap_entering_temp'
     ],
     leaving: [
+      'evaporator_leaving_water_temperature', // Actual database name (not present in current data)
+      'condenser_leaving_water_temperature', // Actual database name
+      'chilled_water_leaving_temp', 
       'evaporator_leaving_temp', // Original expected name
-      'evaporator_leaving_water_temperature', // Actual database name
-      'chilled_water_leaving_temp',
       'evap_leaving_temp'
     ]
   };
 
   // Helper method to find available sensor readings with fallback types
   private static async getSensorReadings(equipmentId: string, sensorTypes: string[], timeRange: number = 30) {
-    const { data: readings } = await supabase
+    console.log(`🔍 Searching for sensor data - Equipment: ${equipmentId}`);
+    console.log(`📊 Looking for sensor types: ${sensorTypes.join(', ')}`);
+    console.log(`⏰ Time range: ${timeRange} minutes`);
+
+    // First try recent data
+    let { data: readings } = await supabase
       .from('sensor_readings')
-      .select('sensor_type, value, timestamp_utc')
+      .select('sensor_type, value, timestamp_utc, source, reading_mode')
       .eq('equipment_id', equipmentId)
       .in('sensor_type', sensorTypes)
       .gte('timestamp_utc', new Date(Date.now() - 1000 * 60 * timeRange).toISOString())
       .order('timestamp_utc', { ascending: false });
+
+    // If no recent data, try extending the search to 7 days
+    if (!readings || readings.length === 0) {
+      console.log(`⚠️ No recent data found, extending search to 7 days`);
+      const { data: extendedReadings } = await supabase
+        .from('sensor_readings')
+        .select('sensor_type, value, timestamp_utc, source, reading_mode')
+        .eq('equipment_id', equipmentId)
+        .in('sensor_type', sensorTypes)
+        .gte('timestamp_utc', new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString())
+        .order('timestamp_utc', { ascending: false })
+        .limit(50);
+      readings = extendedReadings || [];
+    }
+
+    console.log(`✅ Found ${readings?.length || 0} sensor readings`);
+    if (readings && readings.length > 0) {
+      const latestReading = readings[0];
+      console.log(`📅 Latest reading: ${latestReading.timestamp_utc} (${latestReading.sensor_type})`);
+      console.log(`🎯 Data sources: ${[...new Set(readings.map(r => r.source))].join(', ')}`);
+      console.log(`📝 Reading modes: ${[...new Set(readings.map(r => r.reading_mode))].join(', ')}`);
+    }
 
     return readings || [];
   }

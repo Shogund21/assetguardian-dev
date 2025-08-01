@@ -3,11 +3,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Zap, TrendingUp, DollarSign, Settings, AlertTriangle, CheckCircle } from 'lucide-react';
+import { RefreshCw, Zap, TrendingUp, DollarSign, Settings, AlertTriangle, CheckCircle, Brain } from 'lucide-react';
 import { ChillerEnergyService, EnergyEfficiencyData } from '@/services/chillerEnergyService';
+import { EnergyAIService, EnergyAIAnalysis } from '@/services/energyAIService';
 import EnergyConsumptionChart from './EnergyConsumptionChart';
 import EnergyRecommendations from './EnergyRecommendations';
 import EfficiencyTrendsChart from './EfficiencyTrendsChart';
+import EnergyAIInsights from './EnergyAIInsights';
 import { useToast } from '@/hooks/use-toast';
 
 interface ChillerEnergyDashboardProps {
@@ -17,15 +19,23 @@ interface ChillerEnergyDashboardProps {
 
 const ChillerEnergyDashboard = ({ equipmentId, equipmentName }: ChillerEnergyDashboardProps) => {
   const [energyData, setEnergyData] = useState<EnergyEfficiencyData | null>(null);
+  const [aiAnalysis, setAiAnalysis] = useState<EnergyAIAnalysis | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
   const { toast } = useToast();
 
   const loadEnergyData = async () => {
     try {
       setRefreshing(true);
+      console.log('🔄 Loading energy data for equipment:', equipmentId);
       const data = await ChillerEnergyService.getEnergyEfficiencyData(equipmentId);
       setEnergyData(data);
+      
+      // Automatically trigger AI analysis if we have good data
+      if (data.currentPowerConsumption > 0 || data.currentEfficiency > 0) {
+        loadAIAnalysis(data);
+      }
     } catch (error) {
       console.error('Error loading energy data:', error);
       toast({
@@ -36,6 +46,34 @@ const ChillerEnergyDashboard = ({ equipmentId, equipmentName }: ChillerEnergyDas
     } finally {
       setLoading(false);
       setRefreshing(false);
+    }
+  };
+
+  const loadAIAnalysis = async (energyDataToAnalyze?: EnergyEfficiencyData) => {
+    try {
+      setAiLoading(true);
+      const dataToUse = energyDataToAnalyze || energyData;
+      if (!dataToUse) return;
+
+      console.log('🤖 Starting AI analysis...');
+      const analysis = await EnergyAIService.analyzeEnergyEfficiency(equipmentId, dataToUse);
+      setAiAnalysis(analysis);
+      
+      if (analysis) {
+        toast({
+          title: "AI Analysis Complete",
+          description: `Energy efficiency rated ${analysis.overall_rating}/10 - ${analysis.efficiency_status}`,
+        });
+      }
+    } catch (error) {
+      console.error('Error loading AI analysis:', error);
+      toast({
+        title: "AI Analysis Failed",
+        description: "Could not complete energy efficiency analysis.",
+        variant: "destructive",
+      });
+    } finally {
+      setAiLoading(false);
     }
   };
 
@@ -194,10 +232,14 @@ const ChillerEnergyDashboard = ({ equipmentId, equipmentName }: ChillerEnergyDas
 
       {/* Detailed Analysis Tabs */}
       <Tabs defaultValue="consumption" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="consumption">Energy Consumption</TabsTrigger>
           <TabsTrigger value="efficiency">Efficiency Trends</TabsTrigger>
           <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
+          <TabsTrigger value="ai-insights" className="flex items-center gap-2">
+            <Brain className="h-4 w-4" />
+            AI Insights
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="consumption" className="space-y-4">
@@ -210,6 +252,16 @@ const ChillerEnergyDashboard = ({ equipmentId, equipmentName }: ChillerEnergyDas
 
         <TabsContent value="recommendations" className="space-y-4">
           <EnergyRecommendations recommendations={energyData.recommendations} />
+        </TabsContent>
+
+        <TabsContent value="ai-insights" className="space-y-4">
+          <EnergyAIInsights 
+            analysis={aiAnalysis}
+            loading={aiLoading}
+            onRefresh={() => loadAIAnalysis()}
+            equipmentId={equipmentId}
+            energyData={energyData}
+          />
         </TabsContent>
       </Tabs>
     </div>
