@@ -135,7 +135,14 @@ const EfficiencyTrendsChart = ({ equipmentId }: EfficiencyTrendsChartProps) => {
                   fontSize={12}
                 />
                 <YAxis 
+                  yAxisId="left"
                   domain={['dataMin - 1', 'dataMax + 1']}
+                  fontSize={12}
+                />
+                <YAxis 
+                  yAxisId="right"
+                  orientation="right"
+                  domain={['dataMin - 5', 'dataMax + 5']}
                   fontSize={12}
                 />
                 <Tooltip 
@@ -164,6 +171,7 @@ const EfficiencyTrendsChart = ({ equipmentId }: EfficiencyTrendsChartProps) => {
                   stroke="hsl(var(--accent))"
                   strokeWidth={3}
                   dot={{ fill: 'hsl(var(--accent))', strokeWidth: 2, r: 4 }}
+                  yAxisId="left"
                   name="Energy Efficiency Ratio"
                 />
                 
