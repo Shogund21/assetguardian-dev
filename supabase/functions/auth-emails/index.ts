@@ -4,6 +4,7 @@ import { Resend } from "npm:resend@2.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 const hookSecret = Deno.env.get("SEND_EMAIL_HOOK_SECRET");
+const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
 
 // CORS headers
 const corsHeaders = {
@@ -171,6 +172,23 @@ const handler = async (req: Request): Promise<Response> => {
     
     console.log(`📧 Email action: ${email_action_type} for ${user.email}`);
 
+    // Check if API key is available
+    if (!supabaseAnonKey) {
+      console.error("❌ SUPABASE_ANON_KEY not found in environment variables");
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Configuration error: API key not available'
+        }), 
+        { 
+          status: 500, 
+          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+        }
+      );
+    }
+
+    console.log(`🔑 API key available, length: ${supabaseAnonKey.length}`);
+
     let emailType: string;
     let emailHtml: string;
 
@@ -180,7 +198,7 @@ const handler = async (req: Request): Promise<Response> => {
         emailType = 'Welcome & Email Confirmation';
         emailHtml = generateConfirmationEmail(
           user.user_metadata?.first_name || 'User',
-          `${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}`
+          `${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}&apikey=${supabaseAnonKey}`
         );
         break;
         
@@ -188,7 +206,7 @@ const handler = async (req: Request): Promise<Response> => {
         emailType = 'Password Reset';
         emailHtml = generatePasswordResetEmail(
           user.user_metadata?.first_name || 'User',
-          `${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}`
+          `${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}&apikey=${supabaseAnonKey}`
         );
         break;
         
@@ -196,7 +214,7 @@ const handler = async (req: Request): Promise<Response> => {
         emailType = 'Magic Link Login';
         emailHtml = generateConfirmationEmail(
           user.user_metadata?.first_name || 'User',
-          `${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}`
+          `${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}&apikey=${supabaseAnonKey}`
         );
         break;
         
@@ -204,7 +222,7 @@ const handler = async (req: Request): Promise<Response> => {
         emailType = 'Email Change Confirmation';
         emailHtml = generateConfirmationEmail(
           user.user_metadata?.first_name || 'User',
-          `${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}`
+          `${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}&apikey=${supabaseAnonKey}`
         );
         break;
         
