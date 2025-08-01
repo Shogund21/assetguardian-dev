@@ -21,26 +21,70 @@ const ResetPassword = () => {
 
   useEffect(() => {
     const verifyToken = async () => {
-      const tokenHash = searchParams.get('token_hash');
+      // Parse both query parameters and hash fragments for compatibility
+      const tokenHash = searchParams.get('token_hash') || searchParams.get('token');
       const type = searchParams.get('type');
       
-      console.log('Reset password URL params:', { tokenHash, type });
+      // Check for hash fragment format (modern Supabase)
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const hashTokenHash = hashParams.get('access_token');
+      const hashType = hashParams.get('type');
       
-      if (!tokenHash || type !== 'recovery') {
-        console.error('Missing or invalid token parameters');
-        toast({
-          title: "Invalid reset link",
-          description: "This password reset link is invalid or expired.",
-          variant: "destructive",
+      console.log('Reset password URL params:', { 
+        query: { tokenHash, type },
+        hash: { hashTokenHash, hashType },
+        fullURL: window.location.href,
+        hashString: window.location.hash
+      });
+      
+      // Use hash parameters if available, otherwise fall back to query parameters
+      const finalTokenHash = hashTokenHash || tokenHash;
+      const finalType = hashType || type;
+      
+      if (!finalTokenHash || finalType !== 'recovery') {
+        console.error('Missing or invalid token parameters', {
+          finalTokenHash: !!finalTokenHash,
+          finalType,
+          expected: 'recovery'
         });
-        navigate("/auth");
+        
+        // Check if we're in a redirect scenario and need to wait
+        if (window.location.hash.includes('access_token') || window.location.search.includes('token')) {
+          console.log('Detected auth redirect, waiting for session...');
+          // Wait a moment for potential session establishment
+          setTimeout(() => {
+            supabase.auth.getSession().then(({ data: { session } }) => {
+              if (session) {
+                console.log('Session found after redirect, proceeding with password reset');
+                setTokenVerified(true);
+              } else {
+                showInvalidTokenError();
+              }
+            });
+          }, 1000);
+          return;
+        }
+        
+        showInvalidTokenError();
         return;
       }
 
       try {
-        // Verify the reset token with Supabase
+        // For hash-based tokens, try to get the session directly
+        if (hashTokenHash) {
+          console.log('Attempting to get session for hash-based token');
+          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+          
+          if (session && !sessionError) {
+            console.log('Session established successfully for user:', session.user.email);
+            setTokenVerified(true);
+            return;
+          }
+        }
+        
+        // Verify the reset token with Supabase for query-based tokens
         const { data, error } = await supabase.auth.verifyOtp({
-          token_hash: tokenHash,
+          token_hash: finalTokenHash,
           type: 'recovery'
         });
 
@@ -48,12 +92,7 @@ const ResetPassword = () => {
 
         if (error) {
           console.error('Token verification failed:', error);
-          toast({
-            title: "Invalid reset link",
-            description: "This password reset link is invalid or expired.",
-            variant: "destructive",
-          });
-          navigate("/auth");
+          showInvalidTokenError();
           return;
         }
 
@@ -70,6 +109,15 @@ const ResetPassword = () => {
         });
         navigate("/auth");
       }
+    };
+
+    const showInvalidTokenError = () => {
+      toast({
+        title: "Invalid reset link",
+        description: "This password reset link is invalid or expired. Please request a new password reset.",
+        variant: "destructive",
+      });
+      navigate("/auth");
     };
 
     verifyToken();
