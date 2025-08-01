@@ -1,7 +1,8 @@
 project_id = "bqxdbvrtohhgkusmdjxd"
 
-# Auth webhook removed to use Supabase's native email system
-# Custom emails will be triggered via database functions when needed
+[auth]
+send_email_hook_uri = "https://bqxdbvrtohhgkusmdjxd.supabase.co/functions/v1/auth-emails"
+send_email_hook_secrets = "SEND_EMAIL_HOOK_SECRET"
 
 [functions.auth-emails]
 verify_jwt = false
