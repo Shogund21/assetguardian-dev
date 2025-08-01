@@ -207,11 +207,32 @@ const FilterChangeFormDialog = ({
               <FormField
                 control={form.control}
                 name="filter_size"
+                rules={{
+                  required: "Filter size is required",
+                  validate: (value) => {
+                    const trimmedValue = value?.trim();
+                    if (!trimmedValue) return "Filter size is required";
+                    
+                    const filterSizePattern = /^\d+x\d+x\d+$/;
+                    if (!filterSizePattern.test(trimmedValue)) {
+                      return "Filter size must be in format 'WidthxHeightxDepth' (e.g., 20x25x2)";
+                    }
+                    return true;
+                  }
+                }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Filter Size</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., 20x25x2" {...field} />
+                      <Input 
+                        placeholder="e.g., 20x25x2" 
+                        {...field}
+                        onChange={(e) => {
+                          // Trim whitespace when user types
+                          const trimmedValue = e.target.value.trim();
+                          field.onChange(trimmedValue);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
