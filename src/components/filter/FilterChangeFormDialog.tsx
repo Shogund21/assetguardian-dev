@@ -245,19 +245,21 @@ const FilterChangeFormDialog = ({
                         </FormControl>
                       </PopoverTrigger>
                       <PopoverContent 
-                        className="w-auto p-0 z-50" 
+                        className="w-auto p-0 z-40 bg-background border shadow-lg" 
                         align="start" 
-                        side="bottom" 
-                        sideOffset={8}
+                        side="top" 
+                        sideOffset={4}
                         avoidCollisions={true}
-                        data-portal
                       >
                         <Calendar
                           mode="single"
                           selected={field.value}
-                          onSelect={field.onChange}
+                          onSelect={(date) => {
+                            field.onChange(date);
+                            form.setValue('installation_date', date);
+                          }}
                           initialFocus
-                          className={cn("p-3 pointer-events-auto")}
+                          className="p-3 pointer-events-auto bg-background rounded-md"
                         />
                       </PopoverContent>
                     </Popover>
@@ -292,19 +294,21 @@ const FilterChangeFormDialog = ({
                         </FormControl>
                       </PopoverTrigger>
                       <PopoverContent 
-                        className="w-auto p-0 z-50" 
+                        className="w-auto p-0 z-40 bg-background border shadow-lg" 
                         align="start" 
-                        side="bottom" 
-                        sideOffset={8}
+                        side="top" 
+                        sideOffset={4}
                         avoidCollisions={true}
-                        data-portal
                       >
                         <Calendar
                           mode="single"
                           selected={field.value}
-                          onSelect={field.onChange}
+                          onSelect={(date) => {
+                            field.onChange(date);
+                            form.setValue('due_date', date);
+                          }}
                           initialFocus
-                          className={cn("p-3 pointer-events-auto")}
+                          className="p-3 pointer-events-auto bg-background rounded-md"
                         />
                       </PopoverContent>
                     </Popover>
@@ -329,7 +333,7 @@ const FilterChangeFormDialog = ({
                         <SelectValue placeholder="Assign technician (optional)" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="z-50 bg-background">
                       <SelectItem value="unassigned">Not assigned</SelectItem>
                       {technicians.length > 0 ? (
                         technicians.map((tech) => (
@@ -362,7 +366,7 @@ const FilterChangeFormDialog = ({
                           <SelectValue />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className="z-50 bg-background">
                         <SelectItem value="active">Active</SelectItem>
                         <SelectItem value="completed">Completed</SelectItem>
                         <SelectItem value="overdue">Overdue</SelectItem>
