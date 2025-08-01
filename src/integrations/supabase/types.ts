@@ -1219,6 +1219,48 @@ export type Database = {
           },
         ]
       }
+      password_reset_notifications: {
+        Row: {
+          admin_id: string
+          admin_notes: string | null
+          created_at: string
+          custom_email_sent_at: string | null
+          id: string
+          status: string
+          supabase_reset_initiated_at: string | null
+          tracking_token: string
+          updated_at: string
+          user_email: string
+          user_id: string
+        }
+        Insert: {
+          admin_id: string
+          admin_notes?: string | null
+          created_at?: string
+          custom_email_sent_at?: string | null
+          id?: string
+          status?: string
+          supabase_reset_initiated_at?: string | null
+          tracking_token: string
+          updated_at?: string
+          user_email: string
+          user_id: string
+        }
+        Update: {
+          admin_id?: string
+          admin_notes?: string | null
+          created_at?: string
+          custom_email_sent_at?: string | null
+          id?: string
+          status?: string
+          supabase_reset_initiated_at?: string | null
+          tracking_token?: string
+          updated_at?: string
+          user_email?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       password_reset_requests: {
         Row: {
           created_at: string
@@ -1927,6 +1969,10 @@ export type Database = {
       }
     }
     Functions: {
+      admin_send_password_reset_email: {
+        Args: { p_user_email: string; p_admin_notes?: string }
+        Returns: Json
+      }
       assign_user_to_demo_company: {
         Args: { p_user_email: string }
         Returns: string
