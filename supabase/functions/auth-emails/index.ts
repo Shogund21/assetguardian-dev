@@ -1,8 +1,9 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@4.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-const hookSecret = Deno.env.get("AUTH_WEBHOOK_SECRET") || "dev-webhook-secret-2024";
+const hookSecret = Deno.env.get("AUTH_WEBHOOK_SECRET");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -153,67 +154,75 @@ const generatePasswordResetEmail = (
 </html>
 `;
 
+// Verify Supabase webhook signature
+const verifySignature = async (
+  body: string,
+  signature: string,
+  timestamp: string,
+  secret: string
+): Promise<boolean> => {
+  try {
+    // Create the signing payload (timestamp.body)
+    const signingPayload = `${timestamp}.${body}`;
+    
+    // Convert secret to bytes
+    const secretBytes = new TextEncoder().encode(secret);
+    
+    // Create HMAC SHA-256 signature
+    const key = await crypto.subtle.importKey(
+      "raw",
+      secretBytes,
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+    
+    const signatureBytes = await crypto.subtle.sign(
+      "HMAC",
+      key,
+      new TextEncoder().encode(signingPayload)
+    );
+    
+    // Convert to base64
+    const expectedSignature = btoa(String.fromCharCode(...new Uint8Array(signatureBytes)));
+    
+    // Extract the signature from the header (format: v1,signature)
+    const providedSignature = signature.split(',')[1];
+    
+    return providedSignature === expectedSignature;
+  } catch (error) {
+    console.error("Signature verification error:", error);
+    return false;
+  }
+};
+
 const handler = async (req: Request): Promise<Response> => {
   console.log("=== AUTH EMAIL WEBHOOK TRIGGERED ===");
   console.log("Request method:", req.method);
-  console.log("Request headers:", Object.fromEntries(req.headers.entries()));
 
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Verify webhook signature for security
-  const webhookSecret = Deno.env.get("AUTH_WEBHOOK_SECRET");
-  
-  if (webhookSecret) {
-    const signature = req.headers.get("webhook-signature");
-    const timestamp = req.headers.get("webhook-timestamp");
-    const webhookId = req.headers.get("webhook-id");
-    
-    console.log("Webhook verification details:");
-    console.log("- Signature:", signature);
-    console.log("- Timestamp:", timestamp);
-    console.log("- Webhook ID:", webhookId);
-    console.log("- Expected secret exists:", !!webhookSecret);
-    
-    // For Supabase auth webhooks, we need to verify the signature
-    // If we have a signature, verify it; otherwise allow for development
-    if (signature && timestamp) {
-      try {
-        // Get the raw body for signature verification
-        const body = await req.text();
+  try {
+    const body = await req.text();
+    console.log("=== RECEIVED PAYLOAD ===", body);
+
+    // Verify webhook signature if secret is configured
+    if (hookSecret) {
+      const signature = req.headers.get("webhook-signature");
+      const timestamp = req.headers.get("webhook-timestamp");
+      
+      console.log("Webhook verification details:");
+      console.log("- Signature:", signature);
+      console.log("- Timestamp:", timestamp);
+      console.log("- Secret configured:", !!hookSecret);
+      
+      if (signature && timestamp) {
+        const isValid = await verifySignature(body, signature, timestamp, hookSecret);
         
-        // Create the signing payload (timestamp + body)
-        const signingPayload = `${timestamp}.${body}`;
-        
-        // Convert webhook secret to bytes
-        const secretBytes = new TextEncoder().encode(webhookSecret);
-        
-        // Create HMAC SHA-256 signature
-        const key = await crypto.subtle.importKey(
-          "raw",
-          secretBytes,
-          { name: "HMAC", hash: "SHA-256" },
-          false,
-          ["sign"]
-        );
-        
-        const signatureBytes = await crypto.subtle.sign(
-          "HMAC",
-          key,
-          new TextEncoder().encode(signingPayload)
-        );
-        
-        // Convert to base64
-        const expectedSignature = btoa(String.fromCharCode(...new Uint8Array(signatureBytes)));
-        
-        // Extract the signature from the header (format: v1,signature)
-        const providedSignature = signature.split(',')[1];
-        
-        if (providedSignature !== expectedSignature) {
+        if (!isValid) {
           console.log("Webhook signature validation failed");
-          console.log("Expected:", expectedSignature);
-          console.log("Provided:", providedSignature);
           return new Response(JSON.stringify({ error: "Invalid signature" }), {
             status: 401,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -221,37 +230,17 @@ const handler = async (req: Request): Promise<Response> => {
         }
         
         console.log("Webhook signature validation successful");
-        
-        // We need to re-create the request with the body since we've already read it
-        const request = new Request(req.url, {
-          method: req.method,
-          headers: req.headers,
-          body: body
-        });
-        req = request;
-        
-      } catch (error) {
-        console.error("Signature verification error:", error);
-        return new Response(JSON.stringify({ error: "Signature verification failed" }), {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+      } else {
+        console.log("No signature provided - allowing for development/testing");
       }
     } else {
-      console.log("No signature provided - allowing for development/testing");
+      console.log("No webhook secret configured - skipping authentication");
     }
-  } else {
-    console.log("No webhook secret configured - skipping authentication");
-  }
 
-  try {
-    const payload = await req.text();
-    console.log("=== RECEIVED PAYLOAD ===", payload);
-    
     let data: SupabaseAuthWebhook | LegacyAuthEmailPayload;
     
     try {
-      data = JSON.parse(payload);
+      data = JSON.parse(body);
     } catch (parseError) {
       console.error("Failed to parse payload:", parseError);
       throw new Error("Invalid JSON payload");
@@ -263,7 +252,6 @@ const handler = async (req: Request): Promise<Response> => {
     if ('type' in data && data.type && data.user && !('email_data' in data)) {
       const webhook = data as SupabaseAuthWebhook;
       console.log("Supabase auth webhook format detected, type:", webhook.type);
-      console.log("Full webhook payload:", JSON.stringify(webhook, null, 2));
       
       // Only handle signup and password recovery events
       if (webhook.type !== 'user.created' && webhook.type !== 'user.recovery_requested') {
@@ -280,14 +268,10 @@ const handler = async (req: Request): Promise<Response> => {
       let html: string;
 
       if (webhook.type === 'user.created') {
-        // For user creation, we typically send a welcome email
-        // Note: Email confirmation is usually handled by Supabase's built-in system
         subject = "Welcome to Asset Guardian!";
         html = generateConfirmationEmail(firstName, siteUrl, '');
         console.log("Generated welcome email for:", webhook.user.email);
       } else if (webhook.type === 'user.recovery_requested') {
-        // For password recovery, we need to return a message directing users to use Supabase's built-in recovery
-        // since the webhook doesn't contain the necessary token information
         console.log("Processing password recovery for:", webhook.user.email);
         
         subject = "Password Reset - Asset Guardian";
@@ -365,7 +349,6 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
       console.log("Email sent successfully:", emailResponse);
-      console.log("Resend response:", JSON.stringify(emailResponse, null, 2));
 
       return new Response(JSON.stringify({ 
         success: true, 
@@ -428,7 +411,6 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
       console.log("Email sent successfully:", emailResponse);
-      console.log("Resend response:", JSON.stringify(emailResponse, null, 2));
 
       return new Response(JSON.stringify({ 
         success: true, 
@@ -446,7 +428,6 @@ const handler = async (req: Request): Promise<Response> => {
 
   } catch (error: any) {
     console.error("Error in auth-emails function:", error);
-    console.error("Error stack:", error.stack);
     
     // Return success to prevent blocking auth operations
     return new Response(
