@@ -222,10 +222,16 @@ const handler = async (req: Request): Promise<Response> => {
     // Send email using Resend
     console.log(`📧 Sending ${emailType} to ${user.email}`);
     
+    // Use the configured domain or fall back to resend.dev for testing
+    const fromDomain = Deno.env.get("EMAIL_FROM_DOMAIN") || "resend.dev";
+    const fromEmail = `Asset Guardian <noreply@${fromDomain}>`;
+    
+    console.log(`📧 Using from address: ${fromEmail}`);
+    
     const emailResult = await resend.emails.send({
-      from: "Lovable Facilities <noreply@resend.dev>",
+      from: fromEmail,
       to: [user.email],
-      subject: emailType,
+      subject: `Asset Guardian - ${emailType}`,
       html: emailHtml,
     });
 
