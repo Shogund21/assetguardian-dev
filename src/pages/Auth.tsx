@@ -156,18 +156,30 @@ const Auth = () => {
       const result = await resetPassword(resetEmail);
       
       if (result.success) {
-        showSuccess("📧 Reset link sent! Check your email for instructions.");
+        showSuccess("📧 Password reset email sent! Please check your inbox and spam folder for reset instructions from Supabase.");
         toast({
-          title: "Reset link sent!",
-          description: "Check your email for password reset instructions.",
+          title: "Reset Email Sent!",
+          description: "Check your email (including spam folder) for password reset instructions.",
         });
         setShowResetForm(false);
         setResetEmail("");
       } else {
-        showError(result.error || "Password reset failed");
+        // Provide more helpful error messages
+        let errorMessage = result.error || "Password reset failed";
+        
+        if (errorMessage.includes("rate limit") || errorMessage.includes("too many")) {
+          errorMessage = "⏰ Too many reset attempts. Please wait a few minutes before trying again.";
+        } else if (errorMessage.includes("not found") || errorMessage.includes("invalid email")) {
+          errorMessage = "📧 No account found with this email address. Please check your email or sign up for a new account.";
+        } else if (errorMessage.includes("network") || errorMessage.includes("connection")) {
+          errorMessage = "🌐 Network error. Please check your internet connection and try again.";
+        }
+        
+        showError(errorMessage);
       }
     } catch (error) {
-      showError("🌐 An unexpected error occurred. Please try again.");
+      console.error("Password reset error:", error);
+      showError("🌐 An unexpected error occurred. Please check your internet connection and try again.");
     } finally {
       setLoading(false);
     }
@@ -221,9 +233,9 @@ const Auth = () => {
         {showResetForm ? (
           <Card>
             <CardHeader>
-              <CardTitle>Reset Password</CardTitle>
+              <CardTitle>Reset Your Password</CardTitle>
               <CardDescription>
-                Enter your email address to receive reset instructions
+                Enter your email address and we'll send you a secure reset link
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -233,12 +245,16 @@ const Auth = () => {
                   <Input
                     id="resetEmail"
                     type="email"
-                    placeholder="Enter your email"
+                    placeholder="Enter the email for your account"
                     value={resetEmail}
                     onChange={(e) => setResetEmail(e.target.value)}
                     required
                     disabled={loading}
+                    autoComplete="email"
                   />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    We'll send reset instructions to this email address
+                  </p>
                 </div>
 
                 {(error || successMessage) && (

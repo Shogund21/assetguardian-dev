@@ -290,38 +290,65 @@ const handler = async (req: Request): Promise<Response> => {
         // since the webhook doesn't contain the necessary token information
         console.log("Processing password recovery for:", webhook.user.email);
         
-        subject = "Reset Your Asset Guardian Password";
+        subject = "Password Reset - Asset Guardian";
         html = `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reset Your Asset Guardian Password</title>
+  <title>Password Reset - Asset Guardian</title>
 </head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <div style="text-align: center; margin-bottom: 40px;">
-    <img src="https://bqxdbvrtohgkusmdmjxd.supabase.co/storage/v1/object/public/company-assets/91b3768c-9bf7-4a1c-b2be-aea61a3ff3be.png" alt="Asset Guardian" style="height: 60px; width: 60px;">
-    <h1 style="color: #dc2626; margin-top: 20px;">Password Reset Request</h1>
-  </div>
-  
-  <div style="background: #fef2f2; padding: 30px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #dc2626;">
-    <h2 style="margin-top: 0; color: #1e293b;">Hi ${firstName || 'there'}!</h2>
-    <p style="font-size: 16px; margin-bottom: 25px;">
-      We received a request to reset your password for your Asset Guardian account. Please check your email for the official password reset link from Supabase.
-    </p>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8fafc;">
+  <div style="background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); overflow: hidden;">
+    <div style="background: linear-gradient(135deg, #dc2626, #ef4444); padding: 40px 30px; text-align: center;">
+      <img src="https://bqxdbvrtohgkusmdmjxd.supabase.co/storage/v1/object/public/company-assets/91b3768c-9bf7-4a1c-b2be-aea61a3ff3be.png" alt="Asset Guardian" style="height: 60px; width: 60px; margin-bottom: 20px;">
+      <h1 style="color: white; margin: 0; font-size: 28px; font-weight: bold;">Password Reset Request</h1>
+      <p style="color: rgba(255, 255, 255, 0.9); margin: 10px 0 0 0; font-size: 16px;">Asset Guardian Security</p>
+    </div>
     
-    <p style="font-size: 14px; color: #6b7280; margin-top: 20px;">
-      If you don't receive the reset email within a few minutes, please check your spam folder or contact support.
-    </p>
-  </div>
-  
-  <div style="text-align: center; font-size: 14px; color: #64748b;">
-    <p><strong>If you didn't request this password reset, please ignore this email.</strong></p>
-    <p>Your password will remain unchanged.</p>
-    <p style="margin-top: 30px;">
-      Need help? Contact us at <a href="mailto:support@assetguardian.com" style="color: #2563eb;">support@assetguardian.com</a>
-    </p>
+    <div style="padding: 40px 30px;">
+      <h2 style="margin-top: 0; color: #1e293b; font-size: 22px;">Hi ${firstName || 'there'}!</h2>
+      <p style="font-size: 16px; line-height: 1.7; margin-bottom: 25px; color: #475569;">
+        We received a request to reset your password for your Asset Guardian account. 
+      </p>
+      
+      <div style="background: #fef2f2; border: 1px solid #fecaca; padding: 25px; border-radius: 8px; margin: 25px 0;">
+        <p style="margin: 0; font-size: 15px; color: #991b1b; font-weight: 500;">
+          ⚠️ Important: Please check your email for the official password reset link from Supabase (noreply@mail.supabase.io).
+        </p>
+      </div>
+      
+      <div style="background: #f1f5f9; padding: 20px; border-radius: 8px; margin: 25px 0;">
+        <h3 style="margin-top: 0; color: #334155; font-size: 16px;">What to do next:</h3>
+        <ol style="margin: 10px 0; padding-left: 20px; color: #475569;">
+          <li style="margin-bottom: 8px;">Look for an email from <strong>noreply@mail.supabase.io</strong></li>
+          <li style="margin-bottom: 8px;">Click the "Reset Password" link in that email</li>
+          <li style="margin-bottom: 8px;">Follow the instructions to set your new password</li>
+        </ol>
+      </div>
+      
+      <p style="font-size: 14px; color: #6b7280; margin: 25px 0;">
+        <strong>Didn't receive the reset email?</strong><br>
+        • Check your spam/junk folder<br>
+        • Wait a few minutes and try again<br>
+        • Contact support if you continue having issues
+      </p>
+    </div>
+    
+    <div style="background: #f8fafc; padding: 30px; text-align: center; border-top: 1px solid #e2e8f0;">
+      <p style="margin: 0 0 15px 0; font-size: 14px; color: #64748b; font-weight: 500;">
+        If you didn't request this password reset, please ignore this email.
+      </p>
+      <p style="margin: 0; font-size: 14px; color: #64748b;">
+        Your password will remain unchanged.
+      </p>
+      <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+        <p style="margin: 0; font-size: 13px; color: #9ca3af;">
+          Need help? Contact us at <a href="mailto:support@assetguardian.com" style="color: #dc2626; text-decoration: none;">support@assetguardian.com</a>
+        </p>
+      </div>
+    </div>
   </div>
 </body>
 </html>
