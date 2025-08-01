@@ -162,7 +162,7 @@ const FilterChangeFormDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>
             {maintenanceTriggered 
@@ -218,7 +218,7 @@ const FilterChangeFormDialog = ({
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="installation_date"
@@ -244,7 +244,14 @@ const FilterChangeFormDialog = ({
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
+                      <PopoverContent 
+                        className="w-auto p-0 z-50" 
+                        align="start" 
+                        side="bottom" 
+                        sideOffset={8}
+                        avoidCollisions={true}
+                        data-portal
+                      >
                         <Calendar
                           mode="single"
                           selected={field.value}
@@ -284,7 +291,14 @@ const FilterChangeFormDialog = ({
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
+                      <PopoverContent 
+                        className="w-auto p-0 z-50" 
+                        align="start" 
+                        side="bottom" 
+                        sideOffset={8}
+                        avoidCollisions={true}
+                        data-portal
+                      >
                         <Calendar
                           mode="single"
                           selected={field.value}
