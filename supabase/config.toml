@@ -1,11 +1,14 @@
 project_id = "bqxdbvrtohhgkusmdjxd"
 
 [auth]
-# Re-enable custom auth webhook now that RESEND_API_KEY is configured
-hook_uri = "https://bqxdbvrtohhgkusmdjxd.supabase.co/functions/v1/auth-emails"
+# Temporarily switch to test webhook to debug authentication
+hook_uri = "https://bqxdbvrtohhgkusmdjxd.supabase.co/functions/v1/test-auth-webhook"
 hook_secrets = "AUTH_WEBHOOK_SECRET"
 
 [functions.auth-emails]
+verify_jwt = false
+
+[functions.test-auth-webhook]
 verify_jwt = false
 
 [functions.create-technician-accounts]
