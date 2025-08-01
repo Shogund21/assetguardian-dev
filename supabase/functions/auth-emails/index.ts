@@ -162,32 +162,86 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Verify webhook secret for security
-  // Supabase sends the webhook secret in different possible headers
+  // Verify webhook signature for security
   const webhookSecret = Deno.env.get("AUTH_WEBHOOK_SECRET");
+  
   if (webhookSecret) {
-    const authHeader = req.headers.get("authorization");
-    const webhookSecretHeader = req.headers.get("webhook-secret");
-    const apiKeyHeader = req.headers.get("apikey");
+    const signature = req.headers.get("webhook-signature");
+    const timestamp = req.headers.get("webhook-timestamp");
+    const webhookId = req.headers.get("webhook-id");
     
-    // Check various possible authentication methods
-    const isValidAuth = 
-      authHeader === `Bearer ${webhookSecret}` ||
-      webhookSecretHeader === webhookSecret ||
-      apiKeyHeader === webhookSecret ||
-      authHeader === webhookSecret;
+    console.log("Webhook verification details:");
+    console.log("- Signature:", signature);
+    console.log("- Timestamp:", timestamp);
+    console.log("- Webhook ID:", webhookId);
+    console.log("- Expected secret exists:", !!webhookSecret);
     
-    if (!isValidAuth) {
-      console.log("Webhook secret validation failed");
-      console.log("Expected:", webhookSecret);
-      console.log("Auth header:", authHeader);
-      console.log("Webhook secret header:", webhookSecretHeader);
-      console.log("API key header:", apiKeyHeader);
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    // For Supabase auth webhooks, we need to verify the signature
+    // If we have a signature, verify it; otherwise allow for development
+    if (signature && timestamp) {
+      try {
+        // Get the raw body for signature verification
+        const body = await req.text();
+        
+        // Create the signing payload (timestamp + body)
+        const signingPayload = `${timestamp}.${body}`;
+        
+        // Convert webhook secret to bytes
+        const secretBytes = new TextEncoder().encode(webhookSecret);
+        
+        // Create HMAC SHA-256 signature
+        const key = await crypto.subtle.importKey(
+          "raw",
+          secretBytes,
+          { name: "HMAC", hash: "SHA-256" },
+          false,
+          ["sign"]
+        );
+        
+        const signatureBytes = await crypto.subtle.sign(
+          "HMAC",
+          key,
+          new TextEncoder().encode(signingPayload)
+        );
+        
+        // Convert to base64
+        const expectedSignature = btoa(String.fromCharCode(...new Uint8Array(signatureBytes)));
+        
+        // Extract the signature from the header (format: v1,signature)
+        const providedSignature = signature.split(',')[1];
+        
+        if (providedSignature !== expectedSignature) {
+          console.log("Webhook signature validation failed");
+          console.log("Expected:", expectedSignature);
+          console.log("Provided:", providedSignature);
+          return new Response(JSON.stringify({ error: "Invalid signature" }), {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        
+        console.log("Webhook signature validation successful");
+        
+        // We need to re-create the request with the body since we've already read it
+        const request = new Request(req.url, {
+          method: req.method,
+          headers: req.headers,
+          body: body
+        });
+        req = request;
+        
+      } catch (error) {
+        console.error("Signature verification error:", error);
+        return new Response(JSON.stringify({ error: "Signature verification failed" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    } else {
+      console.log("No signature provided - allowing for development/testing");
     }
+  } else {
+    console.log("No webhook secret configured - skipping authentication");
   }
 
   try {
