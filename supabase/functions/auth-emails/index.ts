@@ -162,34 +162,46 @@ const verifySignature = async (
   secret: string
 ): Promise<boolean> => {
   try {
-    // Create the signing payload (timestamp.body)
-    const signingPayload = `${timestamp}.${body}`;
+    console.log("=== SIGNATURE VERIFICATION DEBUG ===");
+    console.log("Raw signature received:", signature);
+    console.log("Timestamp:", timestamp);
+    console.log("Payload length:", body.length);
+    console.log("Secret configured:", !!secret);
     
-    // Convert secret to bytes
-    const secretBytes = new TextEncoder().encode(secret);
+    // Handle Supabase's signature format: "v1,<signature>"
+    let actualSignature = signature;
+    if (signature.startsWith('v1,')) {
+      actualSignature = signature.slice(3); // Remove "v1," prefix
+      console.log("Extracted signature after removing v1 prefix:", actualSignature);
+    }
     
-    // Create HMAC SHA-256 signature
+    // Create the signed payload (timestamp.payload)
+    const signedPayload = `${timestamp}.${body}`;
+    console.log("Signed payload to verify:", signedPayload);
+    
+    // Create HMAC signature
     const key = await crypto.subtle.importKey(
       "raw",
-      secretBytes,
+      new TextEncoder().encode(secret),
       { name: "HMAC", hash: "SHA-256" },
       false,
       ["sign"]
     );
     
-    const signatureBytes = await crypto.subtle.sign(
+    const signature_bytes = await crypto.subtle.sign(
       "HMAC",
       key,
-      new TextEncoder().encode(signingPayload)
+      new TextEncoder().encode(signedPayload)
     );
     
     // Convert to base64
-    const expectedSignature = btoa(String.fromCharCode(...new Uint8Array(signatureBytes)));
+    const expected_signature = btoa(String.fromCharCode(...new Uint8Array(signature_bytes)));
     
-    // Extract the signature from the header (format: v1,signature)
-    const providedSignature = signature.split(',')[1];
+    console.log("Expected signature:", expected_signature);
+    console.log("Actual signature to compare:", actualSignature);
+    console.log("Signatures match:", expected_signature === actualSignature);
     
-    return providedSignature === expectedSignature;
+    return expected_signature === actualSignature;
   } catch (error) {
     console.error("Signature verification error:", error);
     return false;
