@@ -162,8 +162,8 @@ const FilterChangeFormDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>
             {maintenanceTriggered 
               ? "Create Filter Change Record"
@@ -179,8 +179,9 @@ const FilterChangeFormDialog = ({
           )}
         </DialogHeader>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div className="overflow-y-auto flex-1 px-1">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <LocationSelect form={form} />
 
             <EquipmentSelect 
@@ -440,8 +441,9 @@ const FilterChangeFormDialog = ({
                 )}
               </Button>
             </div>
-          </form>
-        </Form>
+            </form>
+          </Form>
+        </div>
       </DialogContent>
     </Dialog>
   );
