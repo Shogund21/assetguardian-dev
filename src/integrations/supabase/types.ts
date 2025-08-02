@@ -107,6 +107,150 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_access_requests: {
+        Row: {
+          created_at: string | null
+          feature_name: string
+          id: string
+          justification: string | null
+          requested_at: string | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string | null
+          user_email: string
+          user_id: string
+          user_name: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          feature_name?: string
+          id?: string
+          justification?: string | null
+          requested_at?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string | null
+          user_email: string
+          user_id: string
+          user_name?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          feature_name?: string
+          id?: string
+          justification?: string | null
+          requested_at?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string | null
+          user_email?: string
+          user_id?: string
+          user_name?: string | null
+        }
+        Relationships: []
+      }
+      ai_feature_permissions: {
+        Row: {
+          created_at: string | null
+          disabled_at: string | null
+          enabled_at: string | null
+          enabled_by: string | null
+          feature_name: string
+          id: string
+          updated_at: string | null
+          user_email: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          disabled_at?: string | null
+          enabled_at?: string | null
+          enabled_by?: string | null
+          feature_name?: string
+          id?: string
+          updated_at?: string | null
+          user_email: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          disabled_at?: string | null
+          enabled_at?: string | null
+          enabled_by?: string | null
+          feature_name?: string
+          id?: string
+          updated_at?: string | null
+          user_email?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_usage_tracking: {
+        Row: {
+          ai_provider: string
+          api_calls_count: number | null
+          confidence_score: number | null
+          created_at: string | null
+          equipment_id: string | null
+          error_message: string | null
+          estimated_cost_usd: number | null
+          feature_name: string
+          id: string
+          operation_type: string
+          response_time_ms: number | null
+          session_id: string | null
+          success: boolean | null
+          tokens_input: number | null
+          tokens_output: number | null
+          user_email: string
+          user_id: string
+        }
+        Insert: {
+          ai_provider: string
+          api_calls_count?: number | null
+          confidence_score?: number | null
+          created_at?: string | null
+          equipment_id?: string | null
+          error_message?: string | null
+          estimated_cost_usd?: number | null
+          feature_name?: string
+          id?: string
+          operation_type: string
+          response_time_ms?: number | null
+          session_id?: string | null
+          success?: boolean | null
+          tokens_input?: number | null
+          tokens_output?: number | null
+          user_email: string
+          user_id: string
+        }
+        Update: {
+          ai_provider?: string
+          api_calls_count?: number | null
+          confidence_score?: number | null
+          created_at?: string | null
+          equipment_id?: string | null
+          error_message?: string | null
+          estimated_cost_usd?: number | null
+          feature_name?: string
+          id?: string
+          operation_type?: string
+          response_time_ms?: number | null
+          session_id?: string | null
+          success?: boolean | null
+          tokens_input?: number | null
+          tokens_output?: number | null
+          user_email?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
@@ -451,6 +595,41 @@ export type Database = {
           },
         ]
       }
+      equipment_live_points: {
+        Row: {
+          created_at: string
+          equipment_id: string
+          id: string
+          last_updated: string
+          points: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          equipment_id: string
+          id?: string
+          last_updated?: string
+          points?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          equipment_id?: string
+          id?: string
+          last_updated?: string
+          points?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipment_live_points_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: true
+            referencedRelation: "equipment"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       equipment_thresholds: {
         Row: {
           created_at: string
@@ -639,6 +818,79 @@ export type Database = {
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hvac_diag_messages: {
+        Row: {
+          body: Json
+          created_at: string
+          id: string
+          sender: string
+          session_id: string
+        }
+        Insert: {
+          body?: Json
+          created_at?: string
+          id?: string
+          sender: string
+          session_id: string
+        }
+        Update: {
+          body?: Json
+          created_at?: string
+          id?: string
+          sender?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hvac_diag_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "hvac_diag_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hvac_diag_sessions: {
+        Row: {
+          created_at: string
+          ended_at: string | null
+          equipment_id: string
+          id: string
+          resolved: boolean
+          started_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          ended_at?: string | null
+          equipment_id: string
+          id?: string
+          resolved?: boolean
+          started_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          ended_at?: string | null
+          equipment_id?: string
+          id?: string
+          resolved?: boolean
+          started_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hvac_diag_sessions_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "equipment"
             referencedColumns: ["id"]
           },
         ]
