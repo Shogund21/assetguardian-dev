@@ -303,8 +303,10 @@ const TechnicianManagement = () => {
       return;
     }
     
-    setSelectedTechnicianId(id);
-    setIsPasswordModalOpen(true);
+    // Confirm deletion and proceed directly for admins
+    if (window.confirm("Are you sure you want to delete this technician? This action cannot be undone.")) {
+      deleteTechnicianMutation.mutate(id);
+    }
   };
 
   const handlePasswordSuccess = async () => {
