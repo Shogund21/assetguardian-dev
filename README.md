@@ -116,6 +116,7 @@ A comprehensive facility management system built with modern web technologies, d
 - **Activity Feed**: Recent activities across all system components
 - **Equipment Overview**: Quick status updates and equipment health summaries
 - **Enhanced Mobile Design**: Touch-optimized interface with improved navigation
+- **Mobile-Optimized Tab Navigation**: 2-row grid layout for predictive maintenance tabs ensuring all options are visible and accessible
 - **Quick Actions**: Fast access to frequently used functions with mobile shortcuts
 - **Status Indicators**: Visual indicators for system health and connectivity
 - **Settings Integration**: Quick access to comprehensive settings management
