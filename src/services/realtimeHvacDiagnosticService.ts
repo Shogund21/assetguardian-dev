@@ -247,6 +247,9 @@ export class RealtimeHvacDiagnosticService {
     equipmentId: string, 
     sessionId: string
   ): Promise<DiagnosticMessage> {
+    // Get conversation history for context
+    const conversationHistory = await this.getSessionMessages(sessionId);
+
     // For general mode, use minimal data
     if (equipmentId === 'general') {
       const { data: analysis, error } = await supabase.functions.invoke(
@@ -257,7 +260,8 @@ export class RealtimeHvacDiagnosticService {
             livePoints: {},
             recentReadings: [],
             sessionId,
-            mode: 'general'
+            mode: 'general',
+            conversationHistory
           }
         }
       );
@@ -305,7 +309,8 @@ export class RealtimeHvacDiagnosticService {
           equipment,
           livePoints: liveData?.points || {},
           recentReadings: recentReadings || [],
-          sessionId
+          sessionId,
+          conversationHistory
         }
       }
     );

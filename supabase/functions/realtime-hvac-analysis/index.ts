@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { equipment, livePoints, recentReadings, sessionId, mode } = await req.json()
+    const { equipment, livePoints, recentReadings, sessionId, mode, conversationHistory = [] } = await req.json()
 
     // Initialize OpenAI (API key from environment)
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
@@ -21,11 +21,11 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured')
     }
 
-    // Prepare analysis prompt based on mode
-    let systemPrompt
+    // Prepare messages array with conversation history
+    let messages = []
     
     if (mode === 'general') {
-      systemPrompt = `You are Ki, a Field Troubleshooting Specialist with 20 years of hands-on HVAC service experience. You work with DX systems, VRF, VAV, chillers, and all types of commercial HVAC equipment.
+      const systemPrompt = `You are Ki, a Field Troubleshooting Specialist with 20 years of hands-on HVAC service experience. You work with DX systems, VRF, VAV, chillers, and all types of commercial HVAC equipment.
 
 You're talking to a technician who is standing at the unit right now. Time is money, so be direct and practical.
 
@@ -45,9 +45,21 @@ Communication style:
 
 Remember: The technician is standing at the unit with limited time. Help them solve the problem efficiently.
 
-Introduce yourself briefly as Ki and ask what HVAC issue they're dealing with.`
+${conversationHistory.length === 0 ? 'Introduce yourself briefly as Ki and ask what HVAC issue they are dealing with.' : 'Continue the conversation based on the technician\'s latest message. Remember what has been discussed and build upon it.'}`
+
+      // Build messages array
+      messages = [{ role: 'system', content: systemPrompt }]
+      
+      // Add conversation history
+      conversationHistory.forEach(msg => {
+        if (msg.sender === 'tech') {
+          messages.push({ role: 'user', content: msg.body.text || 'Technician message' })
+        } else if (msg.sender === 'llm') {
+          messages.push({ role: 'assistant', content: msg.body.text || 'AI response' })
+        }
+      })
     } else {
-      systemPrompt = `You are Ki, a Field Troubleshooting Specialist with 20 years of hands-on HVAC service experience. You're analyzing real-time equipment data.
+      const systemPrompt = `You are Ki, a Field Troubleshooting Specialist with 20 years of hands-on HVAC service experience. You're analyzing real-time equipment data.
 
 Equipment: ${equipment.name} (${equipment.type})
 Location: ${equipment.location}
@@ -69,6 +81,18 @@ Based on your 20 years of field experience, provide:
 4. Your confidence level in this analysis
 
 Keep response concise and actionable for a tech in the field.`
+
+      // Build messages array
+      messages = [{ role: 'system', content: systemPrompt }]
+      
+      // Add conversation history
+      conversationHistory.forEach(msg => {
+        if (msg.sender === 'tech') {
+          messages.push({ role: 'user', content: msg.body.text || 'Technician message' })
+        } else if (msg.sender === 'llm') {
+          messages.push({ role: 'assistant', content: msg.body.text || 'AI response' })
+        }
+      })
     }
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -79,12 +103,7 @@ Keep response concise and actionable for a tech in the field.`
       },
       body: JSON.stringify({
         model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: systemPrompt
-          }
-        ],
+        messages,
         max_tokens: 500,
         temperature: 0.3
       })
