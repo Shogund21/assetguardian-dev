@@ -26,6 +26,12 @@
     height: calc(var(--vh, 1vh) * 100);
   }
 
+  /* Mobile tab navigation scrolling */
+  .mobile-nav-tabs {
+    scroll-padding-right: 3rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
   /* Critical fixes for dropdowns on mobile */
   @media (max-width: 767px) {
     /* Force higher z-index and proper positioning for dropdown wrappers */
