@@ -27,7 +27,7 @@ export const EditEquipmentDialog = ({ equipment, children }: EditEquipmentDialog
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { supabase, isReady } = useAuthenticatedSupabase();
+  const { supabase, isReady, hasValidJWT } = useAuthenticatedSupabase();
   const { currentCompany } = useCompany();
   
   const form = useForm<EquipmentFormValues>({
@@ -47,12 +47,12 @@ export const EditEquipmentDialog = ({ equipment, children }: EditEquipmentDialog
   const onSubmit = async (values: EquipmentFormValues) => {
     setIsSubmitting(true);
     
-    // Check if authentication is ready
-    if (!isReady) {
+    // Check if authentication is ready and valid
+    if (!isReady || !hasValidJWT) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Authentication not ready. Please try again.",
+        title: "Authentication Error",
+        description: "You must be logged in to edit equipment. Please sign in and try again.",
       });
       setIsSubmitting(false);
       return;

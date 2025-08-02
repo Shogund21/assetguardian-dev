@@ -12,9 +12,9 @@ export const useAuthenticatedSupabase = () => {
       console.log("🔄 Checking authentication status...");
       
       if (!isAuthenticated || !session) {
-        console.log("🔓 No authentication, using client without JWT");
+        console.log("🔓 No authentication, not ready");
         setHasValidJWT(false);
-        setIsReady(true);
+        setIsReady(false);
         return;
       }
 
@@ -22,13 +22,13 @@ export const useAuthenticatedSupabase = () => {
         // Ensure session is valid and JWT is available
         await ensureSession();
         setHasValidJWT(true);
+        setIsReady(true);
         console.log("✅ Authentication validated, JWT ready");
       } catch (error) {
         console.error("❌ Authentication validation failed:", error);
         setHasValidJWT(false);
+        setIsReady(false);
       }
-      
-      setIsReady(true);
     };
 
     checkAuthentication();
