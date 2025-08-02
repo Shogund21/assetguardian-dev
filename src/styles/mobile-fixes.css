@@ -28,6 +28,7 @@
 
   /* Mobile tab navigation scrolling */
   .mobile-nav-tabs {
+    scroll-padding-left: 1.5rem;
     scroll-padding-right: 3rem;
     -webkit-overflow-scrolling: touch;
   }
