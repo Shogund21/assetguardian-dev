@@ -18,19 +18,24 @@ A comprehensive facility management system built with modern web technologies, d
 - **AI Equipment Health Monitoring**: Real-time analysis of equipment condition and performance
 - **Sensor Data Collection**: Automated collection and analysis of equipment sensor readings
 - **Predictive Analytics**: AI-powered failure prediction with confidence scoring
+- **Dual AI Analysis**: Choose between GPT, Claude, or both AI models for enhanced accuracy
+- **Energy Efficiency Analysis**: Comprehensive energy consumption and optimization insights
 - **Health Matrix Visualization**: Color-coded equipment health overview dashboard
 - **Maintenance Windows**: Optimal maintenance timing recommendations
 - **Alert System**: Automated alerts for equipment requiring attention
 - **Timeline Predictions**: Forecast equipment failure timelines and maintenance needs
 - **Performance Trends**: Track equipment efficiency and performance degradation
+- **AI Chat Interface**: Natural language queries about equipment performance and recommendations
 
 ### AI Image Reading & Analysis
 - **Photo-based Readings**: Extract sensor readings directly from equipment photos using AI
 - **OpenAI Integration**: ChatGPT-4o powered image analysis for accurate data extraction
+- **Batch Image Processing**: Process multiple images simultaneously with progress tracking
 - **Confidence Scoring**: AI provides confidence levels for extracted readings
 - **Multiple Reading Detection**: Identify and extract multiple readings from single images
 - **Manual Override**: Option to manually adjust AI-extracted readings
 - **Image Documentation**: Store equipment photos with extracted data for reference
+- **Extracted Reading Staging**: Review and validate AI-extracted data before saving
 
 ### Offline Support & Sync
 - **Complete Offline Functionality**: Work without internet connection using IndexedDB storage
@@ -60,8 +65,9 @@ A comprehensive facility management system built with modern web technologies, d
 - **Tabbed Settings Interface**: Modern, organized settings with mobile-optimized navigation
 - **Location Management**: Comprehensive location setup with authentication integration
 - **Company Management**: Multi-tenant company setup and user management
+- **AI Integration Management**: OpenAI API key configuration and AI feature access control
 - **Features Overview**: Detailed feature documentation with guided setup
-- **Access Request Management**: Admin tools for managing user access requests
+- **Access Request Management**: Admin tools for managing user access requests and AI feature permissions
 - **User Metrics & Analytics**: Track user engagement and system performance
 - **Audit Trail**: Complete activity logging and system audit capabilities
 - **Mobile-Responsive**: Touch-optimized settings interface for all devices
@@ -142,8 +148,12 @@ A comprehensive facility management system built with modern web technologies, d
 ### AI & Machine Learning
 - **OpenAI API** integration for image analysis and reading extraction
 - **ChatGPT-4o** for advanced image processing capabilities
+- **Energy AI Analysis** for comprehensive energy efficiency insights
+- **Dual AI Predictive Analysis** supporting GPT and Claude models
+- **AI Feature Access Management** with permission-based access control
 - **Custom AI Models** for predictive maintenance analytics
 - **Confidence Scoring** for AI-generated insights
+- **AI Chat Interface** for natural language equipment queries
 
 ### Mobile & Offline
 - **Capacitor** for native mobile app deployment
@@ -261,6 +271,13 @@ A comprehensive facility management system built with modern web technologies, d
 - `is_member_of()` - Function to verify user membership in companies
 - `can_access_all_data()` - Super admin permission checking function
 
+### AI & Analytics Features
+- `ai_feature_permissions` - Manage AI feature access and permissions per user
+- `ai_access_requests` - Handle user requests for AI feature access
+- `ai_usage_records` - Track AI API usage and costs for analytics
+- `image_analysis_batches` - Manage batch image processing with AI
+- `extracted_reading_staging` - Stage and validate AI-extracted sensor readings
+
 ### Additional Features
 - `filter_changes` - Filter maintenance tracking with automated status calculations
 - `maintenance_documents` - Document storage and management with company-level access control
@@ -277,7 +294,7 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 ### Supabase Edge Function Secrets
-- `OPENAI_API_KEY` - For AI image analysis features
+- `OPENAI_API_KEY` - For AI image analysis and energy efficiency features
 - `RESEND_API_KEY` - For email notifications (optional)
 
 ### Feature Flags
@@ -296,6 +313,8 @@ Comprehensive guides available in the application:
 - **Technician Management** - Team coordination and scheduling
 - **Offline Functionality** - Working without internet connection
 - **AI Image Reading** - Extracting data from equipment photos
+- **AI Feature Configuration** - Setting up OpenAI integration and managing AI permissions
+- **Energy AI Analysis** - Using AI for energy efficiency optimization
 - **Company Setup** - Multi-tenant configuration
 
 ## 🚀 Deployment Options
