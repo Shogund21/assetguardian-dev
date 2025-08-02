@@ -14,6 +14,7 @@ import { SensorReadingsTable } from "./SensorReadingsTable";
 import { usePrintHandler } from "./usePrintHandler";
 
 export const PrintView = () => {
+  console.log("PrintView component rendering");
   const [selectedType, setSelectedType] = useState<PrintDataType>("equipment");
   const { handlePrint } = usePrintHandler();
 
@@ -195,6 +196,16 @@ export const PrintView = () => {
         return <div>Select a data type to print</div>;
     }
   };
+
+  console.log("PrintView render state:", { 
+    selectedType, 
+    isLoading, 
+    hasData: hasData(),
+    equipmentCount: equipmentData?.length || 0,
+    techniciansCount: techniciansData?.length || 0,
+    locationsCount: locationsData?.length || 0,
+    maintenanceCount: maintenanceData?.length || 0
+  });
 
   return (
     <div className="p-6 space-y-6 print:p-0">

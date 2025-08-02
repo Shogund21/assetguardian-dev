@@ -42,6 +42,7 @@ export const EnhancedPrintControls = ({
   isLoading = false,
   hasData = false
 }: EnhancedPrintControlsProps) => {
+  console.log("EnhancedPrintControls render:", { selectedType, isLoading, hasData });
   return (
     <div className="flex justify-between items-center print:hidden mb-6">
       <div className="flex items-center space-x-4">
