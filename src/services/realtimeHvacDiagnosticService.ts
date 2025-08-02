@@ -56,8 +56,8 @@ export class RealtimeHvacDiagnosticService {
       .eq('equipment_id', equipmentId)
       .single();
 
-    if (initialData?.points && typeof initialData.points === 'object') {
-      onUpdate(initialData.points as Record<string, LivePoint>);
+    if (initialData?.points && typeof initialData.points === 'object' && !Array.isArray(initialData.points)) {
+      onUpdate(initialData.points as unknown as Record<string, LivePoint>);
     }
 
     // Subscribe to real-time updates
@@ -77,8 +77,9 @@ export class RealtimeHvacDiagnosticService {
               typeof payload.new === 'object' && 
               'points' in payload.new && 
               typeof payload.new.points === 'object' &&
-              payload.new.points !== null) {
-            onUpdate(payload.new.points as Record<string, LivePoint>);
+              payload.new.points !== null &&
+              !Array.isArray(payload.new.points)) {
+            onUpdate(payload.new.points as unknown as Record<string, LivePoint>);
           }
         }
       )
