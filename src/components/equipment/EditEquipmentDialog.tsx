@@ -3,7 +3,8 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuthenticatedSupabase } from "@/hooks/useAuthenticatedSupabase";
+import { useCompany } from "@/contexts/CompanyContext";
 import { useToast } from "@/hooks/use-toast";
 import { Equipment } from "@/types/equipment";
 import { EquipmentFormSchema, EquipmentFormValues } from "./types";
@@ -26,6 +27,8 @@ export const EditEquipmentDialog = ({ equipment, children }: EditEquipmentDialog
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { supabase, isReady } = useAuthenticatedSupabase();
+  const { currentCompany } = useCompany();
   
   const form = useForm<EquipmentFormValues>({
     resolver: zodResolver(EquipmentFormSchema),
@@ -43,7 +46,21 @@ export const EditEquipmentDialog = ({ equipment, children }: EditEquipmentDialog
 
   const onSubmit = async (values: EquipmentFormValues) => {
     setIsSubmitting(true);
+    
+    // Check if authentication is ready
+    if (!isReady) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Authentication not ready. Please try again.",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+    
     try {
+      console.log("Updating equipment:", equipment.id, "with values:", values);
+      
       const { error } = await supabase
         .from("equipment")
         .update({
@@ -56,9 +73,13 @@ export const EditEquipmentDialog = ({ equipment, children }: EditEquipmentDialog
         })
         .eq("id", equipment.id);
       
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase update error:", error);
+        throw error;
+      }
 
-      queryClient.invalidateQueries({ queryKey: ["equipment"] });
+      // Invalidate with the correct query key that matches Equipment page
+      queryClient.invalidateQueries({ queryKey: ["equipment", currentCompany?.id] });
       
       toast({
         title: "Success",
