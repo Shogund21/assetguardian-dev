@@ -3,19 +3,36 @@ import { PrintView as PrintViewComponent } from "@/components/print/PrintView";
 import { useState, useEffect } from "react";
 import PasswordProtectionModal from "@/components/equipment/PasswordProtectionModal";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { authService } from "@/services/authService";
 
 const PrintView = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(true);
+  const { user, userProfile, authInitialized } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const authStatus = sessionStorage.getItem("printViewAuth");
-    if (authStatus === "true") {
-      setIsAuthenticated(true);
-      setShowPasswordModal(false);
-    }
-  }, []);
+    const checkAuth = async () => {
+      if (!authInitialized) return;
+
+      // Check if user is super admin first
+      if (user && userProfile && authService.isSuperAdmin(userProfile)) {
+        setIsAuthenticated(true);
+        setShowPasswordModal(false);
+        return;
+      }
+
+      // Fall back to session storage for regular users
+      const authStatus = sessionStorage.getItem("printViewAuth");
+      if (authStatus === "true") {
+        setIsAuthenticated(true);
+        setShowPasswordModal(false);
+      }
+    };
+
+    checkAuth();
+  }, [user, userProfile, authInitialized]);
 
   const handlePasswordSuccess = () => {
     setIsAuthenticated(true);
