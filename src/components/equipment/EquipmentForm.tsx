@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useCompany } from "@/contexts/CompanyContext";
+import { useAuth } from "@/hooks/useAuth";
 import FormFields from "./FormFields";
 import FormActions from "./FormActions";
 import { EquipmentFormData } from "@/types/equipment";
@@ -18,6 +20,8 @@ interface EquipmentFormProps {
 export const EquipmentForm = ({ initialData, onSubmit, isEdit = false }: EquipmentFormProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { currentCompany, isCompanyLoading } = useCompany();
+  const { user, isAuthenticated } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState<EquipmentFormData>({
@@ -41,6 +45,16 @@ export const EquipmentForm = ({ initialData, onSubmit, isEdit = false }: Equipme
     setIsLoading(true);
 
     try {
+      // Check authentication first
+      if (!isAuthenticated || !user) {
+        throw new Error("You must be logged in to add equipment");
+      }
+
+      // Check if company is available (for super admin, this means they must select a company)
+      if (!currentCompany) {
+        throw new Error("Please select a company first");
+      }
+
       // Validate required fields
       if (!formData.name.trim()) {
         throw new Error("Equipment name is required");
@@ -53,11 +67,12 @@ export const EquipmentForm = ({ initialData, onSubmit, isEdit = false }: Equipme
       }
 
       console.log("Submitting equipment data:", formData);
+      console.log("Current company:", currentCompany);
 
       if (onSubmit) {
         await onSubmit(formData);
       } else {
-        // Default create behavior - only include fields that exist in database
+        // Default create behavior - include company_id for proper RLS
         const equipmentData = {
           name: formData.name.trim(),
           location: formData.location.trim(),
@@ -65,9 +80,10 @@ export const EquipmentForm = ({ initialData, onSubmit, isEdit = false }: Equipme
           status: formData.status || "Active",
           serial_number: formData.serial_number?.trim() || null,
           model: formData.model?.trim() || null,
+          company_id: currentCompany.id, // Include company_id for RLS
         };
 
-        console.log("Inserting equipment:", equipmentData);
+        console.log("Inserting equipment with company_id:", equipmentData);
 
         const { data, error } = await supabase
           .from('equipment')
