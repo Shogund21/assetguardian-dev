@@ -46,6 +46,12 @@ export class RealtimeHvacDiagnosticService {
   ): Promise<void> {
     console.log('Starting live monitoring for equipment:', equipmentId);
     
+    // Skip live monitoring for general mode
+    if (equipmentId === 'general') {
+      console.log('Skipping live monitoring for general mode');
+      return;
+    }
+    
     // Stop any existing monitoring
     this.stopLiveMonitoring();
     
@@ -123,7 +129,7 @@ export class RealtimeHvacDiagnosticService {
     const { data, error } = await supabase
       .from('hvac_diag_sessions')
       .insert({
-        equipment_id: equipmentId,
+        equipment_id: equipmentId === 'general' ? null : equipmentId,
         user_id: (await supabase.auth.getUser()).data.user?.id,
       })
       .select()
@@ -241,7 +247,34 @@ export class RealtimeHvacDiagnosticService {
     equipmentId: string, 
     sessionId: string
   ): Promise<DiagnosticMessage> {
-    // Get current live points
+    // For general mode, use minimal data
+    if (equipmentId === 'general') {
+      const { data: analysis, error } = await supabase.functions.invoke(
+        'realtime-hvac-analysis',
+        {
+          body: {
+            equipment: { name: 'General HVAC Troubleshooting', type: 'general' },
+            livePoints: {},
+            recentReadings: [],
+            sessionId,
+            mode: 'general'
+          }
+        }
+      );
+
+      if (error) {
+        console.error('Error calling AI analysis:', error);
+        throw error;
+      }
+
+      return await this.sendMessage(sessionId, 'llm', {
+        text: analysis.summary,
+        data: analysis,
+        type: 'analysis'
+      });
+    }
+
+    // Get current live points for specific equipment
     const { data: liveData } = await supabase
       .from('equipment_live_points')
       .select('*')
@@ -294,6 +327,10 @@ export class RealtimeHvacDiagnosticService {
    * Generate demo live data for testing
    */
   static async generateDemoLiveData(equipmentId: string): Promise<void> {
+    // Skip demo data generation for general mode
+    if (equipmentId === 'general') {
+      return;
+    }
     const demoPoints: Record<string, LivePoint> = {
       temperature_supply: {
         name: 'Supply Air Temperature',

@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { equipment, livePoints, recentReadings, sessionId } = await req.json()
+    const { equipment, livePoints, recentReadings, sessionId, mode } = await req.json()
 
     // Initialize OpenAI (API key from environment)
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
@@ -21,8 +21,33 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured')
     }
 
-    // Prepare analysis prompt
-    const systemPrompt = `You are an expert HVAC diagnostic AI assistant. Analyze real-time equipment data and provide immediate insights.
+    // Prepare analysis prompt based on mode
+    let systemPrompt
+    
+    if (mode === 'general') {
+      systemPrompt = `You are Elena Cortez, a Field Troubleshooting Specialist with 20 years of hands-on HVAC service experience. You work with DX systems, VRF, VAV, chillers, and all types of commercial HVAC equipment.
+
+You're talking to a technician who is standing at the unit right now. Time is money, so be direct and practical.
+
+Your expertise:
+- 20 years hands-on field experience
+- Expert in DX, VRF, VAV, chiller troubleshooting
+- Know common failure patterns and quick diagnostic tricks
+- Focus on what the tech can check RIGHT NOW with basic tools
+- Give step-by-step troubleshooting procedures
+
+Communication style:
+- Direct and practical - no fluff
+- Use field terminology technicians understand
+- Ask specific questions about what they're seeing/hearing
+- Provide actionable next steps
+- Share quick diagnostic tricks from your experience
+
+Remember: The technician is standing at the unit with limited time. Help them solve the problem efficiently.
+
+Introduce yourself briefly as Elena and ask what HVAC issue they're dealing with.`
+    } else {
+      systemPrompt = `You are Elena Cortez, a Field Troubleshooting Specialist with 20 years of hands-on HVAC service experience. You're analyzing real-time equipment data.
 
 Equipment: ${equipment.name} (${equipment.type})
 Location: ${equipment.location}
@@ -37,13 +62,14 @@ ${recentReadings.slice(0, 10).map((reading: any) =>
   `${reading.sensor_type}: ${reading.value} ${reading.unit} at ${new Date(reading.timestamp_utc).toLocaleTimeString()}`
 ).join('\n')}
 
-Provide:
+Based on your 20 years of field experience, provide:
 1. Immediate status assessment
-2. Any anomalies or concerns detected
-3. Recommended actions if needed
-4. Confidence level in your analysis
+2. Any anomalies or concerns detected  
+3. Practical next steps for the technician
+4. Your confidence level in this analysis
 
-Keep response concise and actionable.`
+Keep response concise and actionable for a tech in the field.`
+    }
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',

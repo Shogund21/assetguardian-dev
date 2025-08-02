@@ -24,11 +24,20 @@ export const RealtimeDiagnostic = ({ equipmentId, equipmentName, onClose }: Prop
   const [isConnected, setIsConnected] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const isGeneralMode = equipmentId === "general";
+
   // Start monitoring when component mounts
   useEffect(() => {
     const startMonitoring = async () => {
+      // For general mode, skip live monitoring and show as ready
+      if (isGeneralMode) {
+        setIsConnected(true);
+        toast.success('Elena Cortez ready for troubleshooting chat');
+        return;
+      }
+
       try {
-        // Start live monitoring
+        // Start live monitoring for specific equipment
         await RealtimeHvacDiagnosticService.startLiveMonitoring(
           equipmentId,
           (points) => {
@@ -50,9 +59,11 @@ export const RealtimeDiagnostic = ({ equipmentId, equipmentName, onClose }: Prop
     startMonitoring();
 
     return () => {
-      RealtimeHvacDiagnosticService.stopLiveMonitoring();
+      if (!isGeneralMode) {
+        RealtimeHvacDiagnosticService.stopLiveMonitoring();
+      }
     };
-  }, [equipmentId]);
+  }, [equipmentId, isGeneralMode]);
 
   // Auto-scroll to bottom of messages
   useEffect(() => {
@@ -138,9 +149,9 @@ export const RealtimeDiagnostic = ({ equipmentId, equipmentName, onClose }: Prop
     }
   };
 
-  // Generate demo data periodically
+  // Generate demo data periodically (only for specific equipment)
   useEffect(() => {
-    if (!isConnected) return;
+    if (!isConnected || isGeneralMode) return;
 
     const interval = setInterval(async () => {
       try {
@@ -151,7 +162,7 @@ export const RealtimeDiagnostic = ({ equipmentId, equipmentName, onClose }: Prop
     }, 5000); // Update every 5 seconds
 
     return () => clearInterval(interval);
-  }, [equipmentId, isConnected]);
+  }, [equipmentId, isConnected, isGeneralMode]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -170,9 +181,10 @@ export const RealtimeDiagnostic = ({ equipmentId, equipmentName, onClose }: Prop
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* Live Data Panel */}
-      <Card>
+    <div className={`grid grid-cols-1 ${isGeneralMode ? '' : 'lg:grid-cols-2'} gap-6`}>
+      {/* Live Data Panel - Hidden in general mode */}
+      {!isGeneralMode && (
+        <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
             <Activity className="h-5 w-5" />
@@ -223,13 +235,16 @@ export const RealtimeDiagnostic = ({ equipmentId, equipmentName, onClose }: Prop
           </ScrollArea>
         </CardContent>
       </Card>
+      )}
 
       {/* Diagnostic Chat Panel */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
             <MessageCircle className="h-5 w-5" />
-            <CardTitle>AI Diagnostic Assistant</CardTitle>
+            <CardTitle>
+              {isGeneralMode ? 'Elena Cortez - Field Troubleshooting Specialist' : 'AI Diagnostic Assistant'}
+            </CardTitle>
           </div>
           <div className="flex items-center gap-2">
             {!session ? (
@@ -303,7 +318,11 @@ export const RealtimeDiagnostic = ({ equipmentId, equipmentName, onClose }: Prop
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Ask about the equipment condition, report an issue, or request analysis..."
+                  placeholder={
+                    isGeneralMode 
+                      ? "Describe your HVAC issue or what you're seeing at the unit..."
+                      : "Ask about the equipment condition, report an issue, or request analysis..."
+                  }
                   className="flex-1 min-h-[40px] resize-none"
                   rows={2}
                 />
@@ -319,8 +338,18 @@ export const RealtimeDiagnostic = ({ equipmentId, equipmentName, onClose }: Prop
           ) : (
             <div className="text-center text-muted-foreground py-8">
               <MessageCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>Start a diagnostic session to chat with AI assistant</p>
-              <p className="text-sm mt-1">Get real-time analysis and recommendations</p>
+              <p>
+                {isGeneralMode 
+                  ? "Start a session to chat with Elena Cortez"
+                  : "Start a diagnostic session to chat with AI assistant"
+                }
+              </p>
+              <p className="text-sm mt-1">
+                {isGeneralMode
+                  ? "20 years of hands-on HVAC field experience at your fingertips"
+                  : "Get real-time analysis and recommendations"
+                }
+              </p>
             </div>
           )}
         </CardContent>
