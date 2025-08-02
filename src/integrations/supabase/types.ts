@@ -858,7 +858,7 @@ export type Database = {
         Row: {
           created_at: string
           ended_at: string | null
-          equipment_id: string
+          equipment_id: string | null
           id: string
           resolved: boolean
           started_at: string
@@ -868,7 +868,7 @@ export type Database = {
         Insert: {
           created_at?: string
           ended_at?: string | null
-          equipment_id: string
+          equipment_id?: string | null
           id?: string
           resolved?: boolean
           started_at?: string
@@ -878,7 +878,7 @@ export type Database = {
         Update: {
           created_at?: string
           ended_at?: string | null
-          equipment_id?: string
+          equipment_id?: string | null
           id?: string
           resolved?: boolean
           started_at?: string
