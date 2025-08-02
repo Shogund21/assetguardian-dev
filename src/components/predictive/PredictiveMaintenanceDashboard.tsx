@@ -125,7 +125,7 @@ const PredictiveMaintenanceDashboard = () => {
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="flex md:grid w-full md:grid-cols-8 mb-4 h-auto mobile-nav-tabs gap-1 overflow-x-auto">
+        <TabsList className="flex md:grid w-full md:grid-cols-8 mb-4 h-auto mobile-nav-tabs gap-1 overflow-x-auto pl-4 pr-4 md:px-0">
           <TabsTrigger value="readings" className="touch-manipulation mobile-touch-target text-sm py-3 px-4 whitespace-nowrap flex-shrink-0 min-w-[100px]">
             Record
           </TabsTrigger>
