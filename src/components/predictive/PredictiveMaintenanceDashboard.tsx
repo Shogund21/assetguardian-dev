@@ -5,6 +5,9 @@ import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { offlineStorage } from "@/services/offlineStorageService";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { useAuthenticatedSupabase } from "@/hooks/useAuthenticatedSupabase";
+import { useAuth } from "@/hooks/useAuth";
+import { useEffect } from "react";
+import { Lock, Zap } from "lucide-react";
 import { getEquipmentReadingTemplate } from "@/utils/equipmentTemplates";
 import { getSortedEquipmentList } from "@/utils/equipmentSorting";
 
@@ -21,12 +24,15 @@ import MultipleImageAnalysis from "./MultipleImageAnalysis";
 import { EquipmentSelector } from "./dashboard/EquipmentSelector";
 import ChillerHealthDiagnostic from "../hvac/ChillerHealthDiagnostic";
 import ChillerEnergyDashboard from "./energy/ChillerEnergyDashboard";
+import EnergyFeatureLocked from "./energy/EnergyFeatureLocked";
 
 const PredictiveMaintenanceDashboard = () => {
   const [selectedEquipmentId, setSelectedEquipmentId] = useState<string>("");
   const [activeTab, setActiveTab] = useState<string>("readings");
   const { isOnline, cacheEquipmentData } = useOfflineSync();
   const { applyCompanyFilter } = useCompanyFilter();
+  const { hasDualAIAccess } = useAuth();
+  const [hasAIAccess, setHasAIAccess] = useState<boolean | null>(null);
   const { supabase: authSupabase } = useAuthenticatedSupabase();
 
   // Fetch equipment list with offline caching
@@ -99,6 +105,16 @@ const PredictiveMaintenanceDashboard = () => {
   const equipmentType = getEquipmentType(selectedEquipment);
   const readingTemplates = getEquipmentReadingTemplate(equipmentType);
 
+  // Check AI access when component mounts
+  useEffect(() => {
+    const checkAIAccess = async () => {
+      const access = await hasDualAIAccess();
+      setHasAIAccess(access);
+    };
+    
+    checkAIAccess();
+  }, [hasDualAIAccess]);
+
   return (
     <div className="w-full h-full">
       <PredictiveDashboardHeader />
@@ -119,8 +135,10 @@ const PredictiveMaintenanceDashboard = () => {
           <TabsTrigger value="analysis" className="touch-manipulation text-xs md:text-sm py-2">
             Analysis
           </TabsTrigger>
-          <TabsTrigger value="energy" className="touch-manipulation text-xs md:text-sm py-2">
+          <TabsTrigger value="energy" className="touch-manipulation text-xs md:text-sm py-2 flex items-center gap-1">
+            <Zap className="h-3 w-3" />
             Energy
+            {hasAIAccess === false && <Lock className="h-3 w-3 text-amber-500" />}
           </TabsTrigger>
           <TabsTrigger value="hvac-diagnostic" className="touch-manipulation text-xs md:text-sm py-2">
             HVAC Diag
@@ -203,10 +221,14 @@ const PredictiveMaintenanceDashboard = () => {
         
         <TabsContent value="energy" className="mt-2">
           {selectedEquipment ? (
-            <ChillerEnergyDashboard 
-              equipmentId={selectedEquipmentId}
-              equipmentName={selectedEquipment?.name || ''}
-            />
+            hasAIAccess === false ? (
+              <EnergyFeatureLocked equipmentName={selectedEquipment.name} />
+            ) : (
+              <ChillerEnergyDashboard 
+                equipmentId={selectedEquipmentId}
+                equipmentName={selectedEquipment.name}
+              />
+            )
           ) : (
             <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
               <div className="text-4xl mb-4">⚡</div>

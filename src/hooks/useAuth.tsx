@@ -153,6 +153,30 @@ export const useAuth = () => {
     return isAdmin();
   };
 
+  const hasDualAIAccess = async () => {
+    if (!user || !userProfile) return false;
+    try {
+      const { AIFeatureService } = await import('@/services/aiFeatureService');
+      return await AIFeatureService.checkFeatureAccess(user.id, userProfile.email);
+    } catch (error) {
+      console.error('Error checking dual AI access:', error);
+      return false;
+    }
+  };
+
+  const canRequestDualAIAccess = async () => {
+    if (!user || !userProfile) return false;
+    try {
+      const { AIFeatureService } = await import('@/services/aiFeatureService');
+      const requests = await AIFeatureService.getUserAccessRequests(user.id);
+      const pendingRequest = requests.find(req => req.status === 'pending');
+      return !pendingRequest;
+    } catch (error) {
+      console.error('Error checking dual AI request eligibility:', error);
+      return true; // Allow request attempt if check fails
+    }
+  };
+
   return {
     user,
     session,
@@ -165,6 +189,8 @@ export const useAuth = () => {
     isTechnician,
     hasPermission,
     hasFullAccess,
+    hasDualAIAccess,
+    canRequestDualAIAccess,
     // Auth actions
     signIn: authService.signIn,
     signUp: authService.signUp,
