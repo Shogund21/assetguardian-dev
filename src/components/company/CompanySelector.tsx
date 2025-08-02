@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue 
 } from "@/components/ui/select";
-import { Building2 } from "lucide-react";
+
 
 export const CompanySelector = () => {
   const { currentCompany, companies, setCurrentCompany } = useCompany();
@@ -77,9 +77,7 @@ export const CompanySelector = () => {
   const maxWidth = isMobile ? "150px" : "180px";
 
   return (
-    <div className="flex items-center">
-      <Building2 className="h-4 w-4 text-muted-foreground mr-2" />
-      <Select
+    <Select
         value={currentCompany?.id || (isSuperAdmin ? "all_companies" : "")}
         onValueChange={handleValueChange}
         open={open}
@@ -117,6 +115,5 @@ export const CompanySelector = () => {
           ))}
         </SelectContent>
       </Select>
-    </div>
   );
 };
