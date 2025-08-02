@@ -16,22 +16,92 @@ export function QRCodeActions({ equipment, qrCodeContainerRef, size }: QRCodeAct
   const equipmentUrl = generateEquipmentUrl(equipment.id);
 
   const handlePrint = () => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
+    const qrCodeContent = qrCodeContainerRef.current?.innerHTML;
+    if (!qrCodeContent) {
       toast({
         title: "Error",
-        description: "Unable to open print window. Please check your popup blocker.",
+        description: "QR code content not found. Please wait for it to load.",
         variant: "destructive",
       });
       return;
     }
-    
-    printWindow.document.write(generatePrintableHtml(equipment, qrCodeContainerRef.current?.innerHTML || ''));
-    
+
+    // Try to open print window, with fallback for popup blockers
+    let printWindow: Window | null = null;
+    try {
+      printWindow = window.open('', '_blank');
+    } catch (error) {
+      console.error('Failed to open print window:', error);
+    }
+
+    if (!printWindow) {
+      // Fallback: Use current window with temporary content replacement
+      toast({
+        title: "Info",
+        description: "Opening print view in current window. Your page will be restored after printing.",
+      });
+      
+      const currentContent = document.body.innerHTML;
+      const printableHtml = generatePrintableHtml(equipment, qrCodeContent);
+      
+      // Extract just the body content from the generated HTML
+      const bodyMatch = printableHtml.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+      const bodyContent = bodyMatch ? bodyMatch[1] : qrCodeContent;
+      
+      // Temporarily replace page content
+      document.body.innerHTML = bodyContent;
+      document.body.className = 'print-mode';
+      
+      // Print and restore
+      window.print();
+      
+      // Restore original content after a short delay
+      setTimeout(() => {
+        document.body.innerHTML = currentContent;
+        document.body.className = '';
+      }, 100);
+      
+      return;
+    }
+
+    // Create enhanced print window content
+    const printableHtml = generatePrintableHtml(equipment, qrCodeContent);
+    printWindow.document.write(printableHtml);
     printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-    setTimeout(() => printWindow.close(), 500);
+
+    // Handle both load and timeout scenarios
+    const printTimeout = setTimeout(() => {
+      printWindow?.focus();
+      printWindow?.print();
+      setupQRPrintCleanup(printWindow);
+    }, 500);
+
+    printWindow.onload = () => {
+      clearTimeout(printTimeout);
+      printWindow.focus();
+      printWindow.print();
+      setupQRPrintCleanup(printWindow);
+    };
+
+    toast({
+      title: "Success",
+      description: "Print window opened. Complete printing to continue.",
+    });
+  };
+
+  const setupQRPrintCleanup = (printWindow: Window | null) => {
+    if (!printWindow) return;
+    
+    printWindow.onafterprint = () => {
+      printWindow.close();
+    };
+    
+    // Fallback cleanup
+    setTimeout(() => {
+      if (!printWindow.closed) {
+        printWindow.close();
+      }
+    }, 3000);
   };
 
   const handleDownload = () => {

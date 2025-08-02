@@ -1,43 +1,179 @@
 
-/* Print styles */
+/* Enhanced Print styles */
 @media print {
+  /* Page setup */
+  @page {
+    margin: 0.5in;
+    size: letter;
+  }
+
+  /* Reset and base styles */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #000 !important;
+    background: white !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Main content area */
   .print-content {
     display: block !important;
     width: 100%;
     margin: 0;
-    padding: 20px;
+    padding: 0;
+    background: white !important;
   }
 
-  .print-content table {
+  /* Typography */
+  h1, h2, h3, h4, h5, h6 {
+    color: #000 !important;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 12px;
+    page-break-after: avoid;
+  }
+
+  h1 { font-size: 20px; }
+  h2 { font-size: 18px; }
+  h3 { font-size: 16px; }
+
+  /* Tables */
+  .print-content table,
+  table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
+    background: white !important;
+    page-break-inside: avoid;
+    font-size: 10px;
   }
 
   .print-content th,
-  .print-content td {
-    border: 1px solid #ddd;
-    padding: 8px;
+  .print-content td,
+  th, td {
+    border: 1px solid #333 !important;
+    padding: 6px 8px;
     text-align: left;
+    vertical-align: top;
+    background: white !important;
+    color: #000 !important;
   }
 
-  .print-content th {
-    background-color: #f5f5f5;
+  .print-content th,
+  th {
+    background-color: #f5f5f5 !important;
+    font-weight: 600;
+    color: #000 !important;
   }
 
-  .print-content h2 {
-    margin-bottom: 20px;
+  /* Ensure table rows don't break */
+  tr {
+    page-break-inside: avoid;
   }
 
+  /* QR Code specific styles */
+  .qr-code-container {
+    text-align: center;
+    margin: 16px 0;
+    page-break-inside: avoid;
+  }
+
+  .qr-code-container svg {
+    max-width: 150px;
+    height: auto;
+  }
+
+  /* Hide interactive and unnecessary elements */
   aside, 
   nav, 
-  button, 
-  .print:hidden {
+  button,
+  input,
+  select,
+  textarea,
+  .print\\:hidden,
+  .no-print,
+  [class*="print:hidden"],
+  .btn,
+  .button {
     display: none !important;
   }
 
+  /* Layout adjustments */
   main {
     margin: 0 !important;
-    padding: 20px !important;
+    padding: 0 !important;
+    background: white !important;
   }
+
+  /* Equipment grid for better print layout */
+  .equipment-grid {
+    display: block !important;
+  }
+
+  .equipment-card {
+    border: 1px solid #333;
+    padding: 12px;
+    margin-bottom: 12px;
+    page-break-inside: avoid;
+    background: white !important;
+  }
+
+  /* Status badges */
+  .status-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border: 1px solid #333;
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 500;
+    background: white !important;
+    color: #000 !important;
+  }
+
+  /* Links */
+  a {
+    color: #000 !important;
+    text-decoration: underline;
+  }
+
+  /* Utility classes for print */
+  .page-break {
+    page-break-before: always;
+  }
+
+  .no-break {
+    page-break-inside: avoid;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .screen-only {
+    display: none !important;
+  }
+
+  /* Ensure proper spacing */
+  .mb-4 { margin-bottom: 12px; }
+  .mb-6 { margin-bottom: 16px; }
+  .mt-4 { margin-top: 12px; }
+  .mt-6 { margin-top: 16px; }
+
+  /* Text alignment */
+  .text-center { text-align: center; }
+  .text-left { text-align: left; }
+  .text-right { text-align: right; }
+
+  /* Font weights */
+  .font-bold { font-weight: 700; }
+  .font-semibold { font-weight: 600; }
 }
