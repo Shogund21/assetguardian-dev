@@ -4,31 +4,69 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { SortableTableHeader } from "./SortableTableHeader";
+import { useSortedData } from "@/hooks/useSortedData";
 
 interface EquipmentTableProps {
   data: Equipment[];
 }
 
 export const EquipmentTable = ({ data }: EquipmentTableProps) => {
+  const { sortedData, sortConfig, handleSort } = useSortedData(data);
+
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4">Equipment List</h2>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Model</TableHead>
-            <TableHead>Serial Number</TableHead>
-            <TableHead>Location</TableHead>
-            <TableHead>Status</TableHead>
+            <SortableTableHeader
+              sortKey="name"
+              currentSortKey={sortConfig.key}
+              sortDirection={sortConfig.direction}
+              onSort={handleSort}
+            >
+              Name
+            </SortableTableHeader>
+            <SortableTableHeader
+              sortKey="model"
+              currentSortKey={sortConfig.key}
+              sortDirection={sortConfig.direction}
+              onSort={handleSort}
+            >
+              Model
+            </SortableTableHeader>
+            <SortableTableHeader
+              sortKey="serial_number"
+              currentSortKey={sortConfig.key}
+              sortDirection={sortConfig.direction}
+              onSort={handleSort}
+            >
+              Serial Number
+            </SortableTableHeader>
+            <SortableTableHeader
+              sortKey="location"
+              currentSortKey={sortConfig.key}
+              sortDirection={sortConfig.direction}
+              onSort={handleSort}
+            >
+              Location
+            </SortableTableHeader>
+            <SortableTableHeader
+              sortKey="status"
+              currentSortKey={sortConfig.key}
+              sortDirection={sortConfig.direction}
+              onSort={handleSort}
+            >
+              Status
+            </SortableTableHeader>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data?.map((equipment: Equipment) => (
+          {sortedData?.map((equipment: Equipment) => (
             <TableRow key={equipment.id}>
               <TableCell>{equipment.name}</TableCell>
               <TableCell>{equipment.model}</TableCell>

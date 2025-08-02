@@ -3,32 +3,77 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { SortableTableHeader } from "./SortableTableHeader";
+import { useSortedData } from "@/hooks/useSortedData";
 
 interface ProjectsTableProps {
   data: Project[];
 }
 
 export const ProjectsTable = ({ data }: ProjectsTableProps) => {
+  const { sortedData, sortConfig, handleSort } = useSortedData(data);
+
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4">Projects List</h2>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Priority</TableHead>
-            <TableHead>Location</TableHead>
-            <TableHead>Start Date</TableHead>
-            <TableHead>End Date</TableHead>
+            <SortableTableHeader
+              sortKey="name"
+              currentSortKey={sortConfig.key}
+              sortDirection={sortConfig.direction}
+              onSort={handleSort}
+            >
+              Name
+            </SortableTableHeader>
+            <SortableTableHeader
+              sortKey="status"
+              currentSortKey={sortConfig.key}
+              sortDirection={sortConfig.direction}
+              onSort={handleSort}
+            >
+              Status
+            </SortableTableHeader>
+            <SortableTableHeader
+              sortKey="priority"
+              currentSortKey={sortConfig.key}
+              sortDirection={sortConfig.direction}
+              onSort={handleSort}
+            >
+              Priority
+            </SortableTableHeader>
+            <SortableTableHeader
+              sortKey="location"
+              currentSortKey={sortConfig.key}
+              sortDirection={sortConfig.direction}
+              onSort={handleSort}
+            >
+              Location
+            </SortableTableHeader>
+            <SortableTableHeader
+              sortKey="startdate"
+              currentSortKey={sortConfig.key}
+              sortDirection={sortConfig.direction}
+              onSort={handleSort}
+            >
+              Start Date
+            </SortableTableHeader>
+            <SortableTableHeader
+              sortKey="enddate"
+              currentSortKey={sortConfig.key}
+              sortDirection={sortConfig.direction}
+              onSort={handleSort}
+            >
+              End Date
+            </SortableTableHeader>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data?.map((project: Project) => (
+          {sortedData?.map((project: Project) => (
             <TableRow key={project.id}>
               <TableCell>{project.name}</TableCell>
               <TableCell>{project.status}</TableCell>

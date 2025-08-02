@@ -2,10 +2,11 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { SortableTableHeader } from "./SortableTableHeader";
+import { useSortedData } from "@/hooks/useSortedData";
 
 interface Technician {
   id: string;
@@ -24,23 +25,74 @@ interface TechniciansTableProps {
 }
 
 export const TechniciansTable = ({ data }: TechniciansTableProps) => {
+  const { sortedData, sortConfig, handleSort } = useSortedData(data);
+
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4">Technicians</h2>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Phone</TableHead>
-            <TableHead>Specialization</TableHead>
-            <TableHead>Company</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Status</TableHead>
+            <SortableTableHeader
+              sortKey="firstName"
+              currentSortKey={sortConfig.key}
+              sortDirection={sortConfig.direction}
+              onSort={handleSort}
+            >
+              Name
+            </SortableTableHeader>
+            <SortableTableHeader
+              sortKey="email"
+              currentSortKey={sortConfig.key}
+              sortDirection={sortConfig.direction}
+              onSort={handleSort}
+            >
+              Email
+            </SortableTableHeader>
+            <SortableTableHeader
+              sortKey="phone"
+              currentSortKey={sortConfig.key}
+              sortDirection={sortConfig.direction}
+              onSort={handleSort}
+            >
+              Phone
+            </SortableTableHeader>
+            <SortableTableHeader
+              sortKey="specialization"
+              currentSortKey={sortConfig.key}
+              sortDirection={sortConfig.direction}
+              onSort={handleSort}
+            >
+              Specialization
+            </SortableTableHeader>
+            <SortableTableHeader
+              sortKey="company_name"
+              currentSortKey={sortConfig.key}
+              sortDirection={sortConfig.direction}
+              onSort={handleSort}
+            >
+              Company
+            </SortableTableHeader>
+            <SortableTableHeader
+              sortKey="user_role"
+              currentSortKey={sortConfig.key}
+              sortDirection={sortConfig.direction}
+              onSort={handleSort}
+            >
+              Role
+            </SortableTableHeader>
+            <SortableTableHeader
+              sortKey="status"
+              currentSortKey={sortConfig.key}
+              sortDirection={sortConfig.direction}
+              onSort={handleSort}
+            >
+              Status
+            </SortableTableHeader>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data?.map((technician) => (
+          {sortedData?.map((technician) => (
             <TableRow key={technician.id}>
               <TableCell>{`${technician.firstName} ${technician.lastName}`}</TableCell>
               <TableCell>{technician.email}</TableCell>
