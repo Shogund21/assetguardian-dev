@@ -22,7 +22,7 @@ import AnalysisResultsHistory from "./AnalysisResultsHistory";
 import DatabaseStatus from "./DatabaseStatus";
 import MultipleImageAnalysis from "./MultipleImageAnalysis";
 import { EquipmentSelector } from "./dashboard/EquipmentSelector";
-import ChillerHealthDiagnostic from "../hvac/ChillerHealthDiagnostic";
+import { RealtimeDiagnostic } from "./RealtimeDiagnostic";
 import ChillerEnergyDashboard from "./energy/ChillerEnergyDashboard";
 import EnergyFeatureLocked from "./energy/EnergyFeatureLocked";
 
@@ -155,11 +155,11 @@ const PredictiveMaintenanceDashboard = () => {
         </TabsList>
 
         {/* Universal equipment selector - visible for tabs that need equipment selection */}
-        {(activeTab === "history" || activeTab === "analysis" || activeTab === "energy" || activeTab === "hvac-diagnostic" || activeTab === "multi-image") && (
+        {(activeTab === "history" || activeTab === "analysis" || activeTab === "energy" || activeTab === "multi-image") && (
           <div className="mb-4 px-2">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
               <p className="text-sm text-blue-800 font-medium mb-2">
-                📋 Select equipment to view {activeTab === "history" ? "reading history" : activeTab === "analysis" ? "AI analysis" : activeTab === "energy" ? "energy efficiency" : activeTab === "hvac-diagnostic" ? "HVAC diagnostic" : "multi-image analysis"}
+                📋 Select equipment to view {activeTab === "history" ? "reading history" : activeTab === "analysis" ? "AI analysis" : activeTab === "energy" ? "energy efficiency" : "multi-image analysis"}
               </p>
               <EquipmentSelector
                 equipment={sortedEquipment}
@@ -241,20 +241,10 @@ const PredictiveMaintenanceDashboard = () => {
         </TabsContent>
         
         <TabsContent value="hvac-diagnostic" className="mt-2">
-          {selectedEquipment ? (
-            <ChillerHealthDiagnostic 
-              equipmentId={selectedEquipmentId}
-              equipmentName={selectedEquipment?.name || ''}
-            />
-          ) : (
-            <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-              <div className="text-4xl mb-4">🔧</div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Equipment Selected</h3>
-              <p className="text-gray-600 max-w-md mx-auto">
-                Select equipment above to run comprehensive HVAC diagnostic analysis
-              </p>
-            </div>
-          )}
+          <RealtimeDiagnostic 
+            equipmentId="general"
+            equipmentName="HVAC Troubleshooting Assistant"
+          />
         </TabsContent>
         
         <TabsContent value="multi-image" className="mt-2">
