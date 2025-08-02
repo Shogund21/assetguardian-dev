@@ -1,6 +1,9 @@
 
 import React from "react";
 import { SidebarInset } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import { Printer } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "@/components/Sidebar";
 
 interface DesktopLayoutProps {
@@ -8,6 +11,12 @@ interface DesktopLayoutProps {
 }
 
 export const DesktopLayout = ({ children }: DesktopLayoutProps) => {
+  const navigate = useNavigate();
+
+  const handlePrintClick = () => {
+    navigate('/print-view');
+  };
+
   return (
     <div className="flex w-full overflow-hidden min-h-screen">
       {/* Sidebar with fixed width */}
@@ -32,6 +41,15 @@ export const DesktopLayout = ({ children }: DesktopLayoutProps) => {
                 <p className="text-sm text-gray-500">Facilities Management System</p>
               </div>
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePrintClick}
+              className="flex items-center gap-2"
+            >
+              <Printer size={16} />
+              Print
+            </Button>
           </div>
           
           {/* Render children with fallback */}
