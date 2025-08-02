@@ -32,7 +32,7 @@ export const RealtimeDiagnostic = ({ equipmentId, equipmentName, onClose }: Prop
       // For general mode, skip live monitoring and show as ready
       if (isGeneralMode) {
         setIsConnected(true);
-        toast.success('Elena Cortez ready for troubleshooting chat');
+        toast.success('Ki ready for troubleshooting chat');
         return;
       }
 
@@ -243,7 +243,7 @@ export const RealtimeDiagnostic = ({ equipmentId, equipmentName, onClose }: Prop
           <div className="flex items-center gap-2">
             <MessageCircle className="h-5 w-5" />
             <CardTitle>
-              {isGeneralMode ? 'Elena Cortez - Field Troubleshooting Specialist' : 'AI Diagnostic Assistant'}
+              {isGeneralMode ? 'Ki - HVAC Assistant' : 'AI Diagnostic Assistant'}
             </CardTitle>
           </div>
           <div className="flex items-center gap-2">
@@ -340,7 +340,7 @@ export const RealtimeDiagnostic = ({ equipmentId, equipmentName, onClose }: Prop
               <MessageCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p>
                 {isGeneralMode 
-                  ? "Start a session to chat with Elena Cortez"
+                  ? "Start a session to chat with Ki"
                   : "Start a diagnostic session to chat with AI assistant"
                 }
               </p>
