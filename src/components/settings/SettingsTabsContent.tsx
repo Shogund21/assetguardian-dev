@@ -12,6 +12,7 @@ import { AuditSection } from "./sections/AuditSection";
 import { UserMetricsSection } from "./sections/UserMetricsSection";
 import AccessRequestManagement from "./access/AccessRequestManagement";
 import SuperAdminSetup from "./admin/SuperAdminSetup";
+import PrintSettingsTab from "./PrintSettingsTab";
 import { useAuth } from "@/hooks/useAuth";
 
 const ErrorFallback = ({ sectionName }: { sectionName: string }) => (
@@ -71,9 +72,15 @@ const SettingsTabsContent = ({ isMobile, isDemoUser }: SettingsTabsContentProps)
       </TabsContent>
       <TabsContent value="documentation" className="mt-0">
         <SectionWrapper sectionName="Documentation">
-          <DocumentationSection />
-        </SectionWrapper>
-      </TabsContent>
+            <DocumentationSection />
+          </SectionWrapper>
+        </TabsContent>
+
+        <TabsContent value="print" className="mt-0">
+          <SectionWrapper sectionName="Print & Export">
+            <PrintSettingsTab />
+          </SectionWrapper>
+        </TabsContent>
       
       {!isDemoUser && (
         <>

@@ -17,6 +17,7 @@ export const useSettingsTabs = () => {
   const baseTabs = [
     { id: "general", label: "General" },
     { id: "appearance", label: "Appearance" },
+    { id: "print", label: "Print & Export" },
     { id: "documentation", label: "Documentation" },
   ];
 

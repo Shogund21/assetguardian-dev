@@ -10,7 +10,8 @@ import {
   Paintbrush, 
   FileText,
   Shield,
-  Activity
+  Activity,
+  Printer
 } from "lucide-react";
 
 interface SettingsTabsListProps {
@@ -41,6 +42,8 @@ const SettingsTabsList = ({ tabs, isMobile }: SettingsTabsListProps) => {
         return <Shield className="h-4 w-4" />;
       case "user-metrics":
         return <Activity className="h-4 w-4" />;
+      case "print":
+        return <Printer className="h-4 w-4" />;
       default:
         return null;
     }
