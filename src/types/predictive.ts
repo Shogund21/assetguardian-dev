@@ -122,6 +122,32 @@ export interface AssetGuardianAIRequest {
   }>;
 }
 
+// Enhanced Mike Reyes Statistical Analysis Response
+export interface MikeReyesAnalysisResponse {
+  summary: string;
+  alerts: Array<{
+    parameter: string;
+    current: number;
+    baseline_mean: number;
+    z_score: number;
+    severity: "low" | "med" | "high";
+  }>;
+  failure_probability: {
+    "<7d>": number;
+    "8-30d": number;
+    "31-90d": number;
+    highest_risk_mode: string;
+  };
+  recommended_actions: Array<{
+    task: string;
+    downtime_hours: number;
+    parts_cost_usd: number;
+    labor_hours: number;
+    roi: string;
+  }>;
+  confidence_notes: string[];
+}
+
 export interface AssetGuardianAIResponse {
   asset_id: string;
   risk_level: "low" | "medium" | "high";
@@ -150,4 +176,15 @@ export interface AssetGuardianAIResponse {
     due_hours: number;
     assigned_team: string;
   };
+  // Enhanced statistical analysis
+  mike_reyes_analysis?: MikeReyesAnalysisResponse;
+  statistical_baselines?: Record<string, any>;
+  anomaly_detection?: Array<{
+    parameter: string;
+    current: number;
+    baseline_mean: number;
+    z_score: number;
+    severity: "low" | "med" | "high";
+    confidence: number;
+  }>;
 }

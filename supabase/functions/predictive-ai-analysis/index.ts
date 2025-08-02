@@ -34,29 +34,85 @@ serve(async (req) => {
     const standardReadings = sensorReadings.filter((r: any) => r.source === 'maintenance_check');
     const dataSourceSummary = `Data includes ${manualReadings.length} manual readings and ${standardReadings.length} standard maintenance check readings.`;
 
-    // Enhanced AI prompt with industry standards and multi-factor analysis
-    const prompt = `You are AssetGuardian AI, a senior predictive maintenance engineer with 25+ years of experience in HVAC systems analysis. You have access to industry failure databases and manufacturer reliability data. Analyze the following equipment data using advanced statistical models and provide a comprehensive risk assessment with detailed predictive timeline.
+    // Calculate statistical baselines and anomalies
+    const calculateBaselines = (readings: any[]) => {
+      const grouped = readings.reduce((acc: any, reading: any) => {
+        if (!acc[reading.sensor_type]) acc[reading.sensor_type] = [];
+        acc[reading.sensor_type].push(reading.value);
+        return acc;
+      }, {});
 
-ANALYSIS METHODOLOGY:
-1. Apply industry-standard failure rate curves (Weibull distribution)
-2. Consider equipment age, usage patterns, and environmental factors
-3. Use manufacturer specifications and industry benchmarks
-4. Factor in seasonal variations for HVAC equipment
-5. Apply cost-benefit analysis for maintenance recommendations
+      const baselines: any = {};
+      for (const [type, values] of Object.entries(grouped) as [string, number[]][]) {
+        if (values.length >= 5) {
+          const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
+          const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / (values.length - 1);
+          const stdDev = Math.sqrt(variance);
+          baselines[type] = { mean, stdDev, count: values.length };
+        }
+      }
+      return baselines;
+    };
+
+    const detectAnomalies = (readings: any[], baselines: any) => {
+      const anomalies = [];
+      const latest = readings.reduce((acc: any, reading: any) => {
+        if (!acc[reading.sensor_type] || new Date(reading.timestamp_utc) > new Date(acc[reading.sensor_type].timestamp_utc)) {
+          acc[reading.sensor_type] = reading;
+        }
+        return acc;
+      }, {});
+
+      for (const [type, reading] of Object.entries(latest) as [string, any][]) {
+        const baseline = baselines[type];
+        if (baseline && baseline.stdDev > 0) {
+          const zScore = (reading.value - baseline.mean) / baseline.stdDev;
+          const absZ = Math.abs(zScore);
+          let severity = 'low';
+          if (absZ >= 3) severity = 'high';
+          else if (absZ >= 2) severity = 'med';
+          
+          if (absZ >= 1.5) {
+            anomalies.push({
+              parameter: type,
+              current: reading.value,
+              baseline_mean: baseline.mean,
+              z_score: zScore,
+              severity
+            });
+          }
+        }
+      }
+      return anomalies;
+    };
+
+    const baselines = calculateBaselines(sensorReadings);
+    const anomalies = detectAnomalies(sensorReadings, baselines);
+
+    // MIKE REYES PERSONA - Enhanced AI prompt with statistical rigor
+    const prompt = `### ROLE
+You are **"Mike Reyes, Senior HVAC Service Technician"** with 25 years of field experience on large-tonnage Trane CVHE/CVHF chillers, cooling-tower water treatment, and VFD drives. You specialize in predictive maintenance and root-cause analysis.
+
+### STATISTICAL ANALYSIS RESULTS
+Baseline Analysis: ${JSON.stringify(baselines, null, 2)}
+Detected Anomalies: ${JSON.stringify(anomalies, null, 2)}
+
+### CONTEXT
+AssetGuardian has collected the following **live sensor stream** and **historical baselines** for this equipment:
 
 INDUSTRY BENCHMARKS:
-- Chiller bearing life: 15-20 years typical, 10-12 years in high-use environments
-- AHU filter life: 3-6 months depending on environment
-- Motor life expectancy: 15-20 years with proper maintenance
-- Compressor life: 15-25 years for reciprocating, 20-30 for centrifugal
-- Heat exchanger life: 20-30 years with proper water treatment
+- Trane CVHE/CVHF Chiller bearing life: 15-20 years typical, 10-12 years in high-use environments
+- Motor current baseline varies by load but typically 80-95% of FLA at design conditions
+- Vibration RMS should be <0.3 ips for good condition, 0.3-0.7 ips acceptable, >0.7 ips concerning
+- Approach temperature: typically 2-6°F for chillers in good condition
+- Refrigerant levels: 65-75% sight glass level optimal for most conditions
 
-COST REFERENCES:
+COST REFERENCES (2024 market rates):
 - Emergency repairs: 3-5x normal maintenance cost
-- Planned downtime: $500-2000/hour for commercial buildings
-- Chiller replacement: $150,000-500,000+ depending on tonnage
-- AHU major overhaul: $15,000-50,000
-- Motor replacement: $2,000-15,000 depending on HP
+- Planned downtime: $1,200-3,500/hour for commercial buildings
+- Trane chiller bearing replacement: $15,000-35,000 including labor
+- Compressor rebuild: $85,000-180,000 depending on tonnage
+- Complete chiller replacement: $280,000-650,000+ for large tonnage units
 
 Equipment Information:
 - Asset ID: ${equipmentData.asset_id}
@@ -77,19 +133,52 @@ ${JSON.stringify(thresholds, null, 2)}
 Maintenance History with Reading Context:
 ${JSON.stringify(maintenanceHistory, null, 2)}
 
+### TASK
+1. **Diagnose** current operating condition vs. baseline using the statistical analysis above.
+   - Flag any parameter >±2 σ from mean (already calculated in anomalies).
+   - Detect out-of-sequence events (e.g., low load + high current).
+2. **Forecast** probability of failure in three windows:
+   - **<7 days**, **8-30 days**, **31-90 days**
+   Use a 0-1 scale with a one-sentence rationale for each.
+3. **Prioritize** up to **5 preventive actions** that will most reduce the highest-probability failure mode.
+   - Include estimated downtime, parts, labor-hours, and ROI.
+4. **Quantify uncertainty**—list the two data points that, if improved, would raise your confidence the most.
+
 Please analyze this data and respond with a JSON object containing:
 {
   "asset_id": "${equipmentData.asset_id}",
   "risk_level": "low" | "medium" | "high",
-  "finding": "string - describe what you found, mention data sources used",
+  "finding": "string - describe what you found, mention statistical anomalies and z-scores",
   "recommendation": "string - what should be done, include data collection recommendations",
   "create_work_order": boolean,
   "confidence_score": number (0-1),
   "data_quality": {
     "manual_readings_count": ${manualReadings.length},
     "standard_readings_count": ${standardReadings.length},
-    "coverage_assessment": "string"
+    "coverage_assessment": "string",
+    "reading_source_used": "${readingSource}"
   },
+  "mike_reyes_analysis": {
+    "summary": "three-line plain-language overview",
+    "alerts": [
+      {"parameter":"", "current":0, "baseline_mean":0, "z_score":0, "severity":"low|med|high"}
+    ],
+    "failure_probability": {
+      "<7d>": 0.00,
+      "8-30d": 0.00,
+      "31-90d": 0.00,
+      "highest_risk_mode": "failure mode slug"
+    },
+    "recommended_actions": [
+      {"task":"", "downtime_hours":0, "parts_cost_usd":0, "labor_hours":0, "roi":"payback months"}
+    ],
+    "confidence_notes": [
+      "Need continuous vibration on bearings A/B",
+      "Water-chemistry data only weekly—daily would tighten forecast"
+    ]
+  },
+  "statistical_baselines": ${JSON.stringify(baselines)},
+  "anomaly_detection": ${JSON.stringify(anomalies)},
   "predictive_timeline": [
     {
       "timeframe": "string (e.g., '7 days', '30 days', '90 days', '1 year')",
@@ -136,7 +225,7 @@ Please analyze this data and respond with a JSON object containing:
   } (only if create_work_order is true)
 }
 
-Focus on providing detailed predictive timelines with specific dates, probabilities, and cost estimates. Use realistic industry standards for HVAC equipment lifecycle and maintenance costs.`
+Use statistical rigor with z-scores, equipment-specific knowledge, and ROI-driven recommendations. Be Mike Reyes - direct, experienced, and data-driven.`
 
     // Call OpenAI API
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -183,14 +272,38 @@ Focus on providing detailed predictive timelines with specific dates, probabilit
       analysis.data_quality = {
         manual_readings_count: manualReadings.length,
         standard_readings_count: standardReadings.length,
-        coverage_assessment: manualReadings.length > 0 ? 'Good - manual readings available' : 'Limited - only standard readings available'
+        coverage_assessment: manualReadings.length > 0 ? 'Good - manual readings available' : 'Limited - only standard readings available',
+        reading_source_used: readingSource
       };
     }
 
-    // Ensure confidence score is included and in correct range
+    // Ensure confidence score calculation based on data quality and anomalies
     if (!analysis.confidence_score) {
-      analysis.confidence_score = manualReadings.length > 0 ? 0.85 : 0.65; // Higher confidence with manual readings
+      const dataQualityScore = (manualReadings.length * 0.1 + standardReadings.length * 0.05) / 10;
+      const anomalyScore = anomalies.length > 0 ? 0.2 : 0;
+      const baselineScore = Object.keys(baselines).length > 0 ? 0.3 : 0;
+      analysis.confidence_score = Math.min(0.95, 0.4 + dataQualityScore + anomalyScore + baselineScore);
     }
+
+    // Ensure Mike Reyes analysis structure
+    if (!analysis.mike_reyes_analysis) {
+      analysis.mike_reyes_analysis = {
+        summary: "Insufficient data for detailed Mike Reyes analysis.",
+        alerts: anomalies,
+        failure_probability: {
+          "<7d>": 0.01,
+          "8-30d": 0.05,
+          "31-90d": 0.15,
+          "highest_risk_mode": "general_wear"
+        },
+        recommended_actions: [],
+        confidence_notes: ["More sensor data needed for higher confidence", "Historical baseline data limited"]
+      };
+    }
+
+    // Ensure statistical data is included
+    analysis.statistical_baselines = baselines;
+    analysis.anomaly_detection = anomalies;
 
     // Ensure predictive timeline has default structure if missing
     if (!analysis.predictive_timeline) {

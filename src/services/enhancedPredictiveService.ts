@@ -101,7 +101,7 @@ export class EnhancedPredictiveService {
         readingSource
       });
 
-      // Call the Edge Function for AI analysis
+      // Call the Enhanced Mike Reyes Edge Function for AI analysis
       const { data: analysisResult, error: analysisError } = await supabase.functions.invoke(
         'predictive-ai-analysis',
         {
@@ -160,7 +160,10 @@ export class EnhancedPredictiveService {
         predictive_timeline: analysisResult.predictive_timeline,
         degradation_analysis: analysisResult.degradation_analysis,
         maintenance_windows: analysisResult.maintenance_windows,
-        performance_trends: analysisResult.performance_trends
+        performance_trends: analysisResult.performance_trends,
+        mike_reyes_analysis: analysisResult.mike_reyes_analysis,
+        statistical_baselines: analysisResult.statistical_baselines,
+        anomaly_detection: analysisResult.anomaly_detection
       };
 
       const alert = await PredictiveMaintenanceService.createPredictiveAlert(alertData);
@@ -179,6 +182,116 @@ export class EnhancedPredictiveService {
     const sensorScore = Math.min((sensorReadings?.length || 0) / 10, 1) * 0.6;
     const maintenanceScore = Math.min((maintenanceHistory?.length || 0) / 5, 1) * 0.4;
     return sensorScore + maintenanceScore;
+  }
+
+  // New dual-model analysis method
+  static async processDualAIAnalysis(
+    equipmentId: string,
+    readingSource: ReadingSource = 'auto',
+    model: 'gpt' | 'claude' | 'both' = 'both'
+  ): Promise<any> {
+    try {
+      console.log('Starting dual AI analysis for equipment:', equipmentId);
+      console.log('Reading source preference:', readingSource);
+      console.log('AI model(s):', model);
+
+      // Get equipment details first
+      const { data: equipment, error: equipmentError } = await supabase
+        .from('equipment')
+        .select('*')
+        .eq('id', equipmentId)
+        .single();
+
+      if (equipmentError || !equipment) {
+        console.error('Equipment not found:', equipmentError);
+        throw new Error('Equipment not found');
+      }
+
+      // Get recent sensor readings (extended to 12 months for baselines)
+      let sensorReadingsQuery = supabase
+        .from('sensor_readings')
+        .select('*')
+        .eq('equipment_id', equipmentId)
+        .gte('timestamp_utc', new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString())
+        .order('timestamp_utc', { ascending: false });
+
+      if (readingSource !== 'auto') {
+        sensorReadingsQuery = sensorReadingsQuery.eq('source', readingSource);
+      }
+
+      const { data: sensorReadings, error: readingsError } = await sensorReadingsQuery;
+
+      if (readingsError) {
+        console.error('Error fetching sensor readings:', readingsError);
+        throw new Error('Failed to fetch sensor readings');
+      }
+
+      // Get maintenance history
+      const { data: maintenanceHistory, error: maintenanceError } = await supabase
+        .from('hvac_maintenance_checks')
+        .select('*')
+        .eq('equipment_id', equipmentId)
+        .gte('check_date', new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString())
+        .order('check_date', { ascending: false });
+
+      if (maintenanceError) {
+        console.error('Error fetching maintenance history:', maintenanceError);
+        throw new Error('Failed to fetch maintenance history');
+      }
+
+      // Get equipment thresholds
+      const { data: thresholds, error: thresholdsError } = await supabase
+        .from('equipment_thresholds')
+        .select('*')
+        .eq('equipment_id', equipmentId);
+
+      if (thresholdsError) {
+        console.error('Error fetching thresholds:', thresholdsError);
+      }
+
+      // Transform equipment data
+      const equipmentData = {
+        asset_id: equipment.id,
+        asset_type: equipment.name || 'Unknown Equipment',
+        location: equipment.location || 'Unknown Location'
+      };
+
+      console.log('Calling Dual AI Edge Function with data:', {
+        equipmentData,
+        sensorReadingsCount: sensorReadings?.length || 0,
+        maintenanceHistoryCount: maintenanceHistory?.length || 0,
+        thresholdsCount: thresholds?.length || 0,
+        readingSource,
+        model
+      });
+
+      // Call the Dual AI Edge Function
+      const { data: analysisResult, error: analysisError } = await supabase.functions.invoke(
+        'dual-ai-predictive-analysis',
+        {
+          body: {
+            equipmentData,
+            sensorReadings: sensorReadings || [],
+            maintenanceHistory: maintenanceHistory || [],
+            thresholds: thresholds || [],
+            readingSource,
+            model
+          }
+        }
+      );
+
+      if (analysisError) {
+        console.error('Dual AI analysis error:', analysisError);
+        throw new Error(`Dual AI analysis failed: ${analysisError.message}`);
+      }
+
+      console.log('Dual AI analysis completed successfully:', analysisResult);
+      return analysisResult;
+
+    } catch (error) {
+      console.error('Dual AI analysis failed:', error);
+      throw error;
+    }
   }
 
   static async getAnalysisHistory(equipmentId?: string): Promise<PredictiveAlert[]> {
