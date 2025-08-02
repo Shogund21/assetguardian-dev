@@ -56,7 +56,7 @@ const AppContent = () => {
       <Route path="/analytics" element={<Analytics />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/customer-manual" element={<CustomerManual />} />
-      <Route path="/print" element={<PrintView />} />
+      <Route path="/print-view" element={<PrintView />} />
     </Routes>
   );
 };
