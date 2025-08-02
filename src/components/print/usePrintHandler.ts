@@ -6,6 +6,18 @@ export const usePrintHandler = () => {
       return;
     }
 
+    // Check if there's actual data to print
+    const tables = printContent.querySelectorAll('table');
+    const hasData = tables.length > 0 && Array.from(tables).some(table => {
+      const rows = table.querySelectorAll('tbody tr');
+      return rows.length > 0;
+    });
+
+    if (!hasData) {
+      alert('No data available to print. Please select a report type with data.');
+      return;
+    }
+
     // Try to open print window, with fallback for popup blockers
     let printWindow: Window | null = null;
     try {

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Printer, Download } from "lucide-react";
+import { Printer, Download, Loader2 } from "lucide-react";
 
 export type PrintDataType = 
   | "equipment" 
@@ -18,6 +18,8 @@ interface EnhancedPrintControlsProps {
   onTypeChange: (type: PrintDataType) => void;
   onPrint: () => void;
   onExportPDF?: () => void;
+  isLoading?: boolean;
+  hasData?: boolean;
 }
 
 const DATA_TYPE_LABELS = {
@@ -36,7 +38,9 @@ export const EnhancedPrintControls = ({
   selectedType, 
   onTypeChange, 
   onPrint, 
-  onExportPDF 
+  onExportPDF,
+  isLoading = false,
+  hasData = false
 }: EnhancedPrintControlsProps) => {
   return (
     <div className="flex justify-between items-center print:hidden mb-6">
@@ -69,12 +73,23 @@ export const EnhancedPrintControls = ({
         )}
         <Button 
           onClick={onPrint}
-          className="bg-primary hover:bg-primary/90 text-primary-foreground"
+          disabled={isLoading || !hasData}
+          className="bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50"
         >
-          <Printer className="mr-2 h-4 w-4" />
-          Print
+          {isLoading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Printer className="mr-2 h-4 w-4" />
+          )}
+          {isLoading ? "Loading..." : "Print"}
         </Button>
       </div>
+      
+      {!isLoading && !hasData && (
+        <div className="text-sm text-muted-foreground">
+          No data available for the selected report type.
+        </div>
+      )}
     </div>
   );
 };

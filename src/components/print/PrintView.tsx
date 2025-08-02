@@ -17,7 +17,7 @@ export const PrintView = () => {
   const [selectedType, setSelectedType] = useState<PrintDataType>("equipment");
   const { handlePrint } = usePrintHandler();
 
-  const { data: equipmentData } = useQuery({
+  const { data: equipmentData, isLoading: equipmentLoading } = useQuery({
     queryKey: ["equipment"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -30,7 +30,7 @@ export const PrintView = () => {
     },
   });
 
-  const { data: projectsData } = useQuery({
+  const { data: projectsData, isLoading: projectsLoading } = useQuery({
     queryKey: ["projects"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -43,7 +43,7 @@ export const PrintView = () => {
     },
   });
 
-  const { data: maintenanceData } = useQuery({
+  const { data: maintenanceData, isLoading: maintenanceLoading } = useQuery({
     queryKey: ["maintenance"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -56,7 +56,7 @@ export const PrintView = () => {
     },
   });
 
-  const { data: techniciansData } = useQuery({
+  const { data: techniciansData, isLoading: techniciansLoading } = useQuery({
     queryKey: ["technicians"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -69,7 +69,7 @@ export const PrintView = () => {
     },
   });
 
-  const { data: filterChangesData } = useQuery({
+  const { data: filterChangesData, isLoading: filterChangesLoading } = useQuery({
     queryKey: ["filter_changes"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -82,7 +82,7 @@ export const PrintView = () => {
     },
   });
 
-  const { data: locationsData } = useQuery({
+  const { data: locationsData, isLoading: locationsLoading } = useQuery({
     queryKey: ["locations"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -95,7 +95,7 @@ export const PrintView = () => {
     },
   });
 
-  const { data: companiesData } = useQuery({
+  const { data: companiesData, isLoading: companiesLoading } = useQuery({
     queryKey: ["companies"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -108,7 +108,7 @@ export const PrintView = () => {
     },
   });
 
-  const { data: sensorReadingsData } = useQuery({
+  const { data: sensorReadingsData, isLoading: sensorReadingsLoading } = useQuery({
     queryKey: ["sensor_readings"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -121,6 +121,42 @@ export const PrintView = () => {
       return data;
     },
   });
+
+  const isLoading = equipmentLoading || projectsLoading || maintenanceLoading || 
+                   techniciansLoading || filterChangesLoading || locationsLoading || 
+                   companiesLoading || sensorReadingsLoading;
+
+  const getSelectedData = () => {
+    switch (selectedType) {
+      case "equipment": return equipmentData;
+      case "projects": return projectsData;
+      case "maintenance": return maintenanceData;
+      case "technicians": return techniciansData;
+      case "filter_changes": return filterChangesData;
+      case "locations": return locationsData;
+      case "companies": return companiesData;
+      case "sensor_readings": return sensorReadingsData;
+      case "all": return {
+        equipment: equipmentData,
+        projects: projectsData,
+        maintenance: maintenanceData,
+        technicians: techniciansData,
+        filterChanges: filterChangesData,
+        locations: locationsData,
+        companies: companiesData,
+        sensorReadings: sensorReadingsData
+      };
+      default: return null;
+    }
+  };
+
+  const hasData = () => {
+    const data = getSelectedData();
+    if (selectedType === "all") {
+      return Object.values(data || {}).some(d => d && Array.isArray(d) && d.length > 0);
+    }
+    return data && Array.isArray(data) && data.length > 0;
+  };
 
   const renderContent = () => {
     if (selectedType === "all") {
@@ -166,6 +202,8 @@ export const PrintView = () => {
         selectedType={selectedType}
         onTypeChange={setSelectedType}
         onPrint={handlePrint}
+        isLoading={isLoading}
+        hasData={hasData()}
       />
 
       <div className="print-content">
