@@ -9,7 +9,8 @@ import { EquipmentAuth } from "@/components/equipment/EquipmentAuth";
 import { useEquipmentStatus } from "@/hooks/equipment/useEquipmentStatus";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase, testJWTTransmission } from "@/integrations/supabase/client";
+import { useCompany } from "@/contexts/CompanyContext";
+import { useAuthenticatedSupabase } from "@/hooks/useAuthenticatedSupabase";
 import { useEffect } from "react";
 
 const Equipment = () => {
@@ -17,38 +18,47 @@ const Equipment = () => {
   const { handleStatusChange, handleDelete } = useEquipmentStatus();
   const { applyCompanyFilter } = useCompanyFilter();
   const { isAuthenticated, user } = useAuth();
-
-  // Test JWT transmission on component mount
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      testJWTTransmission().then(result => {
-        console.log("Equipment page JWT test result:", result);
-      });
-    }
-  }, [isAuthenticated, user]);
+  const { currentCompany } = useCompany();
+  const { supabase: authSupabase, isReady } = useAuthenticatedSupabase();
 
   const { data: equipment, isLoading } = useQuery({
-    queryKey: ['equipment'],
+    queryKey: ['equipment', currentCompany?.id],
     queryFn: async () => {
       if (!isAuthenticated) {
         console.log('Equipment: User not authenticated');
         return [];
       }
 
-      const { data, error } = await supabase.rpc('get_equipment_data', {
-        p_company_id: null,
-        p_limit: 1000,
-        p_offset: 0,
-        p_search: ''
-      });
-      
-      if (error) {
-        console.error('Error fetching equipment:', error);
+      console.log('Fetching equipment with company context:', currentCompany?.name);
+
+      try {
+        // Use direct table query with company filtering (same approach as useEquipmentQuery)
+        let query = authSupabase
+          .from('equipment')
+          .select('id, name, model, serial_number, location, status, type, company_id, created_at, updated_at');
+        
+        // Apply company filtering
+        query = applyCompanyFilter(query);
+        
+        query = query.order('name');
+        
+        const { data, error } = await query;
+        
+        if (error) {
+          console.error('Error fetching equipment:', error);
+          throw error;
+        }
+
+        console.log(`Retrieved ${data?.length || 0} equipment items`);
+        return data || [];
+      } catch (error) {
+        console.error('Error in equipment query:', error);
         throw error;
       }
-      return data || [];
     },
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && isReady,
+    staleTime: 60000, // 1 minute
+    refetchOnWindowFocus: false,
   });
 
   return (
