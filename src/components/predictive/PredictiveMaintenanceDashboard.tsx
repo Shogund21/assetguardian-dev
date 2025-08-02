@@ -125,31 +125,31 @@ const PredictiveMaintenanceDashboard = () => {
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="flex md:grid w-full md:grid-cols-8 mb-4 h-auto mobile-nav-tabs gap-1 overflow-x-auto pl-8 pr-12 md:px-0">
-          <TabsTrigger value="readings" className="touch-manipulation mobile-touch-target text-sm py-3 px-4 whitespace-nowrap flex-shrink-0 min-w-[100px]">
+        <TabsList className="grid grid-cols-4 grid-rows-2 md:grid-cols-8 md:grid-rows-1 w-full mb-4 h-auto gap-1 p-1">
+          <TabsTrigger value="readings" className="touch-manipulation text-xs md:text-sm py-2 px-1 md:py-3 md:px-4 text-center">
             Record
           </TabsTrigger>
-          <TabsTrigger value="history" className="touch-manipulation mobile-touch-target text-sm py-3 px-4 whitespace-nowrap flex-shrink-0 min-w-[100px]">
+          <TabsTrigger value="history" className="touch-manipulation text-xs md:text-sm py-2 px-1 md:py-3 md:px-4 text-center">
             History
           </TabsTrigger>
-          <TabsTrigger value="analysis" className="touch-manipulation mobile-touch-target text-sm py-3 px-4 whitespace-nowrap flex-shrink-0 min-w-[100px]">
+          <TabsTrigger value="analysis" className="touch-manipulation text-xs md:text-sm py-2 px-1 md:py-3 md:px-4 text-center">
             Analysis
           </TabsTrigger>
-          <TabsTrigger value="energy" className="touch-manipulation mobile-touch-target text-sm py-3 px-4 whitespace-nowrap flex-shrink-0 min-w-[100px] flex items-center gap-1">
+          <TabsTrigger value="energy" className="touch-manipulation text-xs md:text-sm py-2 px-1 md:py-3 md:px-4 text-center flex items-center justify-center gap-1">
             <Zap className="h-4 w-4" />
             Energy
             {hasAIAccess === false && <Lock className="h-3 w-3 text-amber-500" />}
           </TabsTrigger>
-          <TabsTrigger value="hvac-diagnostic" className="touch-manipulation mobile-touch-target text-sm py-3 px-4 whitespace-nowrap flex-shrink-0 min-w-[110px]">
+          <TabsTrigger value="hvac-diagnostic" className="touch-manipulation text-xs md:text-sm py-2 px-1 md:py-3 md:px-4 text-center">
             HVAC Diag
           </TabsTrigger>
-          <TabsTrigger value="multi-image" className="touch-manipulation mobile-touch-target text-sm py-3 px-4 whitespace-nowrap flex-shrink-0 min-w-[110px]">
+          <TabsTrigger value="multi-image" className="touch-manipulation text-xs md:text-sm py-2 px-1 md:py-3 md:px-4 text-center">
             Multi-Image
           </TabsTrigger>
-          <TabsTrigger value="results" className="touch-manipulation mobile-touch-target text-sm py-3 px-4 whitespace-nowrap flex-shrink-0 min-w-[100px]">
+          <TabsTrigger value="results" className="touch-manipulation text-xs md:text-sm py-2 px-1 md:py-3 md:px-4 text-center">
             Results
           </TabsTrigger>
-          <TabsTrigger value="database" className="touch-manipulation mobile-touch-target text-sm py-3 px-4 whitespace-nowrap flex-shrink-0 min-w-[100px]">
+          <TabsTrigger value="database-status" className="touch-manipulation text-xs md:text-sm py-2 px-1 md:py-3 md:px-4 text-center">
             Status
           </TabsTrigger>
         </TabsList>
@@ -269,7 +269,7 @@ const PredictiveMaintenanceDashboard = () => {
           <AnalysisResultsHistory />
         </TabsContent>
         
-        <TabsContent value="database" className="mt-2">
+        <TabsContent value="database-status" className="mt-2">
           <DatabaseStatus />
         </TabsContent>
       </Tabs>

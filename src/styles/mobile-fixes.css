@@ -26,10 +26,8 @@
     height: calc(var(--vh, 1vh) * 100);
   }
 
-  /* Mobile tab navigation scrolling */
+  /* Mobile tab navigation - now using grid layout */
   .mobile-nav-tabs {
-    scroll-padding-left: 2rem;
-    scroll-padding-right: 3rem;
     -webkit-overflow-scrolling: touch;
   }
 
