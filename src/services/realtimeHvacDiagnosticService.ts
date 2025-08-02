@@ -56,8 +56,8 @@ export class RealtimeHvacDiagnosticService {
       .eq('equipment_id', equipmentId)
       .single();
 
-    if (initialData?.points) {
-      onUpdate(initialData.points);
+    if (initialData?.points && typeof initialData.points === 'object') {
+      onUpdate(initialData.points as Record<string, LivePoint>);
     }
 
     // Subscribe to real-time updates
@@ -73,8 +73,12 @@ export class RealtimeHvacDiagnosticService {
         },
         (payload) => {
           console.log('Live points update received:', payload);
-          if (payload.new && payload.new.points) {
-            onUpdate(payload.new.points);
+          if (payload.new && 
+              typeof payload.new === 'object' && 
+              'points' in payload.new && 
+              typeof payload.new.points === 'object' &&
+              payload.new.points !== null) {
+            onUpdate(payload.new.points as Record<string, LivePoint>);
           }
         }
       )
@@ -99,7 +103,7 @@ export class RealtimeHvacDiagnosticService {
       .from('equipment_live_points')
       .upsert({
         equipment_id: equipmentId,
-        points,
+        points: points as any, // Type cast for JSON storage
         last_updated: new Date().toISOString()
       }, {
         onConflict: 'equipment_id'
@@ -130,7 +134,7 @@ export class RealtimeHvacDiagnosticService {
     }
 
     this.activeSessionId = data.id;
-    return data;
+    return data as DiagnosticSession;
   }
 
   /**
@@ -178,7 +182,10 @@ export class RealtimeHvacDiagnosticService {
       throw error;
     }
 
-    return data;
+    return {
+      ...data,
+      sender: data.sender as 'tech' | 'llm'
+    } as DiagnosticMessage;
   }
 
   /**
@@ -196,7 +203,10 @@ export class RealtimeHvacDiagnosticService {
       throw error;
     }
 
-    return data || [];
+    return (data || []).map(msg => ({
+      ...msg,
+      sender: msg.sender as 'tech' | 'llm'
+    })) as DiagnosticMessage[];
   }
 
   /**
@@ -220,11 +230,11 @@ export class RealtimeHvacDiagnosticService {
       throw error;
     }
 
-    return data || [];
+    return (data || []) as DiagnosticSession[];
   }
 
   /**
-   * Analyze current live points using AI
+   * Analyze current state using AI
    */
   static async analyzeCurrentState(
     equipmentId: string, 

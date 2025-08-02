@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -70,7 +69,7 @@ const PredictiveMaintenance = () => {
 
       if (equipmentError) throw equipmentError;
 
-      // Load predictive alerts
+      // Load predictive alerts with proper type casting
       const { data: alertsData, error: alertsError } = await supabase
         .from('predictive_alerts')
         .select('*')
@@ -83,7 +82,15 @@ const PredictiveMaintenance = () => {
       }
 
       setEquipment(equipmentData || []);
-      setAlerts(alertsData || []);
+      
+      // Type cast the alerts data to ensure risk_level is properly typed
+      const typedAlerts: PredictiveAlert[] = (alertsData || []).map(alert => ({
+        ...alert,
+        risk_level: alert.risk_level as 'low' | 'medium' | 'high',
+        confidence_score: alert.confidence_score || 0
+      }));
+      
+      setAlerts(typedAlerts);
     } catch (error) {
       console.error('Error loading data:', error);
       toast.error('Failed to load data');
