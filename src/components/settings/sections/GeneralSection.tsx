@@ -55,7 +55,7 @@ export const GeneralSection = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {isAuthenticated ? (
+          {(isAuthenticated || isAdmin()) ? (
             <TechnicianManagement />
           ) : (
             <div className="flex flex-col items-center justify-center space-y-6 py-10">
