@@ -35,7 +35,18 @@ const MaintenanceCheckDetails = ({ check, open, onOpenChange }: MaintenanceCheck
 
   // Determine equipment type
   const equipmentType = check.equipment_type || 'general';
-  console.log('Equipment type for details:', equipmentType, 'Check data:', check);
+  console.log('=== MaintenanceCheckDetails Debug ===');
+  console.log('Equipment type:', equipmentType);
+  console.log('Check data sample:', {
+    id: check.id,
+    equipment_type: check.equipment_type,
+    evaporator_leaving_water_temp: check.evaporator_leaving_water_temp,
+    evaporator_entering_water_temp: check.evaporator_entering_water_temp,
+    compressor_suction_temp: check.compressor_suction_temp,
+    motor_amperage_rla: check.motor_amperage_rla,
+    air_filter_status: check.air_filter_status,
+    motor_condition: check.motor_condition
+  });
 
   const basicFields = [
     { label: "Date", value: new Date(check.check_date || "") },
@@ -63,7 +74,10 @@ const MaintenanceCheckDetails = ({ check, open, onOpenChange }: MaintenanceCheck
       'evaporator_leaving_water_temp',
       'evaporator_entering_water_temp', 
       'condenser_entering_water_temp',
-      'condenser_leaving_water_temp'
+      'condenser_leaving_water_temp',
+      'compressor_suction_temp',
+      'compressor_discharge_temp',
+      'motor_amperage_rla'
     ];
     
     const completedFields = criticalFields.filter(field => {
@@ -74,17 +88,30 @@ const MaintenanceCheckDetails = ({ check, open, onOpenChange }: MaintenanceCheck
     return Math.round((completedFields.length / criticalFields.length) * 100);
   };
 
-  // AHU-specific fields
+  // AHU-specific fields - using correct database field names
   const ahuFieldDefinitions = [
+    { label: "Air Filter Status", key: "air_filter_status" },
     { label: "Air Filter Cleaned", key: "air_filter_cleaned" },
     { label: "Fan Belt Condition", key: "fan_belt_condition" },
     { label: "Fan Bearings Lubricated", key: "fan_bearings_lubricated" },
     { label: "Fan Noise Level", key: "fan_noise_level" },
     { label: "Dampers Operation", key: "dampers_operation" },
     { label: "Coils Condition", key: "coils_condition" },
+    { label: "Coils Cleaned", key: "coils_cleaned" },
     { label: "Sensors Operation", key: "sensors_operation" },
     { label: "Motor Condition", key: "motor_condition" },
     { label: "Drain Pan Status", key: "drain_pan_status" },
+    { label: "Belt Condition", key: "belt_condition" },
+    { label: "Belts Inspected", key: "belts_inspected" },
+    { label: "Bearings Lubricated", key: "bearings_lubricated" },
+    { label: "Electrical Connections", key: "electrical_connections_condition" },
+    { label: "Control Panel Condition", key: "control_panel_condition" },
+    { label: "Safety Switches Status", key: "safety_switches_status" },
+    { label: "System Efficiency Rating", key: "system_efficiency_rating" },
+    { label: "Energy Consumption (kWh)", key: "energy_consumption_kwh" },
+    { label: "Operating Hours", key: "operating_hours" },
+    { label: "Ambient Temperature (°F)", key: "ambient_temperature" },
+    { label: "Humidity Level (%)", key: "humidity_level" },
   ];
 
   const ahuFields = createFieldsArray(ahuFieldDefinitions);
@@ -97,18 +124,22 @@ const MaintenanceCheckDetails = ({ check, open, onOpenChange }: MaintenanceCheck
     });
   }
 
-  // Elevator-specific fields
+  // Elevator-specific fields - comprehensive coverage
   const elevatorFieldDefinitions = [
     { label: "Elevator Operation", key: "elevator_operation" },
     { label: "Door Operation", key: "door_operation" },
     { label: "Emergency Phone", key: "emergency_phone" },
     { label: "Elevator Lighting", key: "elevator_lighting" },
     { label: "Safety Features Status", key: "safety_features_status" },
+    { label: "Unusual Noise (Elevator)", key: "unusual_noise_elevator" },
+    { label: "Vibration (Elevator)", key: "vibration_elevator" },
+    { label: "Control System Status", key: "control_system_status" },
+    { label: "Maintenance Frequency", key: "maintenance_frequency" },
   ];
 
   const elevatorFields = createFieldsArray(elevatorFieldDefinitions);
 
-  // Restroom-specific fields
+  // Restroom-specific fields - comprehensive coverage
   const restroomFieldDefinitions = [
     { label: "Sink Status", key: "sink_status" },
     { label: "Toilet Status", key: "toilet_status" },
@@ -118,11 +149,12 @@ const MaintenanceCheckDetails = ({ check, open, onOpenChange }: MaintenanceCheck
     { label: "Soap Supply", key: "soap_supply" },
     { label: "Toilet Paper Supply", key: "toilet_paper_supply" },
     { label: "Floor Condition", key: "floor_condition" },
+    { label: "Maintenance Frequency", key: "maintenance_frequency" },
   ];
 
   const restroomFields = createFieldsArray(restroomFieldDefinitions);
 
-  // Cooling Tower fields - this is the main fix
+  // Cooling Tower fields - comprehensive coverage
   const coolingTowerFieldDefinitions = [
     { label: "Fill Media Condition", key: "fill_media_condition" },
     { label: "Drift Eliminators Condition", key: "drift_eliminators_condition" },
@@ -138,6 +170,16 @@ const MaintenanceCheckDetails = ({ check, open, onOpenChange }: MaintenanceCheck
     { label: "Seasonal Preparation Status", key: "seasonal_preparation_status" },
     { label: "Vibration Monitoring", key: "vibration_monitoring" },
     { label: "Emergency Shutdown Status", key: "emergency_shutdown_status" },
+    { label: "Water pH Level", key: "water_ph_level" },
+    { label: "Water Conductivity", key: "water_conductivity" },
+    { label: "Chemical Treatment Status", key: "chemical_treatment_status" },
+    { label: "Unusual Noise", key: "unusual_noise" },
+    { label: "Vibration Observed", key: "vibration_observed" },
+    { label: "Maintenance Frequency", key: "maintenance_frequency" },
+    { label: "Filters Replaced", key: "filters_replaced" },
+    { label: "Coils Cleaned", key: "coils_cleaned" },
+    { label: "Belts Inspected", key: "belts_inspected" },
+    { label: "Bearings Lubricated", key: "bearings_lubricated" },
   ];
 
   const coolingTowerFields = createFieldsArray(coolingTowerFieldDefinitions);
@@ -159,43 +201,90 @@ const MaintenanceCheckDetails = ({ check, open, onOpenChange }: MaintenanceCheck
     });
   }
 
-  // Comprehensive Chiller fields for detailed chiller maintenance
+  // Comprehensive Chiller fields - using correct database field names from chillerDataMapper
   const comprehensiveChillerFieldDefinitions = [
-    // Critical evaporator readings (required)
+    // Evaporator section - critical readings (required)
     { label: "Evaporator Leaving Water Temp (°F)", key: "evaporator_leaving_water_temp", isRequired: true },
     { label: "Evaporator Entering Water Temp (°F)", key: "evaporator_entering_water_temp", isRequired: true },
-    { label: "Evap Sat Rfgt Temp (°F)", key: "evap_sat_rfgt_temp" },
-    { label: "Evap Rfgt Pressure (PSIG)", key: "evap_rfgt_pressure" },
-    { label: "Evap Approach Temp (°F)", key: "evap_approach_temp" },
+    { label: "Evaporator Approach Temp (°F)", key: "evaporator_approach_temp" },
+    { label: "Evaporator Pressure Drop (PSIG)", key: "evaporator_pressure_drop" },
+    { label: "Evaporator Flow Rate", key: "evaporator_flow_rate" },
+    { label: "Evaporator Condition", key: "evaporator_condition" },
     
-    // Critical condenser readings (required)
+    // Condenser section - critical readings (required)
     { label: "Condenser Entering Water Temp (°F)", key: "condenser_entering_water_temp", isRequired: true },
     { label: "Condenser Leaving Water Temp (°F)", key: "condenser_leaving_water_temp", isRequired: true },
-    { label: "Cond Sat Rfgt Temp (°F)", key: "cond_sat_rfgt_temp" },
-    { label: "Cond Rfgt Pressure (PSIG)", key: "cond_rfgt_pressure" },
-    { label: "Cond Approach Temp (°F)", key: "cond_approach_temp" },
+    { label: "Condenser Approach Temp (°F)", key: "condenser_approach_temp" },
+    { label: "Condenser Pressure Drop (PSIG)", key: "condenser_pressure_drop" },
+    { label: "Condenser Flow Rate", key: "condenser_flow_rate" },
+    { label: "Condenser Condition", key: "condenser_condition" },
     
-    // Compressor readings
-    { label: "Compressor Running", key: "compressor_running_status" },
-    { label: "Chiller Control Signal (%)", key: "chiller_control_signal" },
-    { label: "Average Motor Current % RLA", key: "average_motor_current_pct_rla" },
-    { label: "Oil Differential Pressure (PSID)", key: "oil_differential_pressure" },
+    // Compressor section
+    { label: "Compressor Suction Temp (°F)", key: "compressor_suction_temp", isRequired: true },
+    { label: "Compressor Discharge Temp (°F)", key: "compressor_discharge_temp", isRequired: true },
+    { label: "Compressor Suction Pressure (PSIG)", key: "compressor_suction_pressure" },
+    { label: "Compressor Discharge Pressure (PSIG)", key: "compressor_discharge_pressure" },
+    { label: "Compressor Superheat (°F)", key: "compressor_superheat" },
+    { label: "Compressor Subcooling (°F)", key: "compressor_subcooling" },
+    { label: "Compressor Oil Pressure (PSIG)", key: "compressor_oil_pressure" },
+    { label: "Compressor Oil Temp (°F)", key: "compressor_oil_temp" },
+    { label: "Compressor Condition", key: "compressor_condition" },
     
-    // Motor readings
-    { label: "Motor Current (Amps)", key: "motor_current_amps" },
-    { label: "Motor Voltage (Volts)", key: "motor_voltage" },
-    { label: "Motor Power Factor", key: "motor_power_factor" },
+    // Motor section
+    { label: "Motor Amperage % RLA", key: "motor_amperage_rla", isRequired: true },
+    { label: "Motor Voltage Phase 1 (V)", key: "motor_voltage_phase1" },
+    { label: "Motor Voltage Phase 2 (V)", key: "motor_voltage_phase2" },
+    { label: "Motor Voltage Phase 3 (V)", key: "motor_voltage_phase3" },
+    { label: "Motor Temperature (°F)", key: "motor_temperature" },
+    { label: "Motor Vibration", key: "motor_vibration" },
+    
+    // Performance metrics
+    { label: "System Efficiency Rating", key: "system_efficiency_rating" },
+    { label: "Energy Consumption (kWh)", key: "energy_consumption_kwh" },
+    { label: "Operating Hours", key: "operating_hours" },
+    { label: "Cooling Capacity (Tons)", key: "cooling_capacity_tons" },
+    { label: "Efficiency COP", key: "efficiency_cop" },
+    
+    // Water treatment
+    { label: "Water pH Level", key: "water_ph_level" },
+    { label: "Water Conductivity", key: "water_conductivity" },
+    { label: "Chemical Treatment Status", key: "chemical_treatment_status" },
+    
+    // Maintenance actions
+    { label: "Filters Replaced", key: "filters_replaced" },
+    { label: "Coils Cleaned", key: "coils_cleaned" },
+    { label: "Belts Inspected", key: "belts_inspected" },
+    { label: "Bearings Lubricated", key: "bearings_lubricated" },
+    { label: "Refrigerant Checked", key: "refrigerant_checked" },
+    
+    // Electrical and safety
+    { label: "Electrical Connections", key: "electrical_connections_condition" },
+    { label: "Control Panel Condition", key: "control_panel_condition" },
+    { label: "Safety Switches Status", key: "safety_switches_status" },
+    
+    // Follow-up
+    { label: "Inspection Notes", key: "inspection_notes" },
+    { label: "Follow-up Required", key: "follow_up_required" },
+    { label: "Next Inspection Date", key: "next_inspection_date" },
+    { label: "Maintenance Duration (min)", key: "maintenance_duration_minutes" },
+    { label: "Labor Cost ($)", key: "labor_cost" },
+    { label: "Parts Cost ($)", key: "parts_cost" },
   ];
 
   const comprehensiveChillerFields = createFieldsArray(comprehensiveChillerFieldDefinitions);
 
-  // Standard HVAC fields (for basic chiller and general equipment)
+  // Standard HVAC fields (for basic equipment and general RTU)
   const standardFieldDefinitions = [
     { label: "Chiller Pressure (PSI)", key: "chiller_pressure_reading", isNumeric: true },
     { label: "Chiller Temperature (°F)", key: "chiller_temperature_reading", isNumeric: true },
     { label: "Air Filter Status", key: "air_filter_status" },
     { label: "Belt Condition", key: "belt_condition" },
+    { label: "Motor Condition", key: "motor_condition" },
     { label: "Refrigerant Level", key: "refrigerant_level" },
+    { label: "Control System Status", key: "control_system_status" },
+    { label: "Ambient Temperature (°F)", key: "ambient_temperature" },
+    { label: "Humidity Level (%)", key: "humidity_level" },
+    { label: "Maintenance Frequency", key: "maintenance_frequency" },
   ];
 
   const standardFields = createFieldsArray(standardFieldDefinitions);
@@ -205,6 +294,9 @@ const MaintenanceCheckDetails = ({ check, open, onOpenChange }: MaintenanceCheck
     { label: "Vibration Observed", key: "vibration_observed" },
     { label: "Oil Level Status", key: "oil_level_status" },
     { label: "Condenser Condition", key: "condenser_condition" },
+    { label: "Electrical Connections", key: "electrical_connections_condition" },
+    { label: "Control Panel Condition", key: "control_panel_condition" },
+    { label: "Safety Switches Status", key: "safety_switches_status" },
   ];
 
   const observationFields = createFieldsArray(observationFieldDefinitions);

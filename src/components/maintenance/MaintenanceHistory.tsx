@@ -66,19 +66,16 @@ const MaintenanceHistory = () => {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         equipment: {
-          name: check.equipment_name || '',
-          location: check.equipment_location || '',
+          name: 'Equipment Name Not Available', // This should be joined from equipment table
+          location: 'Location Not Available', // This should be joined from equipment table
           type: check.equipment_type
         },
         technician: {
-          firstName: check.technician_name?.split(' ')[0] || '',
-          lastName: check.technician_name?.split(' ').slice(1).join(' ') || ''
+          firstName: 'Technician', // This should be joined from technicians table
+          lastName: 'Not Available' // This should be joined from technicians table
         },
         // Create location object from the proper location data
-        location: check.location_name ? {
-          name: check.location_name,
-          store_number: check.location_store_number
-        } : undefined,
+        location: undefined, // This should be joined from locations table
         // All equipment-specific fields are now properly returned from the RPC function
       })) as MaintenanceCheck[];
       
