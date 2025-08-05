@@ -14,7 +14,7 @@ interface SidebarProps extends React.HTMLAttributes<HTMLElement> {
 export default function Sidebar({ children, className, ...props }: SidebarProps) {
   const [mounted, setMounted] = useState(false);
   const isMobile = useIsMobile();
-  const { open: isOpen, setOpen } = useSidebar();
+  const { open: isOpen, setOpen, openMobile, setOpenMobile } = useSidebar();
 
   useEffect(() => {
     setMounted(true);
@@ -34,7 +34,7 @@ export default function Sidebar({ children, className, ...props }: SidebarProps)
 
   const closeMenuOnMobile = () => {
     if (isMobile) {
-      setOpen(false);
+      setOpenMobile(false);
     }
   };
 
@@ -60,7 +60,7 @@ export default function Sidebar({ children, className, ...props }: SidebarProps)
   
   // For mobile: use Sheet component with improved touch handling
   return (
-    <Sheet open={isOpen} onOpenChange={setOpen}>
+    <Sheet open={openMobile} onOpenChange={setOpenMobile}>
       <SheetOverlay className="z-40" />
       <SheetContent 
         side="left" 
