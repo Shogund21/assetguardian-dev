@@ -133,8 +133,29 @@ const MaintenanceHistory = () => {
       return;
     }
     
-    setSelectedCheckId(id);
-    setIsPasswordModalOpen(true);
+    // Admin users can delete directly without password protection
+    try {
+      const { error } = await supabase
+        .from("hvac_maintenance_checks")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Maintenance check deleted successfully.",
+      });
+
+      fetchMaintenanceChecks();
+    } catch (error) {
+      console.error("Error deleting maintenance check:", error);
+      toast({
+        title: "Error deleting maintenance check",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handlePasswordSuccess = async () => {
