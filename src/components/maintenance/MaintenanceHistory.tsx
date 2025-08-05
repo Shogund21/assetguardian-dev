@@ -35,15 +35,11 @@ const MaintenanceHistory = () => {
         return;
       }
       
-      // Use the updated RPC function with proper company filtering
+      // Use the updated RPC function with correct 3-parameter signature
       const { data, error } = await supabase.rpc('get_maintenance_history', {
-        p_company_id: null, // Let RLS handle company filtering
-        p_equipment_id: null,
-        p_location_id: null,
-        p_technician_id: null,
-        p_start_date: null,
-        p_end_date: null,
-        p_limit: 500
+        p_equipment_id: null, // null means get all equipment
+        p_limit: 500,
+        p_offset: 0
       });
 
       if (error) {
