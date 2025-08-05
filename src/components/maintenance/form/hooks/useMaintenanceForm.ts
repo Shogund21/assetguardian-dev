@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { MaintenanceFormValues, maintenanceFormSchema } from "./schema/maintenanceFormSchema";
@@ -17,7 +16,7 @@ export const useMaintenanceForm = (initialData?: MaintenanceCheck) => {
       technician_id: initialData?.technician_id || "",
       company_id: userProfile?.company_id || "",
       maintenance_frequency: initialData?.maintenance_frequency || "daily",
-      reading_mode: initialData?.reading_mode || "standard",
+      reading_mode: (initialData?.reading_mode as "standard" | "manual" | "ai_image") || "standard",
       notes: initialData?.notes || "",
       
       // Standard HVAC fields

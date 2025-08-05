@@ -90,9 +90,9 @@ export const mapStandardEquipmentData = (values: MaintenanceFormValues, equipmen
       seasonal_preparation_status: processField(values.seasonal_preparation_status),
       vibration_monitoring: processField(values.vibration_monitoring),
       emergency_shutdown_status: processField(values.emergency_shutdown_status),
-      // Conductivity readings
-      city_conductivity_us_cm: processNumberField(values.city_conductivity_us_cm),
-      tower_conductivity_us_cm: processNumberField(values.tower_conductivity_us_cm),
+      // Conductivity readings - fix type errors by using processField instead of processNumberField
+      city_conductivity_us_cm: processField(values.city_conductivity_us_cm?.toString()),
+      tower_conductivity_us_cm: processField(values.tower_conductivity_us_cm?.toString()),
       // Water treatment
       water_ph_level: processNumberField(values.water_ph_level),
       water_conductivity: processNumberField(values.water_conductivity),
