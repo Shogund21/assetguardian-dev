@@ -2556,141 +2556,84 @@ export type Database = {
         }[]
       }
       get_maintenance_history: {
-        Args:
-          | {
-              p_company_id?: string
-              p_equipment_id?: string
-              p_location_id?: string
-              p_technician_id?: string
-              p_start_date?: string
-              p_end_date?: string
-              p_limit?: number
-            }
-          | { p_equipment_id?: string; p_limit?: number; p_offset?: number }
+        Args: { p_equipment_id?: string; p_limit?: number; p_offset?: number }
         Returns: {
           id: string
           equipment_id: string
           technician_id: string
-          company_id: string
-          location_id: string
           check_date: string
           status: Database["public"]["Enums"]["maintenance_check_status"]
+          equipment_name: string
           equipment_type: string
+          equipment_location: string
+          technician_name: string
+          notes: string
+          company_id: string
+          location_id: string
+          location_name: string
+          location_store_number: string
+          maintenance_frequency: string
           reading_mode: string
+          chiller_pressure_reading: number
+          chiller_temperature_reading: number
           air_filter_status: string
           belt_condition: string
-          motor_condition: string
-          control_system_status: string
-          notes: string
-          maintenance_frequency: string
-          vibration_observed: boolean
+          refrigerant_level: string
           unusual_noise: boolean
-          drainage_system_status: string
-          sump_basin_condition: string
-          strainer_status: string
-          pump_seals_condition: string
-          motor_lubrication_status: string
-          fan_assembly_status: string
-          drift_eliminators_condition: string
-          fill_media_condition: string
-          water_system_status: string
-          general_inspection: string
-          emergency_shutdown_status: string
-          vibration_monitoring: string
-          seasonal_preparation_status: string
-          sensor_status: string
-          toilet_status: string
-          safety_features_status: string
+          vibration_observed: boolean
+          oil_level_status: string
+          condenser_condition: string
+          unusual_noise_description: string
+          vibration_description: string
+          air_filter_cleaned: boolean
+          fan_belt_condition: string
+          fan_bearings_lubricated: boolean
+          fan_noise_level: string
+          dampers_operation: string
+          coils_condition: string
+          sensors_operation: string
+          motor_condition: string
+          drain_pan_status: string
+          airflow_reading: number
+          airflow_unit: string
+          troubleshooting_notes: string
+          corrective_actions: string
+          maintenance_recommendations: string
           elevator_operation: string
           door_operation: string
-          images: string[]
-          maintenance_recommendations: string
-          urinal_status: string
-          corrective_actions: string
-          troubleshooting_notes: string
-          airflow_unit: string
-          compressor_condition: string
+          unusual_noise_elevator: boolean
+          vibration_elevator: boolean
           emergency_phone: string
           elevator_lighting: string
           elevator_notes: string
+          safety_features_status: string
+          sink_status: string
+          toilet_status: string
+          urinal_status: string
           hand_dryer_status: string
           cleanliness_level: string
           soap_supply: string
           toilet_paper_supply: string
           floor_condition: string
           restroom_notes: string
-          refrigerant_level: string
-          inspection_notes: string
-          unusual_noise_description: string
-          electrical_connections_condition: string
-          vibration_description: string
-          drain_pan_status: string
-          sensors_operation: string
-          coils_condition: string
-          dampers_operation: string
-          fan_noise_level: string
-          oil_level_status: string
-          condenser_condition: string
-          chemical_treatment_status: string
-          control_panel_condition: string
-          sink_status: string
-          fan_belt_condition: string
-          evaporator_condition: string
-          safety_switches_status: string
-          air_filter_cleaned: boolean
-          fan_bearings_lubricated: boolean
-          airflow_reading: number
-          unusual_noise_elevator: boolean
-          vibration_elevator: boolean
+          fill_media_condition: string
+          drift_eliminators_condition: string
+          fan_assembly_status: string
+          motor_lubrication_status: string
+          pump_seals_condition: string
+          strainer_status: string
+          sump_basin_condition: string
+          water_system_status: string
+          drainage_system_status: string
+          control_system_status: string
+          sensor_status: string
+          seasonal_preparation_status: string
+          vibration_monitoring: string
+          emergency_shutdown_status: string
           city_conductivity_us_cm: number
           tower_conductivity_us_cm: number
-          evaporator_approach_temp: number
-          evaporator_leaving_water_temp: number
-          evaporator_entering_water_temp: number
-          evaporator_pressure_drop: number
-          evaporator_flow_rate: number
-          condenser_approach_temp: number
-          condenser_entering_water_temp: number
-          condenser_leaving_water_temp: number
-          condenser_pressure_drop: number
-          condenser_flow_rate: number
-          compressor_suction_temp: number
-          compressor_discharge_temp: number
-          compressor_suction_pressure: number
-          compressor_discharge_pressure: number
-          compressor_superheat: number
-          compressor_subcooling: number
-          compressor_oil_pressure: number
-          compressor_oil_temp: number
-          motor_amperage_rla: number
-          motor_voltage_phase1: number
-          motor_voltage_phase2: number
-          motor_voltage_phase3: number
-          motor_temperature: number
-          motor_vibration: number
-          system_efficiency_rating: number
-          energy_consumption_kwh: number
-          operating_hours: number
-          cooling_capacity_tons: number
-          heating_capacity_btuh: number
-          efficiency_cop: number
-          water_ph_level: number
-          water_conductivity: number
-          filters_replaced: boolean
-          coils_cleaned: boolean
-          belts_inspected: boolean
-          bearings_lubricated: boolean
-          refrigerant_checked: boolean
-          follow_up_required: boolean
-          next_inspection_date: string
-          maintenance_duration_minutes: number
-          labor_cost: number
-          parts_cost: number
-          parts_used: Json
-          ambient_temperature: number
-          humidity_level: number
-          created_at: string
-          updated_at: string
+          general_inspection: string
+          images: string[]
         }[]
       }
       get_performance_metrics_with_profiles: {
