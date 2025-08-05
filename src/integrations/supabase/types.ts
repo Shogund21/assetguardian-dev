@@ -966,16 +966,37 @@ export type Database = {
           air_filter_status: string | null
           airflow_reading: number | null
           airflow_unit: string | null
+          ambient_temperature: number | null
+          bearings_lubricated: boolean | null
           belt_condition: string | null
+          belts_inspected: boolean | null
           check_date: string | null
+          chemical_treatment_status: string | null
           chiller_pressure_reading: number | null
           chiller_temperature_reading: number | null
           city_conductivity_us_cm: number | null
           cleanliness_level: string | null
+          coils_cleaned: boolean | null
           coils_condition: string | null
           company_id: string | null
+          compressor_condition: string | null
+          compressor_discharge_pressure: number | null
+          compressor_discharge_temp: number | null
+          compressor_oil_pressure: number | null
+          compressor_oil_temp: number | null
+          compressor_subcooling: number | null
+          compressor_suction_pressure: number | null
+          compressor_suction_temp: number | null
+          compressor_superheat: number | null
+          condenser_approach_temp: number | null
           condenser_condition: string | null
+          condenser_entering_water_temp: number | null
+          condenser_flow_rate: number | null
+          condenser_leaving_water_temp: number | null
+          condenser_pressure_drop: number | null
+          control_panel_condition: string | null
           control_system_status: string | null
+          cooling_capacity_tons: number | null
           corrective_actions: string | null
           created_at: string | null
           dampers_operation: string | null
@@ -983,35 +1004,63 @@ export type Database = {
           drain_pan_status: string | null
           drainage_system_status: string | null
           drift_eliminators_condition: string | null
+          efficiency_cop: number | null
+          electrical_connections_condition: string | null
           elevator_lighting: string | null
           elevator_notes: string | null
           elevator_operation: string | null
           emergency_phone: string | null
           emergency_shutdown_status: string | null
+          energy_consumption_kwh: number | null
           equipment_id: string | null
           equipment_type: string | null
+          evaporator_approach_temp: number | null
+          evaporator_condition: string | null
+          evaporator_entering_water_temp: number | null
+          evaporator_flow_rate: number | null
+          evaporator_leaving_water_temp: number | null
+          evaporator_pressure_drop: number | null
           fan_assembly_status: string | null
           fan_bearings_lubricated: boolean | null
           fan_belt_condition: string | null
           fan_noise_level: string | null
           fill_media_condition: string | null
+          filters_replaced: boolean | null
           floor_condition: string | null
+          follow_up_required: boolean | null
           general_inspection: string | null
           hand_dryer_status: string | null
+          heating_capacity_btuh: number | null
+          humidity_level: number | null
           id: string
           images: string[] | null
+          inspection_notes: string | null
+          labor_cost: number | null
           location_id: string | null
+          maintenance_duration_minutes: number | null
           maintenance_frequency: string | null
           maintenance_recommendations: string | null
+          motor_amperage_rla: number | null
           motor_condition: string | null
           motor_lubrication_status: string | null
+          motor_temperature: number | null
+          motor_vibration: number | null
+          motor_voltage_phase1: number | null
+          motor_voltage_phase2: number | null
+          motor_voltage_phase3: number | null
+          next_inspection_date: string | null
           notes: string | null
           oil_level_status: string | null
+          operating_hours: number | null
+          parts_cost: number | null
+          parts_used: Json | null
           pump_seals_condition: string | null
           reading_mode: string | null
+          refrigerant_checked: boolean | null
           refrigerant_level: string | null
           restroom_notes: string | null
           safety_features_status: string | null
+          safety_switches_status: string | null
           seasonal_preparation_status: string | null
           sensor_status: string | null
           sensors_operation: string | null
@@ -1020,6 +1069,7 @@ export type Database = {
           status: Database["public"]["Enums"]["maintenance_check_status"] | null
           strainer_status: string | null
           sump_basin_condition: string | null
+          system_efficiency_rating: number | null
           technician_id: string | null
           toilet_paper_supply: string | null
           toilet_status: string | null
@@ -1034,6 +1084,8 @@ export type Database = {
           vibration_elevator: boolean | null
           vibration_monitoring: string | null
           vibration_observed: boolean | null
+          water_conductivity: number | null
+          water_ph_level: number | null
           water_system_status: string | null
         }
         Insert: {
@@ -1041,16 +1093,37 @@ export type Database = {
           air_filter_status?: string | null
           airflow_reading?: number | null
           airflow_unit?: string | null
+          ambient_temperature?: number | null
+          bearings_lubricated?: boolean | null
           belt_condition?: string | null
+          belts_inspected?: boolean | null
           check_date?: string | null
+          chemical_treatment_status?: string | null
           chiller_pressure_reading?: number | null
           chiller_temperature_reading?: number | null
           city_conductivity_us_cm?: number | null
           cleanliness_level?: string | null
+          coils_cleaned?: boolean | null
           coils_condition?: string | null
           company_id?: string | null
+          compressor_condition?: string | null
+          compressor_discharge_pressure?: number | null
+          compressor_discharge_temp?: number | null
+          compressor_oil_pressure?: number | null
+          compressor_oil_temp?: number | null
+          compressor_subcooling?: number | null
+          compressor_suction_pressure?: number | null
+          compressor_suction_temp?: number | null
+          compressor_superheat?: number | null
+          condenser_approach_temp?: number | null
           condenser_condition?: string | null
+          condenser_entering_water_temp?: number | null
+          condenser_flow_rate?: number | null
+          condenser_leaving_water_temp?: number | null
+          condenser_pressure_drop?: number | null
+          control_panel_condition?: string | null
           control_system_status?: string | null
+          cooling_capacity_tons?: number | null
           corrective_actions?: string | null
           created_at?: string | null
           dampers_operation?: string | null
@@ -1058,35 +1131,63 @@ export type Database = {
           drain_pan_status?: string | null
           drainage_system_status?: string | null
           drift_eliminators_condition?: string | null
+          efficiency_cop?: number | null
+          electrical_connections_condition?: string | null
           elevator_lighting?: string | null
           elevator_notes?: string | null
           elevator_operation?: string | null
           emergency_phone?: string | null
           emergency_shutdown_status?: string | null
+          energy_consumption_kwh?: number | null
           equipment_id?: string | null
           equipment_type?: string | null
+          evaporator_approach_temp?: number | null
+          evaporator_condition?: string | null
+          evaporator_entering_water_temp?: number | null
+          evaporator_flow_rate?: number | null
+          evaporator_leaving_water_temp?: number | null
+          evaporator_pressure_drop?: number | null
           fan_assembly_status?: string | null
           fan_bearings_lubricated?: boolean | null
           fan_belt_condition?: string | null
           fan_noise_level?: string | null
           fill_media_condition?: string | null
+          filters_replaced?: boolean | null
           floor_condition?: string | null
+          follow_up_required?: boolean | null
           general_inspection?: string | null
           hand_dryer_status?: string | null
+          heating_capacity_btuh?: number | null
+          humidity_level?: number | null
           id?: string
           images?: string[] | null
+          inspection_notes?: string | null
+          labor_cost?: number | null
           location_id?: string | null
+          maintenance_duration_minutes?: number | null
           maintenance_frequency?: string | null
           maintenance_recommendations?: string | null
+          motor_amperage_rla?: number | null
           motor_condition?: string | null
           motor_lubrication_status?: string | null
+          motor_temperature?: number | null
+          motor_vibration?: number | null
+          motor_voltage_phase1?: number | null
+          motor_voltage_phase2?: number | null
+          motor_voltage_phase3?: number | null
+          next_inspection_date?: string | null
           notes?: string | null
           oil_level_status?: string | null
+          operating_hours?: number | null
+          parts_cost?: number | null
+          parts_used?: Json | null
           pump_seals_condition?: string | null
           reading_mode?: string | null
+          refrigerant_checked?: boolean | null
           refrigerant_level?: string | null
           restroom_notes?: string | null
           safety_features_status?: string | null
+          safety_switches_status?: string | null
           seasonal_preparation_status?: string | null
           sensor_status?: string | null
           sensors_operation?: string | null
@@ -1097,6 +1198,7 @@ export type Database = {
             | null
           strainer_status?: string | null
           sump_basin_condition?: string | null
+          system_efficiency_rating?: number | null
           technician_id?: string | null
           toilet_paper_supply?: string | null
           toilet_status?: string | null
@@ -1111,6 +1213,8 @@ export type Database = {
           vibration_elevator?: boolean | null
           vibration_monitoring?: string | null
           vibration_observed?: boolean | null
+          water_conductivity?: number | null
+          water_ph_level?: number | null
           water_system_status?: string | null
         }
         Update: {
@@ -1118,16 +1222,37 @@ export type Database = {
           air_filter_status?: string | null
           airflow_reading?: number | null
           airflow_unit?: string | null
+          ambient_temperature?: number | null
+          bearings_lubricated?: boolean | null
           belt_condition?: string | null
+          belts_inspected?: boolean | null
           check_date?: string | null
+          chemical_treatment_status?: string | null
           chiller_pressure_reading?: number | null
           chiller_temperature_reading?: number | null
           city_conductivity_us_cm?: number | null
           cleanliness_level?: string | null
+          coils_cleaned?: boolean | null
           coils_condition?: string | null
           company_id?: string | null
+          compressor_condition?: string | null
+          compressor_discharge_pressure?: number | null
+          compressor_discharge_temp?: number | null
+          compressor_oil_pressure?: number | null
+          compressor_oil_temp?: number | null
+          compressor_subcooling?: number | null
+          compressor_suction_pressure?: number | null
+          compressor_suction_temp?: number | null
+          compressor_superheat?: number | null
+          condenser_approach_temp?: number | null
           condenser_condition?: string | null
+          condenser_entering_water_temp?: number | null
+          condenser_flow_rate?: number | null
+          condenser_leaving_water_temp?: number | null
+          condenser_pressure_drop?: number | null
+          control_panel_condition?: string | null
           control_system_status?: string | null
+          cooling_capacity_tons?: number | null
           corrective_actions?: string | null
           created_at?: string | null
           dampers_operation?: string | null
@@ -1135,35 +1260,63 @@ export type Database = {
           drain_pan_status?: string | null
           drainage_system_status?: string | null
           drift_eliminators_condition?: string | null
+          efficiency_cop?: number | null
+          electrical_connections_condition?: string | null
           elevator_lighting?: string | null
           elevator_notes?: string | null
           elevator_operation?: string | null
           emergency_phone?: string | null
           emergency_shutdown_status?: string | null
+          energy_consumption_kwh?: number | null
           equipment_id?: string | null
           equipment_type?: string | null
+          evaporator_approach_temp?: number | null
+          evaporator_condition?: string | null
+          evaporator_entering_water_temp?: number | null
+          evaporator_flow_rate?: number | null
+          evaporator_leaving_water_temp?: number | null
+          evaporator_pressure_drop?: number | null
           fan_assembly_status?: string | null
           fan_bearings_lubricated?: boolean | null
           fan_belt_condition?: string | null
           fan_noise_level?: string | null
           fill_media_condition?: string | null
+          filters_replaced?: boolean | null
           floor_condition?: string | null
+          follow_up_required?: boolean | null
           general_inspection?: string | null
           hand_dryer_status?: string | null
+          heating_capacity_btuh?: number | null
+          humidity_level?: number | null
           id?: string
           images?: string[] | null
+          inspection_notes?: string | null
+          labor_cost?: number | null
           location_id?: string | null
+          maintenance_duration_minutes?: number | null
           maintenance_frequency?: string | null
           maintenance_recommendations?: string | null
+          motor_amperage_rla?: number | null
           motor_condition?: string | null
           motor_lubrication_status?: string | null
+          motor_temperature?: number | null
+          motor_vibration?: number | null
+          motor_voltage_phase1?: number | null
+          motor_voltage_phase2?: number | null
+          motor_voltage_phase3?: number | null
+          next_inspection_date?: string | null
           notes?: string | null
           oil_level_status?: string | null
+          operating_hours?: number | null
+          parts_cost?: number | null
+          parts_used?: Json | null
           pump_seals_condition?: string | null
           reading_mode?: string | null
+          refrigerant_checked?: boolean | null
           refrigerant_level?: string | null
           restroom_notes?: string | null
           safety_features_status?: string | null
+          safety_switches_status?: string | null
           seasonal_preparation_status?: string | null
           sensor_status?: string | null
           sensors_operation?: string | null
@@ -1174,6 +1327,7 @@ export type Database = {
             | null
           strainer_status?: string | null
           sump_basin_condition?: string | null
+          system_efficiency_rating?: number | null
           technician_id?: string | null
           toilet_paper_supply?: string | null
           toilet_status?: string | null
@@ -1188,6 +1342,8 @@ export type Database = {
           vibration_elevator?: boolean | null
           vibration_monitoring?: string | null
           vibration_observed?: boolean | null
+          water_conductivity?: number | null
+          water_ph_level?: number | null
           water_system_status?: string | null
         }
         Relationships: [

@@ -3,6 +3,7 @@ import { MaintenanceFormValues } from "../schema/maintenanceFormSchema";
 import { mapElevatorData } from "../mappers/elevatorDataMapper";
 import { mapRestroomData } from "../mappers/restroomDataMapper";
 import { mapStandardEquipmentData } from "../mappers/standardEquipmentMapper";
+import { mapChillerData } from "../mappers/chillerDataMapper";
 
 /**
  * Maps form values to appropriate database fields based on equipment type
@@ -53,6 +54,7 @@ export const mapMaintenanceData = (
     ...baseData,
     ...dateData,
     ...mapStandardEquipmentData(formValues, equipmentType),
+    ...mapChillerData(formValues, equipmentType),
     ...mapElevatorData(formValues, equipmentType),
     ...mapRestroomData(formValues, equipmentType)
   };

@@ -1,5 +1,4 @@
 
-
 import { z } from "zod";
 
 export const maintenanceFormSchema = z.object({
@@ -81,6 +80,7 @@ export const maintenanceFormSchema = z.object({
   active_chilled_water_setpoint: z.string().optional(),
   evaporator_pump_override: z.string().optional(),
   evap_water_flow_status: z.string().optional(),
+  evaporator_condition: z.string().optional(),
   
   // Comprehensive Chiller - Condenser fields
   condenser_entering_water_temp: z.string().optional(),
@@ -175,6 +175,44 @@ export const maintenanceFormSchema = z.object({
   city_conductivity_us_cm: z.number().optional(),
   tower_conductivity_us_cm: z.number().optional(),
   
+  // Environmental readings
+  ambient_temperature: z.string().optional(),
+  humidity_level: z.string().optional(),
+  
+  // Electrical and safety fields
+  electrical_connections_condition: z.string().optional(),
+  control_panel_condition: z.string().optional(),
+  safety_switches_status: z.string().optional(),
+  
+  // Maintenance action fields
+  filters_replaced: z.boolean().optional(),
+  coils_cleaned: z.boolean().optional(),
+  belts_inspected: z.boolean().optional(),
+  bearings_lubricated: z.boolean().optional(),
+  refrigerant_checked: z.boolean().optional(),
+  
+  // Performance metrics
+  system_efficiency_rating: z.string().optional(),
+  energy_consumption_kwh: z.string().optional(),
+  operating_hours: z.string().optional(),
+  cooling_capacity_tons: z.string().optional(),
+  heating_capacity_btuh: z.string().optional(),
+  efficiency_cop: z.string().optional(),
+  
+  // Water treatment fields
+  water_ph_level: z.string().optional(),
+  water_conductivity: z.string().optional(),
+  chemical_treatment_status: z.string().optional(),
+  
+  // Follow-up and cost fields
+  inspection_notes: z.string().optional(),
+  follow_up_required: z.boolean().optional(),
+  next_inspection_date: z.string().optional(),
+  maintenance_duration_minutes: z.string().optional(),
+  labor_cost: z.string().optional(),
+  parts_cost: z.string().optional(),
+  parts_used: z.string().optional(),
+  
   // Elevator fields
   unusual_noise_elevator: z.boolean().optional(),
   vibration_elevator: z.boolean().optional(),
@@ -215,4 +253,3 @@ export const maintenanceFormSchema = z.object({
 });
 
 export type MaintenanceFormValues = z.infer<typeof maintenanceFormSchema>;
-

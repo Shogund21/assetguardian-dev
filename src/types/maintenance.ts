@@ -1,3 +1,4 @@
+
 export interface MaintenanceCheck {
   id: string;
   equipment_id: string;
@@ -38,6 +39,78 @@ export interface MaintenanceCheck {
   oil_level_status?: string;
   condenser_condition?: string;
   
+  // Environmental readings
+  ambient_temperature?: number;
+  humidity_level?: number;
+  
+  // Electrical and safety
+  electrical_connections_condition?: string;
+  control_panel_condition?: string;
+  safety_switches_status?: string;
+  
+  // Maintenance actions
+  filters_replaced?: boolean;
+  coils_cleaned?: boolean;
+  belts_inspected?: boolean;
+  bearings_lubricated?: boolean;
+  refrigerant_checked?: boolean;
+  
+  // Performance metrics
+  system_efficiency_rating?: number;
+  energy_consumption_kwh?: number;
+  operating_hours?: number;
+  cooling_capacity_tons?: number;
+  heating_capacity_btuh?: number;
+  efficiency_cop?: number;
+  
+  // Water treatment
+  water_ph_level?: number;
+  water_conductivity?: number;
+  chemical_treatment_status?: string;
+  
+  // Comprehensive chiller fields - Evaporator
+  evaporator_approach_temp?: number;
+  evaporator_leaving_water_temp?: number;
+  evaporator_entering_water_temp?: number;
+  evaporator_pressure_drop?: number;
+  evaporator_flow_rate?: number;
+  evaporator_condition?: string;
+  
+  // Comprehensive chiller fields - Condenser
+  condenser_approach_temp?: number;
+  condenser_entering_water_temp?: number;
+  condenser_leaving_water_temp?: number;
+  condenser_pressure_drop?: number;
+  condenser_flow_rate?: number;
+  
+  // Comprehensive chiller fields - Compressor
+  compressor_suction_temp?: number;
+  compressor_discharge_temp?: number;
+  compressor_suction_pressure?: number;
+  compressor_discharge_pressure?: number;
+  compressor_superheat?: number;
+  compressor_subcooling?: number;
+  compressor_oil_pressure?: number;
+  compressor_oil_temp?: number;
+  compressor_condition?: string;
+  
+  // Comprehensive chiller fields - Motor
+  motor_amperage_rla?: number;
+  motor_voltage_phase1?: number;
+  motor_voltage_phase2?: number;
+  motor_voltage_phase3?: number;
+  motor_temperature?: number;
+  motor_vibration?: number;
+  
+  // Follow-up and costs
+  inspection_notes?: string;
+  follow_up_required?: boolean;
+  next_inspection_date?: string;
+  maintenance_duration_minutes?: number;
+  labor_cost?: number;
+  parts_cost?: number;
+  parts_used?: any;
+  
   // AHU specific fields
   air_filter_cleaned?: boolean;
   fan_belt_condition?: string;
@@ -53,6 +126,24 @@ export interface MaintenanceCheck {
   troubleshooting_notes?: string;
   corrective_actions?: string;
   maintenance_recommendations?: string;
+  
+  // Cooling tower fields
+  city_conductivity_us_cm?: number;
+  tower_conductivity_us_cm?: number;
+  fill_media_condition?: string;
+  drift_eliminators_condition?: string;
+  fan_assembly_status?: string;
+  motor_lubrication_status?: string;
+  pump_seals_condition?: string;
+  strainer_status?: string;
+  sump_basin_condition?: string;
+  water_system_status?: string;
+  drainage_system_status?: string;
+  control_system_status?: string;
+  sensor_status?: string;
+  seasonal_preparation_status?: string;
+  vibration_monitoring?: string;
+  emergency_shutdown_status?: string;
   
   // Elevator fields
   elevator_operation?: string;
