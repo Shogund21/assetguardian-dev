@@ -11,7 +11,7 @@ export const createDefaultValues = (initialData?: MaintenanceCheck): Partial<Mai
     // Properly cast reading_mode to ensure type safety
     const readingMode = initialData.reading_mode as "standard" | "manual" | "ai_image" | undefined;
     
-    // Convert all numeric fields to strings to match form schema
+    // Convert all numeric fields to strings to match form schema, except conductivity fields which are numbers
     return {
       ...initialData,
       reading_mode: readingMode || "standard",
@@ -79,9 +79,9 @@ export const createDefaultValues = (initialData?: MaintenanceCheck): Partial<Mai
       afd_input_current_l2: initialData.afd_input_current_l2?.toString() || "",
       afd_input_current_l3: initialData.afd_input_current_l3?.toString() || "",
       
-      // Cooling tower conductivity fields
-      city_conductivity_us_cm: initialData.city_conductivity_us_cm?.toString() || "",
-      tower_conductivity_us_cm: initialData.tower_conductivity_us_cm?.toString() || "",
+      // Cooling tower conductivity fields - keep as numbers since schema defines them as numbers
+      city_conductivity_us_cm: initialData.city_conductivity_us_cm || undefined,
+      tower_conductivity_us_cm: initialData.tower_conductivity_us_cm || undefined,
       
       // Keep other fields as they are
       location_id: initialData.location_id || "",
