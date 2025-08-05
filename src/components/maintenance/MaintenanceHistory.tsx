@@ -35,11 +35,15 @@ const MaintenanceHistory = () => {
         return;
       }
       
-      // Use the updated RPC function for better security and performance
+      // Use the updated RPC function with proper company filtering
       const { data, error } = await supabase.rpc('get_maintenance_history', {
+        p_company_id: null, // Let RLS handle company filtering
         p_equipment_id: null,
-        p_limit: 500,
-        p_offset: 0
+        p_location_id: null,
+        p_technician_id: null,
+        p_start_date: null,
+        p_end_date: null,
+        p_limit: 500
       });
 
       if (error) {
@@ -51,7 +55,7 @@ const MaintenanceHistory = () => {
       console.log("Fetched maintenance data via RPC:", data);
 
       // Transform the RPC data to match MaintenanceCheck interface
-      const processedData = (data || []).map(check => ({
+      const processedData = (data || []).map((check: any) => ({
         // Spread all fields from the check to preserve equipment-specific data
         ...check,
         // Override specific fields that need transformation
@@ -63,19 +67,22 @@ const MaintenanceHistory = () => {
         notes: check.notes,
         company_id: check.company_id,
         location_id: check.location_id,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        created_at: check.created_at || new Date().toISOString(),
+        updated_at: check.updated_at || new Date().toISOString(),
         equipment: {
-          name: 'Equipment Name Not Available', // This should be joined from equipment table
-          location: 'Location Not Available', // This should be joined from equipment table
+          name: (check as any).equipment_name || 'Equipment Name Not Available',
+          location: (check as any).equipment_location || 'Location Not Available',
           type: check.equipment_type
         },
         technician: {
-          firstName: 'Technician', // This should be joined from technicians table
-          lastName: 'Not Available' // This should be joined from technicians table
+          firstName: (check as any).technician_first_name || 'Technician',
+          lastName: (check as any).technician_last_name || 'Not Available'
         },
         // Create location object from the proper location data
-        location: undefined, // This should be joined from locations table
+        location: (check as any).location_name ? {
+          name: (check as any).location_name,
+          store_number: (check as any).location_store_number
+        } : undefined,
         // All equipment-specific fields are now properly returned from the RPC function
       })) as MaintenanceCheck[];
       
