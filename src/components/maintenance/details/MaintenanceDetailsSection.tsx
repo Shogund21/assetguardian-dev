@@ -2,7 +2,7 @@ import MaintenanceDetailField from "./MaintenanceDetailField";
 
 interface MaintenanceDetailsSectionProps {
   title: string;
-  fields: Array<{ label: string; value: any }>;
+  fields: Array<{ label: string; value: any; isRequired?: boolean }>;
 }
 
 const MaintenanceDetailsSection = ({ title, fields }: MaintenanceDetailsSectionProps) => {
@@ -15,6 +15,7 @@ const MaintenanceDetailsSection = ({ title, fields }: MaintenanceDetailsSectionP
             key={`${field.label}-${index}`}
             label={field.label}
             value={field.value}
+            isRequired={field.isRequired}
           />
         ))}
       </div>

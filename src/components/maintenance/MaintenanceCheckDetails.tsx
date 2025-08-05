@@ -45,14 +45,33 @@ const MaintenanceCheckDetails = ({ check, open, onOpenChange }: MaintenanceCheck
   ];
 
   // Helper function to create field objects that include null values
-  const createFieldsArray = (fieldDefinitions: Array<{ label: string; key: string; isNumeric?: boolean }>) => {
-    return fieldDefinitions.map(({ label, key, isNumeric }) => {
+  const createFieldsArray = (fieldDefinitions: Array<{ label: string; key: string; isNumeric?: boolean; isRequired?: boolean }>) => {
+    return fieldDefinitions.map(({ label, key, isNumeric, isRequired }) => {
       const value = (check as any)[key];
-      return { label, value: value !== undefined ? value : null };
+      return { label, value: value !== undefined ? value : null, isRequired: isRequired || false };
     }).filter(field => {
       // Only filter out undefined values, keep null values to show as "Not Checked"
       return field.value !== undefined;
     });
+  };
+
+  // Calculate completion percentage for critical fields
+  const calculateCompletionPercentage = () => {
+    if (equipmentType !== 'chiller') return null;
+    
+    const criticalFields = [
+      'evaporator_leaving_water_temp',
+      'evaporator_entering_water_temp', 
+      'condenser_entering_water_temp',
+      'condenser_leaving_water_temp'
+    ];
+    
+    const completedFields = criticalFields.filter(field => {
+      const value = (check as any)[field];
+      return value !== null && value !== undefined && value !== '';
+    });
+    
+    return Math.round((completedFields.length / criticalFields.length) * 100);
   };
 
   // AHU-specific fields
@@ -73,7 +92,8 @@ const MaintenanceCheckDetails = ({ check, open, onOpenChange }: MaintenanceCheck
   if (check.airflow_reading !== undefined && check.airflow_reading !== null) {
     ahuFields.push({ 
       label: "Airflow Reading", 
-      value: `${check.airflow_reading} ${check.airflow_unit || ''}`.trim()
+      value: `${check.airflow_reading} ${check.airflow_unit || ''}`.trim(),
+      isRequired: false
     });
   }
 
@@ -126,18 +146,50 @@ const MaintenanceCheckDetails = ({ check, open, onOpenChange }: MaintenanceCheck
   if (check.city_conductivity_us_cm !== undefined) {
     coolingTowerFields.push({ 
       label: "City Conductivity (μS/cm)", 
-      value: check.city_conductivity_us_cm 
+      value: check.city_conductivity_us_cm,
+      isRequired: false
     });
   }
   
   if (check.tower_conductivity_us_cm !== undefined) {
     coolingTowerFields.push({ 
       label: "Tower Conductivity (μS/cm)", 
-      value: check.tower_conductivity_us_cm 
+      value: check.tower_conductivity_us_cm,
+      isRequired: false
     });
   }
 
-  // Standard HVAC fields (chiller and general)
+  // Comprehensive Chiller fields for detailed chiller maintenance
+  const comprehensiveChillerFieldDefinitions = [
+    // Critical evaporator readings (required)
+    { label: "Evaporator Leaving Water Temp (°F)", key: "evaporator_leaving_water_temp", isRequired: true },
+    { label: "Evaporator Entering Water Temp (°F)", key: "evaporator_entering_water_temp", isRequired: true },
+    { label: "Evap Sat Rfgt Temp (°F)", key: "evap_sat_rfgt_temp" },
+    { label: "Evap Rfgt Pressure (PSIG)", key: "evap_rfgt_pressure" },
+    { label: "Evap Approach Temp (°F)", key: "evap_approach_temp" },
+    
+    // Critical condenser readings (required)
+    { label: "Condenser Entering Water Temp (°F)", key: "condenser_entering_water_temp", isRequired: true },
+    { label: "Condenser Leaving Water Temp (°F)", key: "condenser_leaving_water_temp", isRequired: true },
+    { label: "Cond Sat Rfgt Temp (°F)", key: "cond_sat_rfgt_temp" },
+    { label: "Cond Rfgt Pressure (PSIG)", key: "cond_rfgt_pressure" },
+    { label: "Cond Approach Temp (°F)", key: "cond_approach_temp" },
+    
+    // Compressor readings
+    { label: "Compressor Running", key: "compressor_running_status" },
+    { label: "Chiller Control Signal (%)", key: "chiller_control_signal" },
+    { label: "Average Motor Current % RLA", key: "average_motor_current_pct_rla" },
+    { label: "Oil Differential Pressure (PSID)", key: "oil_differential_pressure" },
+    
+    // Motor readings
+    { label: "Motor Current (Amps)", key: "motor_current_amps" },
+    { label: "Motor Voltage (Volts)", key: "motor_voltage" },
+    { label: "Motor Power Factor", key: "motor_power_factor" },
+  ];
+
+  const comprehensiveChillerFields = createFieldsArray(comprehensiveChillerFieldDefinitions);
+
+  // Standard HVAC fields (for basic chiller and general equipment)
   const standardFieldDefinitions = [
     { label: "Chiller Pressure (PSI)", key: "chiller_pressure_reading", isNumeric: true },
     { label: "Chiller Temperature (°F)", key: "chiller_temperature_reading", isNumeric: true },
@@ -159,11 +211,11 @@ const MaintenanceCheckDetails = ({ check, open, onOpenChange }: MaintenanceCheck
   
   // Add description fields if the main field is true
   if (check.unusual_noise && check.unusual_noise_description) {
-    observationFields.push({ label: "Noise Description", value: check.unusual_noise_description });
+    observationFields.push({ label: "Noise Description", value: check.unusual_noise_description, isRequired: false });
   }
   
   if (check.vibration_observed && check.vibration_description) {
-    observationFields.push({ label: "Vibration Description", value: check.vibration_description });
+    observationFields.push({ label: "Vibration Description", value: check.vibration_description, isRequired: false });
   }
 
   const notesFields = [
@@ -214,6 +266,37 @@ const MaintenanceCheckDetails = ({ check, open, onOpenChange }: MaintenanceCheck
           <MaintenanceDetailsSection title="Cooling Tower Inspection" fields={coolingTowerFields} />
         );
       case 'chiller':
+        console.log('Showing Comprehensive Chiller fields, count:', comprehensiveChillerFields.length);
+        const completionPercentage = calculateCompletionPercentage();
+        return (
+          <>
+            {completionPercentage !== null && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-blue-900">Critical Fields Completion</span>
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    completionPercentage >= 80 ? 'bg-green-100 text-green-800' :
+                    completionPercentage >= 50 ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-red-100 text-red-800'
+                  }`}>
+                    {completionPercentage}% Complete
+                  </span>
+                </div>
+                {completionPercentage < 100 && (
+                  <p className="text-sm text-blue-700 mt-2">
+                    This maintenance check is missing some critical chiller readings.
+                  </p>
+                )}
+              </div>
+            )}
+            {comprehensiveChillerFields.length > 0 && (
+              <MaintenanceDetailsSection title="Chiller System Readings" fields={comprehensiveChillerFields} />
+            )}
+            {observationFields.length > 0 && (
+              <MaintenanceDetailsSection title="Observations" fields={observationFields} />
+            )}
+          </>
+        );
       case 'general':
       default:
         console.log('Showing Standard/General fields. Standard count:', standardFields.length, 'Observation count:', observationFields.length);

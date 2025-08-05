@@ -167,7 +167,7 @@ const MaintenanceCheckForm = ({
     }
     
     // Validate form before submission
-    if (!validateForm(values)) {
+    if (!validateForm(values, equipmentType)) {
       return;
     }
     
