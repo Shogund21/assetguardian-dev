@@ -344,6 +344,102 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_rate_limit_analytics: {
+        Row: {
+          cost_usd: number
+          created_at: string
+          event_type: string
+          had_override: boolean
+          id: string
+          identifier: string
+          identifier_type: string
+          limit_type: string | null
+          messages_count: number
+          metadata: Json | null
+          session_id: string | null
+          tokens_used: number
+        }
+        Insert: {
+          cost_usd?: number
+          created_at?: string
+          event_type: string
+          had_override?: boolean
+          id?: string
+          identifier: string
+          identifier_type: string
+          limit_type?: string | null
+          messages_count?: number
+          metadata?: Json | null
+          session_id?: string | null
+          tokens_used?: number
+        }
+        Update: {
+          cost_usd?: number
+          created_at?: string
+          event_type?: string
+          had_override?: boolean
+          id?: string
+          identifier?: string
+          identifier_type?: string
+          limit_type?: string | null
+          messages_count?: number
+          metadata?: Json | null
+          session_id?: string | null
+          tokens_used?: number
+        }
+        Relationships: []
+      }
+      chat_rate_limits: {
+        Row: {
+          blocked_until: string | null
+          cost_usd: number
+          created_at: string
+          first_message_at: string
+          id: string
+          identifier: string
+          identifier_type: string
+          is_blocked: boolean
+          last_message_at: string
+          messages_count: number
+          reset_at: string
+          session_id: string | null
+          tokens_used: number
+          updated_at: string
+        }
+        Insert: {
+          blocked_until?: string | null
+          cost_usd?: number
+          created_at?: string
+          first_message_at?: string
+          id?: string
+          identifier: string
+          identifier_type?: string
+          is_blocked?: boolean
+          last_message_at?: string
+          messages_count?: number
+          reset_at?: string
+          session_id?: string | null
+          tokens_used?: number
+          updated_at?: string
+        }
+        Update: {
+          blocked_until?: string | null
+          cost_usd?: number
+          created_at?: string
+          first_message_at?: string
+          id?: string
+          identifier?: string
+          identifier_type?: string
+          is_blocked?: boolean
+          last_message_at?: string
+          messages_count?: number
+          reset_at?: string
+          session_id?: string | null
+          tokens_used?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       chat_sessions: {
         Row: {
           created_at: string | null
@@ -1947,6 +2043,102 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      rate_limit_configs: {
+        Row: {
+          config_name: string
+          cost_per_day_usd: number
+          cost_per_session_usd: number
+          created_at: string
+          id: string
+          is_active: boolean
+          messages_per_day: number
+          messages_per_session: number
+          progressive_throttle: boolean
+          throttle_delay_ms: number
+          tokens_per_day: number
+          tokens_per_session: number
+          updated_at: string
+        }
+        Insert: {
+          config_name: string
+          cost_per_day_usd?: number
+          cost_per_session_usd?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          messages_per_day?: number
+          messages_per_session?: number
+          progressive_throttle?: boolean
+          throttle_delay_ms?: number
+          tokens_per_day?: number
+          tokens_per_session?: number
+          updated_at?: string
+        }
+        Update: {
+          config_name?: string
+          cost_per_day_usd?: number
+          cost_per_session_usd?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          messages_per_day?: number
+          messages_per_session?: number
+          progressive_throttle?: boolean
+          throttle_delay_ms?: number
+          tokens_per_day?: number
+          tokens_per_session?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      rate_limit_overrides: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          custom_cost_limit: number | null
+          custom_message_limit: number | null
+          custom_token_limit: number | null
+          expires_at: string | null
+          id: string
+          identifier: string
+          identifier_type: string
+          is_active: boolean
+          override_type: string
+          reason: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          custom_cost_limit?: number | null
+          custom_message_limit?: number | null
+          custom_token_limit?: number | null
+          expires_at?: string | null
+          id?: string
+          identifier: string
+          identifier_type?: string
+          is_active?: boolean
+          override_type?: string
+          reason?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          custom_cost_limit?: number | null
+          custom_message_limit?: number | null
+          custom_token_limit?: number | null
+          expires_at?: string | null
+          id?: string
+          identifier?: string
+          identifier_type?: string
+          is_active?: boolean
+          override_type?: string
+          reason?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       refactoring_rules: {
         Row: {

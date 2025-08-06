@@ -63,6 +63,18 @@ export const ChatWidget = () => {
 
       if (error) throw error;
 
+      // Handle rate limiting
+      if (error?.status === 429) {
+        const assistantMessage: Message = {
+          id: `assistant_${Date.now()}`,
+          role: "assistant", 
+          content: data?.response || data?.error || 'Rate limit exceeded. Please try again later.',
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+        return;
+      }
+
       const assistantMessage: Message = {
         id: `assistant_${Date.now()}`,
         role: "assistant",
