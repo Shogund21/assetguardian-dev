@@ -2529,6 +2529,10 @@ export type Database = {
         Args: { p_equipment_id: string }
         Returns: Json
       }
+      delete_hvac_session: {
+        Args: { p_session_id: string }
+        Returns: Json
+      }
       delete_project: {
         Args: { p_project_id: string }
         Returns: Json

@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowLeft, MessageSquare, Bot, User, Calendar, Clock, Wrench, CheckCircle } from 'lucide-react';
-import { RealtimeHvacDiagnosticService, DiagnosticSession } from '@/services/realtimeHvacDiagnosticService';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { RealtimeHvacDiagnosticService } from '@/services/realtimeHvacDiagnosticService';
 import { format } from 'date-fns';
+import { ArrowLeft, Clock, MessageSquare, Trash2, Bot, User, Calendar, CheckCircle, Wrench } from 'lucide-react';
 
 interface DiagnosticMessage {
   id: string;
@@ -15,29 +16,51 @@ interface DiagnosticMessage {
   body: {
     text?: string;
     data?: any;
-    type?: string;
+    type?: 'text' | 'analysis' | 'recommendation';
   };
   created_at: string;
+}
+
+interface DiagnosticSession {
+  id: string;
+  equipment_id: string | null;
+  user_id: string;
+  started_at: string;
+  ended_at: string | null;
+  resolved: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 interface HVACSessionDetailProps {
   session: DiagnosticSession;
   onBack: () => void;
+  isSuperAdmin?: boolean;
+  onDelete?: (sessionId: string) => Promise<void>;
 }
 
-const HVACSessionDetail: React.FC<HVACSessionDetailProps> = ({ session, onBack }) => {
-  // Fetch session messages
+export const HVACSessionDetail: React.FC<HVACSessionDetailProps> = ({ 
+  session, 
+  onBack,
+  isSuperAdmin = false,
+  onDelete
+}) => {
+  const [isDeleting, setIsDeleting] = useState(false);
+  const service = new RealtimeHvacDiagnosticService();
+
   const { data: messages = [], isLoading } = useQuery({
     queryKey: ['hvac-session-messages', session.id],
     queryFn: () => RealtimeHvacDiagnosticService.getSessionMessages(session.id),
-    enabled: !!session.id,
   });
 
-  const getSessionDuration = () => {
+  const getSessionDuration = (): string => {
+    if (!session.ended_at) return 'Ongoing';
+    
     const start = new Date(session.started_at);
-    const end = session.ended_at ? new Date(session.ended_at) : new Date();
-    const duration = Math.round((end.getTime() - start.getTime()) / (1000 * 60)); // minutes
-    return `${duration} minutes`;
+    const end = new Date(session.ended_at);
+    const diffMinutes = Math.floor((end.getTime() - start.getTime()) / (1000 * 60));
+    
+    return `${diffMinutes} minutes`;
   };
 
   const getStatusBadge = () => {
@@ -53,11 +76,10 @@ const HVACSessionDetail: React.FC<HVACSessionDetailProps> = ({ session, onBack }
   const renderMessageContent = (message: DiagnosticMessage) => {
     const { body } = message;
     
-    // Handle analysis type messages with structured data
     if (body.type === 'analysis' && body.data) {
       return (
         <div className="space-y-3">
-          <p className="text-gray-900">{body.text}</p>
+          <p>{body.text}</p>
           {body.data.recommendations && (
             <div className="bg-blue-50 border-l-4 border-blue-400 p-3 rounded">
               <h4 className="font-medium text-blue-900 mb-2">Recommendations:</h4>
@@ -72,7 +94,7 @@ const HVACSessionDetail: React.FC<HVACSessionDetailProps> = ({ session, onBack }
             </div>
           )}
           {body.data.confidence_score && (
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-muted-foreground">
               Confidence: {Math.round(body.data.confidence_score * 100)}%
             </div>
           )}
@@ -80,39 +102,82 @@ const HVACSessionDetail: React.FC<HVACSessionDetailProps> = ({ session, onBack }
       );
     }
     
-    // Default text message
-    return <p className="text-gray-900 whitespace-pre-wrap">{body.text}</p>;
+    return <p className="whitespace-pre-wrap">{body.text}</p>;
   };
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="outline" size="sm" onClick={onBack}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
+      <div className="flex items-center justify-between">
+        <Button
+          variant="outline"
+          onClick={onBack}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
           Back to History
         </Button>
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <MessageSquare className="h-6 w-6 text-blue-600" />
-            Session #{session.id.slice(-8)}
-          </h2>
-          <p className="text-gray-600">HVAC Diagnostic Session Details</p>
+        <div className="flex items-center gap-4">
+          <h1 className="text-2xl font-bold">Session Details</h1>
+          {isSuperAdmin && onDelete && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2 text-destructive hover:text-destructive"
+                  disabled={isDeleting}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete Session
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Session</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete this diagnostic session? This will permanently remove the session and all associated messages. This action cannot be undone.
+                    <br /><br />
+                    <strong>Session ID:</strong> {session.id.slice(0, 8)}...
+                    <br />
+                    <strong>Started:</strong> {format(new Date(session.started_at), 'PPpp')}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={async () => {
+                      setIsDeleting(true);
+                      try {
+                        await onDelete(session.id);
+                      } finally {
+                        setIsDeleting(false);
+                      }
+                    }}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? 'Deleting...' : 'Delete Session'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
         </div>
       </div>
 
-      {/* Session Info */}
+      {/* Session Summary */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-6">
             <div className="flex items-center gap-3">
               <Calendar className="h-5 w-5 text-blue-600" />
               <div>
-                <p className="text-sm text-gray-600">Started</p>
+                <p className="text-sm text-muted-foreground">Started</p>
                 <p className="font-medium">
                   {format(new Date(session.started_at), 'MMM d, yyyy')}
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted-foreground">
                   {format(new Date(session.started_at), 'HH:mm')}
                 </p>
               </div>
@@ -121,11 +186,11 @@ const HVACSessionDetail: React.FC<HVACSessionDetailProps> = ({ session, onBack }
         </Card>
 
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-6">
             <div className="flex items-center gap-3">
               <Clock className="h-5 w-5 text-orange-600" />
               <div>
-                <p className="text-sm text-gray-600">Duration</p>
+                <p className="text-sm text-muted-foreground">Duration</p>
                 <p className="font-medium">{getSessionDuration()}</p>
               </div>
             </div>
@@ -133,11 +198,11 @@ const HVACSessionDetail: React.FC<HVACSessionDetailProps> = ({ session, onBack }
         </Card>
 
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-6">
             <div className="flex items-center gap-3">
               <MessageSquare className="h-5 w-5 text-green-600" />
               <div>
-                <p className="text-sm text-gray-600">Messages</p>
+                <p className="text-sm text-muted-foreground">Messages</p>
                 <p className="font-medium">{messages.length}</p>
               </div>
             </div>
@@ -145,7 +210,7 @@ const HVACSessionDetail: React.FC<HVACSessionDetailProps> = ({ session, onBack }
         </Card>
 
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-6">
             <div className="flex items-center gap-3">
               <div className="flex-shrink-0">
                 {session.resolved ? (
@@ -155,7 +220,7 @@ const HVACSessionDetail: React.FC<HVACSessionDetailProps> = ({ session, onBack }
                 )}
               </div>
               <div>
-                <p className="text-sm text-gray-600">Status</p>
+                <p className="text-sm text-muted-foreground">Status</p>
                 {getStatusBadge()}
               </div>
             </div>
@@ -163,7 +228,7 @@ const HVACSessionDetail: React.FC<HVACSessionDetailProps> = ({ session, onBack }
         </Card>
       </div>
 
-      {/* Conversation */}
+      {/* Conversation Log */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -175,11 +240,11 @@ const HVACSessionDetail: React.FC<HVACSessionDetailProps> = ({ session, onBack }
           <ScrollArea className="h-[600px] w-full rounded-md border p-4">
             {isLoading ? (
               <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               </div>
             ) : messages.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <div className="text-center py-8 text-muted-foreground">
+                <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p>No messages in this session</p>
               </div>
             ) : (
@@ -199,10 +264,10 @@ const HVACSessionDetail: React.FC<HVACSessionDetailProps> = ({ session, onBack }
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <p className="font-medium text-gray-900">
+                        <p className="font-medium">
                           {message.sender === 'tech' ? 'Technician' : 'AI Assistant'}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                           {format(new Date(message.created_at), 'MMM d, HH:mm')}
                         </p>
                       </div>
@@ -224,5 +289,3 @@ const HVACSessionDetail: React.FC<HVACSessionDetailProps> = ({ session, onBack }
     </div>
   );
 };
-
-export default HVACSessionDetail;

@@ -25,7 +25,7 @@ import { EquipmentSelector } from "./dashboard/EquipmentSelector";
 import { RealtimeDiagnostic } from "./RealtimeDiagnostic";
 import ChillerEnergyDashboard from "./energy/ChillerEnergyDashboard";
 import EnergyFeatureLocked from "./energy/EnergyFeatureLocked";
-import HVACAssistantHistory from "./hvac/HVACAssistantHistory";
+import { HVACAssistantHistory } from "./hvac/HVACAssistantHistory";
 
 const PredictiveMaintenanceDashboard = () => {
   const [selectedEquipmentId, setSelectedEquipmentId] = useState<string>("");

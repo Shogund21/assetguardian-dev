@@ -421,4 +421,36 @@ export class RealtimeHvacDiagnosticService {
 
     await this.updateLivePoints(equipmentId, demoPoints);
   }
+
+  /**
+   * Delete a diagnostic session (super admin only)
+   */
+  static async deleteSession(sessionId: string): Promise<{ success: boolean; message?: string }> {
+    try {
+      const { data, error } = await supabase.rpc('delete_hvac_session', {
+        p_session_id: sessionId
+      });
+
+      if (error) {
+        console.error('Error deleting session:', error);
+        throw error;
+      }
+
+      const result = data as any;
+      if (result && !result.success) {
+        throw new Error(result.error || 'Failed to delete session');
+      }
+
+      return {
+        success: true,
+        message: result?.message || 'Session deleted successfully'
+      };
+    } catch (error) {
+      console.error('Error in deleteSession:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to delete session'
+      };
+    }
+  }
 }

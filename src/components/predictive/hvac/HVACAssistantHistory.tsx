@@ -1,34 +1,47 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Calendar, MessageSquare, Wrench, Filter, Search, Eye } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { RealtimeHvacDiagnosticService, DiagnosticSession } from '@/services/realtimeHvacDiagnosticService';
-import { format } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import HVACSessionDetail from './HVACSessionDetail';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { RealtimeHvacDiagnosticService } from '@/services/realtimeHvacDiagnosticService';
+import { HVACSessionDetail } from './HVACSessionDetail';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
+import { format } from 'date-fns';
+import { Search, Eye, Trash2, MessageSquare, Calendar, Wrench, Filter } from 'lucide-react';
 
-const HVACAssistantHistory = () => {
-  const { user } = useAuth();
+interface DiagnosticSession {
+  id: string;
+  equipment_id: string | null;
+  user_id: string;
+  started_at: string;
+  ended_at: string | null;
+  resolved: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export const HVACAssistantHistory: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'resolved' | 'unresolved'>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedSession, setSelectedSession] = useState<DiagnosticSession | null>(null);
+  const [deleteSessionId, setDeleteSessionId] = useState<string | null>(null);
 
-  // Fetch diagnostic sessions
+  const { userProfile } = useAuth();
+  const queryClient = useQueryClient();
+  
+
+  const isSuperAdmin = userProfile?.email === 'edward@shogunaillc.com';
+
   const { data: sessions = [], isLoading, error } = useQuery({
-    queryKey: ['hvac-diagnostic-sessions-history', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return [];
-      return await RealtimeHvacDiagnosticService.getAllSessions();
-    },
-    enabled: !!user?.id,
-    refetchInterval: 60000, // Refresh every minute
+    queryKey: ['hvac-sessions'],
+    queryFn: () => RealtimeHvacDiagnosticService.getAllSessions(),
+    refetchInterval: 30000,
   });
 
-  // Filter sessions based on search and status
   const filteredSessions = sessions.filter(session => {
     const matchesSearch = searchTerm === '' || 
       session.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -51,50 +64,79 @@ const HVACAssistantHistory = () => {
     }
   };
 
-  const getSessionDuration = (session: DiagnosticSession) => {
+  const getSessionDuration = (session: DiagnosticSession): string => {
+    if (!session.ended_at) return 'Ongoing';
+    
     const start = new Date(session.started_at);
-    const end = session.ended_at ? new Date(session.ended_at) : new Date();
-    const duration = Math.round((end.getTime() - start.getTime()) / (1000 * 60)); // minutes
-    return `${duration} min`;
+    const end = new Date(session.ended_at);
+    const diffMinutes = Math.floor((end.getTime() - start.getTime()) / (1000 * 60));
+    
+    return `${diffMinutes} min`;
+  };
+
+  const handleDeleteSession = async () => {
+    if (!deleteSessionId) return;
+
+    try {
+      const result = await RealtimeHvacDiagnosticService.deleteSession(deleteSessionId);
+      
+      if (result.success) {
+        toast.success(result.message || 'Session deleted successfully');
+        queryClient.invalidateQueries({ queryKey: ['hvac-sessions'] });
+        setDeleteSessionId(null);
+      } else {
+        toast.error(result.message || 'Failed to delete session');
+      }
+    } catch (error) {
+      console.error('Error deleting session:', error);
+      toast.error('Failed to delete session');
+    }
   };
 
   if (selectedSession) {
     return (
-      <HVACSessionDetail
+      <HVACSessionDetail 
         session={selectedSession}
         onBack={() => setSelectedSession(null)}
+        isSuperAdmin={isSuperAdmin}
+        onDelete={async (sessionId: string) => {
+          const result = await RealtimeHvacDiagnosticService.deleteSession(sessionId);
+          if (result.success) {
+            toast.success(result.message || 'Session deleted successfully');
+            queryClient.invalidateQueries({ queryKey: ['hvac-sessions'] });
+            setSelectedSession(null);
+          } else {
+            toast.error(result.message || 'Failed to delete session');
+          }
+        }}
       />
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+      <div className="flex flex-col gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <MessageSquare className="h-6 w-6 text-blue-600" />
-            HVAC Assistant History
-          </h2>
-          <p className="text-gray-600 mt-1">
+          <h2 className="text-2xl font-bold">HVAC Assistant History</h2>
+          <p className="text-muted-foreground">
             View past diagnostic sessions and AI assistance conversations
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+        <div className="flex gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
               placeholder="Search sessions..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 w-full sm:w-64"
+              className="pl-10"
             />
           </div>
           
-          <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
-            <SelectTrigger className="w-full sm:w-40">
-              <Filter className="h-4 w-4 mr-2" />
-              <SelectValue />
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
@@ -108,13 +150,13 @@ const HVACAssistantHistory = () => {
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-6">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-100 rounded-lg">
                 <MessageSquare className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Total Sessions</p>
+                <p className="text-sm text-muted-foreground">Total Sessions</p>
                 <p className="text-2xl font-bold">{sessions.length}</p>
               </div>
             </div>
@@ -122,13 +164,13 @@ const HVACAssistantHistory = () => {
         </Card>
 
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-6">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-green-100 rounded-lg">
                 <Wrench className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Resolved</p>
+                <p className="text-sm text-muted-foreground">Resolved</p>
                 <p className="text-2xl font-bold">
                   {sessions.filter(s => s.resolved).length}
                 </p>
@@ -138,13 +180,13 @@ const HVACAssistantHistory = () => {
         </Card>
 
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-6">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-orange-100 rounded-lg">
                 <Calendar className="h-5 w-5 text-orange-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Active/Pending</p>
+                <p className="text-sm text-muted-foreground">Active/Pending</p>
                 <p className="text-2xl font-bold">
                   {sessions.filter(s => !s.resolved).length}
                 </p>
@@ -165,19 +207,19 @@ const HVACAssistantHistory = () => {
         <CardContent>
           {isLoading ? (
             <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
           ) : error ? (
-            <div className="text-center py-8 text-red-600">
+            <div className="text-center py-8 text-destructive">
               <p>Error loading sessions: {(error as Error).message}</p>
             </div>
           ) : filteredSessions.length === 0 ? (
             <div className="text-center py-12">
-              <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium mb-2">
                 {sessions.length === 0 ? 'No Diagnostic Sessions' : 'No Sessions Found'}
               </h3>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 {sessions.length === 0 
                   ? 'Start using the HVAC Diagnostic Assistant to see session history here.'
                   : 'Try adjusting your search criteria or filters.'
@@ -189,19 +231,18 @@ const HVACAssistantHistory = () => {
               {filteredSessions.map((session) => (
                 <div
                   key={session.id}
-                  className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => setSelectedSession(session)}
+                  className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex-1">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-medium text-gray-900">
+                        <h3 className="font-medium">
                           Session #{session.id.slice(-8)}
                         </h3>
                         {getStatusBadge(session)}
                       </div>
                       
-                      <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
                           {format(new Date(session.started_at), 'MMM d, yyyy HH:mm')}
@@ -219,18 +260,55 @@ const HVACAssistantHistory = () => {
                       </div>
                     </div>
                     
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex items-center gap-2"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedSession(session);
-                      }}
-                    >
-                      <Eye className="h-4 w-4" />
-                      View Details
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedSession(session)}
+                        className="flex items-center gap-2"
+                      >
+                        <Eye className="h-4 w-4" />
+                        View Details
+                      </Button>
+                      {isSuperAdmin && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setDeleteSessionId(session.id)}
+                              className="flex items-center gap-2 text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              Delete
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Session</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete this diagnostic session? This will permanently remove the session and all associated messages. This action cannot be undone.
+                                <br /><br />
+                                <strong>Session ID:</strong> {session.id.slice(0, 8)}...
+                                <br />
+                                <strong>Started:</strong> {format(new Date(session.started_at), 'PPpp')}
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel onClick={() => setDeleteSessionId(null)}>
+                                Cancel
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={handleDeleteSession}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Delete Session
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -241,5 +319,3 @@ const HVACAssistantHistory = () => {
     </div>
   );
 };
-
-export default HVACAssistantHistory;
