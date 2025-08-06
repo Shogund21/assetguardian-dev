@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { useAuth } from "@/hooks/useAuth";
+import { useAuthenticatedSupabase } from "@/hooks/useAuthenticatedSupabase";
 import PasswordProtectionModal from "@/components/equipment/PasswordProtectionModal";
 
 const MaintenanceHistory = () => {
@@ -19,7 +20,8 @@ const MaintenanceHistory = () => {
   const isMobile = useIsMobile();
   const [fetchError, setFetchError] = useState<string | null>(null);
   const { applyCompanyFilter } = useCompanyFilter();
-  const { user, isAuthenticated, userProfile, isAdmin } = useAuth();
+  const { user, isAuthenticated, userProfile, isAdmin, session } = useAuth();
+  const { supabase: authenticatedSupabase, isReady, hasValidJWT } = useAuthenticatedSupabase();
 
   // Check if user is admin or super admin
   const isAdminUser = isAdmin() || userProfile?.email === "edward@shogunaillc.com";
@@ -29,14 +31,16 @@ const MaintenanceHistory = () => {
       setLoading(true);
       setFetchError(null);
       console.log("Fetching maintenance checks...");
+      console.log("Auth state:", { isAuthenticated, isReady, hasValidJWT, userId: user?.id, sessionExists: !!session });
       
-      if (!isAuthenticated) {
-        console.log('MaintenanceHistory: User not authenticated');
+      if (!isAuthenticated || !isReady || !hasValidJWT) {
+        console.log('MaintenanceHistory: User not properly authenticated or JWT not ready');
+        setFetchError("Authentication required. Please log in to view maintenance checks.");
         return;
       }
       
-      // Use the updated RPC function with correct 3-parameter signature
-      const { data, error } = await supabase.rpc('get_maintenance_history', {
+      // Use the authenticated supabase client and updated RPC function
+      const { data, error } = await authenticatedSupabase.rpc('get_maintenance_history', {
         p_equipment_id: null, // null means get all equipment
         p_limit: 500,
         p_offset: 0
@@ -189,11 +193,11 @@ const MaintenanceHistory = () => {
   };
 
   useEffect(() => {
-    // Only fetch if user is authenticated to avoid premature calls
-    if (isAuthenticated) {
+    // Only fetch if user is authenticated and JWT is ready
+    if (isAuthenticated && isReady && hasValidJWT) {
       fetchMaintenanceChecks();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isReady, hasValidJWT]);
 
   return (
     <div className="space-y-4">
