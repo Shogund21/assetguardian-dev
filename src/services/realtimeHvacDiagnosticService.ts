@@ -14,11 +14,13 @@ export interface LivePoint {
 
 export interface DiagnosticSession {
   id: string;
-  equipment_id: string;
+  equipment_id: string | null;
   user_id: string;
   started_at: string;
-  ended_at?: string;
+  ended_at: string | null;
   resolved: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface DiagnosticMessage {
@@ -234,6 +236,30 @@ export class RealtimeHvacDiagnosticService {
 
     if (error) {
       console.error('Error fetching active sessions:', error);
+      throw error;
+    }
+
+    return (data || []) as DiagnosticSession[];
+  }
+
+  /**
+   * Get all diagnostic sessions (for history view)
+   */
+  static async getAllSessions(equipmentId?: string): Promise<DiagnosticSession[]> {
+    let query = supabase
+      .from('hvac_diag_sessions')
+      .select('*')
+      .order('started_at', { ascending: false })
+      .limit(100); // Limit to most recent 100 sessions
+
+    if (equipmentId && equipmentId !== 'general') {
+      query = query.eq('equipment_id', equipmentId);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Error fetching all sessions:', error);
       throw error;
     }
 

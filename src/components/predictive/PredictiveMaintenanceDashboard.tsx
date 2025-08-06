@@ -25,6 +25,7 @@ import { EquipmentSelector } from "./dashboard/EquipmentSelector";
 import { RealtimeDiagnostic } from "./RealtimeDiagnostic";
 import ChillerEnergyDashboard from "./energy/ChillerEnergyDashboard";
 import EnergyFeatureLocked from "./energy/EnergyFeatureLocked";
+import HVACAssistantHistory from "./hvac/HVACAssistantHistory";
 
 const PredictiveMaintenanceDashboard = () => {
   const [selectedEquipmentId, setSelectedEquipmentId] = useState<string>("");
@@ -125,7 +126,7 @@ const PredictiveMaintenanceDashboard = () => {
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-4 grid-rows-2 md:grid-cols-8 md:grid-rows-1 w-full mb-4 h-auto gap-1 p-1">
+        <TabsList className="grid grid-cols-3 grid-rows-3 md:grid-cols-9 md:grid-rows-1 w-full mb-4 h-auto gap-1 p-1">
           <TabsTrigger value="readings" className="touch-manipulation text-xs md:text-sm py-2 px-1 md:py-3 md:px-4 text-center">
             Record
           </TabsTrigger>
@@ -142,6 +143,9 @@ const PredictiveMaintenanceDashboard = () => {
           </TabsTrigger>
           <TabsTrigger value="hvac-diagnostic" className="touch-manipulation text-xs md:text-sm py-2 px-1 md:py-3 md:px-4 text-center">
             HVAC Diag
+          </TabsTrigger>
+          <TabsTrigger value="hvac-history" className="touch-manipulation text-xs md:text-sm py-2 px-1 md:py-3 md:px-4 text-center">
+            HVAC History
           </TabsTrigger>
           <TabsTrigger value="multi-image" className="touch-manipulation text-xs md:text-sm py-2 px-1 md:py-3 md:px-4 text-center">
             Multi-Image
@@ -245,6 +249,10 @@ const PredictiveMaintenanceDashboard = () => {
             equipmentId="general"
             equipmentName="HVAC Troubleshooting Assistant"
           />
+        </TabsContent>
+        
+        <TabsContent value="hvac-history" className="mt-2">
+          <HVACAssistantHistory />
         </TabsContent>
         
         <TabsContent value="multi-image" className="mt-2">
