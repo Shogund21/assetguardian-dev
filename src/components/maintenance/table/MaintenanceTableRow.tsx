@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Eye, Trash2 } from "lucide-react";
 import { useState } from "react";
-import MaintenanceCheckDetails from "../MaintenanceCheckDetails";
+import EnhancedMaintenanceDetails from "../details/EnhancedMaintenanceDetails";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MaintenanceTableRowProps {
@@ -153,11 +153,11 @@ const MaintenanceTableRow = ({
         </div>
       </div>
 
-      <MaintenanceCheckDetails 
-        check={check}
-        open={showDetails}
-        onOpenChange={setShowDetails}
-      />
+        <EnhancedMaintenanceDetails
+          check={check}
+          open={showDetails}
+          onOpenChange={setShowDetails}
+        />
     </>
   );
 };
