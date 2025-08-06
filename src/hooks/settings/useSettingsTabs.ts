@@ -12,6 +12,7 @@ export const useSettingsTabs = () => {
 
   const { userProfile, isAdmin } = useAuth();
   const isAdminUser = isAdmin() || userProfile?.email === "edward@shogunaillc.com";
+  const isSuperAdmin = userProfile?.email === "edward@shogunaillc.com";
   const isDemoUser = userProfile?.is_demo_user === true;
 
   const baseTabs = [
@@ -37,6 +38,10 @@ export const useSettingsTabs = () => {
     { id: "ai-management", label: "AI Management" },
   ];
 
+  const superAdminTabs = [
+    { id: "rate-limits", label: "Rate Limits" },
+  ];
+
   // Build tabs based on user type
   let availableTabs = [...baseTabs];
   
@@ -46,6 +51,10 @@ export const useSettingsTabs = () => {
   
   if (isAdminUser && !isDemoUser) {
     availableTabs = [...availableTabs, ...adminTabs];
+  }
+
+  if (isSuperAdmin && !isDemoUser) {
+    availableTabs = [...availableTabs, ...superAdminTabs];
   }
 
   const tabs = availableTabs;

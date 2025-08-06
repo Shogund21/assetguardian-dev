@@ -13,6 +13,7 @@ import { UserMetricsSection } from "./sections/UserMetricsSection";
 import AccessRequestManagement from "./access/AccessRequestManagement";
 import SuperAdminSetup from "./admin/SuperAdminSetup";
 import SuperAdminAIManagement from "../admin/SuperAdminAIManagement";
+import RateLimitManagement from "@/components/admin/RateLimitManagement";
 import PrintSettingsTab from "./PrintSettingsTab";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -40,6 +41,7 @@ interface SettingsTabsContentProps {
 const SettingsTabsContent = ({ isMobile, isDemoUser }: SettingsTabsContentProps) => {
   const { userProfile, isAdmin } = useAuth();
   const isAdminUser = isAdmin() || userProfile?.email === "edward@shogunaillc.com";
+  const isSuperAdmin = userProfile?.email === "edward@shogunaillc.com";
   
   return (
     <div className="mt-0">
@@ -133,6 +135,13 @@ const SettingsTabsContent = ({ isMobile, isDemoUser }: SettingsTabsContentProps)
                 </SectionWrapper>
               </TabsContent>
             </>
+          )}
+          {isSuperAdmin && (
+            <TabsContent value="rate-limits" className="mt-0">
+              <SectionWrapper sectionName="Rate Limits">
+                <RateLimitManagement />
+              </SectionWrapper>
+            </TabsContent>
           )}
         </>
       )}
