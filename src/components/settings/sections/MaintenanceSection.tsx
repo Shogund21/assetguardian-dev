@@ -86,7 +86,13 @@ export const MaintenanceSection = () => {
   const handleEdit = async (check: MaintenanceCheck) => {
     setSelectedCheck(check);
     setActionType('edit');
-    setIsPasswordModalOpen(true);
+    
+    // Super admins and admins can edit directly without password
+    if (isAdminUser) {
+      setIsEditDialogOpen(true);
+    } else {
+      setIsPasswordModalOpen(true);
+    }
   };
 
   const handlePasswordSuccess = async () => {
