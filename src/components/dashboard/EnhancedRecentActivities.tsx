@@ -37,8 +37,8 @@ const EnhancedRecentActivities = () => {
         .from("hvac_maintenance_checks")
         .select(`
           *,
-          equipment:equipment_id(name),
-          technician:technician_id(firstName, lastName)
+          equipment:equipment!fk_maintenance_equipment(name),
+          technician:technicians!fk_maintenance_technician(firstName, lastName)
         `)
         .order("updated_at", { ascending: false })
         .limit(2);

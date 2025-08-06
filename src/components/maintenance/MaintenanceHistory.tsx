@@ -39,12 +39,12 @@ const MaintenanceHistory = () => {
         return;
       }
       
-      // Use direct table queries with JOINs instead of RPC function
+      // Use direct table queries with proper foreign key constraints
       const { data, error } = await authenticatedSupabase
         .from('hvac_maintenance_checks')
         .select(`
           *,
-          equipment:equipment(
+          equipment:equipment!fk_maintenance_equipment(
             id,
             name,
             type,
@@ -54,7 +54,7 @@ const MaintenanceHistory = () => {
             status,
             company_id
           ),
-          technician:technicians!technician_id(
+          technician:technicians!fk_maintenance_technician(
             id,
             firstName,
             lastName,
@@ -62,7 +62,7 @@ const MaintenanceHistory = () => {
             phone,
             specialization
           ),
-          location:locations!location_id(
+          location:locations!fk_maintenance_location(
             id,
             name,
             store_number

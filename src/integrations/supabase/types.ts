@@ -593,6 +593,20 @@ export type Database = {
             referencedRelation: "trial_companies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_equipment_company"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_equipment_company"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "trial_companies"
+            referencedColumns: ["id"]
+          },
         ]
       }
       equipment_live_points: {
@@ -1348,6 +1362,41 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_maintenance_company"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_maintenance_company"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "trial_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_maintenance_equipment"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "equipment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_maintenance_location"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_maintenance_technician"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "hvac_maintenance_checks_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
@@ -1465,6 +1514,20 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_location_company"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_location_company"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "trial_companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "locations_company_id_fkey"
             columns: ["company_id"]
@@ -2081,6 +2144,20 @@ export type Database = {
           user_role?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_technician_company"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_technician_company"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "trial_companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "technicians_company_id_fkey"
             columns: ["company_id"]

@@ -29,8 +29,8 @@ export const MaintenanceSection = () => {
         .from('hvac_maintenance_checks')
         .select(`
           *,
-          equipment:equipment_id(name, location),
-          technician:technician_id(firstName, lastName)
+          equipment:equipment!fk_maintenance_equipment(name, location),
+          technician:technicians!fk_maintenance_technician(firstName, lastName)
         `)
         .order('check_date', { ascending: false });
 
