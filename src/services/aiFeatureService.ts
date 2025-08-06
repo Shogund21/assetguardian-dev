@@ -44,6 +44,12 @@ export interface AIUsageRecord {
 export class AIFeatureService {
   static async checkFeatureAccess(userId: string, userEmail: string, featureName: string = 'dual_ai_energy'): Promise<boolean> {
     try {
+      // Super admin bypass - automatic access
+      if (userEmail === 'edward@shogunaillc.com') {
+        console.log('AIFeatureService: Super admin detected, granting automatic access');
+        return true;
+      }
+
       const { data, error } = await supabase
         .from('ai_feature_permissions' as any)
         .select('id')
@@ -298,6 +304,23 @@ export class AIFeatureService {
     } catch (error) {
       console.error('Error fetching all usage stats:', error);
       return [];
+    }
+  }
+
+  static async clearSuperAdminPendingRequests(): Promise<{ success: boolean; error?: string }> {
+    try {
+      // Clear any pending requests for super admin
+      const { error } = await supabase
+        .from('ai_access_requests' as any)
+        .update({ status: 'denied', review_notes: 'Auto-denied: Super admin has automatic access' })
+        .eq('user_email', 'edward@shogunaillc.com')
+        .eq('status', 'pending');
+
+      if (error) throw error;
+      return { success: true };
+    } catch (error) {
+      console.error('Error clearing super admin pending requests:', error);
+      return { success: false, error: 'Failed to clear pending requests.' };
     }
   }
 }

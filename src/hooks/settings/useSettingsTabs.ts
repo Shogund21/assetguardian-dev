@@ -34,6 +34,7 @@ export const useSettingsTabs = () => {
 
   const adminTabs = [
     { id: "access-requests", label: "Access Requests" },
+    { id: "ai-management", label: "AI Management" },
   ];
 
   // Build tabs based on user type

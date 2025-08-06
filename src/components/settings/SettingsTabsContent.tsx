@@ -12,6 +12,7 @@ import { AuditSection } from "./sections/AuditSection";
 import { UserMetricsSection } from "./sections/UserMetricsSection";
 import AccessRequestManagement from "./access/AccessRequestManagement";
 import SuperAdminSetup from "./admin/SuperAdminSetup";
+import SuperAdminAIManagement from "../admin/SuperAdminAIManagement";
 import PrintSettingsTab from "./PrintSettingsTab";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -120,11 +121,18 @@ const SettingsTabsContent = ({ isMobile, isDemoUser }: SettingsTabsContentProps)
             </SectionWrapper>
           </TabsContent>
           {isAdminUser && (
-            <TabsContent value="access-requests" className="mt-0">
-              <SectionWrapper sectionName="Access Requests">
-                <AccessRequestManagement />
-              </SectionWrapper>
-            </TabsContent>
+            <>
+              <TabsContent value="access-requests" className="mt-0">
+                <SectionWrapper sectionName="Access Requests">
+                  <AccessRequestManagement />
+                </SectionWrapper>
+              </TabsContent>
+              <TabsContent value="ai-management" className="mt-0">
+                <SectionWrapper sectionName="AI Management">
+                  <SuperAdminAIManagement />
+                </SectionWrapper>
+              </TabsContent>
+            </>
           )}
         </>
       )}

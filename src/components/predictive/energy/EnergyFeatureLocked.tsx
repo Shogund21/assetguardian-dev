@@ -13,11 +13,18 @@ interface EnergyFeatureLockedProps {
 }
 
 const EnergyFeatureLocked = ({ equipmentName }: EnergyFeatureLockedProps) => {
-  const { user, userProfile } = useAuth();
+  const { user, userProfile, isAdmin } = useAuth();
   const { toast } = useToast();
   const [showRequestForm, setShowRequestForm] = useState(false);
   const [justification, setJustification] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Super admin bypass - should not see this component
+  const isSuperAdmin = isAdmin() || userProfile?.email === 'edward@shogunaillc.com';
+  if (isSuperAdmin) {
+    console.log('EnergyFeatureLocked: Super admin detected, this component should not render');
+    return null;
+  }
 
   const handleRequestAccess = async () => {
     if (!user || !userProfile || !justification.trim()) {
