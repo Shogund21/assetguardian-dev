@@ -1,4 +1,3 @@
-
 export interface Database {
   public: {
     Tables: {
@@ -477,6 +476,105 @@ export interface Database {
           lastName?: string;
           email?: string;
           phone?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      vendors: {
+        Row: {
+          id: string;
+          company_id: string;
+          name: string;
+          service_categories: string[];
+          contact_name: string | null;
+          contact_email: string | null;
+          contact_phone: string | null;
+          address: string | null;
+          status: string;
+          is_preferred: boolean;
+          rating: number | null;
+          notes: string | null;
+          insurance_expires_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          name: string;
+          service_categories?: string[];
+          contact_name?: string | null;
+          contact_email?: string | null;
+          contact_phone?: string | null;
+          address?: string | null;
+          status?: string;
+          is_preferred?: boolean;
+          rating?: number | null;
+          notes?: string | null;
+          insurance_expires_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          name?: string;
+          service_categories?: string[];
+          contact_name?: string | null;
+          contact_email?: string | null;
+          contact_phone?: string | null;
+          address?: string | null;
+          status?: string;
+          is_preferred?: boolean;
+          rating?: number | null;
+          notes?: string | null;
+          insurance_expires_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      work_order_vendors: {
+        Row: {
+          id: string;
+          work_order_id: string;
+          vendor_id: string;
+          status: string;
+          assigned_at: string;
+          quoted_amount: number | null;
+          approved_amount: number | null;
+          invoice_number: string | null;
+          completed_at: string | null;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          work_order_id: string;
+          vendor_id: string;
+          status?: string;
+          assigned_at?: string;
+          quoted_amount?: number | null;
+          approved_amount?: number | null;
+          invoice_number?: string | null;
+          completed_at?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          work_order_id?: string;
+          vendor_id?: string;
+          status?: string;
+          assigned_at?: string;
+          quoted_amount?: number | null;
+          approved_amount?: number | null;
+          invoice_number?: string | null;
+          completed_at?: string | null;
+          notes?: string | null;
           created_at?: string;
           updated_at?: string;
         };
