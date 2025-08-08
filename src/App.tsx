@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   BrowserRouter as Router,
@@ -39,7 +40,8 @@ function App() {
           </div>
         ) : (
           <Routes>
-            <Route exact path="/" element={<Dashboard />} />
+            {/* exact removed; v6 matches exactly by default */}
+            <Route path="/" element={<Dashboard />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/equipment" element={<EquipmentList />} />
             <Route path="/maintenance" element={<MaintenanceSchedule />} />

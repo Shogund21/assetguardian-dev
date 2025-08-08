@@ -8,7 +8,11 @@ export const getCurrentCompanyId = async (): Promise<string | null> => {
     console.error("[companyService] get_user_company error:", error);
     return null;
   }
-  const id = data?.[0]?.company?.id ?? null;
+
+  // The RPC returns a row with a 'company' JSON object; cast to access its fields safely
+  const rows = (data as unknown) as Array<{ company?: { id?: string; name?: string } }>;
+  const id = rows?.[0]?.company?.id ?? null;
+
   console.log("[companyService] current company id:", id);
   return id;
 };
