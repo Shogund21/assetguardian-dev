@@ -305,7 +305,6 @@ export type Database = {
           asset_id: string
           assigned_at: string | null
           assigned_team: string | null
-          company_id: string | null
           completed_at: string | null
           created_at: string
           description: string
@@ -320,7 +319,6 @@ export type Database = {
           asset_id: string
           assigned_at?: string | null
           assigned_team?: string | null
-          company_id?: string | null
           completed_at?: string | null
           created_at?: string
           description: string
@@ -335,7 +333,6 @@ export type Database = {
           asset_id?: string
           assigned_at?: string | null
           assigned_team?: string | null
-          company_id?: string | null
           completed_at?: string | null
           created_at?: string
           description?: string
@@ -2495,60 +2492,6 @@ export type Database = {
         }
         Relationships: []
       }
-      vendors: {
-        Row: {
-          address: string | null
-          company_id: string
-          contact_email: string | null
-          contact_name: string | null
-          contact_phone: string | null
-          created_at: string
-          id: string
-          insurance_expires_at: string | null
-          is_preferred: boolean
-          name: string
-          notes: string | null
-          rating: number | null
-          service_categories: string[]
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          address?: string | null
-          company_id: string
-          contact_email?: string | null
-          contact_name?: string | null
-          contact_phone?: string | null
-          created_at?: string
-          id?: string
-          insurance_expires_at?: string | null
-          is_preferred?: boolean
-          name: string
-          notes?: string | null
-          rating?: number | null
-          service_categories?: string[]
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          address?: string | null
-          company_id?: string
-          contact_email?: string | null
-          contact_name?: string | null
-          contact_phone?: string | null
-          created_at?: string
-          id?: string
-          insurance_expires_at?: string | null
-          is_preferred?: boolean
-          name?: string
-          notes?: string | null
-          rating?: number | null
-          service_categories?: string[]
-          status?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       vibration_analysis: {
         Row: {
           alignment_status: string | null
@@ -2613,66 +2556,6 @@ export type Database = {
             columns: ["equipment_id"]
             isOneToOne: false
             referencedRelation: "equipment"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      work_order_vendors: {
-        Row: {
-          approved_amount: number | null
-          assigned_at: string
-          completed_at: string | null
-          created_at: string
-          id: string
-          invoice_number: string | null
-          notes: string | null
-          quoted_amount: number | null
-          status: string
-          updated_at: string
-          vendor_id: string
-          work_order_id: string
-        }
-        Insert: {
-          approved_amount?: number | null
-          assigned_at?: string
-          completed_at?: string | null
-          created_at?: string
-          id?: string
-          invoice_number?: string | null
-          notes?: string | null
-          quoted_amount?: number | null
-          status?: string
-          updated_at?: string
-          vendor_id: string
-          work_order_id: string
-        }
-        Update: {
-          approved_amount?: number | null
-          assigned_at?: string
-          completed_at?: string | null
-          created_at?: string
-          id?: string
-          invoice_number?: string | null
-          notes?: string | null
-          quoted_amount?: number | null
-          status?: string
-          updated_at?: string
-          vendor_id?: string
-          work_order_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "work_order_vendors_vendor_id_fkey"
-            columns: ["vendor_id"]
-            isOneToOne: false
-            referencedRelation: "vendors"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "work_order_vendors_work_order_id_fkey"
-            columns: ["work_order_id"]
-            isOneToOne: false
-            referencedRelation: "automated_work_orders"
             referencedColumns: ["id"]
           },
         ]

@@ -2,12 +2,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
-// Import styles
+// Import styles in the correct order
+import './styles/index.css'
 import './index.css'
-
-// Add: Supabase auth context provider and client
-import { SessionContextProvider } from '@supabase/auth-helpers-react'
-import { supabase } from '@/integrations/supabase/client'
 
 // Get root element
 const rootElement = document.getElementById('root');
@@ -19,9 +16,7 @@ if (!rootElement) {
 // Render App with React.StrictMode wrapper
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <SessionContextProvider supabaseClient={supabase} initialSession={null}>
-      <App />
-    </SessionContextProvider>
+    <App />
   </React.StrictMode>
 );
 
@@ -37,4 +32,3 @@ window.addEventListener('resize', setViewportHeight);
 
 // Log successful initialization
 console.log('Application successfully initialized');
-
