@@ -2,8 +2,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
-// Import styles in the correct order
-import './styles/index.css'
+// Import styles
 import './index.css'
 
 // Add: Supabase auth context provider and client
