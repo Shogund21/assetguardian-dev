@@ -26,6 +26,12 @@ function App() {
   const supabase = useSupabaseClient()
   const user = useUser()
 
+  // Use a safe, environment-agnostic redirect URL
+  const redirectTo =
+    typeof window !== 'undefined' && window.location?.origin
+      ? `${window.location.origin}/`
+      : 'http://localhost:3000/';
+
   return (
     <>
       <Router>
@@ -35,7 +41,7 @@ function App() {
               supabaseClient={supabase}
               appearance={{ theme: ThemeSupa }}
               providers={['google', 'github']}
-              redirectTo="http://localhost:3000/"
+              redirectTo={redirectTo}
             />
           </div>
         ) : (
@@ -62,3 +68,4 @@ function App() {
 }
 
 export default App;
+
