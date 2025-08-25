@@ -20,10 +20,10 @@ export const LandingHero = ({ onRequestAccess }: LandingHeroProps) => {
         </div>
         
         <h1 className="landing-hero__title">
-          AI-Powered <span className="landing-hero__title-highlight">Predictive Maintenance</span> Platform
+          Predict Failures. Prevent Emergencies. <span className="landing-hero__title-highlight">Prove ROI in 90 Days.</span>
         </h1>
         <p className="landing-hero__subtitle">
-          Transform your facility management with cutting-edge AI that predicts failures before they happen, optimizes maintenance schedules, and prevents costly downtime with surgical precision.
+          AI-powered facility management that cuts downtime by 35% and reduces emergency calls by up to 96%.
         </p>
         
         <div className="landing-hero__actions">
@@ -31,9 +31,9 @@ export const LandingHero = ({ onRequestAccess }: LandingHeroProps) => {
             <Button
               onClick={onRequestAccess}
               size="lg"
-              className="bg-white text-primary hover:bg-white/90 text-lg px-8 py-4 h-auto font-semibold"
+              className="bg-yellow-500 text-black hover:bg-yellow-400 text-lg px-8 py-4 h-auto font-semibold"
             >
-              Request Access
+              Start No-Risk 90-Day Pilot
             </Button>
             <Link to="/auth">
               <Button
@@ -47,7 +47,7 @@ export const LandingHero = ({ onRequestAccess }: LandingHeroProps) => {
           </div>
           
           <p className="landing-hero__form-note mt-6">
-            Enterprise-grade AI platform • New users request access • Existing users sign in
+            Enterprise-grade AI platform • Start your 90-day pilot • Existing users sign in
           </p>
         </div>
       </div>

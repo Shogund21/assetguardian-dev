@@ -40,10 +40,10 @@ export const AccessRequestModal = ({
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center">
-            Request Access to Asset Guardian
+            Start Your No-Risk 90-Day Pilot
           </DialogTitle>
           <DialogDescription className="text-center text-muted-foreground">
-            Fill out the form below and our team will review your access request.
+            Fill out the form below and our team will set up your pilot program.
           </DialogDescription>
         </DialogHeader>
         
