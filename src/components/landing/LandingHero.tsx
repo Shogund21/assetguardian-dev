@@ -23,7 +23,7 @@ export const LandingHero = ({ onRequestAccess }: LandingHeroProps) => {
           Predict Failures. Prevent Emergencies. <span className="landing-hero__title-highlight">Prove ROI in 90 Days.</span>
         </h1>
         <p className="landing-hero__subtitle">
-          AI-powered facility management that cuts downtime by 35% and reduces emergency calls by up to 96%.
+          AI-powered facility management that cuts downtime by 81% and reduces emergency calls by up to 96%.
         </p>
         
         <div className="landing-hero__actions">
