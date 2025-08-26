@@ -17,15 +17,19 @@ A comprehensive AI-powered facility management system that cuts downtime by 81% 
 ### Predictive Maintenance (AI-Powered)
 - **AI Equipment Health Monitoring**: Real-time analysis of equipment condition and performance
 - **Sensor Data Collection**: Automated collection and analysis of equipment sensor readings
-- **Predictive Analytics**: AI-powered failure prediction with confidence scoring
+- **Predictive Analytics**: AI-powered failure prediction with confidence scoring and statistical analysis
 - **Dual AI Analysis**: Choose between GPT, Claude, or both AI models for enhanced accuracy
 - **Energy Efficiency Analysis**: Comprehensive energy consumption and optimization insights
 - **Health Matrix Visualization**: Color-coded equipment health overview dashboard
-- **Maintenance Windows**: Optimal maintenance timing recommendations
-- **Alert System**: Automated alerts for equipment requiring attention
+- **Maintenance Windows**: Optimal maintenance timing recommendations with cost analysis
+- **Alert System**: Automated alerts for equipment requiring attention with risk level classification
 - **Timeline Predictions**: Forecast equipment failure timelines and maintenance needs
-- **Performance Trends**: Track equipment efficiency and performance degradation
+- **Performance Trends**: Track equipment efficiency and performance degradation with z-score analysis
 - **AI Chat Interface**: Natural language queries about equipment performance and recommendations
+- **Statistical Baselines**: Mike Reyes-style statistical analysis with baseline mean calculations
+- **Anomaly Detection**: Advanced anomaly detection with confidence scoring and severity levels
+- **Degradation Analysis**: Component-level degradation tracking with replacement thresholds
+- **ROI Analysis**: Return on investment calculations for recommended maintenance actions
 
 ### AI Image Reading & Analysis
 - **Photo-based Readings**: Extract sensor readings directly from equipment photos using AI
