@@ -4,7 +4,10 @@
       "Bash(npm install)",
       "Bash(npm run dev:*)",
       "Bash(npm run type-check:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npx update-browserslist-db:*)"
     ],
     "deny": [],
     "ask": []
