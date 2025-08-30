@@ -67,50 +67,35 @@ const AccessRequestManagement = () => {
       status: 'approved' | 'denied'; 
       createTechnician?: AccessRequest 
     }) => {
-      // Update the access request
-      const { error: updateError } = await supabase
-        .from("access_requests")
-        .update({
-          status,
-          reviewed_at: new Date().toISOString(),
-          reviewed_by: "edward@shogunai.com"
-        })
-        .eq("id", id);
-
-      if (updateError) throw updateError;
-
-      // If approved, create technician record
-      if (status === 'approved' && createTechnician) {
-        const { data: technician, error: techError } = await supabase
-          .from("technicians")
-          .insert([{
-            firstName: createTechnician.first_name,
-            lastName: createTechnician.last_name,
-            email: createTechnician.email,
-            phone: createTechnician.phone || '',
-            specialization: 'General',
-            user_role: 'technician'
-          }])
-          .select()
-          .single();
-
-        if (techError) throw techError;
-
-        // Update their role using the function
-        const { error: roleError } = await supabase.rpc('update_technician_role', {
-          p_technician_id: technician.id,
-          p_new_role: 'technician',
-          p_is_admin: false
+      if (status === 'approved') {
+        // Use the secure function for approval and technician creation
+        const { data, error } = await supabase.rpc('approve_access_request_and_create_technician', {
+          p_request_id: id,
+          p_reviewed_by: 'edward@shogunai.com'
         });
 
-        if (roleError) throw roleError;
+        if (error) throw error;
+        
+        const result = data as { success: boolean; error?: string; message?: string };
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to approve access request');
+        }
+      } else {
+        // For denial, just update the access request
+        const { error: updateError } = await supabase
+          .from("access_requests")
+          .update({
+            status,
+            reviewed_at: new Date().toISOString(),
+            reviewed_by: "edward@shogunai.com"
+          })
+          .eq("id", id);
 
-        // Log the action for audit
-        await AuditService.logCreate('technicians', technician.id, technician, `Access request approved and technician created for ${createTechnician.email}`);
+        if (updateError) throw updateError;
+
+        // Log the access request denial
+        await AuditService.logUpdate('access_requests', id, {}, { status }, `Access request ${status} for ${createTechnician?.email}`);
       }
-
-      // Log the access request decision
-      await AuditService.logUpdate('access_requests', id, {}, { status }, `Access request ${status} for ${createTechnician?.email}`);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["access-requests"] });

@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -305,6 +305,7 @@ export type Database = {
           asset_id: string
           assigned_at: string | null
           assigned_team: string | null
+          company_id: string | null
           completed_at: string | null
           created_at: string
           description: string
@@ -319,6 +320,7 @@ export type Database = {
           asset_id: string
           assigned_at?: string | null
           assigned_team?: string | null
+          company_id?: string | null
           completed_at?: string | null
           created_at?: string
           description: string
@@ -333,6 +335,7 @@ export type Database = {
           asset_id?: string
           assigned_at?: string | null
           assigned_team?: string | null
+          company_id?: string | null
           completed_at?: string | null
           created_at?: string
           description?: string
@@ -931,6 +934,102 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      hotel_registrations: {
+        Row: {
+          address: string | null
+          arrival_date: string | null
+          card_last4: string | null
+          city: string | null
+          confirmation_number: string
+          country: string | null
+          created_at: string
+          departure_date: string | null
+          form_json: Json | null
+          guest_email: string | null
+          guest_first_name: string | null
+          guest_last_name: string | null
+          guest_phone: string | null
+          guests: number | null
+          id: string
+          liability_agreement: boolean | null
+          non_smoking_initials: string | null
+          payment_method: string | null
+          pdf_path: string | null
+          pet_policy_initials: string | null
+          postal: string | null
+          room_number: string | null
+          room_type: string | null
+          signature_path: string | null
+          state: string | null
+          updated_at: string
+          vehicle_make: string | null
+          vehicle_model: string | null
+          vehicle_plate: string | null
+        }
+        Insert: {
+          address?: string | null
+          arrival_date?: string | null
+          card_last4?: string | null
+          city?: string | null
+          confirmation_number: string
+          country?: string | null
+          created_at?: string
+          departure_date?: string | null
+          form_json?: Json | null
+          guest_email?: string | null
+          guest_first_name?: string | null
+          guest_last_name?: string | null
+          guest_phone?: string | null
+          guests?: number | null
+          id?: string
+          liability_agreement?: boolean | null
+          non_smoking_initials?: string | null
+          payment_method?: string | null
+          pdf_path?: string | null
+          pet_policy_initials?: string | null
+          postal?: string | null
+          room_number?: string | null
+          room_type?: string | null
+          signature_path?: string | null
+          state?: string | null
+          updated_at?: string
+          vehicle_make?: string | null
+          vehicle_model?: string | null
+          vehicle_plate?: string | null
+        }
+        Update: {
+          address?: string | null
+          arrival_date?: string | null
+          card_last4?: string | null
+          city?: string | null
+          confirmation_number?: string
+          country?: string | null
+          created_at?: string
+          departure_date?: string | null
+          form_json?: Json | null
+          guest_email?: string | null
+          guest_first_name?: string | null
+          guest_last_name?: string | null
+          guest_phone?: string | null
+          guests?: number | null
+          id?: string
+          liability_agreement?: boolean | null
+          non_smoking_initials?: string | null
+          payment_method?: string | null
+          pdf_path?: string | null
+          pet_policy_initials?: string | null
+          postal?: string | null
+          room_number?: string | null
+          room_type?: string | null
+          signature_path?: string | null
+          state?: string | null
+          updated_at?: string
+          vehicle_make?: string | null
+          vehicle_model?: string | null
+          vehicle_plate?: string | null
+        }
+        Relationships: []
       }
       hvac_diag_messages: {
         Row: {
@@ -2244,6 +2343,67 @@ export type Database = {
           },
         ]
       }
+      registration_documents: {
+        Row: {
+          created_at: string
+          file_size: number | null
+          id: string
+          registration_id: string
+          storage_path: string
+        }
+        Insert: {
+          created_at?: string
+          file_size?: number | null
+          id?: string
+          registration_id: string
+          storage_path: string
+        }
+        Update: {
+          created_at?: string
+          file_size?: number | null
+          id?: string
+          registration_id?: string
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registration_documents_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "hotel_registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      registration_signatures: {
+        Row: {
+          created_at: string
+          id: string
+          registration_id: string
+          storage_path: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          registration_id: string
+          storage_path: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          registration_id?: string
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registration_signatures_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "hotel_registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sensor_readings: {
         Row: {
           created_at: string
@@ -2492,6 +2652,60 @@ export type Database = {
         }
         Relationships: []
       }
+      vendors: {
+        Row: {
+          address: string | null
+          company_id: string
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          id: string
+          insurance_expires_at: string | null
+          is_preferred: boolean
+          name: string
+          notes: string | null
+          rating: number | null
+          service_categories: string[]
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          company_id: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          insurance_expires_at?: string | null
+          is_preferred?: boolean
+          name: string
+          notes?: string | null
+          rating?: number | null
+          service_categories?: string[]
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          company_id?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          insurance_expires_at?: string | null
+          is_preferred?: boolean
+          name?: string
+          notes?: string | null
+          rating?: number | null
+          service_categories?: string[]
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       vibration_analysis: {
         Row: {
           alignment_status: string | null
@@ -2556,6 +2770,66 @@ export type Database = {
             columns: ["equipment_id"]
             isOneToOne: false
             referencedRelation: "equipment"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      work_order_vendors: {
+        Row: {
+          approved_amount: number | null
+          assigned_at: string
+          completed_at: string | null
+          created_at: string
+          id: string
+          invoice_number: string | null
+          notes: string | null
+          quoted_amount: number | null
+          status: string
+          updated_at: string
+          vendor_id: string
+          work_order_id: string
+        }
+        Insert: {
+          approved_amount?: number | null
+          assigned_at?: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          invoice_number?: string | null
+          notes?: string | null
+          quoted_amount?: number | null
+          status?: string
+          updated_at?: string
+          vendor_id: string
+          work_order_id: string
+        }
+        Update: {
+          approved_amount?: number | null
+          assigned_at?: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          invoice_number?: string | null
+          notes?: string | null
+          quoted_amount?: number | null
+          status?: string
+          updated_at?: string
+          vendor_id?: string
+          work_order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_order_vendors_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_order_vendors_work_order_id_fkey"
+            columns: ["work_order_id"]
+            isOneToOne: false
+            referencedRelation: "automated_work_orders"
             referencedColumns: ["id"]
           },
         ]
@@ -2647,7 +2921,15 @@ export type Database = {
     }
     Functions: {
       admin_send_password_reset_email: {
-        Args: { p_user_email: string; p_admin_notes?: string }
+        Args: { p_admin_notes?: string; p_user_email: string }
+        Returns: Json
+      }
+      approve_access_request_and_create_technician: {
+        Args: {
+          p_demo_company_name?: string
+          p_request_id: string
+          p_reviewed_by: string
+        }
         Returns: Json
       }
       assign_user_to_demo_company: {
@@ -2669,12 +2951,12 @@ export type Database = {
       check_threshold_violations: {
         Args: { p_equipment_id: string }
         Returns: {
-          sensor_type: string
-          current_value: number
-          warning_threshold: number
           critical_threshold: number
-          violation_level: string
+          current_value: number
+          sensor_type: string
           unit: string
+          violation_level: string
+          warning_threshold: number
         }[]
       }
       cleanup_expired_trials: {
@@ -2690,9 +2972,9 @@ export type Database = {
         }
         Returns: {
           company_id: string
-          trial_expires_at: string
           days_remaining: number
           demo_data_created: boolean
+          trial_expires_at: string
         }[]
       }
       create_trial_company: {
@@ -2713,8 +2995,8 @@ export type Database = {
         Returns: {
           auth_uid: string
           current_user_name: string
-          session_user_name: string
           has_jwt: boolean
+          session_user_name: string
         }[]
       }
       delete_equipment: {
@@ -2731,9 +3013,9 @@ export type Database = {
       }
       end_user_session: {
         Args: {
-          p_session_id: string
-          p_pages_visited?: number
           p_actions_count?: number
+          p_pages_visited?: number
+          p_session_id: string
         }
         Returns: undefined
       }
@@ -2745,7 +3027,7 @@ export type Database = {
         }[]
       }
       extend_trial: {
-        Args: { p_company_id: string; p_additional_days?: number }
+        Args: { p_additional_days?: number; p_company_id: string }
         Returns: string
       }
       generate_demo_data: {
@@ -2755,42 +3037,42 @@ export type Database = {
       get_all_companies_for_super_admin: {
         Args: Record<PropertyKey, never>
         Returns: {
-          id: string
-          name: string
-          logo_url: string
           address: string
           contact_email: string
           contact_phone: string
           created_at: string
+          id: string
+          logo_url: string
+          name: string
           updated_at: string
         }[]
       }
       get_audit_logs_with_profiles: {
         Args: {
-          p_start_date?: string
-          p_end_date?: string
-          p_table_name?: string
           p_action?: string
-          p_user_id?: string
+          p_end_date?: string
           p_limit?: number
+          p_start_date?: string
+          p_table_name?: string
+          p_user_id?: string
         }
         Returns: {
-          id: string
-          user_id: string
           action: string
-          table_name: string
-          record_id: string
-          old_values: Json
-          new_values: Json
-          reason: string
-          metadata: Json
           created_at: string
+          id: string
           ip_address: unknown
-          user_agent: string
+          metadata: Json
+          new_values: Json
+          old_values: Json
+          reason: string
+          record_id: string
           session_id: string
-          user_first_name: string
-          user_last_name: string
+          table_name: string
+          user_agent: string
           user_email: string
+          user_first_name: string
+          user_id: string
+          user_last_name: string
         }[]
       }
       get_current_user_company: {
@@ -2798,8 +3080,8 @@ export type Database = {
         Returns: {
           company_id: string
           company_name: string
-          user_role: string
           is_admin: boolean
+          user_role: string
         }[]
       }
       get_demo_company_id: {
@@ -2814,119 +3096,119 @@ export type Database = {
           p_search?: string
         }
         Returns: {
-          id: string
-          name: string
-          type: string
-          model: string
-          serial_number: string
-          location: string
-          status: string
-          lastMaintenance: string
-          nextMaintenance: string
           company_id: string
           created_at: string
+          id: string
+          lastMaintenance: string
+          location: string
+          model: string
+          name: string
+          nextMaintenance: string
+          serial_number: string
+          status: string
+          type: string
           updated_at: string
         }[]
       }
       get_maintenance_history: {
         Args: { p_equipment_id?: string; p_limit?: number; p_offset?: number }
         Returns: {
-          id: string
-          equipment_id: string
-          technician_id: string
+          air_filter_cleaned: boolean
+          air_filter_status: string
+          airflow_reading: number
+          airflow_unit: string
+          belt_condition: string
           check_date: string
-          status: Database["public"]["Enums"]["maintenance_check_status"]
+          chiller_pressure_reading: number
+          chiller_temperature_reading: number
+          city_conductivity_us_cm: number
+          cleanliness_level: string
+          coils_condition: string
+          company_id: string
+          condenser_condition: string
+          control_system_status: string
+          corrective_actions: string
+          dampers_operation: string
+          door_operation: string
+          drain_pan_status: string
+          drainage_system_status: string
+          drift_eliminators_condition: string
+          elevator_lighting: string
+          elevator_notes: string
+          elevator_operation: string
+          emergency_phone: string
+          emergency_shutdown_status: string
+          equipment_id: string
+          equipment_location: string
           equipment_name: string
           equipment_type: string
-          equipment_location: string
-          technician_name: string
-          notes: string
-          company_id: string
+          fan_assembly_status: string
+          fan_bearings_lubricated: boolean
+          fan_belt_condition: string
+          fan_noise_level: string
+          fill_media_condition: string
+          floor_condition: string
+          general_inspection: string
+          hand_dryer_status: string
+          id: string
+          images: string[]
           location_id: string
           location_name: string
           location_store_number: string
           maintenance_frequency: string
-          reading_mode: string
-          chiller_pressure_reading: number
-          chiller_temperature_reading: number
-          air_filter_status: string
-          belt_condition: string
-          refrigerant_level: string
-          unusual_noise: boolean
-          vibration_observed: boolean
-          oil_level_status: string
-          condenser_condition: string
-          unusual_noise_description: string
-          vibration_description: string
-          air_filter_cleaned: boolean
-          fan_belt_condition: string
-          fan_bearings_lubricated: boolean
-          fan_noise_level: string
-          dampers_operation: string
-          coils_condition: string
-          sensors_operation: string
-          motor_condition: string
-          drain_pan_status: string
-          airflow_reading: number
-          airflow_unit: string
-          troubleshooting_notes: string
-          corrective_actions: string
           maintenance_recommendations: string
-          elevator_operation: string
-          door_operation: string
-          unusual_noise_elevator: boolean
-          vibration_elevator: boolean
-          emergency_phone: string
-          elevator_lighting: string
-          elevator_notes: string
-          safety_features_status: string
-          sink_status: string
-          toilet_status: string
-          urinal_status: string
-          hand_dryer_status: string
-          cleanliness_level: string
-          soap_supply: string
-          toilet_paper_supply: string
-          floor_condition: string
-          restroom_notes: string
-          fill_media_condition: string
-          drift_eliminators_condition: string
-          fan_assembly_status: string
+          motor_condition: string
           motor_lubrication_status: string
+          notes: string
+          oil_level_status: string
           pump_seals_condition: string
+          reading_mode: string
+          refrigerant_level: string
+          restroom_notes: string
+          safety_features_status: string
+          seasonal_preparation_status: string
+          sensor_status: string
+          sensors_operation: string
+          sink_status: string
+          soap_supply: string
+          status: Database["public"]["Enums"]["maintenance_check_status"]
           strainer_status: string
           sump_basin_condition: string
-          water_system_status: string
-          drainage_system_status: string
-          control_system_status: string
-          sensor_status: string
-          seasonal_preparation_status: string
-          vibration_monitoring: string
-          emergency_shutdown_status: string
-          city_conductivity_us_cm: number
+          technician_id: string
+          technician_name: string
+          toilet_paper_supply: string
+          toilet_status: string
           tower_conductivity_us_cm: number
-          general_inspection: string
-          images: string[]
+          troubleshooting_notes: string
+          unusual_noise: boolean
+          unusual_noise_description: string
+          unusual_noise_elevator: boolean
+          urinal_status: string
+          vibration_description: string
+          vibration_elevator: boolean
+          vibration_monitoring: string
+          vibration_observed: boolean
+          water_system_status: string
         }[]
       }
       get_performance_metrics_with_profiles: {
         Args: { p_limit?: number }
         Returns: {
+          api_endpoint: string
+          created_at: string
+          error_message: string
+          error_occurred: boolean
           id: string
-          user_id: string
-          session_id: string
+          load_time_ms: number
           metric_type: string
           page_route: string
-          load_time_ms: number
-          api_endpoint: string
           response_time_ms: number
-          error_occurred: boolean
-          error_message: string
+          session_id: string
           timestamp_utc: string
-          created_at: string
-          user_first_name: string
-          user_last_name: string
           user_email: string
+          user_first_name: string
+          user_id: string
+          user_last_name: string
         }[]
       }
       get_projects_data: {
@@ -2937,38 +3219,38 @@ export type Database = {
           p_search?: string
         }
         Returns: {
-          id: string
-          name: string
-          description: string
-          status: string
-          priority: string
-          location: string
-          startdate: string
-          enddate: string
-          createdat: string
-          updatedat: string
           company_id: string
+          createdat: string
+          description: string
+          enddate: string
+          id: string
+          location: string
+          name: string
+          priority: string
+          startdate: string
+          status: string
+          updatedat: string
         }[]
       }
       get_recent_activities: {
         Args: Record<PropertyKey, never>
         Returns: {
-          id: string
-          title: string
           description: string
+          id: string
           timestamp_val: string
+          title: string
           type: string
         }[]
       }
       get_sensor_analysis: {
         Args: { p_equipment_id: string; p_hours?: number }
         Returns: {
-          sensor_type: string
-          latest_value: number
           avg_value: number
-          min_value: number
+          latest_value: number
           max_value: number
+          min_value: number
           reading_count: number
+          sensor_type: string
           trend_direction: string
           unit: string
         }[]
@@ -2976,47 +3258,47 @@ export type Database = {
       get_technicians_with_roles: {
         Args: Record<PropertyKey, never>
         Returns: {
-          id: string
-          firstName: string
-          lastName: string
+          account_status: string
+          company_id: string
+          company_name: string
           email: string
+          firstName: string
+          id: string
+          is_admin: boolean
+          isAvailable: boolean
+          lastName: string
           phone: string
           specialization: string
-          company_id: string
-          user_role: string
-          is_admin: boolean
-          company_name: string
           status: string
-          isAvailable: boolean
-          account_status: string
           user_id: string
+          user_role: string
         }[]
       }
       get_trial_info: {
         Args: { p_company_id: string }
         Returns: {
-          is_trial: boolean
-          expires_at: string
           days_remaining: number
+          expires_at: string
           is_expired: boolean
+          is_trial: boolean
         }[]
       }
       get_user_activities_with_profiles: {
         Args: { p_limit?: number }
         Returns: {
-          id: string
-          user_id: string
-          session_id: string
-          activity_type: string
-          page_route: string
-          feature_name: string
-          component_name: string
           action_details: Json
-          timestamp_utc: string
+          activity_type: string
+          component_name: string
           created_at: string
-          user_first_name: string
-          user_last_name: string
+          feature_name: string
+          id: string
+          page_route: string
+          session_id: string
+          timestamp_utc: string
           user_email: string
+          user_first_name: string
+          user_id: string
+          user_last_name: string
         }[]
       }
       get_user_company: {
@@ -3028,20 +3310,20 @@ export type Database = {
       get_user_sessions_with_profiles: {
         Args: { p_limit?: number }
         Returns: {
+          actions_count: number
+          created_at: string
+          duration_seconds: number
+          ended_at: string
           id: string
-          user_id: string
+          ip_address: unknown
+          pages_visited: number
           session_id: string
           started_at: string
-          ended_at: string
-          duration_seconds: number
-          pages_visited: number
-          actions_count: number
-          ip_address: unknown
           user_agent: string
-          created_at: string
-          user_first_name: string
-          user_last_name: string
           user_email: string
+          user_first_name: string
+          user_id: string
+          user_last_name: string
         }[]
       }
       is_current_user_admin: {
@@ -3067,38 +3349,38 @@ export type Database = {
       log_audit_event: {
         Args: {
           p_action: string
-          p_table_name: string
-          p_record_id?: string
-          p_old_values?: Json
-          p_new_values?: Json
-          p_reason?: string
           p_metadata?: Json
+          p_new_values?: Json
+          p_old_values?: Json
+          p_reason?: string
+          p_record_id?: string
+          p_table_name: string
         }
         Returns: string
       }
       log_performance_metric: {
         Args: {
-          p_user_id: string
-          p_session_id: string
+          p_api_endpoint?: string
+          p_error_message?: string
+          p_error_occurred?: boolean
+          p_load_time_ms?: number
           p_metric_type: string
           p_page_route?: string
-          p_load_time_ms?: number
-          p_api_endpoint?: string
           p_response_time_ms?: number
-          p_error_occurred?: boolean
-          p_error_message?: string
+          p_session_id: string
+          p_user_id: string
         }
         Returns: string
       }
       log_user_activity: {
         Args: {
-          p_user_id: string
-          p_session_id: string
-          p_activity_type: string
-          p_page_route?: string
-          p_feature_name?: string
-          p_component_name?: string
           p_action_details?: Json
+          p_activity_type: string
+          p_component_name?: string
+          p_feature_name?: string
+          p_page_route?: string
+          p_session_id: string
+          p_user_id: string
         }
         Returns: string
       }
@@ -3108,14 +3390,14 @@ export type Database = {
       }
       request_password_reset: {
         Args: {
-          email_address: string
           client_ip?: unknown
+          email_address: string
           user_agent?: string
         }
         Returns: Json
       }
       reset_password: {
-        Args: { reset_token: string; new_password: string }
+        Args: { new_password: string; reset_token: string }
         Returns: Json
       }
       save_staged_readings_to_sensors: {
@@ -3123,7 +3405,7 @@ export type Database = {
         Returns: Json
       }
       set_claim: {
-        Args: { uid: string; claim: string; value: string }
+        Args: { claim: string; uid: string; value: string }
         Returns: undefined
       }
       set_equipment_status: {
@@ -3131,7 +3413,7 @@ export type Database = {
         Returns: undefined
       }
       set_project_priority: {
-        Args: { p_project_id: string; p_priority: string }
+        Args: { p_priority: string; p_project_id: string }
         Returns: undefined
       }
       set_project_status: {
@@ -3140,19 +3422,19 @@ export type Database = {
       }
       set_technician_status: {
         Args: {
-          p_technician_id: string
-          p_new_status: string
           p_account_status?: string
+          p_new_status: string
+          p_technician_id: string
           p_user_enabled?: boolean
         }
         Returns: undefined
       }
       start_user_session: {
         Args: {
-          p_user_id: string
-          p_session_id: string
           p_ip_address?: unknown
+          p_session_id: string
           p_user_agent?: string
+          p_user_id: string
         }
         Returns: string
       }
@@ -3166,14 +3448,14 @@ export type Database = {
       }
       update_technician_role: {
         Args: {
-          p_technician_id: string
-          p_new_role: string
           p_is_admin?: boolean
+          p_new_role: string
+          p_technician_id: string
         }
         Returns: undefined
       }
       verify_admin_access: {
-        Args: { user_email: string; provided_password: string }
+        Args: { provided_password: string; user_email: string }
         Returns: Json
       }
       verify_password_reset_token: {
