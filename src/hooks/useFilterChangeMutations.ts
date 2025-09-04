@@ -2,19 +2,14 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
 import { FilterChange, FilterChangeFormValues } from "@/types/filterChanges";
 
 export function useFilterChangeMutations() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { isAuthenticated, user } = useAuth();
 
   const create = useMutation({
     mutationFn: async (values: FilterChangeFormValues) => {
-      if (!isAuthenticated || !user) {
-        throw new Error("Authentication required to create filter changes");
-      }
 
       const { data, error } = await supabase
         .from('filter_changes')
@@ -115,9 +110,6 @@ export function useFilterChangeMutations() {
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      if (!isAuthenticated || !user) {
-        throw new Error("Authentication required to delete filter changes");
-      }
 
       const { error } = await supabase
         .from('filter_changes')
@@ -151,9 +143,6 @@ export function useFilterChangeMutations() {
 
   const completeFilterChange = useMutation({
     mutationFn: async (id: string) => {
-      if (!isAuthenticated || !user) {
-        throw new Error("Authentication required to complete filter changes");
-      }
 
       const { error } = await supabase
         .from('filter_changes')

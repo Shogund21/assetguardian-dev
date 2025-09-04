@@ -1,11 +1,9 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout";
 import { EquipmentList } from "@/components/equipment/EquipmentList";
-import { EquipmentAuth } from "@/components/equipment/EquipmentAuth";
 import { useEquipmentStatus } from "@/hooks/equipment/useEquipmentStatus";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { useAuth } from "@/hooks/useAuth";
@@ -63,34 +61,33 @@ const Equipment = () => {
 
   return (
     <Layout>
-      <EquipmentAuth>
-        <div className="space-y-8 animate-fade-in p-4 md:p-6">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold">Equipment</h1>
-              <p className="text-sm md:text-base text-muted-foreground mt-2">
-                View and manage all equipment
-              </p>
-            </div>
-            <Button 
-              onClick={() => navigate("/add-equipment")}
-              className="w-full md:w-auto bg-[#1EAEDB] hover:bg-[#33C3F0] text-black"
-            >
-              <Plus className="mr-2 h-4 w-4" /> Add Equipment
-            </Button>
+      <div className="space-y-8 animate-fade-in p-4 md:p-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold">Equipment</h1>
+            <p className="text-sm md:text-base text-muted-foreground mt-2">
+              View and manage all equipment
+            </p>
           </div>
-
-          {isLoading ? (
-            <p className="text-center py-4">Loading equipment...</p>
-          ) : (
-            <EquipmentList 
-              equipment={equipment || []}
-              onStatusChange={handleStatusChange}
-              onDelete={handleDelete}
-            />
-          )}
+          <Button 
+            onClick={() => navigate("/add-equipment")}
+            size="lg"
+            className="w-full md:w-auto"
+          >
+            <Plus className="mr-2 h-4 w-4" /> Add Equipment
+          </Button>
         </div>
-      </EquipmentAuth>
+
+        {isLoading ? (
+          <p className="text-center py-4">Loading equipment...</p>
+        ) : (
+          <EquipmentList 
+            equipment={equipment || []}
+            onStatusChange={handleStatusChange}
+            onDelete={handleDelete}
+          />
+        )}
+      </div>
     </Layout>
   );
 };

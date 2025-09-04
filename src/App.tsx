@@ -10,6 +10,7 @@ import { CompanyProvider } from "@/contexts/CompanyContext";
 import PageTransition from "@/components/PageTransition";
 import { useAuditTracker } from "@/hooks/useAuditTracker";
 
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import RootPage from "@/components/RootPage";
 import Equipment from "./pages/Equipment";
 import EquipmentDetails from "./pages/EquipmentDetails";
@@ -26,6 +27,7 @@ import ResetPassword from "./pages/ResetPassword";
 import PredictiveMaintenance from "./pages/PredictiveMaintenance";
 import FilterChanges from "./pages/FilterChanges";
 import PrintView from "./pages/PrintView";
+import Index from "./pages/Index";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,22 +43,73 @@ const AppContent = () => {
   
   return (
     <Routes>
-      <Route path="/" element={<RootPage />} />
+      {/* Public routes */}
       <Route path="/landing" element={<Landing />} />
       <Route path="/auth" element={<Auth />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/register" element={<Navigate to="/auth" replace />} />
-      <Route path="/equipment" element={<Equipment />} />
-      <Route path="/equipment/:id" element={<EquipmentDetails />} />
-      <Route path="/add-equipment" element={<AddEquipment />} />
-      <Route path="/projects" element={<Projects />} />
-      <Route path="/maintenance-checks" element={<MaintenanceChecks />} />
-      <Route path="/filter-changes" element={<FilterChanges />} />
-      <Route path="/predictive-maintenance" element={<PredictiveMaintenance />} />
-      <Route path="/analytics" element={<Analytics />} />
-      <Route path="/settings" element={<Settings />} />
-      <Route path="/customer-manual" element={<CustomerManual />} />
-      <Route path="/print-view" element={<PrintView />} />
+      
+      {/* Protected routes */}
+      <Route path="/" element={
+        <ProtectedRoute>
+          <Index />
+        </ProtectedRoute>
+      } />
+      <Route path="/equipment" element={
+        <ProtectedRoute>
+          <Equipment />
+        </ProtectedRoute>
+      } />
+      <Route path="/equipment/:id" element={
+        <ProtectedRoute>
+          <EquipmentDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/add-equipment" element={
+        <ProtectedRoute>
+          <AddEquipment />
+        </ProtectedRoute>
+      } />
+      <Route path="/projects" element={
+        <ProtectedRoute>
+          <Projects />
+        </ProtectedRoute>
+      } />
+      <Route path="/maintenance-checks" element={
+        <ProtectedRoute>
+          <MaintenanceChecks />
+        </ProtectedRoute>
+      } />
+      <Route path="/filter-changes" element={
+        <ProtectedRoute>
+          <FilterChanges />
+        </ProtectedRoute>
+      } />
+      <Route path="/predictive-maintenance" element={
+        <ProtectedRoute>
+          <PredictiveMaintenance />
+        </ProtectedRoute>
+      } />
+      <Route path="/analytics" element={
+        <ProtectedRoute>
+          <Analytics />
+        </ProtectedRoute>
+      } />
+      <Route path="/settings" element={
+        <ProtectedRoute>
+          <Settings />
+        </ProtectedRoute>
+      } />
+      <Route path="/customer-manual" element={
+        <ProtectedRoute>
+          <CustomerManual />
+        </ProtectedRoute>
+      } />
+      <Route path="/print-view" element={
+        <ProtectedRoute>
+          <PrintView />
+        </ProtectedRoute>
+      } />
     </Routes>
   );
 };

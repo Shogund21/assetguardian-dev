@@ -5,46 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import FilterChangesList from "@/components/filter/FilterChangesList";
 import FilterChangeFormDialog from "@/components/filter/FilterChangeFormDialog";
-import { Plus, UserX } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useAuth } from "@/hooks/useAuth";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const FilterChanges = () => {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
   const isMobile = useIsMobile();
-  const { isAuthenticated, isLoading, user } = useAuth();
-
-  if (isLoading) {
-    return (
-      <Layout>
-        <div className="space-y-4 animate-fade-in pb-16">
-          <div className="flex justify-center items-center min-h-[400px]">
-            <div className="text-center space-y-2">
-              <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
-              <p className="text-muted-foreground">Loading...</p>
-            </div>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
-  if (!isAuthenticated || !user) {
-    return (
-      <Layout>
-        <div className="space-y-4 animate-fade-in pb-16">
-          <Alert className="border-destructive/50 bg-destructive/5">
-            <UserX className="h-4 w-4" />
-            <AlertDescription className="text-destructive">
-              You need to be logged in to access filter changes. Please sign in to continue.
-            </AlertDescription>
-          </Alert>
-        </div>
-      </Layout>
-    );
-  }
 
   return (
     <Layout>
