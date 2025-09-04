@@ -2,14 +2,20 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { FilterChange, FilterChangeFormValues } from "@/types/filterChanges";
 
 export function useFilterChangeMutations() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { isAuthenticated, user } = useAuth();
 
   const create = useMutation({
     mutationFn: async (values: FilterChangeFormValues) => {
+      if (!isAuthenticated || !user) {
+        throw new Error("Authentication required to create filter changes");
+      }
+
       const { data, error } = await supabase
         .from('filter_changes')
         .insert([{
@@ -38,9 +44,15 @@ export function useFilterChangeMutations() {
     },
     onError: (error) => {
       console.error("Error creating filter change:", error);
+      const message = error.message.includes("Authentication required") 
+        ? "Please log in to create filter changes."
+        : error.message.includes("violates row-level security")
+        ? "You don't have permission to create filter changes for this equipment."
+        : "Please try again later";
+      
       toast({
         title: "Error adding filter change",
-        description: "Please try again later",
+        description: message,
         variant: "destructive",
       });
     },
@@ -87,9 +99,15 @@ export function useFilterChangeMutations() {
     },
     onError: (error) => {
       console.error("Error updating filter change:", error);
+      const message = error.message.includes("Authentication required") 
+        ? "Please log in to update filter changes."
+        : error.message.includes("violates row-level security")
+        ? "You don't have permission to update this filter change."
+        : "Please try again later";
+      
       toast({
         title: "Error updating filter change",
-        description: "Please try again later",
+        description: message,
         variant: "destructive",
       });
     },
@@ -97,6 +115,10 @@ export function useFilterChangeMutations() {
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
+      if (!isAuthenticated || !user) {
+        throw new Error("Authentication required to delete filter changes");
+      }
+
       const { error } = await supabase
         .from('filter_changes')
         .delete()
@@ -113,9 +135,15 @@ export function useFilterChangeMutations() {
     },
     onError: (error) => {
       console.error("Error deleting filter change:", error);
+      const message = error.message.includes("Authentication required") 
+        ? "Please log in to delete filter changes."
+        : error.message.includes("violates row-level security")
+        ? "You don't have permission to delete this filter change."
+        : "Please try again later";
+      
       toast({
         title: "Error deleting filter change",
-        description: "Please try again later",
+        description: message,
         variant: "destructive",
       });
     },
@@ -123,6 +151,10 @@ export function useFilterChangeMutations() {
 
   const completeFilterChange = useMutation({
     mutationFn: async (id: string) => {
+      if (!isAuthenticated || !user) {
+        throw new Error("Authentication required to complete filter changes");
+      }
+
       const { error } = await supabase
         .from('filter_changes')
         .update({ status: 'completed' })
@@ -139,9 +171,15 @@ export function useFilterChangeMutations() {
     },
     onError: (error) => {
       console.error("Error completing filter change:", error);
+      const message = error.message.includes("Authentication required") 
+        ? "Please log in to complete filter changes."
+        : error.message.includes("violates row-level security")
+        ? "You don't have permission to complete this filter change."
+        : "Please try again later";
+      
       toast({
         title: "Error completing filter change",
-        description: "Please try again later",
+        description: message,
         variant: "destructive",
       });
     },

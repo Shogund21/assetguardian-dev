@@ -4,12 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { FilterChange } from "@/types/filterChanges";
 
-export function useFilterChangesQuery(options?: { equipmentId?: string }) {
+export function useFilterChangesQuery(options?: { equipmentId?: string; enabled?: boolean }) {
   const { toast } = useToast();
-  const { equipmentId } = options || {};
+  const { equipmentId, enabled = true } = options || {};
 
   return useQuery({
     queryKey: ['filter-changes', equipmentId],
+    enabled,
     queryFn: async () => {
       let query = supabase
         .from('filter_changes_view')
