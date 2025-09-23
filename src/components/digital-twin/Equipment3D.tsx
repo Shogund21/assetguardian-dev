@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Box, Cylinder, Sphere } from '@react-three/drei';
+
 import { Mesh } from 'three';
 import { DigitalTwinEquipment } from '@/types/digitalTwin';
 
