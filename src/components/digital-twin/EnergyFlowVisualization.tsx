@@ -12,6 +12,12 @@ export const EnergyFlowVisualization: React.FC<EnergyFlowVisualizationProps> = (
   energyFlows,
   equipmentPositions,
 }) => {
+  const getFlowColor = (efficiency: number) => {
+    if (efficiency >= 0.8) return '#10b981'; // green
+    if (efficiency >= 0.6) return '#f59e0b'; // amber
+    return '#ef4444'; // red
+  };
+
   const flowLines = useMemo(() => {
     return energyFlows.map((flow) => {
       const fromPos = equipmentPositions[flow.from];
@@ -41,13 +47,7 @@ export const EnergyFlowVisualization: React.FC<EnergyFlowVisualizationProps> = (
         width: Math.max(0.1, flow.flow / 100),
       };
     }).filter(Boolean);
-  }, [energyFlows, equipmentPositions]);
-
-  const getFlowColor = (efficiency: number) => {
-    if (efficiency >= 0.8) return '#10b981'; // green
-    if (efficiency >= 0.6) return '#f59e0b'; // amber
-    return '#ef4444'; // red
-  };
+  }, [energyFlows, equipmentPositions, getFlowColor]);
 
   return (
     <group>

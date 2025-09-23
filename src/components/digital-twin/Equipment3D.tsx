@@ -28,78 +28,18 @@ export const Equipment3D: React.FC<Equipment3DProps> = ({
   const getEquipmentGeometry = () => {
     switch (equipment.type?.toLowerCase()) {
       case 'chiller':
-        return (
-          <Box args={[4, 3, 2]}>
-            <meshStandardMaterial
-              color={getStatusColor()}
-              transparent
-              opacity={hovered ? 0.8 : 1}
-              emissive={isSelected ? '#4f46e5' : '#000000'}
-              emissiveIntensity={isSelected ? 0.3 : 0}
-            />
-          </Box>
-        );
+        return <boxGeometry args={[4, 3, 2]} />;
       case 'ahu':
       case 'rtu':
-        return (
-          <Box args={[3, 2, 1.5]}>
-            <meshStandardMaterial
-              color={getStatusColor()}
-              transparent
-              opacity={hovered ? 0.8 : 1}
-              emissive={isSelected ? '#4f46e5' : '#000000'}
-              emissiveIntensity={isSelected ? 0.3 : 0}
-            />
-          </Box>
-        );
+        return <boxGeometry args={[3, 2, 1.5]} />;
       case 'cooling tower':
-        return (
-          <Cylinder args={[1.5, 1.5, 4, 8]}>
-            <meshStandardMaterial
-              color={getStatusColor()}
-              transparent
-              opacity={hovered ? 0.8 : 1}
-              emissive={isSelected ? '#4f46e5' : '#000000'}
-              emissiveIntensity={isSelected ? 0.3 : 0}
-            />
-          </Cylinder>
-        );
+        return <cylinderGeometry args={[1.5, 1.5, 4, 8]} />;
       case 'generator':
-        return (
-          <Box args={[2.5, 1.5, 1]}>
-            <meshStandardMaterial
-              color={getStatusColor()}
-              transparent
-              opacity={hovered ? 0.8 : 1}
-              emissive={isSelected ? '#4f46e5' : '#000000'}
-              emissiveIntensity={isSelected ? 0.3 : 0}
-            />
-          </Box>
-        );
+        return <boxGeometry args={[2.5, 1.5, 1]} />;
       case 'split system':
-        return (
-          <Box args={[1, 0.5, 1.5]}>
-            <meshStandardMaterial
-              color={getStatusColor()}
-              transparent
-              opacity={hovered ? 0.8 : 1}
-              emissive={isSelected ? '#4f46e5' : '#000000'}
-              emissiveIntensity={isSelected ? 0.3 : 0}
-            />
-          </Box>
-        );
+        return <boxGeometry args={[1, 0.5, 1.5]} />;
       default:
-        return (
-          <Box args={[2, 2, 2]}>
-            <meshStandardMaterial
-              color={getStatusColor()}
-              transparent
-              opacity={hovered ? 0.8 : 1}
-              emissive={isSelected ? '#4f46e5' : '#000000'}
-              emissiveIntensity={isSelected ? 0.3 : 0}
-            />
-          </Box>
-        );
+        return <boxGeometry args={[2, 2, 2]} />;
     }
   };
 
@@ -140,33 +80,38 @@ export const Equipment3D: React.FC<Equipment3DProps> = ({
         receiveShadow
       >
         {getEquipmentGeometry()}
+        <meshStandardMaterial
+          color={getStatusColor()}
+          transparent
+          opacity={hovered ? 0.8 : 1}
+          emissive={isSelected ? '#4f46e5' : '#000000'}
+          emissiveIntensity={isSelected ? 0.3 : 0}
+        />
       </mesh>
       
       {/* Health indicator sphere */}
-      <Sphere
-        args={[0.3]}
-        position={[0, 2.5, 0]}
-      >
+      <mesh position={[0, 2.5, 0]}>
+        <sphereGeometry args={[0.3]} />
         <meshStandardMaterial
           color={getHealthIndicator()}
           emissive={getHealthIndicator()}
           emissiveIntensity={0.3}
         />
-      </Sphere>
+      </mesh>
       
       {/* Alert indicators */}
       {equipment.alerts.filter(alert => !alert.acknowledged).map((alert, index) => (
-        <Sphere
+        <mesh
           key={alert.id}
-          args={[0.2]}
           position={[1 + index * 0.5, 3, 0]}
         >
+          <sphereGeometry args={[0.2]} />
           <meshStandardMaterial
             color={alert.type === 'critical' ? '#ef4444' : '#f59e0b'}
             emissive={alert.type === 'critical' ? '#ef4444' : '#f59e0b'}
             emissiveIntensity={0.5}
           />
-        </Sphere>
+        </mesh>
       ))}
     </group>
   );
