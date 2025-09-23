@@ -1,5 +1,5 @@
 import React from 'react';
-import { Html } from '@react-three/drei';
+import SafeHtml from './SafeHtml';
 import { DigitalTwinEquipment } from '@/types/digitalTwin';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -53,7 +53,7 @@ export const SensorOverlay: React.FC<SensorOverlayProps> = ({
         ].filter(sensor => sensor.value !== undefined);
 
         return (
-          <Html
+          <SafeHtml
             key={eq.id}
             position={[eq.position.x, eq.position.y + 3, eq.position.z]}
             distanceFactor={10}
@@ -108,7 +108,7 @@ export const SensorOverlay: React.FC<SensorOverlayProps> = ({
                 </div>
               )}
             </div>
-          </Html>
+          </SafeHtml>
         );
       })}
     </>
