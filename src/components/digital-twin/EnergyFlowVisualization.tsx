@@ -58,21 +58,18 @@ export const EnergyFlowVisualization: React.FC<EnergyFlowVisualizationProps> = (
         if (!line) return null;
         
         return (
-          <React.Fragment key={index}>
+          <group key={index}>
             <mesh>
               <tubeGeometry args={[line.curve, 64, line.radius, 8, false]} />
               <meshStandardMaterial color={line.color} transparent opacity={0.7} />
             </mesh>
-            
+
             {/* Flow direction indicators */}
             {line.points.map((point, pointIndex) => {
               if (pointIndex % 4 !== 0) return null;
-              
+
               return (
-                <mesh
-                  key={pointIndex}
-                  position={[point.x, point.y, point.z]}
-                >
+                <mesh key={pointIndex} position={[point.x, point.y, point.z]}>
                   <sphereGeometry args={[0.05]} />
                   <meshStandardMaterial
                     color={line.color}
@@ -82,7 +79,7 @@ export const EnergyFlowVisualization: React.FC<EnergyFlowVisualizationProps> = (
                 </mesh>
               );
             })}
-          </React.Fragment>
+          </group>
         );
       })}
     </group>
