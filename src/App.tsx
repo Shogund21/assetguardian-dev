@@ -26,6 +26,7 @@ import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import PredictiveMaintenance from "./pages/PredictiveMaintenance";
 import FilterChanges from "./pages/FilterChanges";
+import DigitalTwin from "./pages/DigitalTwin";
 import PrintView from "./pages/PrintView";
 import Index from "./pages/Index";
 
@@ -88,6 +89,11 @@ const AppContent = () => {
       <Route path="/predictive-maintenance" element={
         <ProtectedRoute>
           <PredictiveMaintenance />
+        </ProtectedRoute>
+      } />
+      <Route path="/digital-twin" element={
+        <ProtectedRoute>
+          <DigitalTwin />
         </ProtectedRoute>
       } />
       <Route path="/analytics" element={

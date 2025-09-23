@@ -1,6 +1,5 @@
 
-@layer base {
-  /* Fix for long forms on mobile */
+/* Fix for long forms on mobile */
   .mobile-form-container {
     padding-bottom: 80px; /* Add space for fixed buttons */
   }
@@ -114,12 +113,9 @@
       -webkit-tap-highlight-color: transparent !important;
     }
   }
-}
 
-@layer print {
-  @media print {
-    body {
-      overflow: visible;
-    }
+@media print {
+  body {
+    overflow: visible;
   }
 }

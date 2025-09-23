@@ -1,6 +1,5 @@
 
-@layer utilities {
-  /* Add any custom utility styles here */
+/* Add any custom utility styles here */
   .safe-top {
     padding-top: env(safe-area-inset-top);
   }
@@ -16,4 +15,3 @@
   .safe-right {
     padding-right: env(safe-area-inset-right);
   }
-}

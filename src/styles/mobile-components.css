@@ -1,6 +1,5 @@
 
-@layer components {
-  /* Mobile sidebar styles */
+/* Mobile sidebar styles */
   .mobile-sidebar {
     position: fixed !important;
     top: 0 !important;
@@ -193,7 +192,6 @@
     padding-right: 0.5rem !important;
     overflow-y: auto !important;
   }
-}
 
 @keyframes fade-in {
   from { opacity: 0; }

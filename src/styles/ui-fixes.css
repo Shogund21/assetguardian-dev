@@ -1,6 +1,5 @@
 
-@layer base {
-  /* Fix for dialog positioning on mobile */
+/* Fix for dialog positioning on mobile */
   [data-state=open][role=dialog] {
     z-index: 1000 !important;
   }
@@ -65,4 +64,3 @@
       z-index: 50 !important;
     }
   }
-}

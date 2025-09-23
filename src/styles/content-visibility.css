@@ -1,8 +1,7 @@
 
 /* Core visibility fixes for all layouts */
-@layer base {
-  /* Force visibility on critical elements */
-  html, body, #root {
+/* Force visibility on critical elements */
+html, body, #root {
     height: 100% !important;
     width: 100% !important;
     margin: 0 !important;
@@ -45,7 +44,6 @@
     [data-radix-sidebar-inset] {
       flex: 1 !important;
       display: block !important;
-    }
   }
 
   /* Mobile-specific overrides */

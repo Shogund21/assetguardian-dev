@@ -1,6 +1,5 @@
 
-@layer components {
-  /* Mobile-first touch optimizations */
+/* Mobile-first touch optimizations */
   .touch-manipulation {
     touch-action: manipulation !important;
     -webkit-tap-highlight-color: transparent !important;
@@ -115,7 +114,6 @@
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1) !important;
     }
   }
-}
 
 /* PWA and mobile app specific styles */
 @media (display-mode: standalone) {
