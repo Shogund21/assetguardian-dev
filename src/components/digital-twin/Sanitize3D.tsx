@@ -1,6 +1,6 @@
 import React, { ReactElement, ReactNode } from 'react';
 
-function sanitizeNode(node: ReactNode): ReactNode {
+export function sanitizeNode(node: ReactNode): ReactNode {
   if (Array.isArray(node)) {
     return node.map(sanitizeNode);
   }
@@ -10,7 +10,8 @@ function sanitizeNode(node: ReactNode): ReactNode {
     const cleanedProps: Record<string, any> = {};
     for (const key in rest) {
       if (Object.prototype.hasOwnProperty.call(rest, key)) {
-        if (!key.startsWith('data-')) cleanedProps[key] = rest[key];
+        // Drop any dashed props (e.g., data-lov-id) and explicit data-* props
+        if (!key.startsWith('data-') && !key.includes('-')) cleanedProps[key] = rest[key];
       }
     }
     const sanitizedChildren = sanitizeNode(children);
