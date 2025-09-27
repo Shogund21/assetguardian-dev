@@ -48,8 +48,14 @@ export const LandingHeader = () => {
             About
           </Link>
           <Link 
+            to="/auth" 
+            className="text-white border border-white/30 px-4 py-2 rounded-lg font-medium hover:bg-white/10 hover:border-white/50 transition-colors ml-4"
+          >
+            Sign In
+          </Link>
+          <Link 
             to="/book-demo" 
-            className="bg-yellow-500 text-black px-6 py-2 rounded-lg font-semibold hover:bg-yellow-400 transition-colors ml-4"
+            className="bg-yellow-500 text-black px-6 py-2 rounded-lg font-semibold hover:bg-yellow-400 transition-colors ml-2"
           >
             Book Demo
           </Link>
