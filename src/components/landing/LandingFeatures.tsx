@@ -1,35 +1,36 @@
 
 import { LandingFeatureCard } from "./LandingFeatureCard";
 import { LandingStats } from "./LandingStats";
+import { Brain, Clock, TrendingUp, DollarSign, Thermometer, Shield } from "lucide-react";
 
 const featuresData = [
   {
-    icon: "fas fa-brain",
+    icon: Brain,
     title: "AI Failure Prediction",
     description: "Our neural networks analyze sensor data in real-time to predict equipment failures 2-8 weeks in advance with surgical precision, saving you millions in unexpected downtime."
   },
   {
-    icon: "fas fa-clock",
+    icon: Clock,
     title: "Optimal Maintenance Windows",
     description: "AI automatically identifies the perfect maintenance windows based on equipment load, seasonal patterns, and operational schedules to minimize business impact."
   },
   {
-    icon: "fas fa-chart-line",
+    icon: TrendingUp,
     title: "Performance Degradation Analysis",
     description: "Advanced algorithms detect subtle performance declines invisible to human analysis, tracking efficiency trends and energy consumption patterns over time."
   },
   {
-    icon: "fas fa-dollar-sign",
+    icon: DollarSign,
     title: "Cost Optimization Engine",
     description: "Machine learning algorithms calculate the optimal balance between maintenance costs and equipment lifespan, automatically scheduling interventions for maximum ROI."
   },
   {
-    icon: "fas fa-thermometer-half",
+    icon: Thermometer,
     title: "Real-Time Sensor Integration",
     description: "Seamlessly connects with IoT sensors, HVAC systems, and industrial equipment to create a unified digital twin of your entire facility ecosystem."
   },
   {
-    icon: "fas fa-shield-alt",
+    icon: Shield,
     title: "Predictive Risk Assessment",
     description: "AI-powered risk scoring system evaluates equipment health across multiple dimensions, providing actionable insights for strategic maintenance planning."
   }

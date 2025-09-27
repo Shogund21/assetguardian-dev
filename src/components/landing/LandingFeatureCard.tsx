@@ -1,14 +1,18 @@
 
+import { LucideIcon } from "lucide-react";
+
 interface LandingFeatureCardProps {
-  icon: string;
+  icon: LucideIcon;
   title: string;
   description: string;
 }
 
-export const LandingFeatureCard = ({ icon, title, description }: LandingFeatureCardProps) => {
+export const LandingFeatureCard = ({ icon: Icon, title, description }: LandingFeatureCardProps) => {
   return (
     <div className="landing-feature">
-      <i className={`${icon} landing-feature__icon`}></i>
+      <div className="landing-feature__icon">
+        <Icon size={32} />
+      </div>
       <h3 className="landing-feature__title">{title}</h3>
       <p className="landing-feature__description">{description}</p>
     </div>

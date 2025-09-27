@@ -541,13 +541,17 @@
 }
 
 .landing-feature__icon {
-  font-size: 56px;
   margin-bottom: var(--space-20);
-  display: block;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-dark));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--color-primary);
+  transition: all var(--duration-normal) var(--ease-standard);
+}
+
+.landing-feature:hover .landing-feature__icon {
+  color: var(--color-primary-hover);
+  transform: scale(1.1);
 }
 
 .landing-feature__title {
