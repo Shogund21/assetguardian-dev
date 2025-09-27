@@ -17,7 +17,7 @@ const Results = () => {
         <section className="py-20 px-6">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
-              <h1 className="text-5xl font-bold mb-6">
+              <h1 className="text-5xl font-bold mb-6 text-white">
                 Proven Results: Better Reliability, Lower Costs, Faster Fixes
               </h1>
               <p className="text-xl text-gray-300 max-w-3xl mx-auto">

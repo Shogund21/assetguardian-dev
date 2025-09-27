@@ -4,7 +4,6 @@
 @import 'tailwindcss/utilities';
 
 /* Import core CSS files in proper order */
-@import './variables.css';
 @import './base.css';
 @import './device-fixes.css';
 @import './content-visibility.css';
