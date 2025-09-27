@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Allow: /features
+Allow: /ai-vs-traditional
+Allow: /use-cases
+Allow: /about
+Allow: /blog
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /admin
+
+Sitemap: https://assetguardian.ai/sitemap.xml

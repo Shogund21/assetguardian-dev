@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
 import "../styles/landing.css";
+import { SEO } from "@/components/SEO";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LandingHero } from "@/components/landing/LandingHero";
 import { LandingFeatures } from "@/components/landing/LandingFeatures";
@@ -40,6 +41,7 @@ const Landing = () => {
 
   return (
     <div className="landing-page">
+      <SEO />
       <LandingHeader />
       <LandingHero onRequestAccess={() => setIsModalOpen(true)} />
       <LandingFeatures />

@@ -9,6 +9,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { CompanyProvider } from "@/contexts/CompanyContext";
 import PageTransition from "@/components/PageTransition";
 import { useAuditTracker } from "@/hooks/useAuditTracker";
+import { HelmetProvider } from 'react-helmet-async';
 
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import RootPage from "@/components/RootPage";
@@ -29,6 +30,10 @@ import FilterChanges from "./pages/FilterChanges";
 import DigitalTwin from "./pages/DigitalTwin";
 import PrintView from "./pages/PrintView";
 import Index from "./pages/Index";
+import Features from "./pages/Features";
+import AIvsTraditional from "./pages/AIvsTraditional";
+import UseCases from "./pages/UseCases";
+import About from "./pages/About";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -46,12 +51,17 @@ const AppContent = () => {
     <Routes>
       {/* Public routes */}
       <Route path="/landing" element={<Landing />} />
+      <Route path="/features" element={<Features />} />
+      <Route path="/ai-vs-traditional" element={<AIvsTraditional />} />
+      <Route path="/use-cases" element={<UseCases />} />
+      <Route path="/about" element={<About />} />
       <Route path="/auth" element={<Auth />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/register" element={<Navigate to="/auth" replace />} />
       
       {/* Protected routes */}
-      <Route path="/" element={
+      <Route path="/" element={<RootPage />} />
+      <Route path="/dashboard" element={
         <ProtectedRoute>
           <Index />
         </ProtectedRoute>
@@ -122,21 +132,23 @@ const AppContent = () => {
 
 const App: React.FC = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <CompanyProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <SidebarProvider>
-              <PageTransition>
-                <AppContent />
-              </PageTransition>
-            </SidebarProvider>
-          </BrowserRouter>
-        </TooltipProvider>
-      </CompanyProvider>
-    </QueryClientProvider>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <CompanyProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <SidebarProvider>
+                <PageTransition>
+                  <AppContent />
+                </PageTransition>
+              </SidebarProvider>
+            </BrowserRouter>
+          </TooltipProvider>
+        </CompanyProvider>
+      </QueryClientProvider>
+    </HelmetProvider>
   );
 };
 
