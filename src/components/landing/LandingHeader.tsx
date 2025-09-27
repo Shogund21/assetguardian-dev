@@ -28,36 +28,36 @@ export const LandingHeader = () => {
           <h1 className="logo">AssetGuardian.ai</h1>
         </div>
         <div className="landing-nav__links hidden md:flex space-x-6 items-center">
-          <Link to="/landing" className="text-white hover:text-yellow-400 transition-colors">
+          <Link to="/landing" className="text-gray-900 hover:text-primary transition-colors">
             Home
           </Link>
-          <Link to="/solutions" className="text-white hover:text-yellow-400 transition-colors">
+          <Link to="/solutions" className="text-gray-900 hover:text-primary transition-colors">
             Solutions
           </Link>
-          <Link to="/product" className="text-white hover:text-yellow-400 transition-colors">
+          <Link to="/product" className="text-gray-900 hover:text-primary transition-colors">
             Product
           </Link>
-          <Link to="/results" className="text-white hover:text-yellow-400 transition-colors">
+          <Link to="/results" className="text-gray-900 hover:text-primary transition-colors">
             Results
           </Link>
-          <Link to="/pricing" className="text-white hover:text-yellow-400 transition-colors">
+          <Link to="/pricing" className="text-gray-900 hover:text-primary transition-colors">
             Pricing
           </Link>
-          <Link to="/resources" className="text-white hover:text-yellow-400 transition-colors">
+          <Link to="/resources" className="text-gray-900 hover:text-primary transition-colors">
             Resources
           </Link>
-          <Link to="/about" className="text-white hover:text-yellow-400 transition-colors">
+          <Link to="/about" className="text-gray-900 hover:text-primary transition-colors">
             About
           </Link>
           <Link 
             to="/auth" 
-            className="text-white border border-white/30 px-4 py-2 rounded-lg font-medium hover:bg-white/10 hover:border-white/50 transition-colors ml-4"
+            className="text-gray-900 border border-gray-300 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 hover:border-gray-400 transition-colors ml-4"
           >
             Sign In
           </Link>
           <Link 
             to="/book-demo" 
-            className="bg-yellow-500 text-black px-6 py-2 rounded-lg font-semibold hover:bg-yellow-400 transition-colors ml-2"
+            className="bg-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-primary/90 transition-colors ml-2"
           >
             Book Demo
           </Link>
@@ -65,7 +65,7 @@ export const LandingHeader = () => {
 
         {/* Mobile menu button */}
         <button 
-          className="md:hidden text-white p-2 hover:bg-white/10 rounded-lg transition-colors"
+          className="md:hidden text-gray-900 p-2 hover:bg-gray-100 rounded-lg transition-colors"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           aria-label="Toggle mobile menu"
         >
@@ -74,68 +74,68 @@ export const LandingHeader = () => {
 
         {/* Mobile menu overlay */}
         {isMobileMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-black/95 backdrop-blur-sm border-t border-white/10 z-50">
+          <div className="md:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 z-50">
             <div className="flex flex-col space-y-4 p-6">
               <Link 
                 to="/landing" 
-                className="text-white hover:text-yellow-400 transition-colors py-2"
+                className="text-gray-900 hover:text-primary transition-colors py-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Home
               </Link>
               <Link 
                 to="/solutions" 
-                className="text-white hover:text-yellow-400 transition-colors py-2"
+                className="text-gray-900 hover:text-primary transition-colors py-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Solutions
               </Link>
               <Link 
                 to="/product" 
-                className="text-white hover:text-yellow-400 transition-colors py-2"
+                className="text-gray-900 hover:text-primary transition-colors py-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Product
               </Link>
               <Link 
                 to="/results" 
-                className="text-white hover:text-yellow-400 transition-colors py-2"
+                className="text-gray-900 hover:text-primary transition-colors py-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Results
               </Link>
               <Link 
                 to="/pricing" 
-                className="text-white hover:text-yellow-400 transition-colors py-2"
+                className="text-gray-900 hover:text-primary transition-colors py-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Pricing
               </Link>
               <Link 
                 to="/resources" 
-                className="text-white hover:text-yellow-400 transition-colors py-2"
+                className="text-gray-900 hover:text-primary transition-colors py-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Resources
               </Link>
               <Link 
                 to="/about" 
-                className="text-white hover:text-yellow-400 transition-colors py-2"
+                className="text-gray-900 hover:text-primary transition-colors py-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 About
               </Link>
-              <div className="pt-4 border-t border-white/10 space-y-3">
+              <div className="pt-4 border-t border-gray-200 space-y-3">
                 <Link 
                   to="/auth" 
-                  className="block text-center text-white border border-white/30 px-4 py-3 rounded-lg font-medium hover:bg-white/10 hover:border-white/50 transition-colors"
+                  className="block text-center text-gray-900 border border-gray-300 px-4 py-3 rounded-lg font-medium hover:bg-gray-50 hover:border-gray-400 transition-colors"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Sign In
                 </Link>
                 <Link 
                   to="/book-demo" 
-                  className="block text-center bg-yellow-500 text-black px-6 py-3 rounded-lg font-semibold hover:bg-yellow-400 transition-colors"
+                  className="block text-center bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Book Demo
