@@ -32,15 +32,16 @@ const Product = () => {
                 <div className="w-12 h-12 bg-yellow-500 rounded-lg mb-4 flex items-center justify-center">
                   <span className="text-black font-bold text-xl">AI</span>
                 </div>
-                <h2 className="text-2xl font-bold mb-4">Predictive Analytics</h2>
+                <h2 className="text-2xl font-bold mb-4">Dashboard</h2>
                 <p className="text-gray-300 mb-6">
-                  AI-driven failure prediction that identifies issues before they become problems.
+                  Real-time monitoring with actionable insights for facility managers and technicians, 
+                  featuring predictive alerts and performance analytics.
                 </p>
                 <ul className="text-gray-300 space-y-2">
                   <li>• Machine learning algorithms analyze equipment patterns</li>
                   <li>• Early warning alerts prevent costly breakdowns</li>
                   <li>• Performance trend analysis and forecasting</li>
-                  <li>• Automated maintenance scheduling</li>
+                  <li>• Automated maintenance scheduling with technician dispatch</li>
                 </ul>
               </div>
 
@@ -51,13 +52,14 @@ const Product = () => {
                 </div>
                 <h2 className="text-2xl font-bold mb-4">Technician Assist Mode</h2>
                 <p className="text-gray-300 mb-6">
-                  Field support and troubleshooting guidance that empowers technicians to fix issues first time.
+                  Step-by-step troubleshooting workflows with mobile-first interface, 
+                  AI-guided diagnostics, and expert knowledge base for field support.
                 </p>
                 <ul className="text-gray-300 space-y-2">
-                  <li>• Mobile-first interface for field technicians</li>
-                  <li>• AI-guided diagnostic procedures</li>
-                  <li>• Step-by-step repair instructions</li>
-                  <li>• Real-time expert support and documentation</li>
+                  <li>• Mobile-first interface optimized for field technicians</li>
+                  <li>• AI-guided diagnostic procedures with visual guides</li>
+                  <li>• Step-by-step repair instructions with expert insights</li>
+                  <li>• Real-time expert support and comprehensive documentation</li>
                 </ul>
               </div>
 
@@ -68,10 +70,11 @@ const Product = () => {
                 </div>
                 <h2 className="text-2xl font-bold mb-4">Sensor Hub</h2>
                 <p className="text-gray-300 mb-6">
-                  IoT integration and data collection from all your equipment and systems.
+                  Universal connectivity supporting BACnet, Modbus, LoRaWAN for comprehensive 
+                  equipment integration and data collection.
                 </p>
                 <ul className="text-gray-300 space-y-2">
-                  <li>• Universal sensor compatibility and integration</li>
+                  <li>• BACnet, Modbus, LoRaWAN protocol support</li>
                   <li>• Real-time data collection and monitoring</li>
                   <li>• Wireless and wired connectivity options</li>
                   <li>• Edge computing for instant local processing</li>
@@ -85,12 +88,13 @@ const Product = () => {
                 </div>
                 <h2 className="text-2xl font-bold mb-4">ROI Reports</h2>
                 <p className="text-gray-300 mb-6">
-                  Executive-level performance analytics that prove your investment value.
+                  Energy optimization and uptime metrics with executive dashboards 
+                  showing cost savings and performance improvements.
                 </p>
                 <ul className="text-gray-300 space-y-2">
                   <li>• Energy cost savings tracking and reporting</li>
                   <li>• Downtime reduction metrics and analysis</li>
-                  <li>• Maintenance efficiency improvements</li>
+                  <li>• Technician productivity and efficiency improvements</li>
                   <li>• Executive dashboards and automated reporting</li>
                 </ul>
               </div>

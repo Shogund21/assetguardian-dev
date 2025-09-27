@@ -23,7 +23,7 @@ export const LandingHero = ({ onRequestAccess }: LandingHeroProps) => {
           AI-Driven Predictive Maintenance and Field Support for Facilities
         </h1>
         <p className="landing-hero__subtitle">
-          Empower your technicians with AI insights that predict failures, guide repairs, and achieve 85% first-time fix rates across retail, schools, hospitals, and HVAC service.
+          From schools and hospitals to retail chains and HVAC service companies, AssetGuardian.ai helps technicians troubleshoot in the field and resolve issues the first time.
         </p>
         
         <div className="landing-hero__actions">
@@ -49,11 +49,11 @@ export const LandingHero = ({ onRequestAccess }: LandingHeroProps) => {
           
           <div className="mt-6 text-center">
             <p className="landing-hero__form-note mb-4">
-              10–25% energy savings in 90 days • Monitor chillers, RTUs, and cooling towers • Executive-ready ROI dashboards
+              10–25% energy savings in 90 days • Mobile insights for technicians at the point of service • Executive-ready ROI dashboards
             </p>
             <div className="bg-gray-800/50 rounded-lg p-4 inline-block">
               <p className="text-yellow-400 font-semibold text-lg">
-                "Miami flagship store reduced kWh 18% in 60 days."
+                "Miami facility cut downtime incidents by 30% in 60 days."
               </p>
             </div>
           </div>

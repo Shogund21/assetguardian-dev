@@ -35,8 +35,8 @@ const Resources = () => {
                 </div>
                 <h2 className="text-2xl font-bold mb-4">Chiller Optimization Signals Guide</h2>
                 <p className="text-gray-300 mb-6">
-                  Learn the critical warning signs that predict chiller failures and how to optimize performance 
-                  for maximum energy efficiency.
+                  Early warning indicators and performance optimization strategies for chiller systems 
+                  across all facility types.
                 </p>
                 <ul className="text-gray-300 text-sm space-y-2 mb-6">
                   <li>• 15 key performance indicators to monitor</li>
@@ -56,9 +56,9 @@ const Resources = () => {
                 <div className="w-12 h-12 bg-yellow-500 rounded-lg mb-4 flex items-center justify-center">
                   <span className="text-black font-bold text-xl">🛠️</span>
                 </div>
-                <h2 className="text-2xl font-bold mb-4">Economizer Playbook for Retail</h2>
+                <h2 className="text-2xl font-bold mb-4">Mobile Troubleshooting Playbook for Technicians</h2>
                 <p className="text-gray-300 mb-6">
-                  Complete guide to economizer troubleshooting and optimization specifically designed for retail environments.
+                  Step-by-step field diagnostic procedures and mobile workflows to improve first-time fix rates.
                 </p>
                 <ul className="text-gray-300 text-sm space-y-2 mb-6">
                   <li>• Step-by-step diagnostic procedures</li>
@@ -78,10 +78,10 @@ const Resources = () => {
                 <div className="w-12 h-12 bg-yellow-500 rounded-lg mb-4 flex items-center justify-center">
                   <span className="text-black font-bold text-xl">📈</span>
                 </div>
-                <h2 className="text-2xl font-bold mb-4">ROI Case Study Collection</h2>
+                <h2 className="text-2xl font-bold mb-4">Multi-Vertical ROI Case Studies</h2>
                 <p className="text-gray-300 mb-6">
-                  Real-world case studies showing measurable ROI from predictive maintenance implementations 
-                  across different facility types.
+                  Detailed analysis of energy savings and performance improvements across retail, healthcare, 
+                  education, and HVAC service.
                 </p>
                 <ul className="text-gray-300 text-sm space-y-2 mb-6">
                   <li>• Retail chain energy savings analysis</li>

@@ -27,21 +27,26 @@ const Results = () => {
             </div>
 
             {/* Key Metrics */}
-            <div className="grid md:grid-cols-3 gap-8 mb-16">
+            <div className="grid md:grid-cols-4 gap-8 mb-16">
               <div className="text-center bg-gray-800 p-8 rounded-lg">
                 <div className="text-4xl font-bold text-yellow-400 mb-2">25%</div>
-                <div className="text-xl font-semibold mb-2">Energy Cost Reduction</div>
-                <p className="text-gray-300">Average savings across all facility types</p>
+                <div className="text-xl font-semibold mb-2">Energy Savings</div>
+                <p className="text-gray-300">Average cost reduction within 90 days across all verticals</p>
               </div>
               <div className="text-center bg-gray-800 p-8 rounded-lg">
-                <div className="text-4xl font-bold text-yellow-400 mb-2">85%</div>
+                <div className="text-4xl font-bold text-yellow-400 mb-2">89%</div>
                 <div className="text-xl font-semibold mb-2">First-Time Fix Rate</div>
-                <p className="text-gray-300">Technicians resolve issues on first visit</p>
+                <p className="text-gray-300">Technicians resolve issues on first visit with AI guidance</p>
               </div>
               <div className="text-center bg-gray-800 p-8 rounded-lg">
-                <div className="text-4xl font-bold text-yellow-400 mb-2">96%</div>
-                <div className="text-xl font-semibold mb-2">Uptime Improvement</div>
-                <p className="text-gray-300">Reduction in unexpected equipment failures</p>
+                <div className="text-4xl font-bold text-yellow-400 mb-2">40%</div>
+                <div className="text-xl font-semibold mb-2">Downtime Prevention</div>
+                <p className="text-gray-300">Reduction in equipment failures through predictive insights</p>
+              </div>
+              <div className="text-center bg-gray-800 p-8 rounded-lg">
+                <div className="text-4xl font-bold text-yellow-400 mb-2">100%</div>
+                <div className="text-xl font-semibold mb-2">Compliance Rate</div>
+                <p className="text-gray-300">Automated documentation and regulatory adherence</p>
               </div>
             </div>
 

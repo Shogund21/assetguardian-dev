@@ -31,14 +31,14 @@ const Solutions = () => {
               <div className="bg-gray-800 p-8 rounded-lg">
                 <h2 className="text-2xl font-bold mb-4 text-yellow-400">Retail Facilities</h2>
                 <p className="text-gray-300 mb-6">
-                  Cost reduction and multi-site control for retail chains, 
-                  department stores, and shopping centers.
+                  Multi-location energy management with centralized technician dispatch. 
+                  Reduce costs while ensuring customer comfort across all store locations.
                 </p>
                 <ul className="text-gray-300 space-y-2 mb-6">
-                  <li>• 15-25% energy cost reduction across all locations</li>
-                  <li>• Centralized monitoring for multi-site operations</li>
-                  <li>• Customer comfort optimization</li>
-                  <li>• Automated compliance reporting</li>
+                  <li>• 15-25% energy cost reduction with mobile technician support</li>
+                  <li>• Centralized monitoring with AI-guided troubleshooting</li>
+                  <li>• Customer comfort optimization through rapid issue resolution</li>
+                  <li>• Corporate sustainability goals with real-time energy insights</li>
                 </ul>
                 <Link to="/book-demo">
                   <Button className="bg-yellow-500 text-black hover:bg-yellow-400">
@@ -51,13 +51,14 @@ const Solutions = () => {
               <div className="bg-gray-800 p-8 rounded-lg">
                 <h2 className="text-2xl font-bold mb-4 text-yellow-400">Schools & Universities</h2>
                 <p className="text-gray-300 mb-6">
-                  Air quality monitoring and compliance for healthy learning environments.
+                  Indoor air quality monitoring and compliance with mobile technician support. 
+                  Ensure healthy learning environments while optimizing budgets.
                 </p>
                 <ul className="text-gray-300 space-y-2 mb-6">
-                  <li>• Indoor air quality monitoring and alerts</li>
-                  <li>• Energy efficiency for budget optimization</li>
-                  <li>• Compliance with health and safety standards</li>
-                  <li>• Predictive maintenance for minimal disruption</li>
+                  <li>• Indoor air quality monitoring with technician alerts</li>
+                  <li>• Energy efficiency optimization with mobile insights</li>
+                  <li>• Compliance documentation with automated reporting</li>
+                  <li>• Proactive maintenance scheduling with technician workflows</li>
                 </ul>
                 <Link to="/book-demo">
                   <Button className="bg-yellow-500 text-black hover:bg-yellow-400">
@@ -70,13 +71,14 @@ const Solutions = () => {
               <div className="bg-gray-800 p-8 rounded-lg">
                 <h2 className="text-2xl font-bold mb-4 text-yellow-400">Hospitals & Healthcare</h2>
                 <p className="text-gray-300 mb-6">
-                  Mission-critical uptime and redundancy for patient safety.
+                  Mission-critical uptime with 24/7 technician guidance and redundant systems. 
+                  Ensure patient safety with AI-powered diagnostics and rapid response.
                 </p>
                 <ul className="text-gray-300 space-y-2 mb-6">
-                  <li>• 99.9% system uptime for critical equipment</li>
-                  <li>• Redundant monitoring and backup systems</li>
-                  <li>• Patient safety and comfort optimization</li>
-                  <li>• Regulatory compliance automation</li>
+                  <li>• 99.9% system uptime with instant technician alerts</li>
+                  <li>• Redundant monitoring with predictive insights</li>
+                  <li>• Patient safety compliance with automated documentation</li>
+                  <li>• Emergency response protocols with guided troubleshooting</li>
                 </ul>
                 <Link to="/book-demo">
                   <Button className="bg-yellow-500 text-black hover:bg-yellow-400">
@@ -89,13 +91,14 @@ const Solutions = () => {
               <div className="bg-gray-800 p-8 rounded-lg">
                 <h2 className="text-2xl font-bold mb-4 text-yellow-400">HVAC Service Companies</h2>
                 <p className="text-gray-300 mb-6">
-                  Technician enablement and first-time fix rate improvements.
+                  Technician troubleshooting assist with AI-powered diagnostics for 89% first-time fix improvement. 
+                  Transform your service delivery with mobile-first tools.
                 </p>
                 <ul className="text-gray-300 space-y-2 mb-6">
-                  <li>• 85% first-time fix rate improvement</li>
-                  <li>• AI-guided troubleshooting for technicians</li>
-                  <li>• Mobile field support and diagnostics</li>
-                  <li>• Customer satisfaction optimization</li>
+                  <li>• 89% first-time fix rate with AI-powered diagnostics</li>
+                  <li>• Step-by-step troubleshooting workflows</li>
+                  <li>• Mobile technician workflows with expert knowledge base</li>
+                  <li>• Service route optimization with priority alerts</li>
                 </ul>
                 <Link to="/book-demo">
                   <Button className="bg-yellow-500 text-black hover:bg-yellow-400">

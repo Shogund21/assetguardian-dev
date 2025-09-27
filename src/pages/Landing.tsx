@@ -44,7 +44,7 @@ const Landing = () => {
       <SEO 
         title="AssetGuardian.ai — Predictive Maintenance & Technician Assist"
         description="AI platform for schools, hospitals, retail, and HVAC companies. Predict failures, guide technicians, and resolve issues first time."
-        keywords="predictive maintenance, technician assist, AI facility management, retail maintenance, school maintenance, hospital maintenance, HVAC service"
+        keywords="predictive maintenance, technician assist, AI facility management, retail maintenance, school maintenance, hospital maintenance, HVAC service, first-time fix, mobile technician, field support"
       />
       <LandingHeader />
       <LandingHero onRequestAccess={() => setIsModalOpen(true)} />
