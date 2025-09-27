@@ -19,11 +19,11 @@ const About = () => {
         <section className="py-20 px-4">
           <div className="max-w-6xl mx-auto text-center">
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-              Pioneering the Future of <span className="text-yellow-400">AI Asset Management</span>
+              About AssetGuardian.ai – <span className="text-yellow-400">Supporting Technicians, Facilities, and Operations</span>
             </h1>
             <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
-              AssetGuardian.ai is revolutionizing how enterprises manage their critical assets with 
-              cutting-edge artificial intelligence, machine learning, and predictive analytics.
+              We empower technicians with AI-powered tools that predict failures, guide repairs, 
+              and deliver measurable results across retail, healthcare, education, and HVAC service industries.
             </p>
           </div>
         </section>
@@ -33,23 +33,22 @@ const About = () => {
           <div className="max-w-6xl mx-auto">
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div>
-                <h2 className="text-4xl font-bold text-white mb-6">Our AI-First Mission</h2>
+                <h2 className="text-4xl font-bold text-white mb-6">Our Technician-First Mission</h2>
                 <p className="text-gray-300 mb-6 text-lg">
-                  We believe the future of asset management lies in artificial intelligence. 
-                  Traditional reactive approaches cost enterprises billions in unexpected failures, 
-                  emergency repairs, and operational downtime.
+                  We believe technicians are the heroes of facility management. Traditional reactive approaches 
+                  leave them with incomplete information, leading to multiple site visits and frustrated customers.
                 </p>
                 <p className="text-gray-300 mb-6">
-                  AssetGuardian.ai was built from the ground up to harness the power of machine learning, 
-                  predictive analytics, and intelligent automation to transform how organizations 
-                  manage their most critical assets.
+                  AssetGuardian.ai was built to empower technicians with AI-powered insights, 
+                  step-by-step guidance, and predictive intelligence that helps them diagnose 
+                  and fix issues on the first visit.
                 </p>
                 <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-lg p-6">
                   <h3 className="text-black font-bold text-xl mb-2">Our Vision</h3>
                   <p className="text-black">
-                    A world where equipment failures are predicted and prevented, 
-                    where maintenance is intelligent and automated, and where every asset 
-                    operates at peak efficiency through AI optimization.
+                    A world where every technician is empowered with AI intelligence, 
+                    where equipment failures are predicted before they happen, 
+                    and where first-time fix rates approach 100% across all facility types.
                   </p>
                 </div>
               </div>

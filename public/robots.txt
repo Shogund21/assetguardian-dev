@@ -1,10 +1,12 @@
 User-agent: *
 Allow: /
-Allow: /features
-Allow: /ai-vs-traditional
-Allow: /use-cases
+Allow: /solutions
+Allow: /product
+Allow: /results
+Allow: /pricing
+Allow: /resources
 Allow: /about
-Allow: /blog
+Allow: /book-demo
 Disallow: /auth
 Disallow: /dashboard
 Disallow: /settings

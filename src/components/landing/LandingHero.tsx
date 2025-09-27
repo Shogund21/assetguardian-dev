@@ -20,35 +20,43 @@ export const LandingHero = ({ onRequestAccess }: LandingHeroProps) => {
         </div>
         
         <h1 className="landing-hero__title">
-          AI-Powered Asset Management. <span className="landing-hero__title-highlight">Predict Failures. Prevent Emergencies.</span>
+          AI-Driven Predictive Maintenance and Field Support for Facilities
         </h1>
         <p className="landing-hero__subtitle">
-          AI-powered facility management that cuts downtime by 81% and reduces emergency calls by up to 96%.
+          Empower your technicians with AI insights that predict failures, guide repairs, and achieve 85% first-time fix rates across retail, schools, hospitals, and HVAC service.
         </p>
         
         <div className="landing-hero__actions">
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button
-              onClick={onRequestAccess}
-              size="lg"
-              className="bg-yellow-500 text-black hover:bg-yellow-400 text-lg px-8 py-4 h-auto font-semibold"
-            >
-              Start No-Risk 90-Day Pilot
-            </Button>
-            <Link to="/auth">
+            <Link to="/book-demo">
+              <Button
+                size="lg"
+                className="bg-yellow-500 text-black hover:bg-yellow-400 text-lg px-8 py-4 h-auto font-semibold"
+              >
+                Book Demo
+              </Button>
+            </Link>
+            <Link to="/results">
               <Button
                 variant="outline"
                 size="lg"
                 className="bg-transparent border-2 border-white text-white hover:bg-white/10 text-lg px-8 py-4 h-auto font-semibold w-full"
               >
-                Sign In
+                See How It Works
               </Button>
             </Link>
           </div>
           
-          <p className="landing-hero__form-note mt-6">
-            Enterprise-grade AI platform • Start your 90-day pilot • Existing users sign in
-          </p>
+          <div className="mt-6 text-center">
+            <p className="landing-hero__form-note mb-4">
+              10–25% energy savings in 90 days • Monitor chillers, RTUs, and cooling towers • Executive-ready ROI dashboards
+            </p>
+            <div className="bg-gray-800/50 rounded-lg p-4 inline-block">
+              <p className="text-yellow-400 font-semibold text-lg">
+                "Miami flagship store reduced kWh 18% in 60 days."
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </section>

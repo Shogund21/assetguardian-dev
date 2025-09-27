@@ -13,24 +13,33 @@ export const LandingHeader = () => {
           />
           <h1 className="logo">AssetGuardian.ai</h1>
         </div>
-        <div className="landing-nav__links hidden md:flex space-x-8 items-center">
-          <Link to="/features" className="text-white hover:text-yellow-400 transition-colors">
-            Features
+        <div className="landing-nav__links hidden md:flex space-x-6 items-center">
+          <Link to="/landing" className="text-white hover:text-yellow-400 transition-colors">
+            Home
           </Link>
-          <Link to="/ai-vs-traditional" className="text-white hover:text-yellow-400 transition-colors">
-            AI vs Traditional
+          <Link to="/solutions" className="text-white hover:text-yellow-400 transition-colors">
+            Solutions
           </Link>
-          <Link to="/use-cases" className="text-white hover:text-yellow-400 transition-colors">
-            Use Cases
+          <Link to="/product" className="text-white hover:text-yellow-400 transition-colors">
+            Product
+          </Link>
+          <Link to="/results" className="text-white hover:text-yellow-400 transition-colors">
+            Results
+          </Link>
+          <Link to="/pricing" className="text-white hover:text-yellow-400 transition-colors">
+            Pricing
+          </Link>
+          <Link to="/resources" className="text-white hover:text-yellow-400 transition-colors">
+            Resources
           </Link>
           <Link to="/about" className="text-white hover:text-yellow-400 transition-colors">
             About
           </Link>
           <Link 
-            to="/auth" 
-            className="bg-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-primary/90 transition-colors ml-4"
+            to="/book-demo" 
+            className="bg-yellow-500 text-black px-6 py-2 rounded-lg font-semibold hover:bg-yellow-400 transition-colors ml-4"
           >
-            Sign In
+            Book Demo
           </Link>
         </div>
       </nav>
