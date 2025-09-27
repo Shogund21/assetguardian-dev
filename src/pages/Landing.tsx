@@ -5,6 +5,7 @@ import { SEO } from "@/components/SEO";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LandingHero } from "@/components/landing/LandingHero";
 import { LandingFeatures } from "@/components/landing/LandingFeatures";
+import { LandingFooter } from "@/components/landing/LandingFooter";
 import { AccessRequestModal } from "@/components/landing/AccessRequestModal";
 import { ChatWidget } from "@/components/chatbot/ChatWidget";
 import { useLandingForm } from "@/hooks/useLandingForm";
@@ -49,6 +50,7 @@ const Landing = () => {
       <LandingHeader />
       <LandingHero onRequestAccess={() => setIsModalOpen(true)} />
       <LandingFeatures />
+      <LandingFooter />
       <AccessRequestModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

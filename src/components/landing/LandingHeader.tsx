@@ -1,15 +1,27 @@
 
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 export const LandingHeader = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <header className="landing-header">
+    <header className={`landing-header ${isScrolled ? 'scrolled' : ''}`}>
       <nav className="landing-nav">
         <div className="landing-nav__brand">
           <img 
             src="/lovable-uploads/91b3768c-9bf7-4a1c-b2be-aea61a3ff3be.png" 
-            alt="Asset Guardian Logo" 
-            className="h-8 w-8 mr-3" 
+            alt="AssetGuardian.ai Logo - Predictive Maintenance Platform" 
+            className="brand-logo" 
           />
           <h1 className="logo">AssetGuardian.ai</h1>
         </div>
