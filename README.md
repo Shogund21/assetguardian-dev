@@ -5,6 +5,25 @@ A comprehensive AI-powered facility management system that cuts downtime by 81% 
 
 ## 🚀 Key Features
 
+### Digital Twin & 3D Visualization
+- **Interactive 3D Facility Visualization**: Real-time 3D representation of facility equipment using Three.js and WebGL
+- **Equipment Status Visualization**: Color-coded equipment based on operational status (green=operational, orange=needs attention, red=maintenance/offline)
+- **Enhanced Non-Working Equipment Indicators**: Pulsing animations and visual effects for offline and maintenance equipment
+- **Equipment Labeling System**: Dynamic equipment name labels with status indicators in 3D space
+- **Sensor Data Overlays**: Toggle-able sensor value displays showing temperature, pressure, energy consumption in 3D
+- **Energy Flow Visualization**: Interactive energy flow lines between equipment with efficiency indicators
+- **Camera Control System**: Multiple view presets (Overview, Detail, Maintenance) with smooth camera animations
+- **Equipment Selection & Details**: Click-to-select equipment with detailed information panels and real-time data
+- **Health Score Indicators**: 3D spherical health indicators with size and color based on equipment condition
+- **Alert Visualization**: Visual alert indicators attached to equipment in 3D space with priority-based colors
+- **Real-time Data Integration**: Live updates from sensor readings and predictive alerts in 3D environment
+- **Orbit Controls**: Full 3D navigation with mouse/touch controls for zoom, pan, and rotate
+- **Automated Camera Animations**: Smooth transitions between different view presets and equipment focus
+- **Maintenance Focus Mode**: Automatically focuses camera on equipment needing attention
+- **Reset View Functionality**: Quick return to overview perspective with animation
+- **Performance Optimized**: Hardware-accelerated WebGL rendering with efficient 3D sprite labels
+- **Mobile 3D Support**: Touch-optimized 3D controls for mobile and tablet devices
+
 ### Equipment Management
 - **Smart Equipment Tracking**: Manage various types of HVAC equipment with detailed specifications
 - **Real-time Status Monitoring**: Track equipment status (Operational, Needs Attention, Under Maintenance, Non-operational)
@@ -125,6 +144,7 @@ A comprehensive AI-powered facility management system that cuts downtime by 81% 
 - **Real-time Statistics**: Live KPIs showing equipment count, active projects, and pending tasks
 - **Activity Feed**: Recent activities across all system components
 - **Equipment Overview**: Quick status updates and equipment health summaries
+- **3D Digital Twin Integration**: Interactive 3D facility visualization with real-time equipment status
 - **Enhanced Mobile Design**: Touch-optimized interface with improved navigation
 - **Mobile-Optimized Tab Navigation**: 2-row grid layout for predictive maintenance tabs ensuring all options are visible and accessible
 - **Quick Actions**: Fast access to frequently used functions with mobile shortcuts
@@ -142,6 +162,10 @@ A comprehensive AI-powered facility management system that cuts downtime by 81% 
 - **React Hook Form** with Zod validation for robust form handling
 - **TanStack Query** for efficient data fetching and state management
 - **Recharts** for data visualization and analytics
+- **Three.js** for 3D visualization and digital twin rendering
+- **React Three Fiber** for React-based 3D scene management
+- **React Three Drei** for enhanced 3D utilities and controls
+- **WebGL** for hardware-accelerated 3D graphics
 
 ### Backend & Database
 - **Supabase** for backend services, authentication, and real-time database
@@ -177,8 +201,10 @@ A comprehensive AI-powered facility management system that cuts downtime by 81% 
 - **Offline-First Architecture**: Full functionality without internet connection
 - **Camera Integration**: Take photos directly within the app for AI analysis
 - **Touch-Optimized Interface**: Mobile-first design with touch-friendly controls
+- **3D Touch Controls**: Mobile-optimized 3D navigation for digital twin visualization
 - **Push Notifications**: Real-time alerts for maintenance and equipment issues
 - **Responsive Design**: Seamless experience across all device sizes
+- **Mobile 3D Performance**: Optimized WebGL rendering for mobile devices
 
 ## 🔒 Security Features
 
@@ -282,6 +308,12 @@ A comprehensive AI-powered facility management system that cuts downtime by 81% 
 - `image_analysis_batches` - Manage batch image processing with AI
 - `extracted_reading_staging` - Stage and validate AI-extracted sensor readings
 
+### Digital Twin & 3D Visualization
+- `digital_twin_facilities` - 3D facility layouts and equipment positioning data
+- `equipment_positions` - 3D coordinates and spatial relationships for equipment
+- `energy_flow_data` - Energy flow connections and efficiency metrics between equipment
+- `sensor_visualizations` - 3D sensor data overlay configurations and display settings
+
 ### Additional Features
 - `filter_changes` - Filter maintenance tracking with automated status calculations
 - `maintenance_documents` - Document storage and management with company-level access control
@@ -311,6 +343,7 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 Comprehensive guides available in the application:
 
 - **Equipment Management Guide** - Complete equipment lifecycle management
+- **Digital Twin Visualization** - 3D facility navigation and equipment interaction
 - **Predictive Maintenance Guide** - AI-powered maintenance optimization
 - **Maintenance Procedures** - Step-by-step maintenance workflows
 - **Project Management Best Practices** - Efficient project execution
@@ -319,6 +352,7 @@ Comprehensive guides available in the application:
 - **AI Image Reading** - Extracting data from equipment photos
 - **AI Feature Configuration** - Setting up OpenAI integration and managing AI permissions
 - **Energy AI Analysis** - Using AI for energy efficiency optimization
+- **3D Camera Controls** - Navigating the digital twin environment
 - **Company Setup** - Multi-tenant configuration
 
 ## 🚀 Deployment Options
