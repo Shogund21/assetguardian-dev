@@ -21,67 +21,90 @@ const stripProps = (props: Record<string, any>) => {
   return cleaned;
 };
 
-export const G = React.forwardRef<any, any>(({ children, ...rest }, ref) => (
-  <group ref={ref} {...stripProps(rest)}>{children}</group>
-));
+const ensureData = (props: Record<string, any>) => {
+  if (props.data === undefined) props.data = {};
+  return props;
+};
+
+export const G = React.forwardRef<any, any>(({ children, ...rest }, ref) => {
+  const sp = ensureData(stripProps(rest));
+  return <group ref={ref} {...sp}>{children}</group>;
+});
 G.displayName = 'G';
 
-export const M = React.forwardRef<any, any>(({ children, ...rest }, ref) => (
-  <mesh ref={ref} {...stripProps(rest)}>{children}</mesh>
-));
+export const M = React.forwardRef<any, any>(({ children, ...rest }, ref) => {
+  const sp = ensureData(stripProps(rest));
+  return <mesh ref={ref} {...sp}>{children}</mesh>;
+});
 M.displayName = 'M';
-export const StdMat: React.FC<any> = ({ children, ...rest }) => (
-  <meshStandardMaterial {...stripProps(rest)}>{children}</meshStandardMaterial>
-);
+export const StdMat: React.FC<any> = ({ children, ...rest }) => {
+  const sp = ensureData(stripProps(rest));
+  return <meshStandardMaterial {...sp}>{children}</meshStandardMaterial>;
+};
 
-export const BasicMat: React.FC<any> = ({ children, ...rest }) => (
-  <meshBasicMaterial {...stripProps(rest)}>{children}</meshBasicMaterial>
-);
+export const BasicMat: React.FC<any> = ({ children, ...rest }) => {
+  const sp = ensureData(stripProps(rest));
+  return <meshBasicMaterial {...sp}>{children}</meshBasicMaterial>;
+};
 
-export const BoxGeom: React.FC<any> = ({ children, ...rest }) => (
-  <boxGeometry {...stripProps(rest)}>{children}</boxGeometry>
-);
+export const BoxGeom: React.FC<any> = ({ children, ...rest }) => {
+  const sp = ensureData(stripProps(rest));
+  return <boxGeometry {...sp}>{children}</boxGeometry>;
+};
 
-export const SphereGeom: React.FC<any> = ({ children, ...rest }) => (
-  <sphereGeometry {...stripProps(rest)}>{children}</sphereGeometry>
-);
+export const SphereGeom: React.FC<any> = ({ children, ...rest }) => {
+  const sp = ensureData(stripProps(rest));
+  return <sphereGeometry {...sp}>{children}</sphereGeometry>;
+};
 
-export const CylinderGeom: React.FC<any> = ({ children, ...rest }) => (
-  <cylinderGeometry {...stripProps(rest)}>{children}</cylinderGeometry>
-);
+export const CylinderGeom: React.FC<any> = ({ children, ...rest }) => {
+  const sp = ensureData(stripProps(rest));
+  return <cylinderGeometry {...sp}>{children}</cylinderGeometry>;
+};
 
-export const TubeGeom: React.FC<any> = ({ children, ...rest }) => (
-  <tubeGeometry {...stripProps(rest)}>{children}</tubeGeometry>
-);
+export const TubeGeom: React.FC<any> = ({ children, ...rest }) => {
+  const sp = ensureData(stripProps(rest));
+  return <tubeGeometry {...sp}>{children}</tubeGeometry>;
+};
 
 // Lights (primitive elements)
-export const ALight: React.FC<any> = ({ children, ...rest }) => (
-  <ambientLight {...stripProps(rest)}>{children}</ambientLight>
-);
+export const ALight: React.FC<any> = ({ children, ...rest }) => {
+  const sp = ensureData(stripProps(rest));
+  return <ambientLight {...sp}>{children}</ambientLight>;
+};
 
-export const DLight: React.FC<any> = ({ children, ...rest }) => (
-  <directionalLight {...stripProps(rest)}>{children}</directionalLight>
-);
+export const DLight: React.FC<any> = ({ children, ...rest }) => {
+  const sp = ensureData(stripProps(rest));
+  return <directionalLight {...sp}>{children}</directionalLight>;
+};
 
 // Drei wrappers (forward refs when needed)
-export const PCam = React.forwardRef<any, any>(({ children, ...rest }, ref) => (
-  <DreiPerspectiveCamera ref={ref} {...stripProps(rest)}>
-    {children}
-  </DreiPerspectiveCamera>
-));
+export const PCam = React.forwardRef<any, any>(({ children, ...rest }, ref) => {
+  const sp = ensureData(stripProps(rest));
+  return (
+    <DreiPerspectiveCamera ref={ref} {...sp}>
+      {children}
+    </DreiPerspectiveCamera>
+  );
+});
 PCam.displayName = 'PCam';
 
-export const Controls = React.forwardRef<any, any>(({ children, ...rest }, ref) => (
-  <DreiOrbitControls ref={ref} {...stripProps(rest)}>
-    {children}
-  </DreiOrbitControls>
-));
+export const Controls = React.forwardRef<any, any>(({ children, ...rest }, ref) => {
+  const sp = ensureData(stripProps(rest));
+  return (
+    <DreiOrbitControls ref={ref} {...sp}>
+      {children}
+    </DreiOrbitControls>
+  );
+});
 Controls.displayName = 'Controls';
 
-export const Env: React.FC<any> = ({ children, ...rest }) => (
-  <DreiEnvironment {...stripProps(rest)}>{children}</DreiEnvironment>
-);
+export const Env: React.FC<any> = ({ children, ...rest }) => {
+  const sp = ensureData(stripProps(rest));
+  return <DreiEnvironment {...sp}>{children}</DreiEnvironment>;
+};
 
-export const SafeGrid: React.FC<any> = ({ children, ...rest }) => (
-  <DreiGrid {...stripProps(rest)}>{children}</DreiGrid>
-);
+export const SafeGrid: React.FC<any> = ({ children, ...rest }) => {
+  const sp = ensureData(stripProps(rest));
+  return <DreiGrid {...sp}>{children}</DreiGrid>;
+};
