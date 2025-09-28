@@ -35,101 +35,74 @@ export const DigitalTwinScene: React.FC<DigitalTwinSceneProps> = ({
 
   return (
     <div className="h-full w-full bg-background rounded-lg overflow-hidden border">
-      <Canvas
-        shadows
-        className="h-full w-full"
-        gl={{ antialias: true }}
-        dpr={[1, 2]}
-      >
-        <Sanitize3D>
-          <PCam
-            makeDefault
-            position={[20, 15, 20]}
-            fov={60}
-          />
+      <div className="h-full w-full flex items-center justify-center">
+        <div className="text-center space-y-6 max-w-2xl mx-auto p-8">
+          <div className="text-3xl font-bold text-foreground">Digital Twin Dashboard</div>
+          <div className="text-muted-foreground">
+            3D visualization is currently unavailable due to platform compatibility issues.
+          </div>
           
-          <ALight intensity={0.4} />
-          <DLight
-            position={[10, 10, 5]}
-            intensity={1}
-            castShadow
-          />
-          
-          <Suspense fallback={null}>
-            <Env preset="warehouse" />
-            
-            {/* Facility Floor Grid */}
-            <SafeGrid
-              args={[facility.dimensions.width, facility.dimensions.length]}
-              position={[0, 0, 0]}
-              cellSize={2}
-              cellThickness={0.5}
-              cellColor="#6366f1"
-              sectionSize={10}
-              sectionThickness={1}
-              sectionColor="#4f46e5"
-              fadeDistance={50}
-              fadeStrength={1}
-              followCamera={false}
-              infiniteGrid={false}
-            />
-            
-            {/* Equipment 3D Models */}
-            {facility.equipment.map((equipment) => (
-              <Equipment3D
-                key={equipment.id}
-                equipment={equipment}
-                isSelected={selectedEquipment === equipment.id}
-                onSelect={() => onEquipmentSelect(equipment.id)}
-              />
-            ))}
-            
-            {/* Energy Flow Visualization */}
-            {showEnergyFlow && facility.energyFlow && (
-              <EnergyFlowVisualization
-                energyFlows={facility.energyFlow}
-                equipmentPositions={equipmentPositions}
-              />
-            )}
-            
-            {/* Sensor data display - simplified without HTML overlay */}
-            {showSensors && facility.equipment.map((eq) => (
-              <G key={`sensor-${eq.id}`} position={[eq.position.x, eq.position.y + 4, eq.position.z]}>
-                <M>
-                  <SphereGeom args={[0.1]} />
-                  <BasicMat 
-                    color={eq.healthScore > 70 ? '#10b981' : eq.healthScore > 30 ? '#f59e0b' : '#ef4444'} 
-                  />
-                </M>
-              </G>
-            ))}
-            
-            <Controls
-              ref={orbitControlsRef}
-              enablePan={!isTransitioning}
-              enableZoom={!isTransitioning}
-              enableRotate={!isTransitioning}
-              minDistance={5}
-              maxDistance={100}
-              maxPolarAngle={Math.PI / 2.1}
-              dampingFactor={0.05}
-              enableDamping={true}
-            />
-          </Suspense>
-        </Sanitize3D>
-      </Canvas>
-      
-      {/* Loading indicator */}
-      <Suspense
-        fallback={
-          <div className="absolute inset-0 flex items-center justify-center bg-background/80">
-            <div className="flex items-center gap-2 text-foreground">
-              <Loader2 className="h-6 w-6 animate-spin" />
-              <span>Loading Digital Twin...</span>
+          {/* Facility Information */}
+          <div className="bg-muted p-6 rounded-lg space-y-4">
+            <h3 className="text-xl font-semibold text-foreground">{facility.name}</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div className="bg-background p-3 rounded">
+                <div className="font-medium text-foreground">Equipment</div>
+                <div className="text-2xl font-bold text-primary">{facility.equipment.length}</div>
+              </div>
+              <div className="bg-background p-3 rounded">
+                <div className="font-medium text-foreground">Energy Flows</div>
+                <div className="text-2xl font-bold text-primary">{facility.energyFlow?.length || 0}</div>
+              </div>
+              <div className="bg-background p-3 rounded">
+                <div className="font-medium text-foreground">Dimensions</div>
+                <div className="text-lg font-bold text-primary">
+                  {facility.dimensions.width}×{facility.dimensions.length}m
+                </div>
+              </div>
             </div>
           </div>
-        }
-      />
+
+          {/* Equipment List */}
+          <div className="bg-muted p-6 rounded-lg">
+            <h4 className="text-lg font-semibold text-foreground mb-4">Equipment Overview</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto">
+              {facility.equipment.map((equipment) => (
+                <div 
+                  key={equipment.id} 
+                  className={`bg-background p-3 rounded border-l-4 cursor-pointer transition-colors ${
+                    selectedEquipment === equipment.id 
+                      ? 'border-l-primary bg-primary/5' 
+                      : equipment.status === 'operational' 
+                        ? 'border-l-green-500' 
+                        : equipment.status === 'needs_attention'
+                          ? 'border-l-yellow-500'
+                          : 'border-l-red-500'
+                  }`}
+                  onClick={() => onEquipmentSelect(equipment.id)}
+                >
+                  <div className="font-medium text-foreground">{equipment.name}</div>
+                  <div className="text-sm text-muted-foreground capitalize">{equipment.type}</div>
+                  <div className="text-sm">
+                    Health: <span className="font-medium">{equipment.healthScore}%</span>
+                  </div>
+                  {equipment.alerts.length > 0 && (
+                    <div className="text-xs text-orange-600 mt-1">
+                      {equipment.alerts.length} alert(s)
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Note about 3D */}
+          <div className="text-xs text-muted-foreground bg-blue-50 dark:bg-blue-950 p-3 rounded border">
+            <strong>Note:</strong> The 3D visualization feature requires compatibility updates. 
+            All facility data and controls remain fully functional in this dashboard view.
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
