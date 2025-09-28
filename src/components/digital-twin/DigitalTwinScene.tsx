@@ -1,5 +1,5 @@
 import React, { Suspense, useMemo } from 'react';
-import { Canvas } from '@react-three/fiber';
+import SafeCanvas from './SafeCanvas';
 import { Equipment3D } from './Equipment3D';
 import { EnergyFlowVisualization } from './EnergyFlowVisualization';
 import { DigitalTwinFacility } from '@/types/digitalTwin';
@@ -35,7 +35,7 @@ export const DigitalTwinScene: React.FC<DigitalTwinSceneProps> = ({
 
   return (
     <div className="h-full w-full bg-background rounded-lg overflow-hidden border">
-      <Canvas
+      <SafeCanvas
         shadows
         className="h-full w-full"
         gl={{ antialias: true }}
@@ -117,7 +117,7 @@ export const DigitalTwinScene: React.FC<DigitalTwinSceneProps> = ({
             />
           </Suspense>
         </Sanitize3D>
-      </Canvas>
+      </SafeCanvas>
       
       {/* Loading indicator */}
       <Suspense

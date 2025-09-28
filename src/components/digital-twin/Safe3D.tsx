@@ -4,12 +4,19 @@ import { OrbitControls as DreiOrbitControls, Environment as DreiEnvironment, Gri
 // Utility to strip any dashed or data-* props that confuse R3F applyProps
 const stripProps = (props: Record<string, any>) => {
   const cleaned: Record<string, any> = {};
+  const removed: string[] = [];
   for (const key in props) {
     if (!Object.prototype.hasOwnProperty.call(props, key)) continue;
-  if (key === 'children') continue;
-  const lower = key.toLowerCase();
-  if (lower.includes('-') || lower.startsWith('data') || lower.startsWith('aria')) continue;
-  cleaned[key] = props[key];
+    if (key === 'children') continue;
+    const lower = key.toLowerCase();
+    if (lower.includes('-') || lower.startsWith('data') || lower.startsWith('aria')) {
+      removed.push(key);
+      continue;
+    }
+    cleaned[key] = props[key];
+  }
+  if (removed.length) {
+    console.warn('[Safe3D] STRIPPED props:', removed, 'from component props');
   }
   return cleaned;
 };

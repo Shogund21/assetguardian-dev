@@ -25,7 +25,9 @@ export function sanitizeNode(node: ReactNode): ReactNode {
     try {
       const typeName = typeof el.type === 'string' ? el.type : (el.type as any)?.displayName || (el.type as any)?.name || 'unknown';
       // Log which keys we removed to track the source
-      console.debug('[Sanitize3D] removed dashed props', { type: typeName, removedKeys });
+      console.warn('[Sanitize3D] REMOVED dashed props from', typeName, ':', removedKeys);
+      console.warn('[Sanitize3D] Original props were:', Object.keys(rest));
+      console.warn('[Sanitize3D] Cleaned props are:', Object.keys(cleanedProps));
     } catch {}
   }
 
