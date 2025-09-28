@@ -114,12 +114,14 @@ export const DigitalTwinControls: React.FC<DigitalTwinControlsProps> = ({
           {(totalAlerts > 0 || attentionEquipment.length > 0) && (
             <Collapsible open={showAttentionDetails} onOpenChange={setShowAttentionDetails}>
               <CollapsibleTrigger asChild>
-                <Button variant="outline" className="w-full justify-between" size="sm">
-                  <div className="flex items-center gap-2">
-                    <AlertTriangle className="h-4 w-4" />
-                    <span>{totalAlerts + attentionEquipment.length} Items Need Attention</span>
+                <Button variant="outline" className="w-full justify-between text-left" size="sm">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <AlertTriangle className="h-4 w-4 shrink-0" />
+                    <span className="text-sm truncate">{totalAlerts + attentionEquipment.length} Items Need Attention</span>
                   </div>
-                  {showAttentionDetails ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  <div className="shrink-0">
+                    {showAttentionDetails ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  </div>
                 </Button>
               </CollapsibleTrigger>
               <CollapsibleContent className="space-y-3 mt-2">
