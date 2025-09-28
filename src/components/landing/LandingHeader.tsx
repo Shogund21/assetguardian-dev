@@ -17,50 +17,53 @@ export const LandingHeader = () => {
   }, []);
 
   return (
-    <header className={`landing-header ${isScrolled ? 'scrolled' : ''}`}>
-      <nav className="landing-nav">
-        <div className="landing-nav__brand">
-          <img 
-            src="/lovable-uploads/91b3768c-9bf7-4a1c-b2be-aea61a3ff3be.png" 
-            alt="AssetGuardian.ai Logo - Predictive Maintenance Platform" 
-            className="brand-logo" 
-          />
-          <h1 className="logo">AssetGuardian.ai</h1>
-        </div>
-        <div className="landing-nav__links hidden md:flex space-x-6 items-center">
-          <Link to="/landing" className="text-gray-900 hover:text-primary transition-colors">
-            Home
-          </Link>
-          <Link to="/solutions" className="text-gray-900 hover:text-primary transition-colors">
-            Solutions
-          </Link>
-          <Link to="/product" className="text-gray-900 hover:text-primary transition-colors">
-            Product
-          </Link>
-          <Link to="/results" className="text-gray-900 hover:text-primary transition-colors">
-            Results
-          </Link>
-          <Link to="/pricing" className="text-gray-900 hover:text-primary transition-colors">
-            Pricing
-          </Link>
-          <Link to="/resources" className="text-gray-900 hover:text-primary transition-colors">
-            Resources
-          </Link>
-          <Link to="/about" className="text-gray-900 hover:text-primary transition-colors">
-            About
-          </Link>
-          <Link 
-            to="/auth" 
-            className="text-gray-900 border border-gray-300 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 hover:border-gray-400 transition-colors ml-4"
-          >
-            Sign In
-          </Link>
-          <Link 
-            to="/book-demo" 
-            className="bg-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-primary/90 transition-colors ml-2"
-          >
-            Book Demo
-          </Link>
+    <header className={`fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm transition-all duration-200 ${isScrolled ? 'shadow-sm border-b border-gray-100' : ''}`}>
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Brand Lockup - Far Left */}
+          <div className="flex items-center space-x-3">
+            <img 
+              src="/lovable-uploads/91b3768c-9bf7-4a1c-b2be-aea61a3ff3be.png" 
+              alt="AssetGuardian.ai Logo - Predictive Maintenance Platform" 
+              className="h-8 w-8" 
+            />
+            <h1 className="text-xl font-bold text-primary">AssetGuardian.ai</h1>
+          </div>
+
+          {/* Navigation Links - Center Right */}
+          <div className="hidden md:flex items-center space-x-8">
+            <Link to="/landing" className="text-gray-800 hover:text-primary transition-colors font-medium">
+              Home
+            </Link>
+            <Link to="/solutions" className="text-gray-800 hover:text-primary transition-colors font-medium">
+              Solutions
+            </Link>
+            <Link to="/product" className="text-gray-800 hover:text-primary transition-colors font-medium">
+              Product
+            </Link>
+            <Link to="/results" className="text-gray-800 hover:text-primary transition-colors font-medium">
+              Results
+            </Link>
+            <Link to="/pricing" className="text-gray-800 hover:text-primary transition-colors font-medium">
+              Pricing
+            </Link>
+            <Link to="/resources" className="text-gray-800 hover:text-primary transition-colors font-medium">
+              Resources
+            </Link>
+            <Link to="/about" className="text-gray-800 hover:text-primary transition-colors font-medium">
+              About
+            </Link>
+          </div>
+
+          {/* Sign In Button - Far Right */}
+          <div className="hidden md:flex">
+            <Link 
+              to="/auth" 
+              className="bg-gray-50 text-gray-700 border border-gray-200 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 hover:border-gray-300 transition-colors"
+            >
+              Sign In
+            </Link>
+          </div>
         </div>
 
         {/* Mobile menu button */}
@@ -78,67 +81,60 @@ export const LandingHeader = () => {
             <div className="flex flex-col space-y-4 p-6">
               <Link 
                 to="/landing" 
-                className="text-gray-900 hover:text-primary transition-colors py-2"
+                className="text-gray-800 hover:text-primary transition-colors py-2 font-medium"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Home
               </Link>
               <Link 
                 to="/solutions" 
-                className="text-gray-900 hover:text-primary transition-colors py-2"
+                className="text-gray-800 hover:text-primary transition-colors py-2 font-medium"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Solutions
               </Link>
               <Link 
                 to="/product" 
-                className="text-gray-900 hover:text-primary transition-colors py-2"
+                className="text-gray-800 hover:text-primary transition-colors py-2 font-medium"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Product
               </Link>
               <Link 
                 to="/results" 
-                className="text-gray-900 hover:text-primary transition-colors py-2"
+                className="text-gray-800 hover:text-primary transition-colors py-2 font-medium"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Results
               </Link>
               <Link 
                 to="/pricing" 
-                className="text-gray-900 hover:text-primary transition-colors py-2"
+                className="text-gray-800 hover:text-primary transition-colors py-2 font-medium"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Pricing
               </Link>
               <Link 
                 to="/resources" 
-                className="text-gray-900 hover:text-primary transition-colors py-2"
+                className="text-gray-800 hover:text-primary transition-colors py-2 font-medium"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Resources
               </Link>
               <Link 
                 to="/about" 
-                className="text-gray-900 hover:text-primary transition-colors py-2"
+                className="text-gray-800 hover:text-primary transition-colors py-2 font-medium"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 About
               </Link>
-              <div className="pt-4 border-t border-gray-200 space-y-3">
+              <div className="pt-4 border-t border-gray-200">
                 <Link 
                   to="/auth" 
-                  className="block text-center text-gray-900 border border-gray-300 px-4 py-3 rounded-lg font-medium hover:bg-gray-50 hover:border-gray-400 transition-colors"
+                  className="block text-center bg-gray-50 text-gray-700 border border-gray-200 px-4 py-3 rounded-lg font-semibold hover:bg-gray-100 hover:border-gray-300 transition-colors"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Sign In
-                </Link>
-                <Link 
-                  to="/book-demo" 
-                  className="block text-center bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Book Demo
                 </Link>
               </div>
             </div>
