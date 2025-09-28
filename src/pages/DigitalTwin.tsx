@@ -35,8 +35,15 @@ const DigitalTwin = () => {
   };
 
   const handleViewPreset = (preset: 'overview' | 'detail' | 'maintenance') => {
-    setMaintenanceMode(preset === 'maintenance');
-    animateToPreset(preset, selectedEquipment);
+    if (preset === 'overview') {
+      // For overview, clear selection and maintenance mode to show default view
+      setSelectedEquipment(undefined);
+      setMaintenanceMode(false);
+      animateToPreset(preset);
+    } else {
+      setMaintenanceMode(preset === 'maintenance');
+      animateToPreset(preset, selectedEquipment);
+    }
   };
 
   if (isLoading) {

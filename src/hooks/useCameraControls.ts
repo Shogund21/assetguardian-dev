@@ -87,6 +87,11 @@ export const useCameraControls = (equipment: DigitalTwinEquipment[]) => {
         }
       }
 
+      // For overview, always use the default position regardless of selected equipment
+      if (preset === 'overview') {
+        targetPreset = presets.overview;
+      }
+
       // Animate camera position
       const startPosition = camera.position.clone();
       const endPosition = new Vector3(...targetPreset.position);
