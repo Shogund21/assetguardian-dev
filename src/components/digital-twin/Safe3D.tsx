@@ -1,4 +1,5 @@
 import React from 'react';
+import { OrbitControls as DreiOrbitControls, Environment as DreiEnvironment, Grid as DreiGrid, PerspectiveCamera as DreiPerspectiveCamera } from '@react-three/drei';
 
 // Utility to strip any dashed or data-* props that confuse R3F applyProps
 const stripProps = (props: Record<string, any>) => {
@@ -43,4 +44,36 @@ export const CylinderGeom: React.FC<any> = ({ children, ...rest }) => (
 
 export const TubeGeom: React.FC<any> = ({ children, ...rest }) => (
   <tubeGeometry {...stripProps(rest)}>{children}</tubeGeometry>
+);
+
+// Lights (primitive elements)
+export const ALight: React.FC<any> = ({ children, ...rest }) => (
+  <ambientLight {...stripProps(rest)}>{children}</ambientLight>
+);
+
+export const DLight: React.FC<any> = ({ children, ...rest }) => (
+  <directionalLight {...stripProps(rest)}>{children}</directionalLight>
+);
+
+// Drei wrappers (forward refs when needed)
+export const PCam = React.forwardRef<any, any>(({ children, ...rest }, ref) => (
+  <DreiPerspectiveCamera ref={ref} {...stripProps(rest)}>
+    {children}
+  </DreiPerspectiveCamera>
+));
+PCam.displayName = 'PCam';
+
+export const Controls = React.forwardRef<any, any>(({ children, ...rest }, ref) => (
+  <DreiOrbitControls ref={ref} {...stripProps(rest)}>
+    {children}
+  </DreiOrbitControls>
+));
+Controls.displayName = 'Controls';
+
+export const Env: React.FC<any> = ({ children, ...rest }) => (
+  <DreiEnvironment {...stripProps(rest)}>{children}</DreiEnvironment>
+);
+
+export const SafeGrid: React.FC<any> = ({ children, ...rest }) => (
+  <DreiGrid {...stripProps(rest)}>{children}</DreiGrid>
 );

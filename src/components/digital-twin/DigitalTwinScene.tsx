@@ -1,12 +1,11 @@
 import React, { Suspense, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Environment, Grid, PerspectiveCamera } from '@react-three/drei';
 import { Equipment3D } from './Equipment3D';
 import { EnergyFlowVisualization } from './EnergyFlowVisualization';
 import { DigitalTwinFacility } from '@/types/digitalTwin';
 import { Loader2 } from 'lucide-react';
 import Sanitize3D from './Sanitize3D';
-import { G, M, SphereGeom, BasicMat } from './Safe3D';
+import { G, M, SphereGeom, BasicMat, ALight, DLight, PCam, Controls, Env, SafeGrid } from './Safe3D';
 
 interface DigitalTwinSceneProps {
   facility: DigitalTwinFacility;
@@ -43,24 +42,24 @@ export const DigitalTwinScene: React.FC<DigitalTwinSceneProps> = ({
         dpr={[1, 2]}
       >
         <Sanitize3D>
-          <PerspectiveCamera
+          <PCam
             makeDefault
             position={[20, 15, 20]}
             fov={60}
           />
           
-          <ambientLight intensity={0.4} />
-          <directionalLight
+          <ALight intensity={0.4} />
+          <DLight
             position={[10, 10, 5]}
             intensity={1}
             castShadow
           />
           
           <Suspense fallback={null}>
-            <Environment preset="warehouse" />
+            <Env preset="warehouse" />
             
             {/* Facility Floor Grid */}
-            <Grid
+            <SafeGrid
               args={[facility.dimensions.width, facility.dimensions.length]}
               position={[0, 0, 0]}
               cellSize={2}
@@ -105,7 +104,7 @@ export const DigitalTwinScene: React.FC<DigitalTwinSceneProps> = ({
               </G>
             ))}
             
-            <OrbitControls
+            <Controls
               ref={orbitControlsRef}
               enablePan={!isTransitioning}
               enableZoom={!isTransitioning}
