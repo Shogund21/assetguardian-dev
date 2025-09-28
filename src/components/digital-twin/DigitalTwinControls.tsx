@@ -72,13 +72,13 @@ export const DigitalTwinControls: React.FC<DigitalTwinControlsProps> = ({
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Operational</span>
               <Badge variant={operationalCount === totalEquipment ? 'default' : 'secondary'}>
-                {String(operationalCount)}/{String(totalEquipment)}
+                {`${operationalCount || 0}/${totalEquipment || 0}`}
               </Badge>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Alerts</span>
               <Badge variant={totalAlerts > 0 ? 'destructive' : 'default'}>
-                {String(totalAlerts)}
+                {totalAlerts || 0}
               </Badge>
             </div>
           </div>
