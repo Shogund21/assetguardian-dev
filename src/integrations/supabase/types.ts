@@ -2301,6 +2301,42 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          metadata: Json | null
+          read_at: string | null
+          title: string
+          type: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          metadata?: Json | null
+          read_at?: string | null
+          title: string
+          type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          metadata?: Json | null
+          read_at?: string | null
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       organizations: {
         Row: {
           created_at: string
@@ -3940,6 +3976,12 @@ export type Database = {
           sensor_type: string
           trend_direction: string
           unit: string
+        }[]
+      }
+      get_super_admin_user_ids: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          user_id: string
         }[]
       }
       get_technicians_with_roles: {

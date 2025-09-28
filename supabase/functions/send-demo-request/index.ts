@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@2.0.0";
+import { Resend } from "https://esm.sh/resend@2.0.0";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
@@ -51,6 +51,37 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     console.log('Demo request saved to database:', demoRequest);
+
+    // Create notification for super admins
+    const { data: superAdminIds } = await supabase.rpc('get_super_admin_user_ids');
+    
+    if (superAdminIds && superAdminIds.length > 0) {
+      const notifications = superAdminIds.map((admin: any) => ({
+        type: 'demo_request',
+        title: 'New Demo Request',
+        message: `${requestData.name} from ${requestData.company || 'Unknown Company'} has requested a demo.`,
+        user_id: admin.user_id,
+        metadata: {
+          demo_request_id: demoRequest.id,
+          name: requestData.name,
+          email: requestData.email,
+          company: requestData.company,
+          role: requestData.role,
+          phone: requestData.phone
+        }
+      }));
+
+      const { error: notificationError } = await supabase
+        .from('notifications')
+        .insert(notifications);
+
+      if (notificationError) {
+        console.error('Failed to create notifications:', notificationError);
+        // Don't fail the whole request if notification creation fails
+      } else {
+        console.log('Demo request notifications created for', superAdminIds.length, 'super admins');
+      }
+    }
 
     // Format demo request email body
     const emailBody = `
