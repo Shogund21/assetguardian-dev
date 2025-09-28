@@ -8,43 +8,48 @@ const Product = () => {
     <div className="landing-page">
       <SEO 
         title="AssetGuardian.ai Product Overview"
-        description="Predictive analytics, technician assist mode, sensor hub, ROI reporting"
-        keywords="predictive analytics, technician assist, sensor hub, ROI reporting, facility management platform"
+        description="AI Predictive Maintenance, Technician Assist, sensor hub, and ROI reporting for facilities"
+        keywords="AI predictive maintenance, technician assist, sensor hub, ROI reporting, facility management platform, energy saving"
       />
       <LandingHeader />
       
       <main className="min-h-screen bg-gray-900 text-white">
         <section className="py-20 px-6">
           <div className="max-w-6xl mx-auto">
+            {/* Hero Intro */}
             <div className="text-center mb-16">
               <h1 className="text-5xl font-bold mb-6">
-                A Complete Predictive Maintenance and Technician Assist Platform
+                A Complete AI Predictive Maintenance Platform
               </h1>
-              <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-                Four integrated modules that work together to predict failures, 
-                guide your technicians, and deliver measurable results.
+              <p className="text-xl text-gray-300 max-w-4xl mx-auto">
+                AssetGuardian.ai puts AI Predictive Maintenance at the core of your operations. 
+                Our platform continuously learns equipment patterns, predicts failures before they happen, 
+                and delivers real-time troubleshooting guidance so technicians resolve issues the first time.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8 mb-16">
-              {/* Predictive Analytics */}
-              <div className="bg-gray-800 p-8 rounded-lg">
-                <div className="w-12 h-12 bg-yellow-500 rounded-lg mb-4 flex items-center justify-center">
-                  <span className="text-black font-bold text-xl">AI</span>
+            {/* AI Predictive Maintenance - Lead Module */}
+            <div className="mb-16">
+              <div className="bg-gradient-to-r from-yellow-600 to-yellow-500 p-8 rounded-lg mb-8">
+                <div className="w-16 h-16 bg-black rounded-lg mb-6 flex items-center justify-center">
+                  <span className="text-yellow-400 font-bold text-2xl">AI</span>
                 </div>
-                <h2 className="text-2xl font-bold mb-4">Dashboard</h2>
-                <p className="text-gray-300 mb-6">
-                  Real-time monitoring with actionable insights for facility managers and technicians, 
-                  featuring predictive alerts and performance analytics.
+                <h2 className="text-3xl font-bold mb-4 text-black">AI Predictive Maintenance</h2>
+                <p className="text-xl text-black mb-6 font-medium">
+                  The core engine that powers everything else. Continuous equipment monitoring with 
+                  anomaly detection that reduces energy consumption and repair costs.
                 </p>
-                <ul className="text-gray-300 space-y-2">
-                  <li>• Machine learning algorithms analyze equipment patterns</li>
-                  <li>• Early warning alerts prevent costly breakdowns</li>
-                  <li>• Performance trend analysis and forecasting</li>
-                  <li>• Automated maintenance scheduling with technician dispatch</li>
+                <ul className="text-black space-y-3 text-lg">
+                  <li>• Continuous equipment monitoring with anomaly detection</li>
+                  <li>• Predicts failures before they cause downtime</li>
+                  <li>• Prioritizes alerts by severity and business impact</li>
+                  <li>• Reduces energy consumption and repair costs</li>
                 </ul>
               </div>
+            </div>
 
+            {/* Other Modules Grid */}
+            <div className="grid md:grid-cols-2 gap-8 mb-16">
               {/* Technician Assist Mode */}
               <div className="bg-gray-800 p-8 rounded-lg">
                 <div className="w-12 h-12 bg-yellow-500 rounded-lg mb-4 flex items-center justify-center">
@@ -52,14 +57,13 @@ const Product = () => {
                 </div>
                 <h2 className="text-2xl font-bold mb-4">Technician Assist Mode</h2>
                 <p className="text-gray-300 mb-6">
-                  Step-by-step troubleshooting workflows with mobile-first interface, 
-                  AI-guided diagnostics, and expert knowledge base for field support.
+                  Step-by-step troubleshooting workflows delivered on mobile with real-time sensor overlays 
+                  to guide field techs and boost first-time fix rates.
                 </p>
                 <ul className="text-gray-300 space-y-2">
-                  <li>• Mobile-first interface optimized for field technicians</li>
-                  <li>• AI-guided diagnostic procedures with visual guides</li>
-                  <li>• Step-by-step repair instructions with expert insights</li>
-                  <li>• Real-time expert support and comprehensive documentation</li>
+                  <li>• Step-by-step troubleshooting workflows delivered on mobile</li>
+                  <li>• Real-time sensor overlays to guide field techs</li>
+                  <li>• Boosts first-time fix rates and reduces callbacks</li>
                 </ul>
               </div>
 
@@ -70,14 +74,30 @@ const Product = () => {
                 </div>
                 <h2 className="text-2xl font-bold mb-4">Sensor Hub</h2>
                 <p className="text-gray-300 mb-6">
-                  Universal connectivity supporting BACnet, Modbus, LoRaWAN for comprehensive 
-                  equipment integration and data collection.
+                  Universal connectivity with unified view of chillers, AHUs, RTUs, and cooling towers. 
+                  Plug-and-play with existing sensors or new IoT deployments.
                 </p>
                 <ul className="text-gray-300 space-y-2">
-                  <li>• BACnet, Modbus, LoRaWAN protocol support</li>
-                  <li>• Real-time data collection and monitoring</li>
-                  <li>• Wireless and wired connectivity options</li>
-                  <li>• Edge computing for instant local processing</li>
+                  <li>• Works with BACnet, Modbus, LoRaWAN, and other protocols</li>
+                  <li>• Unified view of chillers, AHUs, RTUs, and cooling towers</li>
+                  <li>• Plug-and-play with existing sensors or new IoT deployments</li>
+                </ul>
+              </div>
+
+              {/* Work Order Compliance */}
+              <div className="bg-gray-800 p-8 rounded-lg">
+                <div className="w-12 h-12 bg-yellow-500 rounded-lg mb-4 flex items-center justify-center">
+                  <span className="text-black font-bold text-xl">📝</span>
+                </div>
+                <h2 className="text-2xl font-bold mb-4">Work Order Compliance</h2>
+                <p className="text-gray-300 mb-6">
+                  Technicians log work orders directly into AssetGuardian.ai, ensuring accountability 
+                  and documentation of every service event.
+                </p>
+                <ul className="text-gray-300 space-y-2">
+                  <li>• Technicians log work orders directly into AssetGuardian.ai</li>
+                  <li>• Ensures accountability and documentation of every service event</li>
+                  <li>• Tracks technician productivity and completion rates</li>
                 </ul>
               </div>
 
@@ -88,53 +108,26 @@ const Product = () => {
                 </div>
                 <h2 className="text-2xl font-bold mb-4">ROI Reports</h2>
                 <p className="text-gray-300 mb-6">
-                  Energy optimization and uptime metrics with executive dashboards 
-                  showing cost savings and performance improvements.
+                  Executive-level dashboards converting kWh into dollars saved with CO₂ reduction 
+                  reporting for sustainability metrics.
                 </p>
                 <ul className="text-gray-300 space-y-2">
-                  <li>• Energy cost savings tracking and reporting</li>
-                  <li>• Downtime reduction metrics and analysis</li>
-                  <li>• Technician productivity and efficiency improvements</li>
-                  <li>• Executive dashboards and automated reporting</li>
+                  <li>• Executive-level dashboards converting kWh into dollars saved</li>
+                  <li>• CO₂ reduction reporting for sustainability metrics</li>
+                  <li>• Customizable reports for leadership and compliance</li>
                 </ul>
               </div>
             </div>
 
-            <div className="bg-gray-800 p-8 rounded-lg mb-16">
-              <div className="text-center">
-                <h2 className="text-3xl font-bold mb-6">How It All Works Together</h2>
-                <p className="text-xl text-gray-300 mb-8">
-                  Our integrated platform creates a seamless experience from prediction to resolution
-                </p>
-                <div className="grid md:grid-cols-4 gap-4 text-center">
-                  <div>
-                    <div className="text-yellow-400 font-bold text-lg mb-2">1. Predict</div>
-                    <p className="text-gray-300">AI identifies potential issues</p>
-                  </div>
-                  <div>
-                    <div className="text-yellow-400 font-bold text-lg mb-2">2. Alert</div>
-                    <p className="text-gray-300">System notifies relevant teams</p>
-                  </div>
-                  <div>
-                    <div className="text-yellow-400 font-bold text-lg mb-2">3. Guide</div>
-                    <p className="text-gray-300">Technicians receive step-by-step support</p>
-                  </div>
-                  <div>
-                    <div className="text-yellow-400 font-bold text-lg mb-2">4. Report</div>
-                    <p className="text-gray-300">Results tracked and ROI measured</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="text-center">
-              <h2 className="text-3xl font-bold mb-6">See the Platform in Action</h2>
-              <p className="text-xl text-gray-300 mb-8">
-                Experience how AssetGuardian.ai transforms facility maintenance
+            {/* Closing CTA Block */}
+            <div className="bg-gray-800 p-12 rounded-lg text-center">
+              <h2 className="text-4xl font-bold mb-6">AI Predictive Maintenance at the Core</h2>
+              <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+                Everything else — from Technician Assist to ROI reporting — builds on our predictive AI engine.
               </p>
               <Link to="/book-demo">
-                <Button size="lg" className="bg-yellow-500 text-black hover:bg-yellow-400 text-lg px-8 py-4">
-                  Book a Demo
+                <Button size="lg" className="bg-yellow-500 text-black hover:bg-yellow-400 text-xl px-12 py-6">
+                  Book a Demo – See AI in Action
                 </Button>
               </Link>
             </div>
