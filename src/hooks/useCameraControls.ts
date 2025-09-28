@@ -14,21 +14,29 @@ export const useCameraControls = (equipment: DigitalTwinEquipment[]) => {
 
   const presets: Record<string, CameraPreset> = {
     overview: {
-      position: [30, 25, 30],
+      position: [40, 30, 40],
       target: [0, 0, 0],
     },
     detail: {
-      position: [15, 10, 15],
+      position: [20, 15, 20],
       target: [0, 0, 0],
     },
     maintenance: {
-      position: [12, 8, 12],
+      position: [15, 10, 15],
       target: [0, 0, 0],
+    },
+    aerial: {
+      position: [0, 50, 0],
+      target: [0, 0, 0],
+    },
+    walkthrough: {
+      position: [5, 3, 5],
+      target: [0, 2, 0],
     },
   };
 
   const animateToPreset = useCallback(
-    (preset: 'overview' | 'detail' | 'maintenance', selectedEquipmentId?: string) => {
+    (preset: 'overview' | 'detail' | 'maintenance' | 'aerial' | 'walkthrough', selectedEquipmentId?: string) => {
       if (!orbitControlsRef.current) return;
 
       setIsTransitioning(true);
@@ -85,7 +93,7 @@ export const useCameraControls = (equipment: DigitalTwinEquipment[]) => {
       const startTarget = controls.target.clone();
       const endTarget = new Vector3(...targetPreset.target);
 
-      const duration = 1500; // 1.5 seconds
+      const duration = 2000; // 2 seconds for smoother transitions
       const startTime = Date.now();
 
       const animate = () => {
