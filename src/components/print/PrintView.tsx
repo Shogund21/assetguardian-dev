@@ -19,7 +19,7 @@ export const PrintView = () => {
   const { handlePrint } = usePrintHandler();
 
   const { data: equipmentData, isLoading: equipmentLoading } = useQuery({
-    queryKey: ["equipment"],
+    queryKey: ["equipment", "print"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("equipment")
