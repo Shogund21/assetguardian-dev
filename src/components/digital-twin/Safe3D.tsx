@@ -6,22 +6,23 @@ const stripProps = (props: Record<string, any>) => {
   const cleaned: Record<string, any> = {};
   for (const key in props) {
     if (!Object.prototype.hasOwnProperty.call(props, key)) continue;
-    if (key === 'children') continue;
-    const lower = key.toLowerCase();
-    if (lower.includes('-') || lower.startsWith('data-')) continue;
-    cleaned[key] = props[key];
+  if (key === 'children') continue;
+  const lower = key.toLowerCase();
+  if (lower.includes('-') || lower.startsWith('data') || lower.startsWith('aria')) continue;
+  cleaned[key] = props[key];
   }
   return cleaned;
 };
 
-export const G: React.FC<any> = ({ children, ...rest }) => (
-  <group {...stripProps(rest)}>{children}</group>
-);
+export const G = React.forwardRef<any, any>(({ children, ...rest }, ref) => (
+  <group ref={ref} {...stripProps(rest)}>{children}</group>
+));
+G.displayName = 'G';
 
-export const M: React.FC<any> = ({ children, ...rest }) => (
-  <mesh {...stripProps(rest)}>{children}</mesh>
-);
-
+export const M = React.forwardRef<any, any>(({ children, ...rest }, ref) => (
+  <mesh ref={ref} {...stripProps(rest)}>{children}</mesh>
+));
+M.displayName = 'M';
 export const StdMat: React.FC<any> = ({ children, ...rest }) => (
   <meshStandardMaterial {...stripProps(rest)}>{children}</meshStandardMaterial>
 );

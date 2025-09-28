@@ -13,8 +13,8 @@ export function sanitizeNode(node: ReactNode): ReactNode {
   for (const key in rest) {
     if (!Object.prototype.hasOwnProperty.call(rest, key)) continue;
     const lower = key.toLowerCase();
-    // Remove all dashed props to avoid R3F applyProps nested path (e.g., data-lov-id -> obj.data.lov.id)
-    if (lower.includes('-')) {
+    // Remove all dashed and accessibility/data props to avoid R3F applyProps nested paths
+    if (lower.includes('-') || lower.startsWith('data') || lower.startsWith('aria')) {
       removedKeys.push(key);
       continue;
     }
