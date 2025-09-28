@@ -65,6 +65,39 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 184 76% 49%;
   }
+
+  /* Base responsive improvements */
+  * {
+    box-sizing: border-box;
+  }
+  
+  html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  body {
+    min-height: 100vh;
+    line-height: 1.6;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+  
+  /* Improve touch targets on mobile */
+  button, [role="button"], input[type="submit"], input[type="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Better focus states for accessibility */
+  button:focus-visible, 
+  a:focus-visible, 
+  input:focus-visible, 
+  textarea:focus-visible, 
+  select:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
 }
 
 /* Print styles */
