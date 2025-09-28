@@ -71,6 +71,7 @@ export const DigitalTwinControls: React.FC<DigitalTwinControlsProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="flex items-center justify-between min-w-0">
               <span className="text-sm text-muted-foreground whitespace-nowrap">Operational</span>
+              <span className="text-sm font-medium tabular-nums shrink-0">{`${operationalCount || 0}/${totalEquipment || 0}`}</span>
             </div>
           </div>
           
@@ -86,7 +87,7 @@ export const DigitalTwinControls: React.FC<DigitalTwinControlsProps> = ({
                 <Button 
                   variant="link" 
                   className="text-amber-600 hover:text-amber-700 p-0 h-auto text-sm"
-                  onClick={onAttentionClick}
+                  onClick={() => { setShowAttentionDetails(true); onAttentionClick(); }}
                 >
                   Attention required
                 </Button>
@@ -115,11 +116,16 @@ export const DigitalTwinControls: React.FC<DigitalTwinControlsProps> = ({
                     className="w-full justify-start text-left"
                     onClick={() => onEquipmentSelect(equipment.id)}
                   >
-                    <div className="flex items-center justify-between w-full">
-                      <span className="text-sm font-medium">{equipment.name}</span>
-                      <Badge variant="secondary" className="text-xs">
-                        {equipment.healthScore}%
-                      </Badge>
+                    <div className="w-full text-left">
+                      <div className="flex items-center justify-between w-full">
+                        <span className="text-sm font-medium">{equipment.name}</span>
+                        <Badge variant="secondary" className="text-xs">
+                          {equipment.healthScore}%
+                        </Badge>
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-0.5">
+                        Location: x {equipment.position.x.toFixed(1)}, y {equipment.position.y.toFixed(1)}, z {equipment.position.z.toFixed(1)}
+                      </div>
                     </div>
                   </Button>
                 ))}
