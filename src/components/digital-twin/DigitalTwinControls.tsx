@@ -71,7 +71,7 @@ export const DigitalTwinControls: React.FC<DigitalTwinControlsProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="flex items-center justify-between min-w-0">
               <span className="text-sm text-muted-foreground whitespace-nowrap">Operational</span>
-              <span className="text-sm font-medium tabular-nums shrink-0">{operationalCount || 0}</span>
+              <span className="text-sm font-medium tabular-nums shrink-0"> {operationalCount || 0}</span>
             </div>
           </div>
           
