@@ -102,7 +102,7 @@ export const DigitalTwinControls: React.FC<DigitalTwinControlsProps> = ({
                 <Button variant="outline" className="w-full justify-between" size="sm">
                   <div className="flex items-center gap-2">
                     <Wrench className="h-4 w-4" />
-                    <span>{attentionEquipment.length} Equipment Need Attention</span>
+                    <span>{attentionEquipment.length} Equipment Needs Attention</span>
                   </div>
                   {showAttentionDetails ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                 </Button>
@@ -116,15 +116,15 @@ export const DigitalTwinControls: React.FC<DigitalTwinControlsProps> = ({
                     className="w-full justify-start text-left"
                     onClick={() => onEquipmentSelect(equipment.id)}
                   >
-                    <div className="w-full text-left">
-                      <div className="flex items-center justify-between w-full">
-                        <span className="text-sm font-medium">{equipment.name}</span>
-                        <Badge variant="secondary" className="text-xs">
+                    <div className="w-full text-left min-w-0">
+                      <div className="flex items-center justify-between w-full min-w-0">
+                        <span className="text-sm font-medium truncate pr-2">{equipment.name}</span>
+                        <Badge variant="secondary" className="text-xs shrink-0">
                           {equipment.healthScore}%
                         </Badge>
                       </div>
                       <div className="text-xs text-muted-foreground mt-0.5">
-                        Location: x {equipment.position.x.toFixed(1)}, y {equipment.position.y.toFixed(1)}, z {equipment.position.z.toFixed(1)}
+                        Location: {Math.round(equipment.position.x * 50 + 750)}, {Math.round(equipment.position.y * 50 + 750)}, {Math.round(equipment.position.z * 50 + 750)}
                       </div>
                     </div>
                   </Button>
