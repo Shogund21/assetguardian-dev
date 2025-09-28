@@ -919,6 +919,45 @@ export type Database = {
           },
         ]
       }
+      demo_requests: {
+        Row: {
+          company: string | null
+          created_at: string
+          email: string
+          id: string
+          name: string
+          phone: string | null
+          requested_at: string
+          role: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          phone?: string | null
+          requested_at?: string
+          role?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          requested_at?: string
+          role?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       equipment: {
         Row: {
           company_id: string | null

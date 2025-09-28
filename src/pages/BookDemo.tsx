@@ -12,10 +12,41 @@ const BookDemo = () => {
     phone: ""
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState('');
+  const [submitStatus, setSubmitStatus] = useState<'success' | 'error' | ''>('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log("Demo request submitted:", formData);
+    setIsSubmitting(true);
+    setSubmitMessage('');
+    setSubmitStatus('');
+
+    try {
+      const response = await fetch('https://bqxdbvrtohhgkusmdjxd.supabase.co/functions/v1/send-demo-request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setSubmitStatus('success');
+        setSubmitMessage('Thank you! Your demo request has been submitted successfully. We\'ll contact you soon.');
+        setFormData({ name: '', email: '', company: '', role: '', phone: '' });
+      } else {
+        throw new Error(result.error || 'Failed to submit demo request');
+      }
+    } catch (error) {
+      console.error('Error submitting demo request:', error);
+      setSubmitStatus('error');
+      setSubmitMessage('Sorry, there was an error submitting your request. Please try again or contact us directly.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -52,6 +83,17 @@ const BookDemo = () => {
               {/* Demo Form */}
               <div className="bg-gray-800 p-8 rounded-lg">
                 <h2 className="text-2xl font-bold mb-6">Schedule Your Personalized Demo</h2>
+                
+                {submitMessage && (
+                  <div className={`p-4 rounded-lg mb-6 ${
+                    submitStatus === 'success' 
+                      ? 'bg-green-900/50 text-green-300 border border-green-700' 
+                      : 'bg-red-900/50 text-red-300 border border-red-700'
+                  }`}>
+                    {submitMessage}
+                  </div>
+                )}
+                
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium mb-2">
@@ -142,9 +184,10 @@ const BookDemo = () => {
 
                   <Button 
                     type="submit" 
-                    className="w-full bg-yellow-500 text-black hover:bg-yellow-400 text-lg py-3"
+                    disabled={isSubmitting}
+                    className="w-full bg-yellow-500 text-black hover:bg-yellow-400 text-lg py-3 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Schedule My Demo
+                    {isSubmitting ? 'Submitting...' : 'Schedule My Demo'}
                   </Button>
                 </form>
 
