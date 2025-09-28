@@ -6,6 +6,7 @@ import { EnergyFlowVisualization } from './EnergyFlowVisualization';
 import { SensorOverlay } from './SensorOverlay';
 import { DigitalTwinEquipment, DigitalTwinFacility } from '@/types/digitalTwin';
 import { Loader2 } from 'lucide-react';
+import Sanitize3D from './Sanitize3D';
 
 interface DigitalTwinSceneProps {
   facility: DigitalTwinFacility;
