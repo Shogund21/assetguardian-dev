@@ -8,13 +8,25 @@ export function sanitizeNode(node: ReactNode): ReactNode {
   const el = node as ReactElement<any>;
   const { children, ...rest } = el.props || {};
   const cleanedProps: Record<string, any> = {};
+  const removedKeys: string[] = [];
 
   for (const key in rest) {
     if (!Object.prototype.hasOwnProperty.call(rest, key)) continue;
     const lower = key.toLowerCase();
     // Remove all dashed props to avoid R3F applyProps nested path (e.g., data-lov-id -> obj.data.lov.id)
-    if (lower.includes('-')) continue;
+    if (lower.includes('-')) {
+      removedKeys.push(key);
+      continue;
+    }
     cleanedProps[key] = rest[key];
+  }
+
+  if (removedKeys.length) {
+    try {
+      const typeName = typeof el.type === 'string' ? el.type : (el.type as any)?.displayName || (el.type as any)?.name || 'unknown';
+      // Log which keys we removed to track the source
+      console.debug('[Sanitize3D] removed dashed props', { type: typeName, removedKeys });
+    } catch {}
   }
 
   const sanitizedChildren = sanitizeNode(children);
