@@ -28,6 +28,8 @@ interface DigitalTwinControlsProps {
   totalAlerts: number;
   operationalCount: number;
   totalEquipment: number;
+  currentPreset: string;
+  isTransitioning: boolean;
 }
 
 export const DigitalTwinControls: React.FC<DigitalTwinControlsProps> = ({
@@ -41,6 +43,8 @@ export const DigitalTwinControls: React.FC<DigitalTwinControlsProps> = ({
   totalAlerts,
   operationalCount,
   totalEquipment,
+  currentPreset,
+  isTransitioning,
 }) => {
   return (
     <div className="space-y-4">
@@ -124,26 +128,29 @@ export const DigitalTwinControls: React.FC<DigitalTwinControlsProps> = ({
             </h4>
             <div className="grid grid-cols-1 gap-2">
               <Button
-                variant="outline"
+                variant={currentPreset === 'overview' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => onViewPreset('overview')}
                 className="justify-start"
+                disabled={isTransitioning}
               >
                 Overview
               </Button>
               <Button
-                variant="outline"
+                variant={currentPreset === 'detail' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => onViewPreset('detail')}
                 className="justify-start"
+                disabled={isTransitioning}
               >
                 Detail View
               </Button>
               <Button
-                variant="outline"
+                variant={currentPreset === 'maintenance' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => onViewPreset('maintenance')}
                 className="justify-start"
+                disabled={isTransitioning}
               >
                 Maintenance
               </Button>
@@ -155,8 +162,9 @@ export const DigitalTwinControls: React.FC<DigitalTwinControlsProps> = ({
             size="sm"
             onClick={onResetView}
             className="w-full"
+            disabled={isTransitioning}
           >
-            <RotateCcw className="h-4 w-4 mr-2" />
+            <RotateCcw className={`h-4 w-4 mr-2 ${isTransitioning ? 'animate-spin' : ''}`} />
             Reset View
           </Button>
         </CardContent>

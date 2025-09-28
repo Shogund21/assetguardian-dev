@@ -14,6 +14,8 @@ interface DigitalTwinSceneProps {
   onEquipmentSelect: (equipmentId: string) => void;
   showEnergyFlow: boolean;
   showSensors: boolean;
+  orbitControlsRef: React.RefObject<any>;
+  isTransitioning: boolean;
 }
 
 export const DigitalTwinScene: React.FC<DigitalTwinSceneProps> = ({
@@ -22,6 +24,8 @@ export const DigitalTwinScene: React.FC<DigitalTwinSceneProps> = ({
   onEquipmentSelect,
   showEnergyFlow,
   showSensors,
+  orbitControlsRef,
+  isTransitioning,
 }) => {
   const equipmentPositions = useMemo(() => {
     return facility.equipment.reduce((acc, equipment) => {
@@ -98,12 +102,15 @@ export const DigitalTwinScene: React.FC<DigitalTwinSceneProps> = ({
             )}
             
             <OrbitControls
-              enablePan={true}
-              enableZoom={true}
-              enableRotate={true}
+              ref={orbitControlsRef}
+              enablePan={!isTransitioning}
+              enableZoom={!isTransitioning}
+              enableRotate={!isTransitioning}
               minDistance={5}
               maxDistance={100}
               maxPolarAngle={Math.PI / 2.1}
+              dampingFactor={0.05}
+              enableDamping={true}
             />
           </Sanitize3D>
         </Suspense>

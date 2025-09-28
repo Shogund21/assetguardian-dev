@@ -3,6 +3,7 @@ import { CustomLayout } from '@/components/CustomLayout';
 import { DigitalTwinScene } from '@/components/digital-twin/DigitalTwinScene';
 import { DigitalTwinControls } from '@/components/digital-twin/DigitalTwinControls';
 import { useDigitalTwinData } from '@/hooks/useDigitalTwinData';
+import { useCameraControls } from '@/hooks/useCameraControls';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Building, Cpu } from 'lucide-react';
@@ -14,6 +15,14 @@ const DigitalTwin = () => {
   const [showSensors, setShowSensors] = useState(true);
   
   const { facility, isLoading, error } = useDigitalTwinData();
+  
+  const {
+    orbitControlsRef,
+    currentPreset,
+    isTransitioning,
+    animateToPreset,
+    resetView,
+  } = useCameraControls(facility?.equipment || []);
 
   const handleEquipmentSelect = (equipmentId: string) => {
     setSelectedEquipment(prev => prev === equipmentId ? undefined : equipmentId);
@@ -21,11 +30,11 @@ const DigitalTwin = () => {
 
   const handleResetView = () => {
     setSelectedEquipment(undefined);
+    resetView();
   };
 
   const handleViewPreset = (preset: 'overview' | 'detail' | 'maintenance') => {
-    // View preset logic would be implemented here
-    console.log('View preset:', preset);
+    animateToPreset(preset, selectedEquipment);
   };
 
   if (isLoading) {
@@ -115,6 +124,8 @@ const DigitalTwin = () => {
               onEquipmentSelect={handleEquipmentSelect}
               showEnergyFlow={showEnergyFlow}
               showSensors={showSensors}
+              orbitControlsRef={orbitControlsRef}
+              isTransitioning={isTransitioning}
             />
           </div>
 
@@ -131,6 +142,8 @@ const DigitalTwin = () => {
               totalAlerts={totalAlerts}
               operationalCount={operationalCount}
               totalEquipment={facility.equipment.length}
+              currentPreset={currentPreset}
+              isTransitioning={isTransitioning}
             />
           </div>
         </div>
