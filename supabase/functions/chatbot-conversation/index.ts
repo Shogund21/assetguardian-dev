@@ -289,29 +289,47 @@ async function updateRateLimitRecords(
 ) {
   const now = new Date().toISOString();
   
-  // Update IP record
-  await supabase
+  // Update IP record - get current values first
+  const { data: ipRecord } = await supabase
     .from('chat_rate_limits')
-    .update({
-      messages_count: supabase.raw('messages_count + 1'),
-      tokens_used: supabase.raw(`tokens_used + ${tokensUsed}`),
-      cost_usd: supabase.raw(`cost_usd + ${cost}`),
-      last_message_at: now
-    })
+    .select('messages_count, tokens_used, cost_usd')
     .eq('identifier', clientIP)
-    .eq('identifier_type', 'ip');
+    .eq('identifier_type', 'ip')
+    .single();
     
-  // Update session record (for session-specific tracking)
-  await supabase
+  if (ipRecord) {
+    await supabase
+      .from('chat_rate_limits')
+      .update({
+        messages_count: (ipRecord.messages_count || 0) + 1,
+        tokens_used: (ipRecord.tokens_used || 0) + tokensUsed,
+        cost_usd: (ipRecord.cost_usd || 0) + cost,
+        last_message_at: now
+      })
+      .eq('identifier', clientIP)
+      .eq('identifier_type', 'ip');
+  }
+    
+  // Update session record - get current values first
+  const { data: sessionRecord } = await supabase
     .from('chat_rate_limits')
-    .update({
-      messages_count: supabase.raw('messages_count + 1'),
-      tokens_used: supabase.raw(`tokens_used + ${tokensUsed}`),
-      cost_usd: supabase.raw(`cost_usd + ${cost}`),
-      last_message_at: now
-    })
+    .select('messages_count, tokens_used, cost_usd')
     .eq('identifier', sessionId)
-    .eq('identifier_type', 'session');
+    .eq('identifier_type', 'session')
+    .single();
+    
+  if (sessionRecord) {
+    await supabase
+      .from('chat_rate_limits')
+      .update({
+        messages_count: (sessionRecord.messages_count || 0) + 1,
+        tokens_used: (sessionRecord.tokens_used || 0) + tokensUsed,
+        cost_usd: (sessionRecord.cost_usd || 0) + cost,
+        last_message_at: now
+      })
+      .eq('identifier', sessionId)
+      .eq('identifier_type', 'session');
+  }
 }
 
 // Log analytics event
@@ -456,7 +474,7 @@ serve(async (req) => {
     }
     
     // Apply throttling delay if needed
-    if (rateLimitCheck.delay > 0) {
+    if (rateLimitCheck.delay && rateLimitCheck.delay > 0) {
       await new Promise(resolve => setTimeout(resolve, rateLimitCheck.delay));
       
       // Log throttling event
@@ -530,7 +548,7 @@ serve(async (req) => {
       (conversationHistory?.length || 0) + 1,
       tokensUsed,
       cost,
-      null,
+      '',
       rateLimitCheck.hasOverride,
       { inputTokens, outputTokens }
     );
@@ -563,7 +581,7 @@ serve(async (req) => {
         hasOverride: rateLimitCheck.hasOverride,
         tokensUsed,
         cost: cost.toFixed(4),
-        remainingMessages: Math.max(0, rateLimitCheck.limits.messagesPerSession - ((conversationHistory?.length || 0) + 1))
+        remainingMessages: Math.max(0, (rateLimitCheck.limits?.messagesPerSession || 0) - ((conversationHistory?.length || 0) + 1))
       }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -586,7 +604,7 @@ serve(async (req) => {
         0,
         'api_error',
         false,
-        { error: error.message }
+        { error: (error as Error)?.message || 'Unknown error' }
       );
     } catch (logError) {
       console.error('Failed to log error analytics:', logError);
