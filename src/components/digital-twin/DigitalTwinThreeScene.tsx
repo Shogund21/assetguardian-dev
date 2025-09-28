@@ -102,9 +102,11 @@ export const DigitalTwinThreeScene: React.FC<DigitalTwinThreeSceneProps> = ({
         : new THREE.BoxGeometry(1.5, 2, 1.5);
 
       const color = getEquipmentColor(equipment.status);
+      const isNonWorking = equipment.status === 'offline' || equipment.status === 'under_maintenance';
       const material = new THREE.MeshPhongMaterial({ 
         color,
-        emissive: selectedEquipment === equipment.id ? 0x444444 : 0x000000
+        emissive: selectedEquipment === equipment.id ? 0x444444 : 0x000000,
+        emissiveIntensity: isNonWorking ? 0.3 : 0.1
       });
 
       const mesh = new THREE.Mesh(geometry, material);
@@ -115,14 +117,16 @@ export const DigitalTwinThreeScene: React.FC<DigitalTwinThreeSceneProps> = ({
       // Health indicator
       const healthColor = equipment.healthScore > 80 ? 0x00ff00 : 
                          equipment.healthScore > 50 ? 0xffff00 : 0xff0000;
-      const healthGeometry = new THREE.SphereGeometry(0.2);
+      const healthSize = isNonWorking ? 0.3 : 0.2; // Larger for non-working equipment
+      const healthGeometry = new THREE.SphereGeometry(healthSize);
       const healthMaterial = new THREE.MeshLambertMaterial({ 
         color: healthColor,
         emissive: healthColor,
-        emissiveIntensity: 0.5
+        emissiveIntensity: isNonWorking ? 0.8 : 0.5
       });
       const healthIndicator = new THREE.Mesh(healthGeometry, healthMaterial);
       healthIndicator.position.set(0, 1.5, 0);
+      healthIndicator.userData = { isNonWorking, originalIntensity: isNonWorking ? 0.8 : 0.5 };
       mesh.add(healthIndicator);
 
       // Alert indicators
@@ -142,8 +146,9 @@ export const DigitalTwinThreeScene: React.FC<DigitalTwinThreeSceneProps> = ({
       scene.add(mesh);
       equipmentMeshesRef.current.set(equipment.id, mesh);
 
-      // Add equipment name label
-      const nameSprite = createTextSprite(equipment.name, true);
+      // Add equipment name label with status indicator
+      const labelText = isNonWorking ? `${equipment.name} - ${equipment.status.toUpperCase()}` : equipment.name;
+      const nameSprite = createTextSprite(labelText, true, isNonWorking);
       nameSprite.position.set(0, 2.5, 0);
       mesh.add(nameSprite);
       labelSpritesRef.current.set(equipment.id, nameSprite);
@@ -223,6 +228,27 @@ export const DigitalTwinThreeScene: React.FC<DigitalTwinThreeSceneProps> = ({
       if (controlsRef.current) {
         controlsRef.current.update();
       }
+      
+      // Add pulsing effect for non-working equipment
+      const time = Date.now() * 0.003;
+      equipmentMeshesRef.current.forEach((mesh, equipmentId) => {
+        const equipment = facility.equipment.find(eq => eq.id === equipmentId);
+        if (equipment && (equipment.status === 'offline' || equipment.status === 'under_maintenance')) {
+          const material = mesh.material as THREE.MeshPhongMaterial;
+          const pulseIntensity = 0.3 + Math.sin(time * 2) * 0.2;
+          material.emissiveIntensity = selectedEquipment === equipmentId ? 0.5 : pulseIntensity;
+          
+          // Pulse health indicator
+          const healthIndicator = mesh.children.find(child => 
+            child instanceof THREE.Mesh && child.userData.isNonWorking
+          ) as THREE.Mesh;
+          if (healthIndicator) {
+            const healthMaterial = healthIndicator.material as THREE.MeshLambertMaterial;
+            healthMaterial.emissiveIntensity = 0.8 + Math.sin(time * 3) * 0.3;
+          }
+        }
+      });
+      
       renderer.render(scene, camera);
     };
     animate();
@@ -288,7 +314,7 @@ export const DigitalTwinThreeScene: React.FC<DigitalTwinThreeSceneProps> = ({
 };
 
 // Helper function to create text sprites
-const createTextSprite = (text: string, isLarge = true): THREE.Sprite => {
+const createTextSprite = (text: string, isLarge = true, isAlert = false): THREE.Sprite => {
   const canvas = document.createElement('canvas');
   const context = canvas.getContext('2d')!;
   
@@ -304,7 +330,13 @@ const createTextSprite = (text: string, isLarge = true): THREE.Sprite => {
   
   // Clear and redraw with proper font
   context.font = `${fontSize}px Arial`;
-  context.fillStyle = 'rgba(0, 0, 0, 0.8)';
+  
+  // Background color based on alert status
+  if (isAlert) {
+    context.fillStyle = 'rgba(255, 0, 0, 0.9)'; // Red background for non-working equipment
+  } else {
+    context.fillStyle = 'rgba(0, 0, 0, 0.8)';
+  }
   context.fillRect(0, 0, canvas.width, canvas.height);
   
   context.fillStyle = 'white';
@@ -328,7 +360,7 @@ const getEquipmentColor = (status: string): number => {
     case 'operational': return 0x00ff00;
     case 'needs_attention': return 0xffa500;
     case 'under_maintenance': return 0xff0000;
-    case 'offline': return 0x666666;
+    case 'offline': return 0xff0000; // Changed to red for better visibility
     default: return 0x00ff00;
   }
 };
