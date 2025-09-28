@@ -42,11 +42,12 @@ export const DigitalTwinScene: React.FC<DigitalTwinSceneProps> = ({
         gl={{ antialias: true }}
         dpr={[1, 2]}
       >
-        <PerspectiveCamera
-          makeDefault
-          position={[20, 15, 20]}
-          fov={60}
-        />
+        <Sanitize3D>
+          <PerspectiveCamera
+            makeDefault
+            position={[20, 15, 20]}
+            fov={60}
+          />
         
         <ambientLight intensity={0.4} />
         <directionalLight
@@ -56,7 +57,6 @@ export const DigitalTwinScene: React.FC<DigitalTwinSceneProps> = ({
         />
         
         <Suspense fallback={null}>
-          <Sanitize3D>
             <Environment preset="warehouse" />
             
             {/* Facility Floor Grid */}
@@ -112,8 +112,8 @@ export const DigitalTwinScene: React.FC<DigitalTwinSceneProps> = ({
               dampingFactor={0.05}
               enableDamping={true}
             />
-          </Sanitize3D>
         </Suspense>
+        </Sanitize3D>
       </Canvas>
       
       {/* Loading indicator */}
