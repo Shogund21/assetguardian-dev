@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { DigitalTwinFacility } from '@/types/digitalTwin';
 
 interface DigitalTwinThreeSceneProps {
@@ -25,7 +26,10 @@ export const DigitalTwinThreeScene: React.FC<DigitalTwinThreeSceneProps> = ({
   const sceneRef = useRef<THREE.Scene>();
   const rendererRef = useRef<THREE.WebGLRenderer>();
   const cameraRef = useRef<THREE.PerspectiveCamera>();
+  const controlsRef = useRef<OrbitControls>();
   const equipmentMeshesRef = useRef<Map<string, THREE.Mesh>>(new Map());
+  const labelSpritesRef = useRef<Map<string, THREE.Sprite>>(new Map());
+  const sensorSpritesRef = useRef<Map<string, THREE.Sprite>>(new Map());
   const energyFlowLinesRef = useRef<THREE.Group>();
   const raycasterRef = useRef<THREE.Raycaster>(new THREE.Raycaster());
   const mouseRef = useRef<THREE.Vector2>(new THREE.Vector2());
@@ -56,6 +60,17 @@ export const DigitalTwinThreeScene: React.FC<DigitalTwinThreeSceneProps> = ({
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     rendererRef.current = renderer;
     mountRef.current.appendChild(renderer.domElement);
+
+    // OrbitControls setup
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.minDistance = 5;
+    controls.maxDistance = 50;
+    controls.target.set(0, 0, 0);
+    controlsRef.current = controls;
+    // Set orbit controls ref for camera control hook
+    (orbitControlsRef as any).current = controls;
 
     // Lighting
     const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
@@ -126,6 +141,24 @@ export const DigitalTwinThreeScene: React.FC<DigitalTwinThreeSceneProps> = ({
 
       scene.add(mesh);
       equipmentMeshesRef.current.set(equipment.id, mesh);
+
+      // Add equipment name label
+      const nameSprite = createTextSprite(equipment.name, true);
+      nameSprite.position.set(0, 2.5, 0);
+      mesh.add(nameSprite);
+      labelSpritesRef.current.set(equipment.id, nameSprite);
+
+      // Add sensor data sprite (initially hidden)
+      const sensorText = equipment.temperature 
+        ? `${Math.round(equipment.temperature)}°F` 
+        : equipment.energyConsumption 
+        ? `${equipment.energyConsumption.toFixed(1)}kW`
+        : 'No Data';
+      const sensorSprite = createTextSprite(sensorText, false);
+      sensorSprite.position.set(0, 3.2, 0);
+      sensorSprite.visible = showSensors;
+      mesh.add(sensorSprite);
+      sensorSpritesRef.current.set(equipment.id, sensorSprite);
     });
 
     // Energy flow lines
@@ -183,54 +216,13 @@ export const DigitalTwinThreeScene: React.FC<DigitalTwinThreeSceneProps> = ({
 
     renderer.domElement.addEventListener('click', handleMouseClick);
 
-    // Basic orbit controls (simplified)
-    let isMouseDown = false;
-    let mouseX = 0;
-    let mouseY = 0;
-
-    const handleMouseDown = (event: MouseEvent) => {
-      isMouseDown = true;
-      mouseX = event.clientX;
-      mouseY = event.clientY;
-    };
-
-    const handleMouseMove = (event: MouseEvent) => {
-      if (!isMouseDown) return;
-
-      const deltaX = event.clientX - mouseX;
-      const deltaY = event.clientY - mouseY;
-
-      const spherical = new THREE.Spherical();
-      spherical.setFromVector3(camera.position);
-      spherical.theta -= deltaX * 0.01;
-      spherical.phi += deltaY * 0.01;
-      spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
-
-      camera.position.setFromSpherical(spherical);
-      camera.lookAt(0, 0, 0);
-
-      mouseX = event.clientX;
-      mouseY = event.clientY;
-    };
-
-    const handleMouseUp = () => {
-      isMouseDown = false;
-    };
-
-    const handleWheel = (event: WheelEvent) => {
-      const scale = event.deltaY > 0 ? 1.1 : 0.9;
-      camera.position.multiplyScalar(scale);
-      camera.position.clampLength(5, 50);
-    };
-
-    renderer.domElement.addEventListener('mousedown', handleMouseDown);
-    renderer.domElement.addEventListener('mousemove', handleMouseMove);
-    renderer.domElement.addEventListener('mouseup', handleMouseUp);
-    renderer.domElement.addEventListener('wheel', handleWheel);
 
     // Animation loop
     const animate = () => {
       requestAnimationFrame(animate);
+      if (controlsRef.current) {
+        controlsRef.current.update();
+      }
       renderer.render(scene, camera);
     };
     animate();
@@ -248,10 +240,20 @@ export const DigitalTwinThreeScene: React.FC<DigitalTwinThreeSceneProps> = ({
     return () => {
       window.removeEventListener('resize', handleResize);
       renderer.domElement.removeEventListener('click', handleMouseClick);
-      renderer.domElement.removeEventListener('mousedown', handleMouseDown);
-      renderer.domElement.removeEventListener('mousemove', handleMouseMove);
-      renderer.domElement.removeEventListener('mouseup', handleMouseUp);
-      renderer.domElement.removeEventListener('wheel', handleWheel);
+      
+      // Dispose sprites and their textures
+      labelSpritesRef.current.forEach(sprite => {
+        if (sprite.material.map) sprite.material.map.dispose();
+        sprite.material.dispose();
+      });
+      sensorSpritesRef.current.forEach(sprite => {
+        if (sprite.material.map) sprite.material.map.dispose();
+        sprite.material.dispose();
+      });
+      
+      // Clear orbit controls ref
+      (orbitControlsRef as any).current = null;
+      controlsRef.current?.dispose();
       
       if (mountRef.current && renderer.domElement.parentNode) {
         mountRef.current.removeChild(renderer.domElement);
@@ -275,7 +277,50 @@ export const DigitalTwinThreeScene: React.FC<DigitalTwinThreeSceneProps> = ({
     }
   }, [showEnergyFlow]);
 
+  // Update sensor visibility
+  useEffect(() => {
+    sensorSpritesRef.current.forEach((sprite) => {
+      sprite.visible = showSensors;
+    });
+  }, [showSensors]);
+
   return <div ref={mountRef} className="w-full h-full" />;
+};
+
+// Helper function to create text sprites
+const createTextSprite = (text: string, isLarge = true): THREE.Sprite => {
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d')!;
+  
+  const fontSize = isLarge ? 24 : 16;
+  const padding = isLarge ? 10 : 6;
+  
+  context.font = `${fontSize}px Arial`;
+  const metrics = context.measureText(text);
+  const textWidth = metrics.width;
+  
+  canvas.width = textWidth + padding * 2;
+  canvas.height = fontSize + padding * 2;
+  
+  // Clear and redraw with proper font
+  context.font = `${fontSize}px Arial`;
+  context.fillStyle = 'rgba(0, 0, 0, 0.8)';
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  
+  context.fillStyle = 'white';
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  context.fillText(text, canvas.width / 2, canvas.height / 2);
+  
+  const texture = new THREE.CanvasTexture(canvas);
+  const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+  const sprite = new THREE.Sprite(material);
+  
+  // Scale sprite based on size
+  const scale = isLarge ? 2.5 : 1.5;
+  sprite.scale.set(scale, scale * 0.4, 1);
+  
+  return sprite;
 };
 
 const getEquipmentColor = (status: string): number => {
