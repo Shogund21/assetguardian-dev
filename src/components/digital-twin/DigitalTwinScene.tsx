@@ -6,7 +6,6 @@ import { EnergyFlowVisualization } from './EnergyFlowVisualization';
 import { SensorOverlay } from './SensorOverlay';
 import { DigitalTwinEquipment, DigitalTwinFacility } from '@/types/digitalTwin';
 import { Loader2 } from 'lucide-react';
-import Sanitize3D from './Sanitize3D';
 
 interface DigitalTwinSceneProps {
   facility: DigitalTwinFacility;
@@ -56,63 +55,61 @@ export const DigitalTwinScene: React.FC<DigitalTwinSceneProps> = ({
         />
         
         <Suspense fallback={null}>
-          <Sanitize3D>
-            <Environment preset="warehouse" />
-            
-            {/* Facility Floor Grid */}
-            <Grid
-              args={[facility.dimensions.width, facility.dimensions.length]}
-              position={[0, 0, 0]}
-              cellSize={2}
-              cellThickness={0.5}
-              cellColor="#6366f1"
-              sectionSize={10}
-              sectionThickness={1}
-              sectionColor="#4f46e5"
-              fadeDistance={50}
-              fadeStrength={1}
-              followCamera={false}
-              infiniteGrid={false}
+          <Environment preset="warehouse" />
+          
+          {/* Facility Floor Grid */}
+          <Grid
+            args={[facility.dimensions.width, facility.dimensions.length]}
+            position={[0, 0, 0]}
+            cellSize={2}
+            cellThickness={0.5}
+            cellColor="#6366f1"
+            sectionSize={10}
+            sectionThickness={1}
+            sectionColor="#4f46e5"
+            fadeDistance={50}
+            fadeStrength={1}
+            followCamera={false}
+            infiniteGrid={false}
+          />
+          
+          {/* Equipment 3D Models */}
+          {facility.equipment.map((equipment) => (
+            <Equipment3D
+              key={equipment.id}
+              equipment={equipment}
+              isSelected={selectedEquipment === equipment.id}
+              onSelect={() => onEquipmentSelect(equipment.id)}
             />
-            
-            {/* Equipment 3D Models */}
-            {facility.equipment.map((equipment) => (
-              <Equipment3D
-                key={equipment.id}
-                equipment={equipment}
-                isSelected={selectedEquipment === equipment.id}
-                onSelect={() => onEquipmentSelect(equipment.id)}
-              />
-            ))}
-            
-            {/* Energy Flow Visualization */}
-            {showEnergyFlow && facility.energyFlow && (
-              <EnergyFlowVisualization
-                energyFlows={facility.energyFlow}
-                equipmentPositions={equipmentPositions}
-              />
-            )}
-            
-            {/* Sensor Overlays */}
-            {showSensors && (
-              <SensorOverlay
-                equipment={facility.equipment}
-                selectedEquipment={selectedEquipment}
-              />
-            )}
-            
-            <OrbitControls
-              ref={orbitControlsRef}
-              enablePan={!isTransitioning}
-              enableZoom={!isTransitioning}
-              enableRotate={!isTransitioning}
-              minDistance={5}
-              maxDistance={100}
-              maxPolarAngle={Math.PI / 2.1}
-              dampingFactor={0.05}
-              enableDamping={true}
+          ))}
+          
+          {/* Energy Flow Visualization */}
+          {showEnergyFlow && facility.energyFlow && (
+            <EnergyFlowVisualization
+              energyFlows={facility.energyFlow}
+              equipmentPositions={equipmentPositions}
             />
-          </Sanitize3D>
+          )}
+          
+          {/* Sensor Overlays */}
+          {showSensors && (
+            <SensorOverlay
+              equipment={facility.equipment}
+              selectedEquipment={selectedEquipment}
+            />
+          )}
+          
+          <OrbitControls
+            ref={orbitControlsRef}
+            enablePan={!isTransitioning}
+            enableZoom={!isTransitioning}
+            enableRotate={!isTransitioning}
+            minDistance={5}
+            maxDistance={100}
+            maxPolarAngle={Math.PI / 2.1}
+            dampingFactor={0.05}
+            enableDamping={true}
+          />
         </Suspense>
       </Canvas>
       
