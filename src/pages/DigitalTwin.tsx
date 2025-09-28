@@ -82,6 +82,13 @@ const DigitalTwin = () => {
   const totalAlerts = facility.equipment.reduce((sum, eq) => sum + eq.alerts.filter(a => !a.acknowledged).length, 0);
   const attentionEquipment = facility.equipment.filter(eq => eq.status === 'needs_attention');
   const operationalCount = facility.equipment.length - attentionEquipment.length;
+  
+  // Get all unacknowledged alerts with equipment info
+  const allAlerts = facility.equipment.flatMap(equipment => 
+    equipment.alerts
+      .filter(alert => !alert.acknowledged)
+      .map(alert => ({ equipment, alert }))
+  );
 
   const handleAttentionClick = () => {
     // Switch to maintenance view and highlight equipment needing attention
@@ -155,6 +162,7 @@ const DigitalTwin = () => {
               currentPreset={currentPreset}
               isTransitioning={isTransitioning}
               attentionEquipment={attentionEquipment}
+              allAlerts={allAlerts}
               onAttentionClick={handleAttentionClick}
               onEquipmentSelect={handleEquipmentSelect}
             />

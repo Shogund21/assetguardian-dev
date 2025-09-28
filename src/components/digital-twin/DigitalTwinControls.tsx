@@ -35,6 +35,7 @@ interface DigitalTwinControlsProps {
   currentPreset: string;
   isTransitioning: boolean;
   attentionEquipment: DigitalTwinEquipment[];
+  allAlerts: Array<{ equipment: DigitalTwinEquipment; alert: any }>;
   onAttentionClick: () => void;
   onEquipmentSelect: (equipmentId: string) => void;
 }
@@ -53,9 +54,23 @@ export const DigitalTwinControls: React.FC<DigitalTwinControlsProps> = ({
   currentPreset,
   isTransitioning,
   attentionEquipment,
+  allAlerts,
   onAttentionClick,
   onEquipmentSelect,
 }) => {
+  const formatLocation = (location: string): string => {
+    // Format location to proper display format (e.g., "777", "776B")
+    if (location.includes(',')) {
+      // If it's coordinates, extract meaningful location identifier
+      const parts = location.split(',');
+      if (parts.length >= 2) {
+        const x = Math.round(parseFloat(parts[0]));
+        const z = Math.round(parseFloat(parts[2] || parts[1]));
+        return `${Math.abs(x)}${z < 0 ? 'B' : ''}`;
+      }
+    }
+    return location;
+  };
   const [showAttentionDetails, setShowAttentionDetails] = useState(false);
   return (
     <div className="space-y-4">
@@ -95,40 +110,84 @@ export const DigitalTwinControls: React.FC<DigitalTwinControlsProps> = ({
             )}
           </div>
 
-          {/* Equipment Needing Attention Details */}
-          {attentionEquipment.length > 0 && (
+          {/* Attention Details */}
+          {(totalAlerts > 0 || attentionEquipment.length > 0) && (
             <Collapsible open={showAttentionDetails} onOpenChange={setShowAttentionDetails}>
               <CollapsibleTrigger asChild>
                 <Button variant="outline" className="w-full justify-between" size="sm">
                   <div className="flex items-center gap-2">
-                    <Wrench className="h-4 w-4" />
-                    <span>{attentionEquipment.length} Equipment Needs Attention</span>
+                    <AlertTriangle className="h-4 w-4" />
+                    <span>{totalAlerts + attentionEquipment.length} Items Need Attention</span>
                   </div>
                   {showAttentionDetails ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                 </Button>
               </CollapsibleTrigger>
-              <CollapsibleContent className="space-y-2 mt-2">
-                {attentionEquipment.map((equipment) => (
-                  <Button
-                    key={equipment.id}
-                    variant="ghost"
-                    size="sm"
-                    className="w-full justify-start text-left"
-                    onClick={() => onEquipmentSelect(equipment.id)}
-                  >
-                    <div className="w-full text-left min-w-0">
-                      <div className="flex items-center justify-between w-full min-w-0">
-                        <span className="text-sm font-medium truncate pr-2">{equipment.name}</span>
-                        <Badge variant="secondary" className="text-xs shrink-0">
-                          {equipment.healthScore}%
-                        </Badge>
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-0.5">
-                        Location: {equipment.location}
-                      </div>
-                    </div>
-                  </Button>
-                ))}
+              <CollapsibleContent className="space-y-3 mt-2">
+                {/* Active Alerts Section */}
+                {allAlerts.length > 0 && (
+                  <div className="space-y-2">
+                    <h5 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      Active Alerts ({allAlerts.length})
+                    </h5>
+                    {allAlerts.map(({ equipment, alert }, index) => (
+                      <Button
+                        key={`${equipment.id}-${alert.id}-${index}`}
+                        variant="ghost"
+                        size="sm"
+                        className="w-full justify-start text-left p-2 h-auto"
+                        onClick={() => onEquipmentSelect(equipment.id)}
+                      >
+                        <div className="w-full text-left min-w-0">
+                          <div className="flex items-center justify-between w-full min-w-0 mb-1">
+                            <span className="text-sm font-medium truncate pr-2">{equipment.name}</span>
+                            <Badge 
+                              variant={alert.type === 'critical' ? 'destructive' : alert.type === 'warning' ? 'secondary' : 'outline'} 
+                              className="text-xs shrink-0"
+                            >
+                              {alert.type}
+                            </Badge>
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Location: {formatLocation(equipment.location)}
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {alert.message}
+                          </div>
+                        </div>
+                      </Button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Equipment Needs Attention Section */}
+                {attentionEquipment.length > 0 && (
+                  <div className="space-y-2">
+                    <h5 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      Equipment Needs Attention ({attentionEquipment.length})
+                    </h5>
+                    {attentionEquipment.map((equipment) => (
+                      <Button
+                        key={equipment.id}
+                        variant="ghost"
+                        size="sm"
+                        className="w-full justify-start text-left"
+                        onClick={() => onEquipmentSelect(equipment.id)}
+                      >
+                        <div className="w-full text-left min-w-0">
+                          <div className="flex items-center justify-between w-full min-w-0">
+                            <span className="text-sm font-medium truncate pr-2">{equipment.name}</span>
+                            <Badge variant="secondary" className="text-xs shrink-0">
+                              {equipment.healthScore}%
+                            </Badge>
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-0.5">
+                            Location: {formatLocation(equipment.location)}
+                          </div>
+                        </div>
+                      </Button>
+                    ))}
+                  </div>
+                )}
               </CollapsibleContent>
             </Collapsible>
           )}
