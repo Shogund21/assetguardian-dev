@@ -1,5 +1,5 @@
 import React, { Suspense, useMemo } from 'react';
-import SafeCanvas from './SafeCanvas';
+import { Canvas } from '@react-three/fiber';
 import { Equipment3D } from './Equipment3D';
 import { EnergyFlowVisualization } from './EnergyFlowVisualization';
 import { DigitalTwinFacility } from '@/types/digitalTwin';
@@ -33,103 +33,36 @@ export const DigitalTwinScene: React.FC<DigitalTwinSceneProps> = ({
     }, {} as Record<string, { x: number; y: number; z: number }>);
   }, [facility.equipment]);
 
-  return (
-    <div className="h-full w-full bg-background rounded-lg overflow-hidden border">
-      <SafeCanvas
-        shadows
-        className="h-full w-full"
-        gl={{ antialias: true }}
-        dpr={[1, 2]}
-      >
-        <Sanitize3D>
-          <PCam
-            makeDefault
-            position={[20, 15, 20]}
-            fov={60}
-          />
-          
-          <ALight intensity={0.4} />
-          <DLight
-            position={[10, 10, 5]}
-            intensity={1}
-            castShadow
-          />
-          
-          <Suspense fallback={null}>
-            <Env preset="warehouse" />
-            
-            {/* Facility Floor Grid */}
-            <SafeGrid
-              args={[facility.dimensions.width, facility.dimensions.length]}
-              position={[0, 0, 0]}
-              cellSize={2}
-              cellThickness={0.5}
-              cellColor="#6366f1"
-              sectionSize={10}
-              sectionThickness={1}
-              sectionColor="#4f46e5"
-              fadeDistance={50}
-              fadeStrength={1}
-              followCamera={false}
-              infiniteGrid={false}
-            />
-            
-            {/* Equipment 3D Models */}
-            {facility.equipment.map((equipment) => (
-              <Equipment3D
-                key={equipment.id}
-                equipment={equipment}
-                isSelected={selectedEquipment === equipment.id}
-                onSelect={() => onEquipmentSelect(equipment.id)}
-              />
-            ))}
-            
-            {/* Energy Flow Visualization */}
-            {showEnergyFlow && facility.energyFlow && (
-              <EnergyFlowVisualization
-                energyFlows={facility.energyFlow}
-                equipmentPositions={equipmentPositions}
-              />
-            )}
-            
-            {/* Sensor data display - simplified without HTML overlay */}
-            {showSensors && facility.equipment.map((eq) => (
-              <G key={`sensor-${eq.id}`} position={[eq.position.x, eq.position.y + 4, eq.position.z]}>
-                <M>
-                  <SphereGeom args={[0.1]} />
-                  <BasicMat 
-                    color={eq.healthScore > 70 ? '#10b981' : eq.healthScore > 30 ? '#f59e0b' : '#ef4444'} 
-                  />
-                </M>
-              </G>
-            ))}
-            
-            <Controls
-              ref={orbitControlsRef}
-              enablePan={!isTransitioning}
-              enableZoom={!isTransitioning}
-              enableRotate={!isTransitioning}
-              minDistance={5}
-              maxDistance={100}
-              maxPolarAngle={Math.PI / 2.1}
-              dampingFactor={0.05}
-              enableDamping={true}
-            />
-          </Suspense>
-        </Sanitize3D>
-      </SafeCanvas>
-      
-      {/* Loading indicator */}
-      <Suspense
-        fallback={
-          <div className="absolute inset-0 flex items-center justify-center bg-background/80">
-            <div className="flex items-center gap-2 text-foreground">
-              <Loader2 className="h-6 w-6 animate-spin" />
-              <span>Loading Digital Twin...</span>
+  // TEMPORARY: R3F Error Boundary fallback
+  try {
+    return (
+      <div className="h-full w-full bg-background rounded-lg overflow-hidden border">
+        <div className="h-full w-full flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <div className="text-2xl font-bold text-foreground">Digital Twin Preview</div>
+            <div className="text-muted-foreground">
+              3D visualization temporarily unavailable due to compatibility issues
+            </div>
+            <div className="bg-muted p-4 rounded-lg">
+              <div className="text-sm space-y-2">
+                <div><strong>Facility:</strong> {facility.name}</div>
+                <div><strong>Equipment Count:</strong> {facility.equipment.length}</div>
+                <div><strong>Total Energy Flow:</strong> {facility.energyFlow?.length || 0} connections</div>
+              </div>
             </div>
           </div>
-        }
-      />
-    </div>
-  );
+        </div>
+      </div>
+    );
+  } catch (error) {
+    console.error('DigitalTwinScene error:', error);
+    return (
+      <div className="h-full w-full bg-background rounded-lg overflow-hidden border flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-lg font-semibold text-destructive">3D Scene Error</div>
+          <div className="text-sm text-muted-foreground">Unable to render 3D visualization</div>
+        </div>
+      </div>
+    );
+  }
 };
