@@ -80,8 +80,8 @@ const DigitalTwin = () => {
 
   const selectedEquipmentData = facility.equipment.find(eq => eq.id === selectedEquipment);
   const totalAlerts = facility.equipment.reduce((sum, eq) => sum + eq.alerts.filter(a => !a.acknowledged).length, 0);
-  const operationalCount = facility.equipment.filter(eq => eq.status === 'operational').length;
   const attentionEquipment = facility.equipment.filter(eq => eq.status === 'needs_attention');
+  const operationalCount = facility.equipment.length - attentionEquipment.length;
 
   const handleAttentionClick = () => {
     // Switch to maintenance view and highlight equipment needing attention
