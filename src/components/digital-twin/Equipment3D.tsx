@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Mesh } from 'three';
 import { DigitalTwinEquipment } from '@/types/digitalTwin';
+import { G, M, BoxGeom, CylinderGeom, SphereGeom, StdMat } from './Safe3D';
 
 interface Equipment3DProps {
   equipment: DigitalTwinEquipment;
@@ -27,18 +28,18 @@ export const Equipment3D: React.FC<Equipment3DProps> = ({
   const getEquipmentGeometry = () => {
     switch (equipment.type?.toLowerCase()) {
       case 'chiller':
-        return <boxGeometry args={[4, 3, 2]} />;
+        return <BoxGeom args={[4, 3, 2]} />;
       case 'ahu':
       case 'rtu':
-        return <boxGeometry args={[3, 2, 1.5]} />;
+        return <BoxGeom args={[3, 2, 1.5]} />;
       case 'cooling tower':
-        return <cylinderGeometry args={[1.5, 1.5, 4, 8]} />;
+        return <CylinderGeom args={[1.5, 1.5, 4, 8]} />;
       case 'generator':
-        return <boxGeometry args={[2.5, 1.5, 1]} />;
+        return <BoxGeom args={[2.5, 1.5, 1]} />;
       case 'split system':
-        return <boxGeometry args={[1, 0.5, 1.5]} />;
+        return <BoxGeom args={[1, 0.5, 1.5]} />;
       default:
-        return <boxGeometry args={[2, 2, 2]} />;
+        return <BoxGeom args={[2, 2, 2]} />;
     }
   };
 
@@ -64,13 +65,13 @@ export const Equipment3D: React.FC<Equipment3DProps> = ({
   };
 
   return (
-    <group
+    <G
       position={[equipment.position.x, equipment.position.y, equipment.position.z]}
       rotation={[equipment.rotation.x, equipment.rotation.y, equipment.rotation.z]}
       scale={[equipment.scale.x, equipment.scale.y, equipment.scale.z]}
     >
       {/* Main equipment mesh */}
-      <mesh
+      <M
         ref={meshRef}
         onClick={onSelect}
         onPointerOver={() => setHovered(true)}
@@ -79,39 +80,39 @@ export const Equipment3D: React.FC<Equipment3DProps> = ({
         receiveShadow
       >
         {getEquipmentGeometry()}
-        <meshStandardMaterial
+        <StdMat
           color={getStatusColor()}
           transparent
           opacity={hovered ? 0.8 : 1}
           emissive={isSelected ? '#4f46e5' : '#000000'}
           emissiveIntensity={isSelected ? 0.3 : 0}
         />
-      </mesh>
+      </M>
 
       {/* Health indicator sphere */}
-      <mesh position={[0, 2.5, 0]}>
-        <sphereGeometry args={[0.3]} />
-        <meshStandardMaterial
+      <M position={[0, 2.5, 0]}>
+        <SphereGeom args={[0.3]} />
+        <StdMat
           color={getHealthIndicator()}
           emissive={getHealthIndicator()}
           emissiveIntensity={0.3}
         />
-      </mesh>
+      </M>
       
       {/* Alert indicators */}
       {equipment.alerts.filter(alert => !alert.acknowledged).map((alert, index) => (
-        <mesh
+        <M
           key={alert.id}
           position={[1 + index * 0.5, 3, 0]}
         >
-          <sphereGeometry args={[0.2]} />
-          <meshStandardMaterial
+          <SphereGeom args={[0.2]} />
+          <StdMat
             color={alert.type === 'critical' ? '#ef4444' : '#f59e0b'}
             emissive={alert.type === 'critical' ? '#ef4444' : '#f59e0b'}
             emissiveIntensity={0.5}
           />
-        </mesh>
+        </M>
       ))}
-    </group>
+    </G>
   );
 };

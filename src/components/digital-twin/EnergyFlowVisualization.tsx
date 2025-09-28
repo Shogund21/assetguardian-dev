@@ -1,9 +1,15 @@
 import React, { useMemo } from 'react';
-import { EnergyFlowData } from '@/types/digitalTwin';
 import * as THREE from 'three';
+import { TubeGeom, StdMat, SphereGeom, G, M } from './Safe3D';
 
 interface EnergyFlowVisualizationProps {
-  energyFlows: EnergyFlowData[];
+  energyFlows: {
+    from: string;
+    to: string;
+    flow: number;
+    efficiency: number;
+    color: string;
+  }[];
   equipmentPositions: Record<string, { x: number; y: number; z: number }>;
 }
 
@@ -52,35 +58,35 @@ export const EnergyFlowVisualization: React.FC<EnergyFlowVisualizationProps> = (
   }, [energyFlows, equipmentPositions]);
 
   return (
-    <group>
+    <G>
       {flowLines.map((line, index) => {
         if (!line) return null;
         
         return (
-          <group key={index}>
-            <mesh>
-              <tubeGeometry args={[line.curve, 64, line.radius, 8, false]} />
-              <meshStandardMaterial color={line.color} transparent opacity={0.7} />
-            </mesh>
+          <G key={index}>
+            <M>
+              <TubeGeom args={[line.curve, 64, line.radius, 8, false]} />
+              <StdMat color={line.color} transparent opacity={0.7} />
+            </M>
 
             {/* Flow direction indicators */}
             {line.points.map((point, pointIndex) => {
               if (pointIndex % 4 !== 0) return null;
 
               return (
-                <mesh key={pointIndex} position={[point.x, point.y, point.z]}>
-                  <sphereGeometry args={[0.05]} />
-                  <meshStandardMaterial
+                <M key={pointIndex} position={[point.x, point.y, point.z]}>
+                  <SphereGeom args={[0.05]} />
+                  <StdMat
                     color={line.color}
                     emissive={line.color}
                     emissiveIntensity={0.3}
                   />
-                </mesh>
+                </M>
               );
             })}
-          </group>
+          </G>
         );
       })}
-    </group>
+    </G>
   );
 };

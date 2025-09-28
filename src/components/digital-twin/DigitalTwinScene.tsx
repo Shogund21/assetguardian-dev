@@ -6,6 +6,7 @@ import { EnergyFlowVisualization } from './EnergyFlowVisualization';
 import { DigitalTwinFacility } from '@/types/digitalTwin';
 import { Loader2 } from 'lucide-react';
 import Sanitize3D from './Sanitize3D';
+import { G, M, SphereGeom, BasicMat } from './Safe3D';
 
 interface DigitalTwinSceneProps {
   facility: DigitalTwinFacility;
@@ -94,14 +95,14 @@ export const DigitalTwinScene: React.FC<DigitalTwinSceneProps> = ({
             
             {/* Sensor data display - simplified without HTML overlay */}
             {showSensors && facility.equipment.map((eq) => (
-              <group key={`sensor-${eq.id}`} position={[eq.position.x, eq.position.y + 4, eq.position.z]}>
-                <mesh>
-                  <sphereGeometry args={[0.1]} />
-                  <meshBasicMaterial 
+              <G key={`sensor-${eq.id}`} position={[eq.position.x, eq.position.y + 4, eq.position.z]}>
+                <M>
+                  <SphereGeom args={[0.1]} />
+                  <BasicMat 
                     color={eq.healthScore > 70 ? '#10b981' : eq.healthScore > 30 ? '#f59e0b' : '#ef4444'} 
                   />
-                </mesh>
-              </group>
+                </M>
+              </G>
             ))}
             
             <OrbitControls
