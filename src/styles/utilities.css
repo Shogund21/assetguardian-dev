@@ -1,5 +1,14 @@
 
 /* Add any custom utility styles here */
+
+/* Header scroll offset for sticky header */
+:root {
+  --header-height: 4rem; /* 64px = h-16 */
+}
+
+html {
+  scroll-padding-top: calc(var(--header-height) + env(safe-area-inset-top));
+}
   .safe-top {
     padding-top: env(safe-area-inset-top);
   }
