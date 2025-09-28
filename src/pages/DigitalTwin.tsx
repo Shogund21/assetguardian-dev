@@ -81,6 +81,16 @@ const DigitalTwin = () => {
   const selectedEquipmentData = facility.equipment.find(eq => eq.id === selectedEquipment);
   const totalAlerts = facility.equipment.reduce((sum, eq) => sum + eq.alerts.filter(a => !a.acknowledged).length, 0);
   const operationalCount = facility.equipment.filter(eq => eq.status === 'operational').length;
+  const attentionEquipment = facility.equipment.filter(eq => eq.status === 'needs_attention');
+
+  const handleAttentionClick = () => {
+    // Switch to maintenance view and highlight equipment needing attention
+    animateToPreset('maintenance');
+    // If there's equipment needing attention, select the first one
+    if (attentionEquipment.length > 0) {
+      setSelectedEquipment(attentionEquipment[0].id);
+    }
+  };
 
   return (
     <CustomLayout>
@@ -144,6 +154,9 @@ const DigitalTwin = () => {
               totalEquipment={facility.equipment.length}
               currentPreset={currentPreset}
               isTransitioning={isTransitioning}
+              attentionEquipment={attentionEquipment}
+              onAttentionClick={handleAttentionClick}
+              onEquipmentSelect={handleEquipmentSelect}
             />
           </div>
         </div>

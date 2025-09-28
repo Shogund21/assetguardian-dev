@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { 
   Eye, 
   Zap, 
@@ -13,7 +14,10 @@ import {
   Settings,
   AlertTriangle,
   CheckCircle,
-  Clock
+  Clock,
+  ChevronDown,
+  ChevronUp,
+  Wrench
 } from 'lucide-react';
 import { DigitalTwinEquipment } from '@/types/digitalTwin';
 
@@ -30,6 +34,9 @@ interface DigitalTwinControlsProps {
   totalEquipment: number;
   currentPreset: string;
   isTransitioning: boolean;
+  attentionEquipment: DigitalTwinEquipment[];
+  onAttentionClick: () => void;
+  onEquipmentSelect: (equipmentId: string) => void;
 }
 
 export const DigitalTwinControls: React.FC<DigitalTwinControlsProps> = ({
@@ -45,7 +52,11 @@ export const DigitalTwinControls: React.FC<DigitalTwinControlsProps> = ({
   totalEquipment,
   currentPreset,
   isTransitioning,
+  attentionEquipment,
+  onAttentionClick,
+  onEquipmentSelect,
 }) => {
+  const [showAttentionDetails, setShowAttentionDetails] = useState(false);
   return (
     <div className="space-y-4">
       {/* Facility Status Overview */}
@@ -73,7 +84,7 @@ export const DigitalTwinControls: React.FC<DigitalTwinControlsProps> = ({
           </div>
           
           <div className="flex items-center gap-2 text-sm">
-            {totalAlerts === 0 ? (
+            {totalAlerts === 0 && attentionEquipment.length === 0 ? (
               <>
                 <CheckCircle className="h-4 w-4 text-green-500" />
                 <span className="text-green-600">All systems operational</span>
@@ -81,10 +92,49 @@ export const DigitalTwinControls: React.FC<DigitalTwinControlsProps> = ({
             ) : (
               <>
                 <AlertTriangle className="h-4 w-4 text-amber-500" />
-                <span className="text-amber-600">Attention required</span>
+                <Button 
+                  variant="link" 
+                  className="text-amber-600 hover:text-amber-700 p-0 h-auto text-sm"
+                  onClick={onAttentionClick}
+                >
+                  Attention required
+                </Button>
               </>
             )}
           </div>
+
+          {/* Equipment Needing Attention Details */}
+          {attentionEquipment.length > 0 && (
+            <Collapsible open={showAttentionDetails} onOpenChange={setShowAttentionDetails}>
+              <CollapsibleTrigger asChild>
+                <Button variant="outline" className="w-full justify-between" size="sm">
+                  <div className="flex items-center gap-2">
+                    <Wrench className="h-4 w-4" />
+                    <span>{attentionEquipment.length} Equipment Need Attention</span>
+                  </div>
+                  {showAttentionDetails ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-2 mt-2">
+                {attentionEquipment.map((equipment) => (
+                  <Button
+                    key={equipment.id}
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start text-left"
+                    onClick={() => onEquipmentSelect(equipment.id)}
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <span className="text-sm font-medium">{equipment.name}</span>
+                      <Badge variant="secondary" className="text-xs">
+                        {equipment.healthScore}%
+                      </Badge>
+                    </div>
+                  </Button>
+                ))}
+              </CollapsibleContent>
+            </Collapsible>
+          )}
         </CardContent>
       </Card>
 
