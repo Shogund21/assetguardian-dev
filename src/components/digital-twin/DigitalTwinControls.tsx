@@ -124,7 +124,7 @@ export const DigitalTwinControls: React.FC<DigitalTwinControlsProps> = ({
                         </Badge>
                       </div>
                       <div className="text-xs text-muted-foreground mt-0.5">
-                        Location: {Math.round(equipment.position.x * 50 + 750)}, {Math.round(equipment.position.y * 50 + 750)}, {Math.round(equipment.position.z * 50 + 750)}
+                        Location: {equipment.location}
                       </div>
                     </div>
                   </Button>

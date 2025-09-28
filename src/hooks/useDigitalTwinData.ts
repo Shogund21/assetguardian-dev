@@ -105,6 +105,7 @@ export const useDigitalTwinData = (facilityId?: string) => {
           id: eq.id,
           name: eq.name,
           type: eq.type || 'Unknown',
+          location: eq.location || 'Unknown',
           position: { x, y: 0, z },
           rotation: { x: 0, y: 0, z: 0 },
           scale: { x: 1, y: 1, z: 1 },

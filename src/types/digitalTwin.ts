@@ -2,6 +2,7 @@ export interface DigitalTwinEquipment {
   id: string;
   name: string;
   type: string;
+  location: string;
   position: {
     x: number;
     y: number;
