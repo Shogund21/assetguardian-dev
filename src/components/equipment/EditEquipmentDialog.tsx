@@ -39,8 +39,6 @@ export const EditEquipmentDialog = ({ equipment, children }: EditEquipmentDialog
       location: equipment.location,
       status: equipment.status || "",
       type: equipment.type || "",
-      lastMaintenance: null,
-      nextMaintenance: null,
     },
   });
 

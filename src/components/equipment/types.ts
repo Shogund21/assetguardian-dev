@@ -7,8 +7,6 @@ export const EquipmentFormSchema = z.object({
   serialNumber: z.string().optional(),
   location: z.string().min(2, "Location is required"),
   status: z.string().optional(),
-  lastMaintenance: z.string().nullable().optional(),
-  nextMaintenance: z.string().nullable().optional(),
   type: z.string().min(1, "Type is required"),
 });
 
