@@ -33,11 +33,6 @@ export const LandingHeader = () => {
 
           {/* Navigation Links - Center Right */}
           <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
-            {location.pathname !== '/landing' && (
-              <Link to="/landing" className="text-gray-800 hover:text-primary transition-colors font-medium text-sm xl:text-base">
-                Home
-              </Link>
-            )}
             <Link to="/solutions" className="text-gray-800 hover:text-primary transition-colors font-medium text-sm xl:text-base">
               Solutions
             </Link>
@@ -83,16 +78,7 @@ export const LandingHeader = () => {
         {isMobileMenuOpen && (
           <div className="lg:hidden absolute top-full left-0 right-0 bg-white/98 backdrop-blur-sm border-t border-gray-200 z-50 shadow-lg">
             <div className="flex flex-col space-y-1 p-4 max-h-[calc(100vh-4rem)] overflow-y-auto">
-              {location.pathname !== '/landing' && (
-                <Link 
-                  to="/landing" 
-                  className="text-gray-800 hover:text-primary hover:bg-gray-50 transition-colors py-3 px-4 rounded-lg font-medium text-base"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Home
-                </Link>
-              )}
-              <Link 
+              <Link
                 to="/solutions" 
                 className="text-gray-800 hover:text-primary hover:bg-gray-50 transition-colors py-3 px-4 rounded-lg font-medium text-base"
                 onClick={() => setIsMobileMenuOpen(false)}
