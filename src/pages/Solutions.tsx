@@ -39,6 +39,7 @@ const Solutions = () => {
                   <li>• Centralized monitoring with AI-guided troubleshooting</li>
                   <li>• Customer comfort optimization through rapid issue resolution</li>
                   <li>• Corporate sustainability goals with real-time energy insights</li>
+                  <li>• <strong>Digital Twins predict HVAC issues before peak shopping hours, ensuring uninterrupted customer comfort</strong></li>
                 </ul>
                 <Link to="/book-demo">
                   <Button className="bg-yellow-500 text-black hover:bg-yellow-400">
@@ -59,6 +60,7 @@ const Solutions = () => {
                   <li>• Energy efficiency optimization with mobile insights</li>
                   <li>• Compliance documentation with automated reporting</li>
                   <li>• Proactive maintenance scheduling with technician workflows</li>
+                  <li>• <strong>Live digital twins help maintain healthy air quality and compliance across classrooms</strong></li>
                 </ul>
                 <Link to="/book-demo">
                   <Button className="bg-yellow-500 text-black hover:bg-yellow-400">
@@ -79,6 +81,7 @@ const Solutions = () => {
                   <li>• Redundant monitoring with predictive insights</li>
                   <li>• Patient safety compliance with automated documentation</li>
                   <li>• Emergency response protocols with guided troubleshooting</li>
+                  <li>• <strong>Digital Twins safeguard uptime by detecting critical anomalies before equipment fails</strong></li>
                 </ul>
                 <Link to="/book-demo">
                   <Button className="bg-yellow-500 text-black hover:bg-yellow-400">
@@ -99,6 +102,7 @@ const Solutions = () => {
                   <li>• Step-by-step troubleshooting workflows</li>
                   <li>• Mobile technician workflows with expert knowledge base</li>
                   <li>• Service route optimization with priority alerts</li>
+                  <li>• <strong>Give your clients digital proof of performance with AI-powered equipment twins</strong></li>
                 </ul>
                 <Link to="/book-demo">
                   <Button className="bg-yellow-500 text-black hover:bg-yellow-400">

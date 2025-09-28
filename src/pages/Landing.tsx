@@ -4,6 +4,7 @@ import "../styles/landing.css";
 import { SEO } from "@/components/SEO";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LandingHero } from "@/components/landing/LandingHero";
+import { LandingDigitalTwin } from "@/components/landing/LandingDigitalTwin";
 import { LandingFeatures } from "@/components/landing/LandingFeatures";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 import { AccessRequestModal } from "@/components/landing/AccessRequestModal";
@@ -49,6 +50,7 @@ const Landing = () => {
       />
       <LandingHeader />
       <LandingHero onRequestAccess={() => setIsModalOpen(true)} />
+      <LandingDigitalTwin />
       <LandingFeatures />
       <LandingFooter />
       <AccessRequestModal

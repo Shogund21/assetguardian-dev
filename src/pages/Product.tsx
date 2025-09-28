@@ -48,6 +48,25 @@ const Product = () => {
               </div>
             </div>
 
+            {/* Digital Twin Technology */}
+            <div className="mb-16">
+              <div className="bg-white/5 p-8 rounded-lg border border-white/10">
+                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-lg mb-6 flex items-center justify-center">
+                  <span className="text-white font-bold text-2xl">🔬</span>
+                </div>
+                <h2 className="text-3xl font-bold mb-4 text-white">Digital Twin Technology</h2>
+                <p className="text-xl text-gray-300 mb-6">
+                  Every chiller, AHU, or cooling tower in AssetGuardian.ai has a live digital twin — a virtual model continuously updated with sensor data. The twin doesn't just show you equipment health, it predicts failures, simulates outcomes, and guides technicians to resolve issues the first time.
+                </p>
+                <ul className="text-gray-300 space-y-3 text-lg">
+                  <li>• Live, sensor-driven virtual replicas of assets</li>
+                  <li>• Predictive modeling to forecast failures</li>
+                  <li>• Simulated performance outcomes for planning</li>
+                  <li>• Technician-first troubleshooting guidance</li>
+                </ul>
+              </div>
+            </div>
+
             {/* Other Modules Grid */}
             <div className="grid md:grid-cols-2 gap-8 mb-16">
               {/* Technician Assist Mode */}
