@@ -22,9 +22,8 @@ export const EquipmentItem = ({ equipment }: EquipmentItemProps) => {
 
       if (error) throw error;
 
-      // Invalidate and refetch equipment queries
+      // Invalidate and refetch
       await queryClient.invalidateQueries({ queryKey: ["equipment"] });
-      await queryClient.invalidateQueries({ queryKey: ["equipment", equipment.company_id] });
 
       toast({
         title: "Status updated",
