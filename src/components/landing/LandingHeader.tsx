@@ -1,11 +1,12 @@
 
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 
 export const LandingHeader = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,9 +33,11 @@ export const LandingHeader = () => {
 
           {/* Navigation Links - Center Right */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link to="/landing" className="text-gray-800 hover:text-primary transition-colors font-medium">
-              Home
-            </Link>
+            {location.pathname !== '/landing' && (
+              <Link to="/landing" className="text-gray-800 hover:text-primary transition-colors font-medium">
+                Home
+              </Link>
+            )}
             <Link to="/solutions" className="text-gray-800 hover:text-primary transition-colors font-medium">
               Solutions
             </Link>
@@ -79,13 +82,15 @@ export const LandingHeader = () => {
         {isMobileMenuOpen && (
           <div className="md:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 z-50">
             <div className="flex flex-col space-y-4 p-6">
-              <Link 
-                to="/landing" 
-                className="text-gray-800 hover:text-primary transition-colors py-2 font-medium"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Home
-              </Link>
+              {location.pathname !== '/landing' && (
+                <Link 
+                  to="/landing" 
+                  className="text-gray-800 hover:text-primary transition-colors py-2 font-medium"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Home
+                </Link>
+              )}
               <Link 
                 to="/solutions" 
                 className="text-gray-800 hover:text-primary transition-colors py-2 font-medium"
