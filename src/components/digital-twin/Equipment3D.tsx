@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Mesh } from 'three';
 import { DigitalTwinEquipment } from '@/types/digitalTwin';
+import Sanitize3D from './Sanitize3D';
 
 interface Equipment3DProps {
   equipment: DigitalTwinEquipment;
@@ -64,54 +65,56 @@ export const Equipment3D: React.FC<Equipment3DProps> = ({
   };
 
   return (
-    <group
-      position={[equipment.position.x, equipment.position.y, equipment.position.z]}
-      rotation={[equipment.rotation.x, equipment.rotation.y, equipment.rotation.z]}
-      scale={[equipment.scale.x, equipment.scale.y, equipment.scale.z]}
-    >
-      {/* Main equipment mesh */}
-      <mesh
-        ref={meshRef}
-        onClick={onSelect}
-        onPointerOver={() => setHovered(true)}
-        onPointerOut={() => setHovered(false)}
-        castShadow
-        receiveShadow
+    <Sanitize3D>
+      <group
+        position={[equipment.position.x, equipment.position.y, equipment.position.z]}
+        rotation={[equipment.rotation.x, equipment.rotation.y, equipment.rotation.z]}
+        scale={[equipment.scale.x, equipment.scale.y, equipment.scale.z]}
       >
-        {getEquipmentGeometry()}
-        <meshStandardMaterial
-          color={getStatusColor()}
-          transparent
-          opacity={hovered ? 0.8 : 1}
-          emissive={isSelected ? '#4f46e5' : '#000000'}
-          emissiveIntensity={isSelected ? 0.3 : 0}
-        />
-      </mesh>
-
-      {/* Health indicator sphere */}
-      <mesh position={[0, 2.5, 0]}>
-        <sphereGeometry args={[0.3]} />
-        <meshStandardMaterial
-          color={getHealthIndicator()}
-          emissive={getHealthIndicator()}
-          emissiveIntensity={0.3}
-        />
-      </mesh>
-      
-      {/* Alert indicators */}
-      {equipment.alerts.filter(alert => !alert.acknowledged).map((alert, index) => (
+        {/* Main equipment mesh */}
         <mesh
-          key={alert.id}
-          position={[1 + index * 0.5, 3, 0]}
+          ref={meshRef}
+          onClick={onSelect}
+          onPointerOver={() => setHovered(true)}
+          onPointerOut={() => setHovered(false)}
+          castShadow
+          receiveShadow
         >
-          <sphereGeometry args={[0.2]} />
+          {getEquipmentGeometry()}
           <meshStandardMaterial
-            color={alert.type === 'critical' ? '#ef4444' : '#f59e0b'}
-            emissive={alert.type === 'critical' ? '#ef4444' : '#f59e0b'}
-            emissiveIntensity={0.5}
+            color={getStatusColor()}
+            transparent
+            opacity={hovered ? 0.8 : 1}
+            emissive={isSelected ? '#4f46e5' : '#000000'}
+            emissiveIntensity={isSelected ? 0.3 : 0}
           />
         </mesh>
-      ))}
-    </group>
+
+        {/* Health indicator sphere */}
+        <mesh position={[0, 2.5, 0]}>
+          <sphereGeometry args={[0.3]} />
+          <meshStandardMaterial
+            color={getHealthIndicator()}
+            emissive={getHealthIndicator()}
+            emissiveIntensity={0.3}
+          />
+        </mesh>
+        
+        {/* Alert indicators */}
+        {equipment.alerts.filter(alert => !alert.acknowledged).map((alert, index) => (
+          <mesh
+            key={alert.id}
+            position={[1 + index * 0.5, 3, 0]}
+          >
+            <sphereGeometry args={[0.2]} />
+            <meshStandardMaterial
+              color={alert.type === 'critical' ? '#ef4444' : '#f59e0b'}
+              emissive={alert.type === 'critical' ? '#ef4444' : '#f59e0b'}
+              emissiveIntensity={0.5}
+            />
+          </mesh>
+        ))}
+      </group>
+    </Sanitize3D>
   );
 };

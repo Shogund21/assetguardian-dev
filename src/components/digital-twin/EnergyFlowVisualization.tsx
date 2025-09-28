@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import Sanitize3D from './Sanitize3D';
 
 import { EnergyFlowData } from '@/types/digitalTwin';
 import * as THREE from 'three';
@@ -53,35 +54,37 @@ export const EnergyFlowVisualization: React.FC<EnergyFlowVisualizationProps> = (
   }, [energyFlows, equipmentPositions, getFlowColor]);
 
   return (
-    <group>
-      {flowLines.map((line, index) => {
-        if (!line) return null;
-        
-        return (
-          <group key={index}>
-            <mesh>
-              <tubeGeometry args={[line.curve, 64, line.radius, 8, false]} />
-              <meshStandardMaterial color={line.color} transparent opacity={0.7} />
-            </mesh>
+    <Sanitize3D>
+      <group>
+        {flowLines.map((line, index) => {
+          if (!line) return null;
+          
+          return (
+            <group key={index}>
+              <mesh>
+                <tubeGeometry args={[line.curve, 64, line.radius, 8, false]} />
+                <meshStandardMaterial color={line.color} transparent opacity={0.7} />
+              </mesh>
 
-            {/* Flow direction indicators */}
-            {line.points.map((point, pointIndex) => {
-              if (pointIndex % 4 !== 0) return null;
+              {/* Flow direction indicators */}
+              {line.points.map((point, pointIndex) => {
+                if (pointIndex % 4 !== 0) return null;
 
-              return (
-                <mesh key={pointIndex} position={[point.x, point.y, point.z]}>
-                  <sphereGeometry args={[0.05]} />
-                  <meshStandardMaterial
-                    color={line.color}
-                    emissive={line.color}
-                    emissiveIntensity={0.3}
-                  />
-                </mesh>
-              );
-            })}
-          </group>
-        );
-      })}
-    </group>
+                return (
+                  <mesh key={pointIndex} position={[point.x, point.y, point.z]}>
+                    <sphereGeometry args={[0.05]} />
+                    <meshStandardMaterial
+                      color={line.color}
+                      emissive={line.color}
+                      emissiveIntensity={0.3}
+                    />
+                  </mesh>
+                );
+              })}
+            </group>
+          );
+        })}
+      </group>
+    </Sanitize3D>
   );
 };
