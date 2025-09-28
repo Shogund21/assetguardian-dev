@@ -12,6 +12,8 @@ interface DigitalTwinThreeSceneProps {
   showSensors: boolean;
   orbitControlsRef: React.RefObject<any>;
   isTransitioning: boolean;
+  maintenanceMode?: boolean;
+  maintenanceEquipment?: Array<any>;
 }
 
 export const DigitalTwinThreeScene: React.FC<DigitalTwinThreeSceneProps> = ({
@@ -22,6 +24,8 @@ export const DigitalTwinThreeScene: React.FC<DigitalTwinThreeSceneProps> = ({
   showSensors,
   orbitControlsRef,
   isTransitioning,
+  maintenanceMode = false,
+  maintenanceEquipment = [],
 }) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene>();
@@ -129,12 +133,13 @@ export const DigitalTwinThreeScene: React.FC<DigitalTwinThreeSceneProps> = ({
       
       const color = getEquipmentColor(equipment.status);
       const isNonWorking = equipment.status === 'offline' || equipment.status === 'under_maintenance';
+      const isMaintenanceHighlighted = maintenanceMode && maintenanceEquipment.some(mEq => mEq.id === equipment.id);
       
       // Enhanced material with PBR-like properties
       const material = new THREE.MeshPhongMaterial({ 
-        color,
-        emissive: selectedEquipment === equipment.id ? 0x444444 : 0x000000,
-        emissiveIntensity: isNonWorking ? 0.3 : 0.1,
+        color: isMaintenanceHighlighted ? 0xff8c00 : color, // Orange for maintenance highlighting
+        emissive: selectedEquipment === equipment.id ? 0x444444 : (isMaintenanceHighlighted ? 0xff4500 : 0x000000),
+        emissiveIntensity: isMaintenanceHighlighted ? 0.4 : (isNonWorking ? 0.3 : 0.1),
         shininess: 30,
         specular: 0x222222
       });
@@ -360,13 +365,24 @@ export const DigitalTwinThreeScene: React.FC<DigitalTwinThreeSceneProps> = ({
     };
   }, [facility, onEquipmentSelect, showEnergyFlow]);
 
-  // Update selection highlighting
+  // Update selection highlighting and maintenance mode
   useEffect(() => {
     equipmentMeshesRef.current.forEach((mesh, equipmentId) => {
       const material = mesh.material as THREE.MeshPhongMaterial;
-      material.emissive.setHex(selectedEquipment === equipmentId ? 0x444444 : 0x000000);
+      const equipment = facility.equipment.find(eq => eq.id === equipmentId);
+      const isMaintenanceHighlighted = maintenanceMode && maintenanceEquipment.some(mEq => mEq.id === equipmentId);
+      
+      if (isMaintenanceHighlighted) {
+        material.color.setHex(0xff8c00); // Orange for maintenance
+        material.emissive.setHex(selectedEquipment === equipmentId ? 0x444444 : 0xff4500);
+        material.emissiveIntensity = 0.4;
+      } else {
+        material.color.setHex(getEquipmentColor(equipment?.status || 'operational'));
+        material.emissive.setHex(selectedEquipment === equipmentId ? 0x444444 : 0x000000);
+        material.emissiveIntensity = equipment?.status === 'offline' || equipment?.status === 'under_maintenance' ? 0.3 : 0.1;
+      }
     });
-  }, [selectedEquipment]);
+  }, [selectedEquipment, maintenanceMode, maintenanceEquipment, facility.equipment]);
 
   // Update energy flow visibility
   useEffect(() => {

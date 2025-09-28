@@ -10,6 +10,8 @@ interface DigitalTwinSceneProps {
   showSensors: boolean;
   orbitControlsRef: React.RefObject<any>;
   isTransitioning: boolean;
+  maintenanceMode?: boolean;
+  maintenanceEquipment?: Array<any>;
 }
 
 export const DigitalTwinScene: React.FC<DigitalTwinSceneProps> = ({
@@ -20,6 +22,8 @@ export const DigitalTwinScene: React.FC<DigitalTwinSceneProps> = ({
   showSensors,
   orbitControlsRef,
   isTransitioning,
+  maintenanceMode = false,
+  maintenanceEquipment = [],
 }) => {
   const equipmentPositions = useMemo(() => {
     return facility.equipment.reduce((acc, equipment) => {
@@ -30,15 +34,17 @@ export const DigitalTwinScene: React.FC<DigitalTwinSceneProps> = ({
 
   return (
     <div className="w-full h-full">
-      <DigitalTwinThreeScene
-        facility={facility}
-        selectedEquipment={selectedEquipment}
-        onEquipmentSelect={onEquipmentSelect}
-        showEnergyFlow={showEnergyFlow}
-        showSensors={showSensors}
-        orbitControlsRef={orbitControlsRef}
-        isTransitioning={isTransitioning}
-      />
+        <DigitalTwinThreeScene
+          facility={facility}
+          selectedEquipment={selectedEquipment}
+          onEquipmentSelect={onEquipmentSelect}
+          showEnergyFlow={showEnergyFlow}
+          showSensors={showSensors}
+          orbitControlsRef={orbitControlsRef}
+          isTransitioning={isTransitioning}
+          maintenanceMode={maintenanceMode}
+          maintenanceEquipment={maintenanceEquipment}
+        />
     </div>
   );
 };

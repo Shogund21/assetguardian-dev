@@ -13,6 +13,7 @@ const DigitalTwin = () => {
   const [selectedEquipment, setSelectedEquipment] = useState<string>();
   const [showEnergyFlow, setShowEnergyFlow] = useState(true);
   const [showSensors, setShowSensors] = useState(true);
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
   
   const { facility, isLoading, error } = useDigitalTwinData();
   
@@ -34,6 +35,7 @@ const DigitalTwin = () => {
   };
 
   const handleViewPreset = (preset: 'overview' | 'detail' | 'maintenance') => {
+    setMaintenanceMode(preset === 'maintenance');
     animateToPreset(preset, selectedEquipment);
   };
 
@@ -81,6 +83,7 @@ const DigitalTwin = () => {
   const selectedEquipmentData = facility.equipment.find(eq => eq.id === selectedEquipment);
   const totalAlerts = facility.equipment.reduce((sum, eq) => sum + eq.alerts.filter(a => !a.acknowledged).length, 0);
   const attentionEquipment = facility.equipment.filter(eq => eq.status === 'needs_attention');
+  const maintenanceEquipment = facility.equipment.filter(eq => eq.status === 'needs_attention' || eq.status === 'under_maintenance');
   const operationalCount = facility.equipment.length - attentionEquipment.length;
   
   // Get all unacknowledged alerts with equipment info
@@ -92,6 +95,7 @@ const DigitalTwin = () => {
 
   const handleAttentionClick = () => {
     // Switch to maintenance view and highlight equipment needing attention
+    setMaintenanceMode(true);
     animateToPreset('maintenance');
     // If there's equipment needing attention, select the first one
     if (attentionEquipment.length > 0) {
@@ -143,6 +147,8 @@ const DigitalTwin = () => {
               showSensors={showSensors}
               orbitControlsRef={orbitControlsRef}
               isTransitioning={isTransitioning}
+              maintenanceMode={maintenanceMode}
+              maintenanceEquipment={maintenanceEquipment}
             />
           </div>
 
