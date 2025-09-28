@@ -13,8 +13,8 @@ const Solutions = () => {
       />
       <LandingHeader />
       
-      <main className="min-h-screen bg-gray-900 text-white">
-        <section className="py-20 px-6">
+      <main className="bg-gray-900 text-white">
+        <section className="py-20 px-6 pb-32">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <h1 className="text-5xl font-bold mb-6">
