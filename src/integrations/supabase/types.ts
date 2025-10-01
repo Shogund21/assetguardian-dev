@@ -776,13 +776,6 @@ export type Database = {
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "company_users_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "trial_companies"
-            referencedColumns: ["id"]
-          },
         ]
       }
       condenser_maintenance: {
@@ -1010,24 +1003,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "equipment_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "trial_companies"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "fk_equipment_company"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_equipment_company"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "trial_companies"
             referencedColumns: ["id"]
           },
         ]
@@ -1932,13 +1911,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "fk_maintenance_company"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "trial_companies"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "fk_maintenance_equipment"
             columns: ["equipment_id"]
             isOneToOne: false
@@ -1964,13 +1936,6 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "hvac_maintenance_checks_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "trial_companies"
             referencedColumns: ["id"]
           },
           {
@@ -2085,24 +2050,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "fk_location_company"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "trial_companies"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "locations_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "locations_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "trial_companies"
             referencedColumns: ["id"]
           },
         ]
@@ -2162,13 +2113,6 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "maintenance_documents_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "trial_companies"
             referencedColumns: ["id"]
           },
           {
@@ -2713,13 +2657,6 @@ export type Database = {
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "projects_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "trial_companies"
-            referencedColumns: ["id"]
-          },
         ]
       }
       rate_limit_configs: {
@@ -3156,24 +3093,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "fk_technician_company"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "trial_companies"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "technicians_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technicians_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "trial_companies"
             referencedColumns: ["id"]
           },
         ]
@@ -3559,88 +3482,7 @@ export type Database = {
       }
     }
     Views: {
-      filter_changes_view: {
-        Row: {
-          created_at: string | null
-          due_date: string | null
-          equipment_id: string | null
-          filter_condition: string | null
-          filter_size: string | null
-          filter_type: string | null
-          id: string | null
-          installation_date: string | null
-          notes: string | null
-          status: Database["public"]["Enums"]["filter_change_status"] | null
-          status_calc: string | null
-          technician_id: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          due_date?: string | null
-          equipment_id?: string | null
-          filter_condition?: string | null
-          filter_size?: string | null
-          filter_type?: string | null
-          id?: string | null
-          installation_date?: string | null
-          notes?: string | null
-          status?: Database["public"]["Enums"]["filter_change_status"] | null
-          status_calc?: never
-          technician_id?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          due_date?: string | null
-          equipment_id?: string | null
-          filter_condition?: string | null
-          filter_size?: string | null
-          filter_type?: string | null
-          id?: string | null
-          installation_date?: string | null
-          notes?: string | null
-          status?: Database["public"]["Enums"]["filter_change_status"] | null
-          status_calc?: never
-          technician_id?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "filter_changes_equipment_id_fkey"
-            columns: ["equipment_id"]
-            isOneToOne: false
-            referencedRelation: "equipment"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "filter_changes_technician_id_fkey"
-            columns: ["technician_id"]
-            isOneToOne: false
-            referencedRelation: "technicians"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      trial_companies: {
-        Row: {
-          address: string | null
-          contact_email: string | null
-          contact_phone: string | null
-          created_at: string | null
-          days_remaining: number | null
-          id: string | null
-          is_expired: boolean | null
-          is_trial: boolean | null
-          logo_url: string | null
-          name: string | null
-          trial_created_at: string | null
-          trial_expires_at: string | null
-          updated_at: string | null
-          user_count: number | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       admin_send_password_reset_email: {
@@ -3657,10 +3499,6 @@ export type Database = {
       }
       assign_user_to_demo_company: {
         Args: { p_user_email: string }
-        Returns: string
-      }
-      calculate_filter_status: {
-        Args: { p_due: string }
         Returns: string
       }
       can_access_all_data: {
