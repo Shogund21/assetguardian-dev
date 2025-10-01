@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { FilterChange } from "@/types/filterChanges";
+import { calculateFilterStatus } from "@/utils/filterStatusCalculator";
 
 export function useFilterChangesQuery(options?: { equipmentId?: string; enabled?: boolean }) {
   const { toast } = useToast();
@@ -12,8 +13,9 @@ export function useFilterChangesQuery(options?: { equipmentId?: string; enabled?
     queryKey: ['filter-changes', equipmentId],
     enabled,
     queryFn: async () => {
+      // Query filter_changes directly where status = 'active' instead of using view
       let query = supabase
-        .from('filter_changes_view')
+        .from('filter_changes')
         .select(`
           *,
           equipment:equipment_id (
@@ -25,6 +27,7 @@ export function useFilterChangesQuery(options?: { equipmentId?: string; enabled?
             lastName
           )
         `)
+        .eq('status', 'active')
         .order('due_date', { ascending: true });
 
       if (equipmentId) {
@@ -43,7 +46,13 @@ export function useFilterChangesQuery(options?: { equipmentId?: string; enabled?
         throw error;
       }
 
-      return (data || []) as FilterChange[];
+      // Add calculated status_calc to each item (replaces view's status_calc column)
+      const dataWithStatus = (data || []).map(item => ({
+        ...item,
+        status_calc: calculateFilterStatus(item.due_date)
+      }));
+
+      return dataWithStatus as FilterChange[];
     },
   });
 }

@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { FilterChange } from "@/types/filterChanges";
 import { format } from "date-fns";
 import { ArrowRight } from "lucide-react";
+import { calculateFilterStatus } from "@/utils/filterStatusCalculator";
 
 interface FilterChangeSummary {
   total: number;
@@ -31,14 +32,15 @@ export const FilterChangesOverview = () => {
   useEffect(() => {
     const fetchFilterSummary = async () => {
       try {
-        // Fetch summary counts
+        // Fetch summary counts - query filter_changes directly where status = 'active'
         const { data: viewData, error: viewError } = await supabase
-          .from("filter_changes_view")
-          .select("status, status_calc");
+          .from("filter_changes")
+          .select("status, due_date")
+          .eq("status", "active");
 
         if (viewError) throw viewError;
 
-        // Process summary data
+        // Process summary data and calculate status on client side
         const summaryData: FilterChangeSummary = {
           total: viewData.length,
           overdue: 0,
@@ -50,20 +52,23 @@ export const FilterChangesOverview = () => {
         viewData.forEach(item => {
           if (item.status === 'completed') {
             summaryData.completed++;
-          } else if (item.status_calc === 'overdue') {
-            summaryData.overdue++;
-          } else if (item.status_calc === 'due_soon') {
-            summaryData.due_soon++;
           } else {
-            summaryData.upcoming++;
+            const statusCalc = calculateFilterStatus(item.due_date);
+            if (statusCalc === 'overdue') {
+              summaryData.overdue++;
+            } else if (statusCalc === 'due_soon') {
+              summaryData.due_soon++;
+            } else {
+              summaryData.upcoming++;
+            }
           }
         });
 
         setSummary(summaryData);
 
-        // Fetch recent filter changes
+        // Fetch recent filter changes - query filter_changes directly where status = 'active'
         const { data: recentData, error: recentError } = await supabase
-          .from("filter_changes_view")
+          .from("filter_changes")
           .select(`
             *,
             equipment:equipment_id (
@@ -71,11 +76,19 @@ export const FilterChangesOverview = () => {
               location
             )
           `)
+          .eq("status", "active")
           .order("due_date", { ascending: true })
           .limit(3);
 
         if (recentError) throw recentError;
-        setRecentChanges(recentData as FilterChange[]);
+        
+        // Add calculated status_calc to each item
+        const dataWithStatus = recentData.map(item => ({
+          ...item,
+          status_calc: calculateFilterStatus(item.due_date)
+        }));
+        
+        setRecentChanges(dataWithStatus as FilterChange[]);
 
       } catch (error) {
         console.error("Error fetching filter changes summary:", error);
