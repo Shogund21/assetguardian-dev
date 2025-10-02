@@ -46,8 +46,24 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       }
 
       try {
-        // Check if user has an approved technician record
         const { supabase } = await import("@/integrations/supabase/client");
+        
+        // First, check if user has admin role in user_roles table
+        const { data: adminRole } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('role', 'admin')
+          .maybeSingle();
+
+        if (adminRole) {
+          console.log("✅ User has admin role, access granted:", user.email);
+          setIsApproved(true);
+          setCheckingApproval(false);
+          return;
+        }
+
+        // Check if user has an approved technician record
         const { data: technician, error } = await supabase
           .from('technicians')
           .select('account_status, user_role, email')
@@ -69,15 +85,15 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
             .eq('email', user.email)
             .maybeSingle();
 
-          if (techByEmail && techByEmail.account_status === 'active') {
-            console.log("✅ User approved (matched by email):", user.email);
+          if (techByEmail && ['active', 'has_account'].includes(techByEmail.account_status)) {
+            console.log("✅ User approved (matched by email):", user.email, "Status:", techByEmail.account_status);
             setIsApproved(true);
           } else {
             console.log("❌ No approved technician record found for:", user.email);
             setIsApproved(false);
           }
-        } else if (technician.account_status === 'active') {
-          console.log("✅ User approved:", technician.email);
+        } else if (['active', 'has_account'].includes(technician.account_status)) {
+          console.log("✅ User approved:", technician.email, "Status:", technician.account_status);
           setIsApproved(true);
         } else {
           console.log("❌ User not approved. Status:", technician.account_status);
