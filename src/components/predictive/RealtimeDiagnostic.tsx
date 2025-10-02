@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Activity, MessageCircle, AlertTriangle, CheckCircle, XCircle, Send, Loader2, Paperclip, X } from 'lucide-react';
+import { Activity, MessageCircle, AlertTriangle, CheckCircle, XCircle, Send, Loader2, Paperclip, X, Camera } from 'lucide-react';
 import { RealtimeHvacDiagnosticService, type LivePoint, type DiagnosticSession, type DiagnosticMessage } from '@/services/realtimeHvacDiagnosticService';
 import { toast } from 'sonner';
 
@@ -24,8 +24,12 @@ export const RealtimeDiagnostic = ({ equipmentId, equipmentName, onClose }: Prop
   const [isConnected, setIsConnected] = useState(false);
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [isCameraActive, setIsCameraActive] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const isGeneralMode = equipmentId === "general";
 
@@ -153,6 +157,76 @@ export const RealtimeDiagnostic = ({ equipmentId, equipmentName, onClose }: Prop
   const removeImage = (index: number) => {
     setSelectedImages(prev => prev.filter((_, i) => i !== index));
   };
+
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'environment' },
+        audio: false 
+      });
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        streamRef.current = stream;
+        setIsCameraActive(true);
+      }
+    } catch (error) {
+      console.error('Camera access error:', error);
+      toast.error("Unable to access camera. Please use the upload button instead.");
+    }
+  };
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    setIsCameraActive(false);
+  };
+
+  const capturePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(video, 0, 0);
+        
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              if (e.target?.result) {
+                const base64Image = e.target.result as string;
+                setSelectedImages(prev => {
+                  if (prev.length >= 5) {
+                    toast.error("You can only attach up to 5 images per message.");
+                    return prev;
+                  }
+                  return [...prev, base64Image];
+                });
+                stopCamera();
+              }
+            };
+            reader.readAsDataURL(blob);
+          }
+        }, 'image/jpeg', 0.8);
+      }
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, []);
 
   // Send message with or without images
   const sendMessage = async () => {
@@ -375,6 +449,27 @@ export const RealtimeDiagnostic = ({ equipmentId, equipmentName, onClose }: Prop
               </ScrollArea>
               
               <div className="space-y-2">
+                {/* Camera preview */}
+                {isCameraActive && (
+                  <div className="relative w-full bg-black rounded-lg overflow-hidden">
+                    <video 
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      className="w-full h-64 object-cover"
+                    />
+                    <canvas ref={canvasRef} className="hidden" />
+                    <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+                      <Button onClick={capturePhoto} size="sm">
+                        Capture
+                      </Button>
+                      <Button onClick={stopCamera} size="sm" variant="outline">
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
                 {/* Image previews */}
                 {selectedImages.length > 0 && (
                   <div className="flex flex-wrap gap-2 p-2 bg-gray-50 rounded-lg">
@@ -406,15 +501,28 @@ export const RealtimeDiagnostic = ({ equipmentId, equipmentName, onClose }: Prop
                     onChange={handleImageUpload}
                     className="hidden"
                   />
-                  <Button
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isAnalyzing || isUploadingImage || selectedImages.length >= 5}
-                    size="icon"
-                    variant="outline"
-                    type="button"
-                  >
-                    <Paperclip className="h-4 w-4" />
-                  </Button>
+                  {!isCameraActive && (
+                    <>
+                      <Button
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isAnalyzing || isUploadingImage || selectedImages.length >= 5}
+                        size="icon"
+                        variant="outline"
+                        type="button"
+                      >
+                        <Paperclip className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        onClick={startCamera}
+                        disabled={isAnalyzing || selectedImages.length >= 5}
+                        size="icon"
+                        variant="outline"
+                        type="button"
+                      >
+                        <Camera className="h-4 w-4" />
+                      </Button>
+                    </>
+                  )}
                   <Textarea
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
