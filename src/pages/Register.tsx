@@ -40,7 +40,23 @@ const Register = () => {
     setIsSubmitting(true);
 
     try {
-      // Check if email already exists
+      // Check if email already exists in access requests or technicians
+      const { data: existingRequest } = await supabase
+        .from("access_requests")
+        .select("email")
+        .eq("email", formData.email)
+        .single();
+
+      if (existingRequest) {
+        toast({
+          title: "Request already submitted",
+          description: "An access request with this email already exists. Please wait for admin approval.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       const { data: existingTechnician } = await supabase
         .from("technicians")
         .select("email")
@@ -53,37 +69,35 @@ const Register = () => {
           description: "This email is already associated with an account.",
           variant: "destructive",
         });
+        setIsSubmitting(false);
         return;
       }
 
-      // Create technician record with pending status
-      const { data: technician, error: techError } = await supabase
-        .from("technicians")
+      // Create access request record (NOT a technician)
+      const { error: requestError } = await supabase
+        .from("access_requests")
         .insert([{
-          firstName: formData.firstName,
-          lastName: formData.lastName,
+          first_name: formData.firstName,
+          last_name: formData.lastName,
           email: formData.email,
           phone: formData.phone,
-          specialization: formData.specialization,
-          company_name: formData.companyName,
-          status: 'pending',
-          user_role: 'technician'
-        }])
-        .select()
-        .single();
+          company: formData.companyName,
+          reason: `Requested access as ${formData.specialization} specialist`,
+          status: 'pending'
+        }]);
 
-      if (techError) throw techError;
+      if (requestError) throw requestError;
 
       toast({
-        title: "Registration Successful",
-        description: "Your account has been created and is pending approval. You'll receive an email once approved.",
+        title: "Access Request Submitted",
+        description: "Your request has been submitted for admin approval. You'll receive login credentials via email once approved.",
       });
 
-      navigate("/");
+      navigate("/auth");
     } catch (error: any) {
       toast({
-        title: "Registration Failed",
-        description: error.message || "There was an error creating your account.",
+        title: "Submission Failed",
+        description: error.message || "There was an error submitting your request.",
         variant: "destructive",
       });
     } finally {
@@ -102,9 +116,9 @@ const Register = () => {
               className="h-12 w-12" 
             />
           </div>
-          <CardTitle className="text-2xl font-bold">Join Asset Guardian</CardTitle>
+          <CardTitle className="text-2xl font-bold">Request Access</CardTitle>
           <CardDescription>
-            Create your account to get started with our facilities management system
+            Submit your request for admin approval. You'll receive login credentials via email once approved.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -189,14 +203,17 @@ const Register = () => {
               className="w-full" 
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Creating Account..." : "Create Account"}
+              {isSubmitting ? "Submitting Request..." : "Request Access"}
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-6 text-center space-y-2">
+            <p className="text-xs text-muted-foreground">
+              All requests require administrator approval before access is granted.
+            </p>
             <p className="text-sm text-gray-600">
               Already have an account?{" "}
-              <Link to="/" className="font-medium text-primary hover:underline">
+              <Link to="/auth" className="font-medium text-primary hover:underline">
                 Sign in here
               </Link>
             </p>

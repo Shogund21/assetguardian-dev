@@ -119,7 +119,9 @@ const AccessRequestManagement = () => {
       queryClient.invalidateQueries({ queryKey: ["technicians"] });
       toast({
         title: "Success",
-        description: `Access request ${variables.status === 'approved' ? 'approved and technician created' : 'denied'} successfully`,
+        description: variables.status === 'approved' 
+          ? 'Access approved! User account created and password reset email sent.' 
+          : 'Access request denied successfully',
       });
     },
     onError: (error) => {
@@ -240,7 +242,7 @@ const AccessRequestManagement = () => {
                     className="flex items-center gap-2"
                   >
                     <CheckCircle className="h-4 w-4" />
-                    Approve & Create Technician
+                    {updateRequestMutation.isPending ? 'Creating Account...' : 'Approve & Create Account'}
                   </Button>
                   <Button
                     variant="destructive"
