@@ -335,15 +335,6 @@ const Auth = () => {
           <p className="text-xs text-muted-foreground">
             Need help? Contact your administrator for access.
           </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Don't have access yet?{" "}
-            <Link 
-              to="/landing" 
-              className="text-primary hover:underline font-medium"
-            >
-              Request Access
-            </Link>
-          </p>
         </div>
 
         {/* Super Admin Setup - Only show if account doesn't exist */}
