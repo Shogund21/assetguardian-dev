@@ -56,13 +56,17 @@ Asset Guardian is fully optimized for mobile devices, providing complete functio
 ### Equipment Management
 - **QR Code Scanning**: Scan equipment QR codes for quick access
 - **Mobile Forms**: Complete maintenance forms on mobile devices
-- **Photo Integration**: Take and attach photos directly from mobile camera
+- **Photo Integration**: Take and attach photos directly from mobile camera with live preview
+- **Multi-Image Capture**: Capture multiple equipment photos in diagnostic sessions
+- **Ki Assistant**: Real-time HVAC diagnostics with image upload and camera capture
 - **GPS Location**: Automatic location tagging for field work
 
 ### Maintenance Checks
 - **Mobile Checklists**: Complete maintenance checks on mobile devices
 - **Touch Input**: Optimized input methods for field conditions
-- **Photo Documentation**: Capture equipment conditions with mobile camera
+- **Photo Documentation**: Capture equipment conditions with mobile camera (up to 5 images)
+- **Live Camera Access**: Direct camera integration with video preview for immediate captures
+- **Diagnostic Images**: Attach images to Ki Assistant sessions for AI-powered analysis
 - **Voice Notes**: Record voice notes for detailed documentation
 
 ### Project Management
@@ -170,7 +174,12 @@ Asset Guardian is fully optimized for mobile devices, providing complete functio
 ## Advanced Mobile Features
 
 ### Camera Integration
-- **Equipment Photos**: Capture equipment conditions and issues
+- **Equipment Photos**: Capture equipment conditions and issues with direct camera access
+- **Ki Assistant Image Capture**: Take photos directly in HVAC diagnostic sessions
+- **Multi-Image Support**: Capture and upload up to 5 images simultaneously
+- **Video Preview**: Live camera preview before capturing photos
+- **Camera Controls**: Switch between front and rear cameras on mobile devices
+- **Image Management**: Preview, remove, and manage captured images before sending
 - **Document Scanning**: Scan documents and manuals for reference
 - **QR Code Reading**: Scan equipment QR codes for instant access
 - **Image Annotations**: Add annotations and notes to captured images

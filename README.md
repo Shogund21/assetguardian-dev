@@ -44,7 +44,11 @@ A comprehensive AI-powered facility management system that cuts downtime by 81% 
 - **Alert System**: Automated alerts for equipment requiring attention with risk level classification
 - **Timeline Predictions**: Forecast equipment failure timelines and maintenance needs
 - **Performance Trends**: Track equipment efficiency and performance degradation with z-score analysis
-- **AI Chat Interface**: Natural language queries about equipment performance and recommendations
+- **Ki Assistant**: Real-time HVAC diagnostic assistant with natural language interaction
+- **Image Upload & Analysis**: Upload up to 5 equipment images for AI-powered diagnostics
+- **Camera Photo Capture**: Take photos directly from mobile/desktop camera for instant analysis
+- **Multi-Image Support**: Process multiple images simultaneously for comprehensive diagnostics
+- **Visual Documentation**: Store equipment photos with diagnostic sessions for reference
 - **Statistical Baselines**: Mike Reyes-style statistical analysis with baseline mean calculations
 - **Anomaly Detection**: Advanced anomaly detection with confidence scoring and severity levels
 - **Degradation Analysis**: Component-level degradation tracking with replacement thresholds
@@ -191,7 +195,9 @@ A comprehensive AI-powered facility management system that cuts downtime by 81% 
 
 ### Additional Integrations
 - **QR Code Generation** for equipment identification
-- **Camera Integration** for mobile photo capture
+- **Camera Integration** for mobile and desktop photo capture with video stream
+- **Multi-Image Upload** supporting up to 5 images simultaneously
+- **Base64 Image Processing** for efficient image handling and storage
 - **Email Notifications** via Resend.com
 - **Print Optimization** for report generation
 
@@ -199,7 +205,9 @@ A comprehensive AI-powered facility management system that cuts downtime by 81% 
 
 - **Native Mobile Apps**: Deploy as iOS and Android apps using Capacitor
 - **Offline-First Architecture**: Full functionality without internet connection
-- **Camera Integration**: Take photos directly within the app for AI analysis
+- **Camera Integration**: Take photos directly within the app for AI analysis with video preview
+- **Multi-Camera Support**: Access front and rear cameras on mobile devices
+- **Image Capture Controls**: Capture, preview, and manage multiple photos before sending
 - **Touch-Optimized Interface**: Mobile-first design with touch-friendly controls
 - **3D Touch Controls**: Mobile-optimized 3D navigation for digital twin visualization
 - **Push Notifications**: Real-time alerts for maintenance and equipment issues
