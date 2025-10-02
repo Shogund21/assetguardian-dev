@@ -2,10 +2,8 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -14,13 +12,6 @@ import { supabase } from "@/integrations/supabase/client";
 const Auth = () => {
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  const [signupEmail, setSignupEmail] = useState("");
-  const [signupPassword, setSignupPassword] = useState("");
-  const [signupFirstName, setSignupFirstName] = useState("");
-  const [signupLastName, setSignupLastName] = useState("");
-  const [signupPhone, setSignupPhone] = useState("");
-  const [signupCompany, setSignupCompany] = useState("");
-  const [signupPurpose, setSignupPurpose] = useState("");
   const [resetEmail, setResetEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -32,7 +23,7 @@ const Auth = () => {
   const [checkingSuperAdmin, setCheckingSuperAdmin] = useState(true);
   
   const navigate = useNavigate();
-  const { isAuthenticated, signIn, signUp, resetPassword } = useAuth();
+  const { isAuthenticated, signIn, resetPassword } = useAuth();
   const { toast } = useToast();
 
   // Check if super admin exists
@@ -113,39 +104,6 @@ const Auth = () => {
     }
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    clearMessages();
-    setLoading(true);
-
-    try {
-      const result = await signUp(signupEmail, signupPassword, signupFirstName, signupLastName, signupPhone, signupCompany, signupPurpose);
-      
-      if (result.success) {
-        showSuccess("🎉 Account created successfully! Check your email for confirmation.");
-        toast({
-          title: "Account created!",
-          description: "Please check your email to verify your account.",
-        });
-        
-        // Clear form on success
-        setSignupEmail("");
-        setSignupPassword("");
-        setSignupFirstName("");
-        setSignupLastName("");
-        setSignupPhone("");
-        setSignupCompany("");
-        setSignupPurpose("");
-      } else {
-        showError(result.error || "Sign up failed. Please try again.");
-      }
-    } catch (error) {
-      console.error("Unexpected error during sign up:", error);
-      showError("🌐 An unexpected error occurred. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -291,192 +249,83 @@ const Auth = () => {
           </Card>
         ) : (
           <Card>
-            <CardContent className="p-0">
-              <Tabs defaultValue="signin" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="signin">Sign In</TabsTrigger>
-                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
-                </TabsList>
+            <CardContent className="p-6">
+              <div className="space-y-6">
+                <div className="space-y-2 mb-4">
+                  <h3 className="text-lg font-semibold">Welcome Back</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Sign in to your approved account
+                  </p>
+                </div>
                 
-                <TabsContent value="signin" className="p-6 pt-4">
-                  <div className="space-y-2 mb-4">
-                    <h3 className="text-lg font-semibold">Welcome Back</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Sign in to your account to continue
-                    </p>
+                <form onSubmit={handleSignIn} className="space-y-4">
+                  <div>
+                    <Label htmlFor="loginEmail">Email</Label>
+                    <Input
+                      id="loginEmail"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={loginEmail}
+                      onChange={(e) => setLoginEmail(e.target.value)}
+                      required
+                      disabled={loading}
+                    />
                   </div>
                   
-                  <form onSubmit={handleSignIn} className="space-y-4">
-                    <div>
-                      <Label htmlFor="loginEmail">Email</Label>
-                      <Input
-                        id="loginEmail"
-                        type="email"
-                        placeholder="Enter your email"
-                        value={loginEmail}
-                        onChange={(e) => setLoginEmail(e.target.value)}
-                        required
-                        disabled={loading}
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="loginPassword">Password</Label>
-                      <Input
-                        id="loginPassword"
-                        type="password"
-                        placeholder="Enter your password"
-                        value={loginPassword}
-                        onChange={(e) => setLoginPassword(e.target.value)}
-                        required
-                        disabled={loading}
-                      />
-                    </div>
-
-                    {(error || successMessage) && (
-                      <Alert variant={error ? "destructive" : "default"} className={successMessage ? "border-green-200 bg-green-50 text-green-800" : ""}>
-                        <AlertDescription>{error || successMessage}</AlertDescription>
-                      </Alert>
-                    )}
-
-                    <Button 
-                      type="submit" 
-                      className="w-full" 
-                      disabled={loading || !loginEmail.trim() || !loginPassword.trim() || isRateLimited}
-                    >
-                      {loading ? "Signing in..." : isRateLimited ? "Please wait..." : "Sign In"}
-                    </Button>
-                    
-                    <div className="text-center">
-                      <button
-                        type="button"
-                        onClick={() => setShowResetForm(true)}
-                        className="text-sm text-primary hover:underline"
-                        disabled={loading}
-                      >
-                        Forgot your password?
-                      </button>
-                    </div>
-                  </form>
-                </TabsContent>
-                
-                <TabsContent value="signup" className="p-6 pt-4">
-                  <div className="space-y-2 mb-4">
-                    <h3 className="text-lg font-semibold">Create Account</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Sign up for a new account to get started
-                    </p>
+                  <div>
+                    <Label htmlFor="loginPassword">Password</Label>
+                    <Input
+                      id="loginPassword"
+                      type="password"
+                      placeholder="Enter your password"
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
+                      required
+                      disabled={loading}
+                    />
                   </div>
+
+                  {(error || successMessage) && (
+                    <Alert variant={error ? "destructive" : "default"} className={successMessage ? "border-green-200 bg-green-50 text-green-800" : ""}>
+                      <AlertDescription>{error || successMessage}</AlertDescription>
+                    </Alert>
+                  )}
+
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    disabled={loading || !loginEmail.trim() || !loginPassword.trim() || isRateLimited}
+                  >
+                    {loading ? "Signing in..." : isRateLimited ? "Please wait..." : "Sign In"}
+                  </Button>
                   
-                  <form onSubmit={handleSignUp} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="signupFirstName">First Name</Label>
-                        <Input
-                          id="signupFirstName"
-                          type="text"
-                          placeholder="First name"
-                          value={signupFirstName}
-                          onChange={(e) => setSignupFirstName(e.target.value)}
-                          disabled={loading}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="signupLastName">Last Name</Label>
-                        <Input
-                          id="signupLastName"
-                          type="text"
-                          placeholder="Last name"
-                          value={signupLastName}
-                          onChange={(e) => setSignupLastName(e.target.value)}
-                          disabled={loading}
-                        />
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="signupEmail">Email</Label>
-                      <Input
-                        id="signupEmail"
-                        type="email"
-                        placeholder="Enter your work email"
-                        value={signupEmail}
-                        onChange={(e) => setSignupEmail(e.target.value)}
-                        required
-                        disabled={loading}
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="signupPhone">Phone Number</Label>
-                      <Input
-                        id="signupPhone"
-                        type="tel"
-                        placeholder="Phone Number (optional)"
-                        value={signupPhone}
-                        onChange={(e) => setSignupPhone(e.target.value)}
-                        disabled={loading}
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="signupCompany">Company/Organization</Label>
-                      <Input
-                        id="signupCompany"
-                        type="text"
-                        placeholder="Enter your company or organization"
-                        value={signupCompany}
-                        onChange={(e) => setSignupCompany(e.target.value)}
-                        required
-                        disabled={loading}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="signupPurpose">Purpose</Label>
-                      <Textarea
-                        id="signupPurpose"
-                        placeholder="Briefly explain your role and how you plan to use Asset Guardian"
-                        value={signupPurpose}
-                        onChange={(e) => setSignupPurpose(e.target.value)}
-                        required
-                        disabled={loading}
-                        className="min-h-[80px] resize-none"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="signupPassword">Password</Label>
-                      <Input
-                        id="signupPassword"
-                        type="password"
-                        placeholder="Create a password"
-                        value={signupPassword}
-                        onChange={(e) => setSignupPassword(e.target.value)}
-                        required
-                        disabled={loading}
-                        minLength={6}
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Password must be at least 6 characters long
-                      </p>
-                    </div>
-
-                    {(error || successMessage) && (
-                      <Alert variant={error ? "destructive" : "default"} className={successMessage ? "border-green-200 bg-green-50 text-green-800" : ""}>
-                        <AlertDescription>{error || successMessage}</AlertDescription>
-                      </Alert>
-                    )}
-
-                    <Button 
-                      type="submit" 
-                      className="w-full" 
-                      disabled={loading || !signupEmail.trim() || !signupPassword.trim() || !signupCompany.trim() || !signupPurpose.trim() || isRateLimited}
+                  <div className="text-center space-y-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowResetForm(true)}
+                      className="text-sm text-primary hover:underline block w-full"
+                      disabled={loading}
                     >
-                      {loading ? "Creating account..." : isRateLimited ? "Please wait..." : "Create Account"}
-                    </Button>
-                  </form>
-                </TabsContent>
-              </Tabs>
+                      Forgot your password?
+                    </button>
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">
+                          Don't have an account?
+                        </span>
+                      </div>
+                    </div>
+                    <Link to="/register">
+                      <Button variant="outline" className="w-full" type="button">
+                        Request Access
+                      </Button>
+                    </Link>
+                  </div>
+                </form>
+              </div>
             </CardContent>
           </Card>
         )}

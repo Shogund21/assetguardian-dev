@@ -67,8 +67,8 @@ const AccessRequestManagement = () => {
       status: 'approved' | 'denied'; 
       createTechnician?: AccessRequest 
     }) => {
-      if (status === 'approved') {
-        // Use the secure function for approval and technician creation
+      if (status === 'approved' && createTechnician) {
+        // Step 1: Use the secure function for approval and technician creation
         const { data, error } = await supabase.rpc('approve_access_request_and_create_technician', {
           p_request_id: id,
           p_reviewed_by: 'edward@shogunai.com'
@@ -79,6 +79,23 @@ const AccessRequestManagement = () => {
         const result = data as { success: boolean; error?: string; message?: string };
         if (!result.success) {
           throw new Error(result.error || 'Failed to approve access request');
+        }
+
+        // Step 2: Create the actual auth account via edge function
+        const { data: authData, error: authError } = await supabase.functions.invoke('create-approved-user', {
+          body: {
+            email: createTechnician.email,
+            requestId: id
+          }
+        });
+
+        if (authError) {
+          console.error('Error creating auth account:', authError);
+          throw new Error('Failed to create auth account: ' + authError.message);
+        }
+
+        if (!authData.success) {
+          throw new Error(authData.error || 'Failed to create auth account');
         }
       } else {
         // For denial, just update the access request
