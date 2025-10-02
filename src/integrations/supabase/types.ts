@@ -1957,7 +1957,7 @@ export type Database = {
       image_analysis_batches: {
         Row: {
           batch_name: string
-          company_id: string | null
+          company_id: string
           completed_at: string | null
           created_at: string
           created_by: string | null
@@ -1973,7 +1973,7 @@ export type Database = {
         }
         Insert: {
           batch_name: string
-          company_id?: string | null
+          company_id: string
           completed_at?: string | null
           created_at?: string
           created_by?: string | null
@@ -1989,7 +1989,7 @@ export type Database = {
         }
         Update: {
           batch_name?: string
-          company_id?: string | null
+          company_id?: string
           completed_at?: string | null
           created_at?: string
           created_by?: string | null
