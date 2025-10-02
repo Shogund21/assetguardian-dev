@@ -17,6 +17,7 @@ interface DiagnosticMessage {
     text?: string;
     data?: any;
     type?: 'text' | 'analysis' | 'recommendation';
+    images?: string[];
   };
   created_at: string;
 }
@@ -265,7 +266,7 @@ export const HVACSessionDetail: React.FC<HVACSessionDetailProps> = ({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <p className="font-medium">
-                          {message.sender === 'tech' ? 'Technician' : 'AI Assistant'}
+                          {message.sender === 'tech' ? 'Technician' : 'Ki Assistant'}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {format(new Date(message.created_at), 'MMM d, HH:mm')}
@@ -277,6 +278,19 @@ export const HVACSessionDetail: React.FC<HVACSessionDetailProps> = ({
                           : 'bg-green-50 border border-green-200'
                       }`}>
                         {renderMessageContent(message)}
+                        {message.body.images && message.body.images.length > 0 && (
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {message.body.images.map((image, idx) => (
+                              <img
+                                key={idx}
+                                src={image}
+                                alt={`Attachment ${idx + 1}`}
+                                className="h-32 w-32 object-cover rounded-lg border cursor-pointer hover:opacity-80 transition-opacity"
+                                onClick={() => window.open(image, '_blank')}
+                              />
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

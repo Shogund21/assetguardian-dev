@@ -31,6 +31,7 @@ export interface DiagnosticMessage {
     text?: string;
     data?: any;
     type?: 'text' | 'analysis' | 'recommendation';
+    images?: string[];
   };
   created_at: string;
 }

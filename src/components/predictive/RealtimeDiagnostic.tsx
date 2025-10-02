@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Activity, MessageCircle, AlertTriangle, CheckCircle, XCircle, Send, Loader2 } from 'lucide-react';
+import { Activity, MessageCircle, AlertTriangle, CheckCircle, XCircle, Send, Loader2, Paperclip, X } from 'lucide-react';
 import { RealtimeHvacDiagnosticService, type LivePoint, type DiagnosticSession, type DiagnosticMessage } from '@/services/realtimeHvacDiagnosticService';
 import { toast } from 'sonner';
 
@@ -22,7 +22,10 @@ export const RealtimeDiagnostic = ({ equipmentId, equipmentName, onClose }: Prop
   const [inputMessage, setInputMessage] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isGeneralMode = equipmentId === "general";
 
@@ -32,7 +35,7 @@ export const RealtimeDiagnostic = ({ equipmentId, equipmentName, onClose }: Prop
       // For general mode, skip live monitoring and show as ready
       if (isGeneralMode) {
         setIsConnected(true);
-        toast.success('Ki ready for troubleshooting chat');
+        toast.success('Ki Assistant ready for troubleshooting chat');
         return;
       }
 
@@ -108,28 +111,73 @@ export const RealtimeDiagnostic = ({ equipmentId, equipmentName, onClose }: Prop
     }
   };
 
-  // Send message
+  // Handle image upload
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploadingImage(true);
+    const newImages: string[] = [];
+
+    try {
+      for (let i = 0; i < Math.min(files.length, 5); i++) {
+        const file = files[i];
+        const reader = new FileReader();
+        
+        await new Promise((resolve, reject) => {
+          reader.onload = (event) => {
+            if (event.target?.result) {
+              newImages.push(event.target.result as string);
+            }
+            resolve(true);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
+
+      setSelectedImages(prev => [...prev, ...newImages].slice(0, 5));
+      toast.success(`${newImages.length} image(s) added`);
+    } catch (error) {
+      console.error('Error uploading images:', error);
+      toast.error('Failed to upload images');
+    } finally {
+      setIsUploadingImage(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  // Remove image from selection
+  const removeImage = (index: number) => {
+    setSelectedImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Send message with or without images
   const sendMessage = async () => {
-    if (!session || !inputMessage.trim()) return;
+    if (!session || (!inputMessage.trim() && selectedImages.length === 0)) return;
 
     try {
       // Send user message
       await RealtimeHvacDiagnosticService.sendMessage(session.id, 'tech', {
         text: inputMessage,
-        type: 'text'
+        type: 'text',
+        images: selectedImages.length > 0 ? selectedImages : undefined
       });
 
       setInputMessage('');
+      setSelectedImages([]);
 
       // Reload messages to show user message immediately
       const updatedMessages = await RealtimeHvacDiagnosticService.getSessionMessages(session.id);
       setMessages(updatedMessages);
 
-      // Get AI response
+      // Get Ki response
       setIsAnalyzing(true);
       await RealtimeHvacDiagnosticService.analyzeCurrentState(equipmentId, session.id);
       
-      // Reload messages again to show AI response
+      // Reload messages again to show Ki response
       const finalMessages = await RealtimeHvacDiagnosticService.getSessionMessages(session.id);
       setMessages(finalMessages);
       setIsAnalyzing(false);
@@ -243,7 +291,7 @@ export const RealtimeDiagnostic = ({ equipmentId, equipmentName, onClose }: Prop
           <div className="flex items-center gap-2">
             <MessageCircle className="h-5 w-5" />
             <CardTitle>
-              {isGeneralMode ? 'Ki - HVAC Assistant' : 'AI Diagnostic Assistant'}
+              {isGeneralMode ? 'Ki - HVAC Assistant' : 'Ki Diagnostic Assistant'}
             </CardTitle>
           </div>
           <div className="flex items-center gap-2">
@@ -284,7 +332,7 @@ export const RealtimeDiagnostic = ({ equipmentId, equipmentName, onClose }: Prop
                     >
                       <div className="flex items-center gap-2 mb-1">
                         <Badge variant="outline" className="text-xs">
-                          {message.sender === 'tech' ? 'You' : 'AI Assistant'}
+                          {message.sender === 'tech' ? 'You' : 'Ki Assistant'}
                         </Badge>
                         <span className="text-xs text-muted-foreground">
                           {new Date(message.created_at).toLocaleTimeString()}
@@ -293,6 +341,19 @@ export const RealtimeDiagnostic = ({ equipmentId, equipmentName, onClose }: Prop
                       <div className="text-sm">
                         {message.body.text}
                       </div>
+                      {message.body.images && message.body.images.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {message.body.images.map((image, idx) => (
+                            <img
+                              key={idx}
+                              src={image}
+                              alt={`Uploaded ${idx + 1}`}
+                              className="h-24 w-24 object-cover rounded-lg border cursor-pointer hover:opacity-80 transition-opacity"
+                              onClick={() => window.open(image, '_blank')}
+                            />
+                          ))}
+                        </div>
+                      )}
                       {message.body.type === 'analysis' && message.body.data && (
                         <div className="mt-2 text-xs text-muted-foreground">
                           Status: {message.body.data.overallStatus} | 
@@ -305,7 +366,7 @@ export const RealtimeDiagnostic = ({ equipmentId, equipmentName, onClose }: Prop
                   {isAnalyzing && (
                     <div className="p-3 rounded-lg bg-gray-500/10 mr-8 flex items-center gap-2">
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      <span className="text-sm">AI is analyzing...</span>
+                      <span className="text-sm">Ki is analyzing...</span>
                     </div>
                   )}
                   
@@ -313,26 +374,67 @@ export const RealtimeDiagnostic = ({ equipmentId, equipmentName, onClose }: Prop
                 </div>
               </ScrollArea>
               
-              <div className="flex gap-2">
-                <Textarea
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder={
-                    isGeneralMode 
-                      ? "Describe your HVAC issue or what you're seeing at the unit..."
-                      : "Ask about the equipment condition, report an issue, or request analysis..."
-                  }
-                  className="flex-1 min-h-[40px] resize-none"
-                  rows={2}
-                />
-                <Button
-                  onClick={sendMessage}
-                  disabled={!inputMessage.trim() || isAnalyzing}
-                  size="icon"
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
+              <div className="space-y-2">
+                {/* Image previews */}
+                {selectedImages.length > 0 && (
+                  <div className="flex flex-wrap gap-2 p-2 bg-gray-50 rounded-lg">
+                    {selectedImages.map((image, idx) => (
+                      <div key={idx} className="relative group">
+                        <img
+                          src={image}
+                          alt={`Preview ${idx + 1}`}
+                          className="h-16 w-16 object-cover rounded border"
+                        />
+                        <button
+                          onClick={() => removeImage(idx)}
+                          className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Message input */}
+                <div className="flex gap-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isAnalyzing || isUploadingImage || selectedImages.length >= 5}
+                    size="icon"
+                    variant="outline"
+                    type="button"
+                  >
+                    <Paperclip className="h-4 w-4" />
+                  </Button>
+                  <Textarea
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder={
+                      isGeneralMode 
+                        ? "Describe your HVAC issue or what you're seeing at the unit..."
+                        : "Ask about the equipment condition, report an issue, or request analysis..."
+                    }
+                    className="flex-1 min-h-[40px] resize-none"
+                    rows={2}
+                  />
+                  <Button
+                    onClick={sendMessage}
+                    disabled={(!inputMessage.trim() && selectedImages.length === 0) || isAnalyzing}
+                    size="icon"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           ) : (
@@ -341,7 +443,7 @@ export const RealtimeDiagnostic = ({ equipmentId, equipmentName, onClose }: Prop
               <p>
                 {isGeneralMode 
                   ? "Start a session to chat with Ki"
-                  : "Start a diagnostic session to chat with AI assistant"
+                  : "Start a diagnostic session to chat with Ki Assistant"
                 }
               </p>
               <p className="text-sm mt-1">
