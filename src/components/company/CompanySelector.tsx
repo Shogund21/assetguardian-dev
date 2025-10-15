@@ -40,9 +40,9 @@ export const CompanySelector = () => {
     checkSuperAdmin();
   }, [userProfile]);
 
-  // Always show selector for super admin, even with one company
-  if (companies.length <= 1 && !isSuperAdmin) {
-    return null; // Don't render the selector if there's only one or no company (unless super admin)
+  // Only show selector for super admins
+  if (!isSuperAdmin) {
+    return null; // Regular users should never see the company selector
   }
 
   const handleValueChange = (value: string) => {
