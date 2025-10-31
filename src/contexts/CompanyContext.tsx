@@ -35,11 +35,56 @@ export const useCompany = () => {
 };
 
 export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentCompany, setCurrentCompany] = useState<Company | null>(null);
+  const [currentCompany, setCurrentCompanyState] = useState<Company | null>(null);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [isCompanyLoading, setIsCompanyLoading] = useState(true);
   const [hasValidSession, setHasValidSession] = useState(false);
   const { toast } = useToast();
+
+  // Protected setCurrentCompany with permission check
+  const setCurrentCompany = async (company: Company | null) => {
+    try {
+      // Check if user has permission to switch companies
+      const { data: canSwitch, error } = await supabase.rpc('can_switch_companies');
+      
+      if (error) {
+        console.error('CompanyContext: Error checking switch permission:', error);
+        toast({
+          title: "Error",
+          description: "Could not verify permissions",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (!canSwitch) {
+        console.warn('CompanyContext: Unauthorized attempt to switch companies');
+        toast({
+          title: "Access Denied",
+          description: "You do not have permission to switch companies",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Permission granted, proceed with company switch
+      console.log('CompanyContext: Company switch authorized:', company?.name || 'All Companies');
+      setCurrentCompanyState(company);
+      
+      if (company) {
+        localStorage.setItem("selectedCompanyId", company.id);
+      } else {
+        localStorage.removeItem("selectedCompanyId");
+      }
+    } catch (error) {
+      console.error('CompanyContext: Error in setCurrentCompany:', error);
+      toast({
+        title: "Error",
+        description: "Could not switch companies",
+        variant: "destructive",
+      });
+    }
+  };
 
   const fetchCompanies = async () => {
     try {
@@ -186,13 +231,13 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       console.log("CompanyContext: Companies fetched:", data?.map(c => ({ id: c.id, name: c.name })) || []);
       setCompanies(data || []);
       
-      // For super admin, don't auto-select a company - let them see all data by default
+        // For super admin, don't auto-select a company - let them see all data by default
       if (isSuperAdmin) {
         console.log("CompanyContext: Super admin detected - clearing any saved company to show all data");
         // Clear any existing company selection for super admin to prevent conflicts
         localStorage.removeItem("selectedCompanyId");
         // Always start with null for super admin (shows "All Companies")
-        setCurrentCompany(null);
+        setCurrentCompanyState(null);
         console.log("CompanyContext: Super admin currentCompany set to null for 'All Companies' view");
       } else {
         // Set first company as default if we have companies and no current selection (for regular users)
@@ -204,15 +249,15 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
             const savedCompany = data.find(c => c.id === savedCompanyId);
             if (savedCompany) {
               console.log("CompanyContext: Restoring saved company for regular user:", savedCompany.name);
-              setCurrentCompany(savedCompany);
+              setCurrentCompanyState(savedCompany);
             } else {
               console.log("CompanyContext: Saved company not found, using first available:", data[0].name);
-              setCurrentCompany(data[0]);
+              setCurrentCompanyState(data[0]);
               localStorage.setItem("selectedCompanyId", data[0].id);
             }
           } else {
             console.log("CompanyContext: No saved company for regular user, using first available:", data[0].name);
-            setCurrentCompany(data[0]);
+            setCurrentCompanyState(data[0]);
             localStorage.setItem("selectedCompanyId", data[0].id);
           }
         } else {

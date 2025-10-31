@@ -256,7 +256,7 @@ export type Database = {
           action: string
           created_at: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           metadata: Json | null
           new_values: Json | null
           old_values: Json | null
@@ -271,7 +271,7 @@ export type Database = {
           action: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           metadata?: Json | null
           new_values?: Json | null
           old_values?: Json | null
@@ -286,7 +286,7 @@ export type Database = {
           action?: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           metadata?: Json | null
           new_values?: Json | null
           old_values?: Json | null
@@ -1141,7 +1141,7 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           last_attempt: string
           locked_until: string | null
           user_agent: string | null
@@ -1151,7 +1151,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           last_attempt?: string
           locked_until?: string | null
           user_agent?: string | null
@@ -1161,7 +1161,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           last_attempt?: string
           locked_until?: string | null
           user_agent?: string | null
@@ -2355,7 +2355,7 @@ export type Database = {
           created_at: string
           expires_at: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           is_used: boolean | null
           reset_token: string
           used_at: string | null
@@ -2366,7 +2366,7 @@ export type Database = {
           created_at?: string
           expires_at: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           is_used?: boolean | null
           reset_token: string
           used_at?: string | null
@@ -2377,7 +2377,7 @@ export type Database = {
           created_at?: string
           expires_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           is_used?: boolean | null
           reset_token?: string
           used_at?: string | null
@@ -3213,7 +3213,7 @@ export type Database = {
           duration_seconds: number | null
           ended_at: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           pages_visited: number | null
           session_id: string
           started_at: string | null
@@ -3226,7 +3226,7 @@ export type Database = {
           duration_seconds?: number | null
           ended_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           pages_visited?: number | null
           session_id: string
           started_at?: string | null
@@ -3239,7 +3239,7 @@ export type Database = {
           duration_seconds?: number | null
           ended_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           pages_visited?: number | null
           session_id?: string
           started_at?: string | null
@@ -3522,14 +3522,9 @@ export type Database = {
         Args: { p_user_email: string }
         Returns: string
       }
-      can_access_all_data: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      can_modify_data: {
-        Args: { p_company_id: string }
-        Returns: boolean
-      }
+      can_access_all_data: { Args: never; Returns: boolean }
+      can_modify_data: { Args: { p_company_id: string }; Returns: boolean }
+      can_switch_companies: { Args: never; Returns: boolean }
       check_threshold_violations: {
         Args: { p_equipment_id: string }
         Returns: {
@@ -3541,10 +3536,7 @@ export type Database = {
           warning_threshold: number
         }[]
       }
-      cleanup_expired_trials: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
+      cleanup_expired_trials: { Args: never; Returns: number }
       create_complete_trial_company: {
         Args: {
           p_company_name: string
@@ -3568,12 +3560,9 @@ export type Database = {
         }
         Returns: string
       }
-      dashboard_payload: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
+      dashboard_payload: { Args: never; Returns: Json }
       debug_auth_uid: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           auth_uid: string
           current_user_name: string
@@ -3581,18 +3570,9 @@ export type Database = {
           session_user_name: string
         }[]
       }
-      delete_equipment: {
-        Args: { p_equipment_id: string }
-        Returns: Json
-      }
-      delete_hvac_session: {
-        Args: { p_session_id: string }
-        Returns: Json
-      }
-      delete_project: {
-        Args: { p_project_id: string }
-        Returns: Json
-      }
+      delete_equipment: { Args: { p_equipment_id: string }; Returns: Json }
+      delete_hvac_session: { Args: { p_session_id: string }; Returns: Json }
+      delete_project: { Args: { p_project_id: string }; Returns: Json }
       end_user_session: {
         Args: {
           p_actions_count?: number
@@ -3617,7 +3597,7 @@ export type Database = {
         Returns: undefined
       }
       get_all_companies_for_super_admin: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           address: string
           contact_email: string
@@ -3658,7 +3638,7 @@ export type Database = {
         }[]
       }
       get_current_user_company: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           company_id: string
           company_name: string
@@ -3666,10 +3646,7 @@ export type Database = {
           user_role: string
         }[]
       }
-      get_demo_company_id: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      get_demo_company_id: { Args: never; Returns: string }
       get_equipment_data: {
         Args: {
           p_company_id?: string
@@ -3815,7 +3792,7 @@ export type Database = {
         }[]
       }
       get_recent_activities: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           description: string
           id: string
@@ -3838,13 +3815,13 @@ export type Database = {
         }[]
       }
       get_super_admin_user_ids: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           user_id: string
         }[]
       }
       get_technicians_with_roles: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           account_status: string
           company_id: string
@@ -3890,7 +3867,7 @@ export type Database = {
         }[]
       }
       get_user_company: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           company: Json
         }[]
@@ -3921,30 +3898,12 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_admin_or_engineer: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      is_current_user_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      is_demo_user: {
-        Args: { p_user_id?: string }
-        Returns: boolean
-      }
-      is_member_of: {
-        Args: { company_id: string }
-        Returns: boolean
-      }
-      is_super_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      is_trial_expired: {
-        Args: { p_company_id: string }
-        Returns: boolean
-      }
+      is_admin_or_engineer: { Args: never; Returns: boolean }
+      is_current_user_admin: { Args: never; Returns: boolean }
+      is_demo_user: { Args: { p_user_id?: string }; Returns: boolean }
+      is_member_of: { Args: { company_id: string }; Returns: boolean }
+      is_super_admin: { Args: never; Returns: boolean }
+      is_trial_expired: { Args: { p_company_id: string }; Returns: boolean }
       log_audit_event: {
         Args: {
           p_action: string
@@ -4037,10 +3996,7 @@ export type Database = {
         }
         Returns: string
       }
-      super_admin_exists: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      super_admin_exists: { Args: never; Returns: boolean }
       track_failed_login: {
         Args: { p_email: string; p_ip_address?: unknown; p_user_agent?: string }
         Returns: boolean

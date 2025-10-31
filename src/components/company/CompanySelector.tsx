@@ -19,29 +19,37 @@ export const CompanySelector = () => {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [canSwitchCompanies, setCanSwitchCompanies] = useState(false);
 
-  // Check if user is super admin
+  // Check if user is super admin and has permission to switch companies
   useEffect(() => {
-    const checkSuperAdmin = async () => {
+    const checkPermissions = async () => {
+      // Hardcoded super admin check first
       if (userProfile?.email === 'edward@shogunaillc.com') {
         setIsSuperAdmin(true);
+        setCanSwitchCompanies(true);
         return;
       }
       
       try {
-        const { data } = await supabase.rpc('is_super_admin');
-        setIsSuperAdmin(data || false);
+        // Check both super admin status and company switching permission
+        const { data: isSuperAdminData } = await supabase.rpc('is_super_admin');
+        const { data: canSwitchData } = await supabase.rpc('can_switch_companies');
+        
+        setIsSuperAdmin(isSuperAdminData || false);
+        setCanSwitchCompanies(canSwitchData || false);
       } catch (error) {
-        console.error('Error checking super admin status:', error);
+        console.error('Error checking permissions:', error);
         setIsSuperAdmin(false);
+        setCanSwitchCompanies(false);
       }
     };
 
-    checkSuperAdmin();
+    checkPermissions();
   }, [userProfile]);
 
-  // Only show selector for super admins
-  if (!isSuperAdmin) {
+  // Only show selector if user is super admin AND has permission to switch companies
+  if (!isSuperAdmin || !canSwitchCompanies) {
     return null; // Regular users should never see the company selector
   }
 
