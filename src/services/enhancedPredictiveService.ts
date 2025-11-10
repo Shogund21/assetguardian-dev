@@ -49,11 +49,7 @@ export class EnhancedPredictiveService {
       // Get maintenance history with the reading_mode column
       const { data: maintenanceHistory, error: maintenanceError } = await supabase
         .from('hvac_maintenance_checks')
-        .select(`
-          *,
-          equipment:equipment_id (name, location),
-          technician:technician_id (firstName, lastName)
-        `)
+        .select('*')
         .eq('equipment_id', equipmentId)
         .gte('check_date', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
         .order('check_date', { ascending: false });
