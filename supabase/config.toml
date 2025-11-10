@@ -18,3 +18,6 @@ verify_jwt = false
 
 [functions.send-demo-request]
 verify_jwt = false
+
+[functions.predictive-ai-analysis]
+verify_jwt = false
