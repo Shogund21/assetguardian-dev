@@ -44,6 +44,18 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Protected setCurrentCompany with permission check
   const setCurrentCompany = async (company: Company | null) => {
     try {
+      // If there's no session, skip RPC and allow silent set/clear
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setCurrentCompanyState(company);
+        if (company) {
+          localStorage.setItem("selectedCompanyId", company.id);
+        } else {
+          localStorage.removeItem("selectedCompanyId");
+        }
+        return;
+      }
+
       // Check if user has permission to switch companies
       const { data: canSwitch, error } = await supabase.rpc('can_switch_companies');
       
@@ -97,7 +109,7 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (sessionError) {
         console.error("CompanyContext: Session error:", sessionError);
         setCompanies([]);
-        setCurrentCompany(null);
+        setCurrentCompanyState(null);
         setIsCompanyLoading(false);
         return;
       }
@@ -108,7 +120,7 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (!session || !session.access_token || !session.user?.id) {
         console.log("CompanyContext: No valid session, clearing companies");
         setCompanies([]);
-        setCurrentCompany(null);
+        setCurrentCompanyState(null);
         setHasValidSession(false);
         setIsCompanyLoading(false);
         return;
