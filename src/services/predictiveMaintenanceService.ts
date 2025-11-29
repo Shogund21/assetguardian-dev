@@ -128,38 +128,43 @@ export class PredictiveMaintenanceService {
   }
 
   static async createPredictiveAlert(alert: Omit<PredictiveAlert, 'id' | 'created_at'>): Promise<PredictiveAlert> {
-    // Prepare the alert data for database insertion
-    const alertData = {
-      asset_id: alert.asset_id,
-      risk_level: alert.risk_level,
-      finding: alert.finding,
-      recommendation: alert.recommendation,
-      confidence_score: alert.confidence_score,
-      resolved_at: alert.resolved_at,
-      work_order_id: alert.work_order_id,
-      data_quality: alert.data_quality as any,
-      predictive_timeline: alert.predictive_timeline as any,
-      degradation_analysis: alert.degradation_analysis as any,
-      maintenance_windows: alert.maintenance_windows as any,
-      performance_trends: alert.performance_trends as any,
-    };
-
-    const { data, error } = await supabase
-      .from('predictive_alerts')
-      .insert([alertData])
-      .select()
-      .single();
+    // Use the secure function to bypass RLS while maintaining security
+    const { data, error } = await supabase.rpc('create_predictive_alert_secure', {
+      p_asset_id: alert.asset_id,
+      p_risk_level: alert.risk_level,
+      p_finding: alert.finding,
+      p_recommendation: alert.recommendation,
+      p_confidence_score: alert.confidence_score,
+      p_resolved_at: alert.resolved_at,
+      p_work_order_id: alert.work_order_id,
+      p_data_quality: alert.data_quality as any,
+      p_predictive_timeline: alert.predictive_timeline as any,
+      p_degradation_analysis: alert.degradation_analysis as any,
+      p_maintenance_windows: alert.maintenance_windows as any,
+      p_performance_trends: alert.performance_trends as any,
+    });
 
     if (error) throw error;
     
+    // Parse the JSONB result from the function
+    const alertData = typeof data === 'string' ? JSON.parse(data) : data;
+    
     return {
-      ...data,
+      id: alertData.id,
+      asset_id: alertData.asset_id,
+      risk_level: alertData.risk_level,
+      finding: alertData.finding,
+      recommendation: alertData.recommendation,
+      confidence_score: alertData.confidence_score,
+      created_at: alertData.created_at,
+      resolved_at: alertData.resolved_at,
+      work_order_id: alertData.work_order_id,
       equipment: null, // Will be populated separately if needed
-      data_quality: data.data_quality as any,
-      predictive_timeline: data.predictive_timeline as any,
-      degradation_analysis: data.degradation_analysis as any,
-      maintenance_windows: data.maintenance_windows as any,
-      performance_trends: data.performance_trends as any,
+      data_quality: alertData.data_quality as any,
+      predictive_timeline: alertData.predictive_timeline as any,
+      degradation_analysis: alertData.degradation_analysis as any,
+      maintenance_windows: alertData.maintenance_windows as any,
+      performance_trends: alertData.performance_trends as any
     } as PredictiveAlert;
   }
 
