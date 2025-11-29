@@ -3551,6 +3551,23 @@ export type Database = {
           trial_expires_at: string
         }[]
       }
+      create_predictive_alert_secure: {
+        Args: {
+          p_asset_id: string
+          p_confidence_score?: number
+          p_data_quality?: Json
+          p_degradation_analysis?: Json
+          p_finding: string
+          p_maintenance_windows?: Json
+          p_performance_trends?: Json
+          p_predictive_timeline?: Json
+          p_recommendation: string
+          p_resolved_at?: string
+          p_risk_level: string
+          p_work_order_id?: string
+        }
+        Returns: Json
+      }
       create_trial_company: {
         Args: {
           p_company_name: string
