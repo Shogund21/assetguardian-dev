@@ -429,6 +429,29 @@ const ComprehensiveChillerFields = ({ form }: ComprehensiveChillerFieldsProps) =
 
                 <FormField
                   control={form.control}
+                  name="oil_level_status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Oil Level Status</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select oil level" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="optimal">Optimal</SelectItem>
+                          <SelectItem value="low">Low</SelectItem>
+                          <SelectItem value="needs_refill">Needs Refill</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
                   name="oil_tank_pressure"
                   render={({ field }) => (
                     <FormItem>
