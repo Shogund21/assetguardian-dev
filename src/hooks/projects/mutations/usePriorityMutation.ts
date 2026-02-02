@@ -1,16 +1,11 @@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Project } from "@/types/project";
 
-export const usePriorityMutation = (
-  projects: Project[],
-  setProjects: (projects: Project[]) => void
-) => {
+export const usePriorityMutation = (refetch: () => Promise<any>) => {
   const { toast } = useToast();
 
   const handlePriorityChange = async (projectId: string, newPriority: string) => {
     try {
-      const timestamp = new Date().toISOString();
       console.log("Updating project priority:", { projectId, newPriority });
       
       const { error } = await supabase.rpc('set_project_priority', {
@@ -23,11 +18,7 @@ export const usePriorityMutation = (
         throw error;
       }
 
-      setProjects(projects.map(project => 
-        project.id === projectId 
-          ? { ...project, priority: newPriority, updatedat: timestamp }
-          : project
-      ));
+      await refetch();
 
       toast({
         title: "Success",

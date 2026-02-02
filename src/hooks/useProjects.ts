@@ -1,36 +1,35 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Project } from "@/types/project";
+import { useAuth } from "@/hooks/useAuth";
 import { useProjectMutations } from "./projects/useProjectMutations";
-import { useProjectsQuery } from "./projects/useProjectsQuery";
 
 export const useProjects = () => {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
-  
-  const { fetchProjects } = useProjectsQuery();
-  const { 
+  const { isAuthenticated } = useAuth();
+
+  const { data: projects = [], isLoading: loading, refetch } = useQuery({
+    queryKey: ["projects"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("projects")
+        .select("*")
+        .order("createdat", { ascending: false });
+      if (error) throw error;
+      return (data || []) as Project[];
+    },
+    enabled: isAuthenticated,
+  });
+
+  const { handleStatusChange, handlePriorityChange, handleDelete, isDeleting } = 
+    useProjectMutations(refetch);
+
+  return { 
+    projects, 
+    loading, 
     handleStatusChange, 
     handlePriorityChange, 
-    handleDelete,
-    isDeleting
-  } = useProjectMutations(projects, setProjects);
-
-  useEffect(() => {
-    const loadProjects = async () => {
-      const data = await fetchProjects();
-      setProjects(data);
-      setLoading(false);
-    };
-
-    loadProjects();
-  }, []);
-
-  return {
-    projects,
-    loading,
-    handleStatusChange,
-    handlePriorityChange,
-    handleDelete,
-    isDeleting
+    handleDelete, 
+    isDeleting, 
+    refetch 
   };
 };

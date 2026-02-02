@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectBasicInfo } from "./form/ProjectBasicInfo";
 import { ProjectStatusInfo } from "./form/ProjectStatusInfo";
@@ -14,6 +15,7 @@ import { projectFormSchema, type ProjectFormValues } from "./types";
 export const AddProjectForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<ProjectFormValues>({
@@ -50,6 +52,8 @@ export const AddProjectForm = () => {
         title: "Success",
         description: "Project added successfully",
       });
+      
+      await queryClient.invalidateQueries({ queryKey: ["projects"] });
       navigate("/projects");
     } catch (error) {
       console.error("Error adding project:", error);
