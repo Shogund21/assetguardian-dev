@@ -72,23 +72,26 @@ export function NumberStepper({
           type="button"
           variant="outline"
           size="icon"
-          className="h-10 w-10 shrink-0"
+          // 48px touch target for mobile
+          className="h-12 w-12 shrink-0 active:scale-95 touch-manipulation"
           onClick={handleDecrement}
           disabled={disabled || (min !== undefined && (value ?? 0) <= min)}
         >
-          <Minus className="h-4 w-4" />
+          <Minus className="h-5 w-5" />
         </Button>
       )}
       
       <div className="relative flex-1">
         <Input
           type="number"
+          inputMode="decimal"
           value={displayValue}
           onChange={handleInputChange}
           placeholder={placeholder}
           disabled={disabled}
           className={cn(
-            'text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
+            // min-h-[48px] for touch-friendly input, larger text for mobile
+            'min-h-[48px] text-center text-base [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
             unit && 'pr-12',
             inputClassName
           )}
@@ -108,11 +111,12 @@ export function NumberStepper({
           type="button"
           variant="outline"
           size="icon"
-          className="h-10 w-10 shrink-0"
+          // 48px touch target for mobile
+          className="h-12 w-12 shrink-0 active:scale-95 touch-manipulation"
           onClick={handleIncrement}
           disabled={disabled || (max !== undefined && (value ?? 0) >= max)}
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-5 w-5" />
         </Button>
       )}
     </div>

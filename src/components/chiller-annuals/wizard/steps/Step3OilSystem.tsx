@@ -39,7 +39,7 @@ export function Step3OilSystem({ formData, updateOil }: Step3Props) {
   const isHighAcid = oil.acid_number_mgkoh_g !== null && oil.acid_number_mgkoh_g > ACID_THRESHOLD;
 
   return (
-    <div className="space-y-6 pb-24">
+    <div className="space-y-6">
       {/* Oil Level */}
       <div className="space-y-4">
         <Label>Oil Level</Label>
@@ -74,15 +74,15 @@ export function Step3OilSystem({ formData, updateOil }: Step3Props) {
             <div
               key={type.code}
               className={cn(
-                'flex items-center space-x-2 p-3 border rounded-lg cursor-pointer transition-colors',
+                'flex items-center space-x-2 p-4 border rounded-lg cursor-pointer transition-colors min-h-[52px] active:scale-[0.99] touch-manipulation',
                 oil.oil_type === type.code
                   ? 'bg-primary/10 border-primary'
                   : 'hover:bg-accent'
               )}
               onClick={() => updateOil('oil_type', type.code)}
             >
-              <RadioGroupItem value={type.code} id={`oil-${type.code}`} />
-              <Label htmlFor={`oil-${type.code}`} className="cursor-pointer text-sm">
+              <RadioGroupItem value={type.code} id={`oil-${type.code}`} className="h-5 w-5" />
+              <Label htmlFor={`oil-${type.code}`} className="cursor-pointer text-base">
                 {type.label}
               </Label>
             </div>
@@ -102,15 +102,15 @@ export function Step3OilSystem({ formData, updateOil }: Step3Props) {
             <div
               key={app.code}
               className={cn(
-                'flex items-center space-x-2 p-3 border rounded-lg cursor-pointer transition-colors',
+                'flex items-center space-x-2 p-4 border rounded-lg cursor-pointer transition-colors min-h-[52px] active:scale-[0.99] touch-manipulation',
                 oil.appearance === app.code
                   ? 'bg-primary/10 border-primary'
                   : 'hover:bg-accent'
               )}
               onClick={() => updateOil('appearance', app.code)}
             >
-              <RadioGroupItem value={app.code} id={`app-${app.code}`} />
-              <Label htmlFor={`app-${app.code}`} className="cursor-pointer text-sm">
+              <RadioGroupItem value={app.code} id={`app-${app.code}`} className="h-5 w-5" />
+              <Label htmlFor={`app-${app.code}`} className="cursor-pointer text-base">
                 {app.label}
               </Label>
             </div>

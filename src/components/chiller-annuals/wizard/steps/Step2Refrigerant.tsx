@@ -67,7 +67,7 @@ export function Step2Refrigerant({ formData, updateRefrigerant, errors }: Step2P
   };
 
   return (
-    <div className="space-y-6 pb-24">
+    <div className="space-y-6">
       {/* Leak Detection - Critical field */}
       <Card className={cn(
         'border-2',
@@ -109,15 +109,15 @@ export function Step2Refrigerant({ formData, updateRefrigerant, errors }: Step2P
               <div
                 key={loc.code}
                 className={cn(
-                  'flex items-center space-x-2 p-3 border rounded-lg cursor-pointer transition-colors',
+                  'flex items-center space-x-2 p-4 border rounded-lg cursor-pointer transition-colors min-h-[52px] active:scale-[0.99] touch-manipulation',
                   refrigerant.leak_location_code === loc.code
                     ? 'bg-primary/10 border-primary'
                     : 'hover:bg-accent'
                 )}
                 onClick={() => updateRefrigerant('leak_location_code', loc.code)}
               >
-                <RadioGroupItem value={loc.code} id={`leak-${loc.code}`} />
-                <Label htmlFor={`leak-${loc.code}`} className="cursor-pointer text-sm">
+                <RadioGroupItem value={loc.code} id={`leak-${loc.code}`} className="h-5 w-5" />
+                <Label htmlFor={`leak-${loc.code}`} className="cursor-pointer text-base">
                   {loc.label}
                 </Label>
               </div>
@@ -138,15 +138,15 @@ export function Step2Refrigerant({ formData, updateRefrigerant, errors }: Step2P
             <div
               key={cond.code}
               className={cn(
-                'flex items-center space-x-2 p-3 border rounded-lg cursor-pointer transition-colors',
+                'flex items-center space-x-2 p-4 border rounded-lg cursor-pointer transition-colors min-h-[52px] active:scale-[0.99] touch-manipulation',
                 refrigerant.sight_glass_condition === cond.code
                   ? 'bg-primary/10 border-primary'
                   : 'hover:bg-accent'
               )}
               onClick={() => updateRefrigerant('sight_glass_condition', cond.code)}
             >
-              <RadioGroupItem value={cond.code} id={`sight-${cond.code}`} />
-              <Label htmlFor={`sight-${cond.code}`} className="cursor-pointer text-sm">
+              <RadioGroupItem value={cond.code} id={`sight-${cond.code}`} className="h-5 w-5" />
+              <Label htmlFor={`sight-${cond.code}`} className="cursor-pointer text-base">
                 {cond.label}
               </Label>
             </div>
@@ -157,14 +157,14 @@ export function Step2Refrigerant({ formData, updateRefrigerant, errors }: Step2P
       {/* Moisture Indicator */}
       <div className="space-y-2">
         <Label>Moisture Indicator Color</Label>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {MOISTURE_COLORS.map((color) => (
             <button
               key={color.code}
               type="button"
               onClick={() => updateRefrigerant('moisture_indicator_color', color.code)}
               className={cn(
-                'flex-1 py-3 px-4 rounded-lg border-2 font-medium transition-all text-sm',
+                'min-h-[52px] py-3 px-3 rounded-lg border-2 font-medium transition-all text-base active:scale-[0.98] touch-manipulation',
                 refrigerant.moisture_indicator_color === color.code
                   ? 'border-primary bg-primary/10'
                   : 'border-border hover:bg-accent'

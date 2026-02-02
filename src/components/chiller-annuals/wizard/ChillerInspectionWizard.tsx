@@ -171,8 +171,8 @@ export function ChillerInspectionWizard({ draftId, onComplete }: ChillerInspecti
         </div>
       </header>
 
-      {/* Content */}
-      <main className="flex-1 overflow-y-auto px-4 py-4">
+      {/* Content - with bottom padding for sticky nav */}
+      <main className="flex-1 overflow-y-auto px-4 py-4 pb-[calc(80px+env(safe-area-inset-bottom))]">
         {renderStep()}
       </main>
 

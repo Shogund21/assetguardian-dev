@@ -134,15 +134,15 @@ export function Step4TubeInspection({ formData, updateTubes }: Step4Props) {
               <div
                 key={method.code}
                 className={cn(
-                  'flex items-center space-x-2 p-3 border rounded-lg cursor-pointer transition-colors',
+                  'flex items-center space-x-2 p-4 border rounded-lg cursor-pointer transition-colors min-h-[52px] active:scale-[0.99] touch-manipulation',
                   data.test_method === method.code
                     ? 'bg-primary/10 border-primary'
                     : 'hover:bg-accent'
                 )}
                 onClick={() => updateTubes(bundleType, 'test_method', method.code)}
               >
-                <RadioGroupItem value={method.code} id={`${bundleType}-${method.code}`} />
-                <Label htmlFor={`${bundleType}-${method.code}`} className="cursor-pointer text-sm">
+                <RadioGroupItem value={method.code} id={`${bundleType}-${method.code}`} className="h-5 w-5" />
+                <Label htmlFor={`${bundleType}-${method.code}`} className="cursor-pointer text-base">
                   {method.label}
                 </Label>
               </div>
@@ -212,14 +212,14 @@ export function Step4TubeInspection({ formData, updateTubes }: Step4Props) {
               <div
                 key={sev.code}
                 className={cn(
-                  'flex items-center space-x-2 px-3 py-2 border rounded-lg cursor-pointer transition-colors',
+                  'flex items-center justify-center space-x-2 px-4 py-3 border rounded-lg cursor-pointer transition-colors min-h-[48px] active:scale-[0.99] touch-manipulation',
                   data.fouling_severity === sev.code
                     ? 'bg-primary/10 border-primary'
                     : 'hover:bg-accent'
                 )}
                 onClick={() => updateTubes(bundleType, 'fouling_severity', sev.code)}
               >
-                <RadioGroupItem value={sev.code} id={`${bundleType}-foul-${sev.code}`} />
+                <RadioGroupItem value={sev.code} id={`${bundleType}-foul-${sev.code}`} className="h-4 w-4" />
                 <Label htmlFor={`${bundleType}-foul-${sev.code}`} className="cursor-pointer text-sm">
                   {sev.label}
                 </Label>
@@ -250,15 +250,15 @@ export function Step4TubeInspection({ formData, updateTubes }: Step4Props) {
                 <div
                   key={method.code}
                   className={cn(
-                    'flex-1 flex items-center justify-center space-x-2 px-3 py-2 border rounded-lg cursor-pointer transition-colors',
+                    'flex-1 flex items-center justify-center space-x-2 px-3 py-3 border rounded-lg cursor-pointer transition-colors min-h-[48px] active:scale-[0.99] touch-manipulation',
                     data.cleaning_method === method.code
                       ? 'bg-primary/10 border-primary'
                       : 'hover:bg-accent'
                   )}
                   onClick={() => updateTubes(bundleType, 'cleaning_method', method.code)}
                 >
-                  <RadioGroupItem value={method.code} id={`${bundleType}-clean-${method.code}`} />
-                  <Label htmlFor={`${bundleType}-clean-${method.code}`} className="cursor-pointer text-sm">
+                  <RadioGroupItem value={method.code} id={`${bundleType}-clean-${method.code}`} className="h-4 w-4" />
+                  <Label htmlFor={`${bundleType}-clean-${method.code}`} className="cursor-pointer text-base">
                     {method.label}
                   </Label>
                 </div>
@@ -279,15 +279,15 @@ export function Step4TubeInspection({ formData, updateTubes }: Step4Props) {
               <div
                 key={cond.code}
                 className={cn(
-                  'flex items-center space-x-2 p-3 border rounded-lg cursor-pointer transition-colors',
+                  'flex items-center space-x-2 p-4 border rounded-lg cursor-pointer transition-colors min-h-[52px] active:scale-[0.99] touch-manipulation',
                   data.waterbox_condition === cond.code
                     ? 'bg-primary/10 border-primary'
                     : 'hover:bg-accent'
                 )}
                 onClick={() => updateTubes(bundleType, 'waterbox_condition', cond.code)}
               >
-                <RadioGroupItem value={cond.code} id={`${bundleType}-wb-${cond.code}`} />
-                <Label htmlFor={`${bundleType}-wb-${cond.code}`} className="cursor-pointer text-sm">
+                <RadioGroupItem value={cond.code} id={`${bundleType}-wb-${cond.code}`} className="h-5 w-5" />
+                <Label htmlFor={`${bundleType}-wb-${cond.code}`} className="cursor-pointer text-base">
                   {cond.label}
                 </Label>
               </div>
@@ -329,12 +329,12 @@ export function Step4TubeInspection({ formData, updateTubes }: Step4Props) {
   };
 
   return (
-    <div className="space-y-4 pb-24">
-      {/* Bundle Selection Tabs */}
+    <div className="space-y-4">
+      {/* Bundle Selection Tabs - touch-friendly tabs */}
       <Tabs value={activeBundle} onValueChange={(v) => setActiveBundle(v as 'evaporator' | 'condenser')}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="evaporator">Evaporator</TabsTrigger>
-          <TabsTrigger value="condenser">Condenser</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 h-12">
+          <TabsTrigger value="evaporator" className="text-base">Evaporator</TabsTrigger>
+          <TabsTrigger value="condenser" className="text-base">Condenser</TabsTrigger>
         </TabsList>
         <TabsContent value="evaporator" className="mt-4">
           {renderBundleInspection('evaporator')}
