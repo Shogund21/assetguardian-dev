@@ -23,8 +23,12 @@ import {
   Calendar,
   MapPin,
   User,
-  Activity
+  Activity,
+  Printer,
+  Download
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DialogFooter } from "@/components/ui/dialog";
 import { format } from "date-fns";
 
 interface EnhancedMaintenanceDetailsProps {
@@ -263,6 +267,103 @@ const EnhancedMaintenanceDetails = ({ check, open, onOpenChange }: EnhancedMaint
   const readings = getEquipmentReadings();
   const conditions = getEquipmentConditions();
 
+  // Print handler
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      const printContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Maintenance Check - ${getEquipmentName()}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+            h1 { font-size: 24px; margin-bottom: 10px; color: #1f2937; }
+            .header-info { margin-bottom: 20px; color: #666; }
+            .header-info p { margin: 4px 0; }
+            .section { margin-bottom: 24px; }
+            .section-title { font-size: 18px; font-weight: bold; margin-bottom: 12px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; color: #374151; }
+            .reading-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f3f4f6; }
+            .reading-label { color: #6b7280; }
+            .reading-value { font-weight: 600; color: #1f2937; }
+            .status-badge { padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 500; }
+            .good { background: #dcfce7; color: #166534; }
+            .warning { background: #fef9c3; color: #854d0e; }
+            .critical { background: #fee2e2; color: #991b1b; }
+            .notes-section { background: #f9fafb; padding: 16px; border-radius: 8px; margin-top: 8px; }
+            .notes-title { font-weight: 600; margin-bottom: 8px; }
+            @media print { body { padding: 0; } }
+          </style>
+        </head>
+        <body>
+          <h1>${getEquipmentName()}</h1>
+          <div class="header-info">
+            <p><strong>Location:</strong> ${getLocationName()}</p>
+            <p><strong>Technician:</strong> ${getTechnicianName()}</p>
+            <p><strong>Date:</strong> ${format(new Date(check.check_date || ""), "MMM dd, yyyy 'at' h:mm a")}</p>
+            <p><strong>Status:</strong> ${check.status?.replace('_', ' ').toUpperCase() || 'UNKNOWN'}</p>
+            <p><strong>Equipment Type:</strong> ${check.equipment_type?.toUpperCase() || 'N/A'}</p>
+          </div>
+          
+          ${readings.length > 0 ? `
+          <div class="section">
+            <div class="section-title">Readings</div>
+            ${readings.map(r => `
+              <div class="reading-row">
+                <span class="reading-label">${r.label}</span>
+                <span class="reading-value">${formatFieldValue(r.value, r.label.toLowerCase())}</span>
+              </div>
+            `).join('')}
+          </div>
+          ` : ''}
+          
+          ${conditions.length > 0 ? `
+          <div class="section">
+            <div class="section-title">Equipment Conditions</div>
+            ${conditions.map(c => `
+              <div class="reading-row">
+                <span class="reading-label">${c.label}</span>
+                <span class="status-badge ${c.status}">${formatFieldValue(c.value, c.label.toLowerCase())}</span>
+              </div>
+            `).join('')}
+          </div>
+          ` : ''}
+          
+          ${check.notes ? `
+          <div class="section">
+            <div class="section-title">Notes</div>
+            <div class="notes-section">
+              <p>${check.notes}</p>
+            </div>
+          </div>
+          ` : ''}
+          
+          ${check.maintenance_recommendations ? `
+          <div class="section">
+            <div class="section-title">Recommendations</div>
+            <div class="notes-section">
+              <p>${check.maintenance_recommendations}</p>
+            </div>
+          </div>
+          ` : ''}
+        </body>
+        </html>
+      `;
+      
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.onload = () => {
+        printWindow.focus();
+        printWindow.print();
+      };
+    }
+  };
+
+  const handleExport = () => {
+    // Use print to PDF (browser's built-in PDF export)
+    handlePrint();
+  };
+
   // Group readings by category
   const groupedReadings = readings.reduce((acc, reading) => {
     if (!acc[reading.category]) acc[reading.category] = [];
@@ -281,8 +382,8 @@ const EnhancedMaintenanceDetails = ({ check, open, onOpenChange }: EnhancedMaint
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
-        <DialogHeader className="pb-4 border-b">
+      <DialogContent className="max-w-4xl h-[90vh] flex flex-col overflow-hidden">
+        <DialogHeader className="flex-shrink-0 pb-4 border-b">
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-2">
               <DialogTitle className="text-2xl font-bold text-gray-900">
@@ -330,8 +431,8 @@ const EnhancedMaintenanceDetails = ({ check, open, onOpenChange }: EnhancedMaint
           </Card>
         </DialogHeader>
 
-        <Tabs defaultValue="overview" className="flex-1">
-          <TabsList className="grid w-full grid-cols-4">
+        <Tabs defaultValue="overview" className="flex-1 flex flex-col min-h-0">
+          <TabsList className="flex-shrink-0 grid w-full grid-cols-4">
             <TabsTrigger value="overview" className="flex items-center gap-1">
               <Activity className="h-4 w-4" />
               Overview
@@ -351,6 +452,7 @@ const EnhancedMaintenanceDetails = ({ check, open, onOpenChange }: EnhancedMaint
           </TabsList>
 
           <ScrollArea className="flex-1 mt-4">
+            <div className="pr-4">
             <TabsContent value="overview" className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <Card>
@@ -514,8 +616,20 @@ const EnhancedMaintenanceDetails = ({ check, open, onOpenChange }: EnhancedMaint
                 </CardContent>
               </Card>
             </TabsContent>
+            </div>
           </ScrollArea>
         </Tabs>
+
+        <DialogFooter className="flex-shrink-0 pt-4 border-t gap-2">
+          <Button variant="outline" onClick={handlePrint}>
+            <Printer className="mr-2 h-4 w-4" />
+            Print
+          </Button>
+          <Button variant="outline" onClick={handleExport}>
+            <Download className="mr-2 h-4 w-4" />
+            Export PDF
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
