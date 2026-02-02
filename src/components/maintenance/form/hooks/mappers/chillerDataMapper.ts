@@ -35,6 +35,7 @@ export const mapChillerData = (values: MaintenanceFormValues, equipmentType: str
     compressor_oil_temp: processNumberField(values.oil_tank_pressure),
     compressor_condition: processField(values.compressor_running_status),
     compressor_vibration: processField(values.compressor_vibration),
+    oil_level_status: processField(values.oil_level_status),
     
     // Motor fields
     motor_amperage_rla: processNumberField(values.average_motor_current_pct_rla),
