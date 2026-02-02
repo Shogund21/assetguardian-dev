@@ -1,530 +1,895 @@
 
 
-# Chiller Annual Risk Scoring & Auto-Flag Logic Implementation
+# Mobile-First Inspection Workflow UI for Annual Chiller Maintenance
 
 ## Overview
 
-This plan implements a weighted risk scoring system for the Annual Chiller Maintenance module with automatic risk level assignment, recommended actions, and red flag triggers. The logic will be implemented as a service that can be called from both frontend (real-time preview) and potentially as a database trigger for persistence.
+This plan designs a step-by-step, mobile-optimized inspection workflow that prioritizes tap-based inputs over typing, supports offline data collection, and integrates with the existing risk scoring system. The workflow guides technicians through 9 sequential screens while allowing flexible navigation and section skipping with reason codes.
 
 ---
 
-## Risk Scoring Weights
-
-| Condition | Points | Database Field(s) |
-|-----------|--------|-------------------|
-| Refrigerant Leak Detected | +25 | `chiller_refrigerant_inspection.leak_detected = true` |
-| Tube Plugs Above Limit | +30 | `chiller_tube_inspection.plugged_pct > manufacturer_limit` |
-| Oil Acid Test Fail | +30 | `chiller_oil_analysis.acid_number_mgkoh_g > 0.05` |
-| Voltage Imbalance >2% | +20 | `chiller_electrical_check.voltage_imbalance_pct > 2.0` |
-| kW/ton YoY Degradation >10% | +15 | Compare current vs prior year `kw_per_ton` |
-
----
-
-## Risk Level Thresholds
-
-| Score Range | Level | Color | Code |
-|-------------|-------|-------|------|
-| 0 - 30 | Green (Low) | #10B981 | `low` |
-| 31 - 60 | Yellow (Medium) | #F59E0B | `medium` |
-| 61 - 100 | Red (High/Critical) | #EF4444 | `high` or `critical` |
-
----
-
-## Calculation Formulas
-
-### 1. Plug Percentage (plugged_pct)
+## Architecture: Step-by-Step Workflow Engine
 
 ```text
-INPUT:
-  tubes_plugged_total: int (e.g., 12)
-  tube_count_total: int (e.g., 400)
-
-CALCULATION:
-  IF tube_count_total > 0 THEN
-    plugged_pct = (tubes_plugged_total / tube_count_total) * 100
-  ELSE
-    plugged_pct = 0
-
-EXAMPLE:
-  tubes_plugged_total = 12
-  tube_count_total = 400
-  plugged_pct = (12 / 400) * 100 = 3.0%
-
-MANUFACTURER LIMIT:
-  Default threshold: 5% (configurable per chiller model)
-  Trane CVHE: 5%
-  Carrier 30HXC: 5%
-  York YK: 6%
-```
-
-### 2. Voltage Imbalance Percentage (voltage_imbalance_pct)
-
-```text
-INPUT:
-  voltage_l1_l2: numeric (e.g., 460.5)
-  voltage_l2_l3: numeric (e.g., 458.0)
-  voltage_l3_l1: numeric (e.g., 455.2)
-
-CALCULATION:
-  avg_voltage = (voltage_l1_l2 + voltage_l2_l3 + voltage_l3_l1) / 3
-  max_deviation = MAX(
-    ABS(voltage_l1_l2 - avg_voltage),
-    ABS(voltage_l2_l3 - avg_voltage),
-    ABS(voltage_l3_l1 - avg_voltage)
-  )
-  voltage_imbalance_pct = (max_deviation / avg_voltage) * 100
-
-EXAMPLE:
-  voltages = [460.5, 458.0, 455.2]
-  avg_voltage = 457.9
-  max_deviation = |460.5 - 457.9| = 2.6
-  voltage_imbalance_pct = (2.6 / 457.9) * 100 = 0.57%
-  
-  Result: 0.57% < 2% threshold → NO penalty points
-```
-
-### 3. Tons Actual (derived if not entered directly)
-
-```text
-INPUT:
-  chw_delta_t_f: numeric (e.g., 10.5°F)
-  chw_flow_gpm: numeric (e.g., 2400 GPM)
-
-CALCULATION:
-  tons_actual = (chw_flow_gpm * chw_delta_t_f * 8.33 * 60) / 12000
-  
-  Simplified:
-  tons_actual = chw_flow_gpm * chw_delta_t_f * 0.04165
-
-EXAMPLE:
-  chw_delta_t_f = 10.5
-  chw_flow_gpm = 2400
-  tons_actual = 2400 * 10.5 * 0.04165 = 1049.6 tons
-
-ALTERNATE (if direct measurement):
-  tons_actual can be entered directly from chiller display
-```
-
-### 4. kW per Ton (kw_per_ton)
-
-```text
-INPUT:
-  kw_input: numeric (e.g., 580 kW)
-  tons_actual: numeric (e.g., 1049.6 tons)
-
-CALCULATION:
-  IF tons_actual > 0 THEN
-    kw_per_ton = kw_input / tons_actual
-  ELSE
-    kw_per_ton = NULL (cannot calculate)
-
-EXAMPLE:
-  kw_input = 580
-  tons_actual = 1049.6
-  kw_per_ton = 580 / 1049.6 = 0.553 kW/ton
-```
-
-### 5. Year-over-Year Efficiency Degradation
-
-```text
-INPUT:
-  current_year_kw_per_ton: numeric (e.g., 0.553)
-  prior_year_kw_per_ton: numeric (e.g., 0.520) -- from same equipment's prior year PM
-
-DETECTION RULE:
-  1. Query prior year's performance test for same equipment_id
-  2. Get prior_year.kw_per_ton
-
-CALCULATION:
-  IF prior_year_kw_per_ton EXISTS AND prior_year_kw_per_ton > 0 THEN
-    efficiency_variance_pct = ((current_kw_per_ton - prior_year_kw_per_ton) / prior_year_kw_per_ton) * 100
-    degradation_since_last_year_pct = efficiency_variance_pct
-  ELSE
-    degradation_since_last_year_pct = NULL (no prior data)
-
-TRIGGER CONDITION:
-  IF degradation_since_last_year_pct > 10.0 THEN
-    add +15 points to risk score
-
-EXAMPLE:
-  current_kw_per_ton = 0.553
-  prior_year_kw_per_ton = 0.520
-  degradation = ((0.553 - 0.520) / 0.520) * 100 = 6.35%
-  
-  Result: 6.35% < 10% threshold → NO penalty points
-
-EXAMPLE 2 (degraded):
-  current_kw_per_ton = 0.600
-  prior_year_kw_per_ton = 0.520
-  degradation = ((0.600 - 0.520) / 0.520) * 100 = 15.38%
-  
-  Result: 15.38% > 10% threshold → ADD +15 points
++----------------------------------+
+|      ChillerInspectionWizard     |
+|  (Main workflow orchestrator)    |
++----------------------------------+
+              |
+    +-------------------+
+    | WizardStepContext |  (Current step, progress, skip reasons)
+    +-------------------+
+              |
+    +-------------------+
+    | OfflineFormStore  |  (IndexedDB for draft persistence)
+    +-------------------+
+              |
+    +-------------------+
+    |    Step Components |
+    +-------------------+
+              |
+    +---------+---------+---------+---------+
+    |         |         |         |         |
+ Step 1    Step 2    Step 3   ...      Step 9
+(Asset)  (Refrig)   (Oil)            (Review)
 ```
 
 ---
 
-## Complete Risk Scoring Algorithm
+## Screen Flow Summary
 
+| Step | Screen | Critical Fields | Can Skip? |
+|------|--------|-----------------|-----------|
+| 1 | Select Asset + Create PM | equipment_id, inspection_date, technician_id | No |
+| 2 | Refrigerant Inspection | leak_detected, sight_glass_condition | Yes |
+| 3 | Oil System | current_level_pct, sample_collected, acid_number | Yes |
+| 4 | Tube Inspection | bundle_type, plugged_pct, test_method | Yes |
+| 5 | Water Side + Quality | flow_rate_gpm, delta_t_f, pH, legionella_detected | Yes |
+| 6 | Electrical | voltage readings, insulation_resistance, vibration_acceptable | Yes |
+| 7 | Performance Test | kw_input, tons_actual, chw/cw temps | Yes |
+| 8 | Findings + Photos | issue_code, severity, photo attachments | Yes |
+| 9 | Review + Submit | Risk score display, action recommendation | No |
+
+---
+
+## Screen-by-Screen Design
+
+### Screen 1: Select Asset + Create Annual PM
+
+**Purpose**: Initialize the inspection by selecting equipment and creating the parent PM record.
+
+**Layout** (Mobile):
 ```text
-FUNCTION calculateChillerRiskScore(pm: AnnualChillerPMComplete) -> RiskResult:
-  
-  total_score = 0
-  red_flags = []
-  findings_to_create = []
++------------------------------------------+
+|  [<] Annual Chiller Inspection      [?]  |
++------------------------------------------+
+| Progress: ●○○○○○○○○  Step 1 of 9         |
++------------------------------------------+
+|                                          |
+|  Select Chiller                          |
+|  +------------------------------------+  |
+|  | [Search icon] Search equipment...  |  |
+|  +------------------------------------+  |
+|  | ○ Chiller 1 - Building A           |  |
+|  | ● Chiller 2 - Main Plant  ✓        |  |
+|  | ○ Chiller 3 - Warehouse            |  |
+|  +------------------------------------+  |
+|                                          |
+|  Inspection Date                         |
+|  +------------------------------------+  |
+|  | [📅]  Feb 2, 2026                  |  |
+|  +------------------------------------+  |
+|                                          |
+|  Lead Technician                         |
+|  +------------------------------------+  |
+|  | [▼] Select technician...           |  |
+|  +------------------------------------+  |
+|                                          |
+|  Operating Hours (at inspection)         |
+|  +------------------------------------+  |
+|  | [+]  12,450  [-]                   |  |
+|  +------------------------------------+  |
+|                                          |
+|  +------------------------------------+  |
+|  |          Start Inspection          |  |
+|  +------------------------------------+  |
++------------------------------------------+
+```
 
-  // === REFRIGERANT CHECK (+25) ===
-  IF pm.refrigerant_inspection.leak_detected = TRUE THEN
-    total_score += 25
-    red_flags.push("REFRIGERANT_LEAK")
-    findings_to_create.push({
-      issue_code: "REF002",
-      severity: "high",
-      recommended_action: "REPAIR"
-    })
-  END IF
+**Required Fields**:
+| Field | Type | Validation | UI Component |
+|-------|------|------------|--------------|
+| equipment_id | uuid | Required | Radio list with search filter |
+| inspection_date | date | Required, not future | Date picker |
+| technician_id | uuid | Required | Select dropdown |
+| operating_hours_at_inspection | int | Optional | Number stepper (+/-) |
+| chiller_model | text | Auto-filled from equipment | Read-only display |
+| chiller_serial | text | Auto-filled from equipment | Read-only display |
 
-  // === TUBE INSPECTION CHECK (+30) ===
-  FOR EACH tube_inspection IN pm.tube_inspections:
-    plugged_pct = calculatePluggedPct(tube_inspection)
-    manufacturer_limit = getManufacturerLimit(pm.chiller_model) // default 5%
-    
-    IF plugged_pct > manufacturer_limit THEN
-      total_score += 30
-      red_flags.push("TUBE_PLUGS_EXCEEDED")
-      findings_to_create.push({
-        issue_code: "TUBE003",
-        severity: "high",
-        recommended_action: "REPAIR"
-      })
-      BREAK  // Only count once even if both evap/cond exceed
-    END IF
-  END FOR
+**Validation Rules**:
+- Cannot proceed without selecting equipment
+- Cannot proceed without selecting technician
+- Inspection date cannot be in the future
+- If equipment already has PM for current year, show warning dialog
 
-  // === OIL ACID CHECK (+30) ===
-  IF pm.oil_analysis EXISTS THEN
-    acid_threshold = 0.05  // mg KOH/g for POE oil (adjust for mineral)
-    
-    IF pm.oil_analysis.acid_number_mgkoh_g > acid_threshold THEN
-      total_score += 30
-      red_flags.push("OIL_ACID_FAIL")
-      findings_to_create.push({
-        issue_code: "OIL002",
-        severity: "high",
-        recommended_action: "HIGH_RISK"
-      })
-    END IF
-  END IF
+**Error Handling**:
+- No equipment available: Show "No chillers found" with link to equipment page
+- Offline mode: Load cached equipment list from IndexedDB
 
-  // === ELECTRICAL CHECK (+20) ===
-  FOR EACH electrical_check IN pm.electrical_checks:
-    IF electrical_check.component = 'main_motor' THEN
-      IF electrical_check.voltage_imbalance_pct > 2.0 THEN
-        total_score += 20
-        red_flags.push("VOLTAGE_IMBALANCE")
-        findings_to_create.push({
-          issue_code: "ELEC001",
-          severity: "medium",
-          recommended_action: "MONITOR"
-        })
-      END IF
-      BREAK  // Only check main motor
-    END IF
-  END FOR
+---
 
-  // === PERFORMANCE DEGRADATION CHECK (+15) ===
-  IF pm.performance_test EXISTS THEN
-    prior_year_pm = getPriorYearPM(pm.equipment_id, pm.inspection_year - 1)
-    
-    IF prior_year_pm.performance_test.kw_per_ton EXISTS THEN
-      current_kw = pm.performance_test.kw_per_ton
-      prior_kw = prior_year_pm.performance_test.kw_per_ton
-      
-      IF prior_kw > 0 THEN
-        degradation_pct = ((current_kw - prior_kw) / prior_kw) * 100
-        
-        IF degradation_pct > 10.0 THEN
-          total_score += 15
-          red_flags.push("EFFICIENCY_DEGRADED")
-          findings_to_create.push({
-            issue_code: "PERF002",
-            severity: "medium",
-            recommended_action: "MONITOR"
-          })
-        END IF
-      END IF
-    END IF
-  END IF
+### Screen 2: Refrigerant Inspection
 
-  // === DETERMINE RISK LEVEL ===
-  IF total_score <= 30 THEN
-    risk_level = "low"
-  ELSE IF total_score <= 60 THEN
-    risk_level = "medium"
-  ELSE
-    IF red_flags contains ["OIL_ACID_FAIL", "TUBE_PLUGS_EXCEEDED"] 
-       OR total_score > 80 THEN
-      risk_level = "critical"
-    ELSE
-      risk_level = "high"
-    END IF
-  END IF
+**Purpose**: Document refrigerant system status, leak detection, and charge levels.
 
-  // === DETERMINE REQUIRES_IMMEDIATE_ACTION ===
-  requires_immediate_action = (
-    risk_level IN ["high", "critical"] 
-    OR red_flags contains "REFRIGERANT_LEAK"
-    OR red_flags contains "OIL_ACID_FAIL"
-  )
+**Layout** (Mobile):
+```text
++------------------------------------------+
+|  [<] Refrigerant Inspection    [Skip ▼]  |
++------------------------------------------+
+| Progress: ●●○○○○○○○  Step 2 of 9         |
++------------------------------------------+
+|                                          |
+|  Leak Detected?                          |
+|  +------------------+------------------+ |
+|  |       NO         |       YES        | |
+|  |   [selected]     |                  | |
+|  +------------------+------------------+ |
+|                                          |
+|  [Conditional: If YES]                   |
+|  Leak Location                           |
+|  +------------------------------------+  |
+|  | ○ Shaft Seal                       |  |
+|  | ○ Suction Flange                   |  |
+|  | ○ Discharge Flange                 |  |
+|  | ○ Relief Valve                     |  |
+|  | ○ Other: ___________               |  |
+|  +------------------------------------+  |
+|                                          |
+|  Sight Glass Condition                   |
+|  +------------------------------------+  |
+|  | ○ Clear        ○ Bubbles (Minor)   |  |
+|  | ○ Bubbles (Heavy)  ○ Discolored    |  |
+|  +------------------------------------+  |
+|                                          |
+|  Moisture Indicator                      |
+|  +------------------------------------+  |
+|  | 🟢 Green  |  🟡 Yellow  |  🔴 Red   | |
+|  +------------------------------------+  |
+|                                          |
+|  Refrigerant Type                        |
+|  +------------------------------------+  |
+|  | [▼] R-134a                         |  |
+|  +------------------------------------+  |
+|                                          |
+|  Charge (lbs)                            |
+|  +------------------------------------+  |
+|  |  Current: [____] Nameplate: 850    |  |
+|  +------------------------------------+  |
+|                                          |
+|  Pressures (PSIG)                        |
+|  +------------------+------------------+ |
+|  | Suction: [____]  | Discharge:[____]| |
+|  +------------------+------------------+ |
+|                                          |
+|  Acid Test Passed?                       |
+|  +------------------+------------------+ |
+|  |       YES        |       NO         | |
+|  +------------------+------------------+ |
+|                                          |
+|  +------------------------------------+  |
+|  |              Next Step              |  |
+|  +------------------------------------+  |
++------------------------------------------+
+```
 
-  RETURN {
-    overall_risk_score: MIN(total_score, 100),
-    overall_risk_level: risk_level,
-    requires_immediate_action: requires_immediate_action,
-    red_flags: red_flags,
-    auto_findings: findings_to_create
-  }
+**Required Fields**:
+| Field | Type | UI Component | Critical? |
+|-------|------|--------------|-----------|
+| leak_detected | boolean | Toggle button pair (NO/YES) | Yes (blocks submit if null) |
+| leak_location_code | enum | Radio list (conditional) | Yes if leak_detected |
+| sight_glass_condition | enum | Radio grid | No |
+| moisture_indicator_color | enum | Color button trio | No |
+| refrigerant_type | enum | Select dropdown | No |
+| charge_lbs | numeric | Number input with stepper | No |
+| suction_pressure_psig | numeric | Number input | No |
+| discharge_pressure_psig | numeric | Number input | No |
+| acid_test_passed | boolean | Toggle button pair | No |
 
-END FUNCTION
+**Skip Reason Codes**:
+- `not_applicable`: Equipment not running
+- `deferred`: Will complete on follow-up visit
+- `access_issue`: Cannot access components
+
+---
+
+### Screen 3: Oil System
+
+**Purpose**: Document oil condition, sample collection, and lab results.
+
+**Layout** (Mobile):
+```text
++------------------------------------------+
+|  [<] Oil System                [Skip ▼]  |
++------------------------------------------+
+| Progress: ●●●○○○○○○  Step 3 of 9         |
++------------------------------------------+
+|                                          |
+|  Oil Level                               |
+|  +------------------------------------+  |
+|  |         [========|--]  75%         |  |
+|  +------------------------------------+  |
+|  0%                                 100% |
+|                                          |
+|  Oil Type                                |
+|  +------------------------------------+  |
+|  | ○ POE  ○ Mineral  ○ Alkylbenzene   |  |
+|  +------------------------------------+  |
+|                                          |
+|  Oil Appearance                          |
+|  +------------------------------------+  |
+|  | ○ Clear    ○ Hazy                  |  |
+|  | ○ Dark     ○ Contaminated          |  |
+|  +------------------------------------+  |
+|                                          |
+|  Sample Collected?                       |
+|  +------------------+------------------+ |
+|  |       NO         |       YES        | |
+|  +------------------+------------------+ |
+|                                          |
+|  [Conditional: Lab Results Available]    |
+|  Acid Number (mg KOH/g)                  |
+|  +------------------------------------+  |
+|  | [____] 0.05    [⚠ Threshold: 0.05] |  |
+|  +------------------------------------+  |
+|                                          |
+|  Wear Metals (ppm)                       |
+|  +------------+------------+------------+|
+|  | Iron       | Copper     | Aluminum  ||
+|  | [____]     | [____]     | [____]    ||
+|  +------------+------------+------------+|
+|                                          |
+|  Oil Changed?                            |
+|  +------------------+------------------+ |
+|  |       NO         |       YES        | |
+|  +------------------+------------------+ |
+|                                          |
+|  Oil Filter Replaced?                    |
+|  +------------------+------------------+ |
+|  |       NO         |       YES        | |
+|  +------------------+------------------+ |
+|                                          |
+|  +------------------------------------+  |
+|  |              Next Step              |  |
+|  +------------------------------------+  |
++------------------------------------------+
+```
+
+**Required Fields**:
+| Field | Type | UI Component | Triggers Risk? |
+|-------|------|--------------|----------------|
+| current_level_pct | numeric | Slider (0-100) | No |
+| oil_type | enum | Radio buttons | No |
+| appearance | enum | Radio grid | No |
+| sample_collected | boolean | Toggle pair | No |
+| acid_number_mgkoh_g | numeric | Number input | YES (+30 if > 0.05) |
+| iron_ppm | numeric | Number input | No |
+| copper_ppm | numeric | Number input | No |
+| oil_changed | boolean | Toggle pair | No |
+| oil_filter_replaced | boolean | Toggle pair | No |
+
+**Auto-Calculations**:
+- If acid_number > 0.05, show warning badge "HIGH ACID"
+
+---
+
+### Screen 4: Tube Inspection (Evaporator/Condenser)
+
+**Purpose**: Document tube bundle condition with separate paths for evaporator and condenser.
+
+**Layout** (Mobile):
+```text
++------------------------------------------+
+|  [<] Tube Inspection           [Skip ▼]  |
++------------------------------------------+
+| Progress: ●●●●○○○○○  Step 4 of 9         |
++------------------------------------------+
+|                                          |
+|  Select Bundle                           |
+|  +------------------+------------------+ |
+|  |    EVAPORATOR    |    CONDENSER     | |
+|  |   [selected]     |                  | |
+|  +------------------+------------------+ |
+|                                          |
+|  [Tab: EVAPORATOR]                       |
+|                                          |
+|  Total Tubes: [____]  Plugged: [____]    |
+|  Calculated: 3.5% plugged                |
+|  +------------------------------------+  |
+|  | [========|---------------] 3.5%    |  |
+|  +------------------------------------+  |
+|  Threshold: 5%  [✓ PASS]                 |
+|                                          |
+|  Test Method                             |
+|  +------------------------------------+  |
+|  | ○ Eddy Current   ○ Ultrasonic      |  |
+|  | ○ Visual         ○ Pressure Test   |  |
+|  +------------------------------------+  |
+|                                          |
+|  Wall Thickness (mils)                   |
+|  +------------------+------------------+ |
+|  | Min: [____]      | Avg: [____]      | |
+|  +------------------+------------------+ |
+|  Original: 49 mils                       |
+|                                          |
+|  Fouling Severity                        |
+|  +------------------------------------+  |
+|  | ○ None  ○ Light  ○ Moderate        |  |
+|  | ○ Heavy  ○ Severe                  |  |
+|  +------------------------------------+  |
+|                                          |
+|  Tubes Cleaned?                          |
+|  +------------------+------------------+ |
+|  |       NO         |       YES        | |
+|  +------------------+------------------+ |
+|                                          |
+|  [If YES] Cleaning Method                |
+|  +------------------------------------+  |
+|  | ○ Mechanical  ○ Chemical  ○ Hydro  |  |
+|  +------------------------------------+  |
+|                                          |
+|  Waterbox Condition                      |
+|  +------------------------------------+  |
+|  | ○ Good  ○ Fair  ○ Poor  ○ Repair   |  |
+|  +------------------------------------+  |
+|                                          |
+|  +------------------------------------+  |
+|  |        Add Condenser Data          |  |
+|  +------------------------------------+  |
+|                                          |
+|  +------------------------------------+  |
+|  |              Next Step              |  |
+|  +------------------------------------+  |
++------------------------------------------+
+```
+
+**Required Fields**:
+| Field | Type | UI Component | Triggers Risk? |
+|-------|------|--------------|----------------|
+| bundle_type | enum | Toggle tabs | Required |
+| tube_count_total | int | Number input | No |
+| tubes_plugged_total | int | Number input | No |
+| plugged_pct | numeric | Auto-calculated + progress bar | YES (+30 if > 5%) |
+| test_method | enum | Radio grid | No |
+| min_wall_thickness_mils | numeric | Number input | No |
+| wall_loss_pct | numeric | Auto-calculated | YES (+25 if > 20%) |
+| fouling_severity | enum | Radio buttons | No |
+| tubes_cleaned | boolean | Toggle pair | No |
+| cleaning_method | enum | Radio buttons (conditional) | No |
+| waterbox_condition | enum | Radio buttons | No |
+
+**Auto-Calculations**:
+```text
+plugged_pct = (tubes_plugged_total / tube_count_total) * 100
+wall_loss_pct = ((original_wall_thickness - min_wall_thickness) / original_wall_thickness) * 100
 ```
 
 ---
 
-## Recommended Action Rules
+### Screen 5: Water Side + Water Quality
 
-| Condition | Action Code | Display Text |
-|-----------|-------------|--------------|
-| Score 0-30, no red flags | `MONITOR` | "Continue monitoring per schedule" |
-| Score 31-60, no critical red flags | `MONITOR_CLOSELY` | "Monitor closely, schedule follow-up" |
-| Any single red flag (except acid) | `REPAIR` | "Schedule repair within 30 days" |
-| Oil acid fail OR tube limit exceeded | `REPAIR_URGENT` | "Repair required within 14 days" |
-| Score 61+ OR multiple red flags | `HIGH_RISK` | "Immediate attention required" |
-| Refrigerant leak + acid fail | `CRITICAL` | "Critical - Take chiller offline for repair" |
+**Purpose**: Document water flow parameters and water chemistry.
 
+**Layout** (Mobile):
 ```text
-FUNCTION determineRecommendedAction(result: RiskResult) -> ActionRecommendation:
-  
-  flags = result.red_flags
-  score = result.overall_risk_score
-  
-  // Critical combinations
-  IF "REFRIGERANT_LEAK" IN flags AND "OIL_ACID_FAIL" IN flags THEN
-    RETURN { code: "CRITICAL", text: "Critical - Take chiller offline for repair", priority: 1 }
-  END IF
-  
-  // High risk with multiple issues
-  IF LENGTH(flags) >= 2 OR score > 80 THEN
-    RETURN { code: "HIGH_RISK", text: "Immediate attention required", priority: 2 }
-  END IF
-  
-  // Urgent repair scenarios
-  IF "OIL_ACID_FAIL" IN flags OR "TUBE_PLUGS_EXCEEDED" IN flags THEN
-    RETURN { code: "REPAIR_URGENT", text: "Repair required within 14 days", priority: 3 }
-  END IF
-  
-  // Standard repair
-  IF LENGTH(flags) = 1 THEN
-    RETURN { code: "REPAIR", text: "Schedule repair within 30 days", priority: 4 }
-  END IF
-  
-  // Elevated monitoring
-  IF score > 30 THEN
-    RETURN { code: "MONITOR_CLOSELY", text: "Monitor closely, schedule follow-up in 90 days", priority: 5 }
-  END IF
-  
-  // Normal
-  RETURN { code: "MONITOR", text: "Continue monitoring per annual schedule", priority: 6 }
++------------------------------------------+
+|  [<] Water System              [Skip ▼]  |
++------------------------------------------+
+| Progress: ●●●●●○○○○  Step 5 of 9         |
++------------------------------------------+
+|                                          |
+|  Select Water Loop                       |
+|  +------------------+------------------+ |
+|  |  CHILLED WATER   | CONDENSER WATER  | |
+|  +------------------+------------------+ |
+|                                          |
+|  --- FLOW & TEMPERATURES ---             |
+|                                          |
+|  Flow Rate (GPM)                         |
+|  +------------------+------------------+ |
+|  | Actual: [____]   | Design: 2400     | |
+|  +------------------+------------------+ |
+|                                          |
+|  Water Temps (°F)                        |
+|  +------------------+------------------+ |
+|  | Entering: [____] | Leaving: [____]  | |
+|  +------------------+------------------+ |
+|  Calculated ΔT: 10.5°F                   |
+|                                          |
+|  Strainer Cleaned?                       |
+|  +------------------+------------------+ |
+|  |       NO         |       YES        | |
+|  +------------------+------------------+ |
+|                                          |
+|  --- WATER QUALITY ---                   |
+|                                          |
+|  pH Level                                |
+|  +------------------------------------+  |
+|  |         [========|--]  7.8         |  |
+|  +------------------------------------+  |
+|  6.5                                 9.0 |
+|                                          |
+|  Conductivity (μmhos)                    |
+|  +------------------------------------+  |
+|  | [________]                         |  |
+|  +------------------------------------+  |
+|                                          |
+|  Legionella Detected?                    |
+|  +------------------+------------------+ |
+|  |       NO         |  ⚠️ YES         | |
+|  +------------------+------------------+ |
+|  [Warning: +40 risk points if YES]       |
+|                                          |
+|  Within Treatment Spec?                  |
+|  +------------------+------------------+ |
+|  |       NO         |       YES        | |
+|  +------------------+------------------+ |
+|                                          |
+|  +------------------------------------+  |
+|  |              Next Step              |  |
+|  +------------------------------------+  |
++------------------------------------------+
+```
 
-END FUNCTION
+**Required Fields**:
+| Field | Type | UI Component | Triggers Risk? |
+|-------|------|--------------|----------------|
+| water_loop | enum | Toggle tabs | Required |
+| flow_rate_gpm | numeric | Number input | No |
+| entering_water_temp_f | numeric | Number input | No |
+| leaving_water_temp_f | numeric | Number input | No |
+| strainer_cleaned | boolean | Toggle pair | No |
+| ph | numeric | Slider with labels (6.5-9.0) | No |
+| conductivity_umhos | numeric | Number input | No |
+| legionella_detected | boolean | Toggle pair with warning | YES (+40 if true) |
+| within_spec | boolean | Toggle pair | No |
+
+**Auto-Calculations**:
+```text
+delta_t_f = leaving_water_temp_f - entering_water_temp_f
 ```
 
 ---
 
-## Red Flag Triggers
+### Screen 6: Electrical
 
-| Trigger | Condition | Auto-Finding Code | Severity |
-|---------|-----------|-------------------|----------|
-| Refrigerant Leak | `leak_detected = true` | REF002 | critical |
-| Repeated Leak (YoY) | Current + prior year both had leaks | REF002 | critical |
-| Oil Acid Fail | `acid_number_mgkoh_g > 0.05` | OIL002 | high |
-| Tube Plugs Exceeded | `plugged_pct > 5%` | TUBE003 | high |
-| Tube Wall Loss Critical | `wall_loss_pct > 20%` | TUBE002 | high |
-| Voltage Imbalance | `voltage_imbalance_pct > 2%` | ELEC001 | medium |
-| Efficiency Degraded | `degradation_pct > 10%` | PERF002 | medium |
-| Legionella Detected | `legionella_detected = true` | WTR004 | critical |
-| Low Insulation Resistance | `insulation_resistance_megohms < 1` | ELEC003 | high |
+**Purpose**: Document motor electrical readings and safety checks.
 
----
-
-## Example Calculations
-
-### Example 1: Healthy Chiller
-
+**Layout** (Mobile):
 ```text
-INPUT:
-  leak_detected: false
-  tubes_plugged_total: 8, tube_count_total: 400 → plugged_pct = 2%
-  acid_number_mgkoh_g: 0.02
-  voltage_imbalance_pct: 0.8%
-  kw_per_ton: 0.55, prior_year: 0.53 → degradation = 3.8%
-
-SCORING:
-  Refrigerant leak:     0 (no leak)
-  Tube plugs:           0 (2% < 5%)
-  Oil acid:             0 (0.02 < 0.05)
-  Voltage imbalance:    0 (0.8% < 2%)
-  Efficiency:           0 (3.8% < 10%)
-  
-  TOTAL SCORE: 0
-  RISK LEVEL: low (Green)
-  RECOMMENDED ACTION: MONITOR - "Continue monitoring per annual schedule"
-  RED FLAGS: []
++------------------------------------------+
+|  [<] Electrical Check          [Skip ▼]  |
++------------------------------------------+
+| Progress: ●●●●●●○○○  Step 6 of 9         |
++------------------------------------------+
+|                                          |
+|  Component                               |
+|  +------------------------------------+  |
+|  | ○ Main Motor  ○ Oil Pump  ○ VFD    |  |
+|  +------------------------------------+  |
+|                                          |
+|  --- VOLTAGE READINGS ---                |
+|                                          |
+|  3-Phase Voltage (V)                     |
+|  +----------+----------+----------+      |
+|  |  L1-L2   |  L2-L3   |  L3-L1   |      |
+|  | [_____]  | [_____]  | [_____]  |      |
+|  +----------+----------+----------+      |
+|                                          |
+|  Calculated Imbalance: 0.57%             |
+|  +------------------------------------+  |
+|  | [==|--------------------] 0.57%    |  |
+|  +------------------------------------+  |
+|  Threshold: 2%  [✓ PASS]                 |
+|                                          |
+|  --- AMPERAGE READINGS ---               |
+|                                          |
+|  3-Phase Amps                            |
+|  +----------+----------+----------+      |
+|  |    L1    |    L2    |    L3    |      |
+|  | [_____]  | [_____]  | [_____]  |      |
+|  +----------+----------+----------+      |
+|                                          |
+|  --- MOTOR HEALTH ---                    |
+|                                          |
+|  Insulation Resistance (MΩ)              |
+|  +------------------------------------+  |
+|  | [________]  Min required: 1 MΩ     |  |
+|  +------------------------------------+  |
+|                                          |
+|  Vibration Acceptable?                   |
+|  +------------------+------------------+ |
+|  |       YES        |       NO         | |
+|  +------------------+------------------+ |
+|                                          |
+|  Starter Condition                       |
+|  +------------------------------------+  |
+|  | ○ Operational  ○ Worn Contacts     |  |
+|  | ○ Overheating  ○ Needs Replace     |  |
+|  +------------------------------------+  |
+|                                          |
+|  +------------------------------------+  |
+|  |              Next Step              |  |
+|  +------------------------------------+  |
++------------------------------------------+
 ```
 
-### Example 2: Medium Risk Chiller
+**Required Fields**:
+| Field | Type | UI Component | Triggers Risk? |
+|-------|------|--------------|----------------|
+| component | enum | Radio buttons | Required |
+| voltage_l1_l2 | numeric | Number input | No |
+| voltage_l2_l3 | numeric | Number input | No |
+| voltage_l3_l1 | numeric | Number input | No |
+| voltage_imbalance_pct | numeric | Auto-calculated + bar | YES (+20 if > 2%) |
+| amperage_l1/l2/l3 | numeric | Number inputs | No |
+| insulation_resistance_megohms | numeric | Number input | YES (+20 if < 1) |
+| vibration_acceptable | boolean | Toggle pair | No |
+| starter_condition | enum | Radio grid | No |
 
+**Auto-Calculations**:
 ```text
-INPUT:
-  leak_detected: false
-  tubes_plugged_total: 30, tube_count_total: 400 → plugged_pct = 7.5%
-  acid_number_mgkoh_g: 0.03
-  voltage_imbalance_pct: 2.5%
-  kw_per_ton: 0.60, prior_year: 0.52 → degradation = 15.4%
-
-SCORING:
-  Refrigerant leak:     0
-  Tube plugs:          +30 (7.5% > 5%)
-  Oil acid:             0
-  Voltage imbalance:   +20 (2.5% > 2%)
-  Efficiency:          +15 (15.4% > 10%)
-  
-  TOTAL SCORE: 65
-  RISK LEVEL: high (Red)
-  RECOMMENDED ACTION: HIGH_RISK - "Immediate attention required"
-  RED FLAGS: [TUBE_PLUGS_EXCEEDED, VOLTAGE_IMBALANCE, EFFICIENCY_DEGRADED]
-  REQUIRES_IMMEDIATE_ACTION: true
-```
-
-### Example 3: Critical Risk Chiller
-
-```text
-INPUT:
-  leak_detected: true (shaft seal)
-  tubes_plugged_total: 15, tube_count_total: 400 → plugged_pct = 3.75%
-  acid_number_mgkoh_g: 0.08
-  voltage_imbalance_pct: 1.2%
-  kw_per_ton: 0.58, prior_year: 0.55 → degradation = 5.5%
-
-SCORING:
-  Refrigerant leak:    +25
-  Tube plugs:           0 (3.75% < 5%)
-  Oil acid:            +30 (0.08 > 0.05)
-  Voltage imbalance:    0 (1.2% < 2%)
-  Efficiency:           0 (5.5% < 10%)
-  
-  TOTAL SCORE: 55
-  RISK LEVEL: critical (escalated due to leak + acid combo)
-  RECOMMENDED ACTION: CRITICAL - "Critical - Take chiller offline for repair"
-  RED FLAGS: [REFRIGERANT_LEAK, OIL_ACID_FAIL]
-  REQUIRES_IMMEDIATE_ACTION: true
-  
-  AUTO-GENERATED FINDINGS:
-    1. REF002 - Refrigerant Leak Detected (severity: critical)
-    2. OIL002 - High Acid Number (severity: high)
+avg_voltage = (L1L2 + L2L3 + L3L1) / 3
+max_deviation = MAX(|L1L2 - avg|, |L2L3 - avg|, |L3L1 - avg|)
+voltage_imbalance_pct = (max_deviation / avg_voltage) * 100
 ```
 
 ---
 
-## Implementation Files
+### Screen 7: Performance Test
+
+**Purpose**: Document operating efficiency and capacity measurements.
+
+**Layout** (Mobile):
+```text
++------------------------------------------+
+|  [<] Performance Test          [Skip ▼]  |
++------------------------------------------+
+| Progress: ●●●●●●●○○  Step 7 of 9         |
++------------------------------------------+
+|                                          |
+|  Test Date                               |
+|  +------------------------------------+  |
+|  | [📅]  Feb 2, 2026  @ 14:30         |  |
+|  +------------------------------------+  |
+|                                          |
+|  Load %                                  |
+|  +------------------------------------+  |
+|  |         [========|--]  75%         |  |
+|  +------------------------------------+  |
+|  0%                                 100% |
+|                                          |
+|  --- WATER TEMPERATURES ---              |
+|                                          |
+|  Chilled Water (°F)                      |
+|  +------------------+------------------+ |
+|  | Supply: [_____]  | Return: [_____]  | |
+|  +------------------+------------------+ |
+|  ΔT: 10.5°F                              |
+|                                          |
+|  Condenser Water (°F)                    |
+|  +------------------+------------------+ |
+|  | Supply: [_____]  | Return: [_____]  | |
+|  +------------------+------------------+ |
+|                                          |
+|  CHW Flow (GPM): [________]              |
+|                                          |
+|  --- EFFICIENCY METRICS ---              |
+|                                          |
+|  kW Input                                |
+|  +------------------------------------+  |
+|  | [________]                         |  |
+|  +------------------------------------+  |
+|                                          |
+|  Tons (Actual)                           |
+|  +------------------------------------+  |
+|  | [________]  or [Calculate from ΔT] |  |
+|  +------------------------------------+  |
+|                                          |
+|  +------------------------------------+  |
+|  |  CALCULATED: 0.553 kW/ton          |  |
+|  |  Design: 0.520 kW/ton              |  |
+|  |  Variance: +6.3%  [✓ OK]           |  |
+|  +------------------------------------+  |
+|                                          |
+|  +------------------------------------+  |
+|  |              Next Step              |  |
+|  +------------------------------------+  |
++------------------------------------------+
+```
+
+**Required Fields**:
+| Field | Type | UI Component | Triggers Risk? |
+|-------|------|--------------|----------------|
+| test_date | datetime | Date-time picker | No |
+| load_pct | numeric | Slider (0-100) | No |
+| chilled_water_supply_f | numeric | Number input | No |
+| chilled_water_return_f | numeric | Number input | No |
+| condenser_water_supply_f | numeric | Number input | No |
+| condenser_water_return_f | numeric | Number input | No |
+| chw_flow_gpm | numeric | Number input | No |
+| kw_input | numeric | Number input | No |
+| tons_actual | numeric | Number input OR auto-calc | No |
+| kw_per_ton | numeric | Auto-calculated | YES (+15 if >10% YoY) |
+
+**Auto-Calculations**:
+```text
+chw_delta_t_f = chilled_water_return_f - chilled_water_supply_f
+tons_actual = chw_flow_gpm * chw_delta_t_f * 0.04165
+kw_per_ton = kw_input / tons_actual
+degradation_pct = ((current_kw_per_ton - prior_year_kw_per_ton) / prior_year_kw_per_ton) * 100
+```
+
+---
+
+### Screen 8: Findings + Photos
+
+**Purpose**: Document issues discovered with photo evidence.
+
+**Layout** (Mobile):
+```text
++------------------------------------------+
+|  [<] Findings & Photos         [Skip ▼]  |
++------------------------------------------+
+| Progress: ●●●●●●●●○  Step 8 of 9         |
++------------------------------------------+
+|                                          |
+|  [Auto-Generated Findings from Risk]     |
+|  +------------------------------------+  |
+|  | ⚠️ REF002 - Refrigerant Leak       |  |
+|  |    Severity: HIGH                  |  |
+|  |    [Edit] [+ Add Photo]            |  |
+|  +------------------------------------+  |
+|  | ⚠️ OIL002 - High Acid Number       |  |
+|  |    Severity: HIGH                  |  |
+|  |    [Edit] [+ Add Photo]            |  |
+|  +------------------------------------+  |
+|                                          |
+|  +------------------------------------+  |
+|  |      + Add Manual Finding          |  |
+|  +------------------------------------+  |
+|                                          |
+|  [Add Finding Modal]                     |
+|  +------------------------------------+  |
+|  | Issue Code                         |  |
+|  | [▼] Select from list...            |  |
+|  |                                    |  |
+|  | Category: Refrigerant              |  |
+|  |                                    |  |
+|  | Severity                           |  |
+|  | ○ Low  ○ Medium  ○ High  ○ Critical|  |
+|  |                                    |  |
+|  | Description                        |  |
+|  | [________________________]         |  |
+|  | [________________________]         |  |
+|  |                                    |  |
+|  | Photos                             |  |
+|  | +------+ +------+ +------+         |  |
+|  | |[📷]  | |[img] | |[+]   |         |  |
+|  | |Take  | |      | |Add   |         |  |
+|  | +------+ +------+ +------+         |  |
+|  |                                    |  |
+|  | Recommended Action                 |  |
+|  | [________________________]         |  |
+|  |                                    |  |
+|  | [         Save Finding         ]   |  |
+|  +------------------------------------+  |
+|                                          |
+|  +------------------------------------+  |
+|  |              Next Step              |  |
+|  +------------------------------------+  |
++------------------------------------------+
+```
+
+**Required Fields**:
+| Field | Type | UI Component | Required? |
+|-------|------|--------------|-----------|
+| issue_code | enum | Searchable select | Yes for new findings |
+| severity | enum | Radio buttons | Yes |
+| description | text | Textarea (max 500 chars) | Yes |
+| photos | file[] | Camera/gallery picker | No |
+| recommended_action | text | Text input | No |
+
+**Photo Upload Flow**:
+1. Tap camera icon to open device camera
+2. Tap gallery icon to select from photos
+3. Photos stored locally in IndexedDB until sync
+4. Each photo gets caption field
+5. Mark one photo as "primary" for the finding
+
+---
+
+### Screen 9: Review + Submit
+
+**Purpose**: Final review showing risk score, red flags, and recommended action.
+
+**Layout** (Mobile):
+```text
++------------------------------------------+
+|  [<] Review & Submit                     |
++------------------------------------------+
+| Progress: ●●●●●●●●●  Step 9 of 9         |
++------------------------------------------+
+|                                          |
+|  +------------------------------------+  |
+|  |         RISK SCORE: 55             |  |
+|  |                                    |  |
+|  |    +------------------------+      |  |
+|  |    |████████████░░░░░░░░░░░|      |  |
+|  |    +------------------------+      |  |
+|  |    0     30     60     100         |  |
+|  |                                    |  |
+|  |    Risk Level: CRITICAL 🔴         |  |
+|  +------------------------------------+  |
+|                                          |
+|  Recommended Action                      |
+|  +------------------------------------+  |
+|  | ⚠️ CRITICAL: Take chiller offline  |  |
+|  |    for repair                      |  |
+|  +------------------------------------+  |
+|                                          |
+|  Red Flags                               |
+|  +------------------------------------+  |
+|  | 🔴 Refrigerant Leak (+25)          |  |
+|  | 🔴 Oil Acid Fail (+30)             |  |
+|  +------------------------------------+  |
+|                                          |
+|  Score Breakdown                         |
+|  +------------------------------------+  |
+|  | Refrigerant Leak     +25           |  |
+|  | Tube Plugs            0            |  |
+|  | Oil Acid             +30           |  |
+|  | Voltage Imbalance     0            |  |
+|  | Efficiency             0           |  |
+|  +------------------------------------+  |
+|                                          |
+|  Sections Completed                      |
+|  +------------------------------------+  |
+|  | ✓ Refrigerant  ✓ Oil  ✓ Tubes      |  |
+|  | ✓ Water  ✓ Electrical  ✓ Perf      |  |
+|  | ⚠ Findings (2 open)                |  |
+|  +------------------------------------+  |
+|                                          |
+|  Sections Skipped                        |
+|  +------------------------------------+  |
+|  | None                               |  |
+|  +------------------------------------+  |
+|                                          |
+|  +------------------------------------+  |
+|  |      Submit Inspection              |  |
+|  |    (Requires: Leak + Severity)     |  |
+|  +------------------------------------+  |
+|                                          |
+|  +------------------------------------+  |
+|  |      Save as Draft                  |  |
+|  +------------------------------------+  |
++------------------------------------------+
+```
+
+**Validation Before Submit**:
+| Validation Rule | Blocks Submit? |
+|-----------------|----------------|
+| Equipment not selected | Yes |
+| Technician not selected | Yes |
+| No inspection date | Yes |
+| Leak detected but no location | Yes |
+| Critical findings with no photo | Warning only |
+| All sections skipped | Yes (at least 1 required) |
+
+**Submit Actions**:
+1. If online: Sync to Supabase immediately
+2. If offline: Store in IndexedDB, show sync indicator
+3. Update `annual_chiller_pm.status` to `pending_review`
+4. Save calculated risk score to `overall_risk_score`
+5. Auto-generate findings from red flags if not already present
+
+---
+
+## Offline Capability
+
+### Data Storage (IndexedDB)
+
+**New Stores for Chiller Annuals**:
+```text
+chiller_annual_drafts
+  - id: string (UUID)
+  - equipment_id: string
+  - created_at: string
+  - updated_at: string
+  - current_step: number (1-9)
+  - form_data: object (all inspection data)
+  - synced: boolean
+  - skip_reasons: object { step_number: reason_code }
+
+chiller_annual_photos
+  - id: string (UUID)
+  - draft_id: string (FK to drafts)
+  - finding_number: number
+  - photo_blob: Blob
+  - caption: string
+  - is_primary: boolean
+  - synced: boolean
+```
+
+### Offline Workflow:
+1. On wizard start: Cache equipment list and reference data
+2. Auto-save to IndexedDB on every field change
+3. Resume from last step if app closes
+4. Show offline indicator in header
+5. Queue photos for upload when online
+6. Sync entire inspection when connectivity restored
+
+---
+
+## Files to Create
 
 | File | Purpose |
 |------|---------|
-| `src/services/chillerRiskCalculator.ts` | Core calculation logic (pure functions) |
-| `src/hooks/useChillerRiskScore.ts` | React hook for real-time calculation |
-| `src/types/chillerRisk.ts` | TypeScript interfaces for risk results |
+| `src/components/chiller-annuals/wizard/ChillerInspectionWizard.tsx` | Main wizard orchestrator |
+| `src/components/chiller-annuals/wizard/WizardProgress.tsx` | Progress bar component |
+| `src/components/chiller-annuals/wizard/WizardNavigation.tsx` | Back/Next/Skip buttons |
+| `src/components/chiller-annuals/wizard/SkipReasonDialog.tsx` | Skip reason selection dialog |
+| `src/components/chiller-annuals/wizard/steps/Step1AssetSelection.tsx` | Screen 1 |
+| `src/components/chiller-annuals/wizard/steps/Step2Refrigerant.tsx` | Screen 2 |
+| `src/components/chiller-annuals/wizard/steps/Step3OilSystem.tsx` | Screen 3 |
+| `src/components/chiller-annuals/wizard/steps/Step4TubeInspection.tsx` | Screen 4 |
+| `src/components/chiller-annuals/wizard/steps/Step5WaterSystem.tsx` | Screen 5 |
+| `src/components/chiller-annuals/wizard/steps/Step6Electrical.tsx` | Screen 6 |
+| `src/components/chiller-annuals/wizard/steps/Step7Performance.tsx` | Screen 7 |
+| `src/components/chiller-annuals/wizard/steps/Step8Findings.tsx` | Screen 8 |
+| `src/components/chiller-annuals/wizard/steps/Step9Review.tsx` | Screen 9 |
+| `src/components/chiller-annuals/wizard/components/ToggleButtonPair.tsx` | Reusable YES/NO toggle |
+| `src/components/chiller-annuals/wizard/components/NumberStepper.tsx` | +/- number input |
+| `src/components/chiller-annuals/wizard/components/PhotoCapture.tsx` | Camera/gallery picker |
+| `src/components/chiller-annuals/wizard/components/RiskScoreDisplay.tsx` | Score visualization |
+| `src/hooks/useChillerWizardForm.ts` | Form state management hook |
+| `src/hooks/useChillerOfflineStorage.ts` | IndexedDB operations hook |
+| `src/services/chillerOfflineService.ts` | Offline storage service |
 
 ---
 
-## Technical Implementation
+## Validation Summary
 
-### New Types (`src/types/chillerRisk.ts`)
+### Fields That Block Submission (Critical):
+1. `equipment_id` - Must select a chiller
+2. `inspection_date` - Must have valid date
+3. `technician_id` - Must assign lead technician
+4. `leak_detected` - Must answer YES or NO
+5. `leak_location_code` - Required if leak detected
+6. At least 1 section must be completed (cannot skip all)
 
-```typescript
-interface RedFlag {
-  code: 'REFRIGERANT_LEAK' | 'TUBE_PLUGS_EXCEEDED' | 'OIL_ACID_FAIL' | 
-        'VOLTAGE_IMBALANCE' | 'EFFICIENCY_DEGRADED' | 'LEGIONELLA_DETECTED' |
-        'LOW_INSULATION' | 'REPEATED_LEAK';
-  description: string;
-  issueCode: string;
-  severity: 'medium' | 'high' | 'critical';
-}
-
-interface RiskCalculationResult {
-  overallRiskScore: number;
-  overallRiskLevel: 'none' | 'low' | 'medium' | 'high' | 'critical';
-  requiresImmediateAction: boolean;
-  redFlags: RedFlag[];
-  recommendedAction: {
-    code: string;
-    text: string;
-    priority: number;
-  };
-  autoFindings: Array<{
-    issueCode: string;
-    category: string;
-    description: string;
-    severity: string;
-    recommendedAction: string;
-  }>;
-  scoreBreakdown: {
-    refrigerantLeak: number;
-    tubePlugs: number;
-    oilAcid: number;
-    voltageImbalance: number;
-    efficiencyDegradation: number;
-  };
-}
-
-interface ManufacturerLimits {
-  tubePluggedPctLimit: number;
-  oilAcidThreshold: number;
-  voltageImbalanceThreshold: number;
-  efficiencyDegradationThreshold: number;
-}
-```
-
-### Service Implementation (`src/services/chillerRiskCalculator.ts`)
-
-The service will include:
-1. `calculatePluggedPct()` - Compute tube plug percentage
-2. `calculateVoltageImbalance()` - Compute voltage imbalance from 3-phase readings
-3. `calculateTonsActual()` - Derive tons from flow and delta-T
-4. `calculateKwPerTon()` - Compute efficiency metric
-5. `calculateEfficiencyDegradation()` - Compare YoY performance
-6. `calculateChillerRiskScore()` - Main orchestrator function
-7. `determineRecommendedAction()` - Map score to action
-8. `getManufacturerLimits()` - Lookup model-specific thresholds
-
-### Hook Implementation (`src/hooks/useChillerRiskScore.ts`)
-
-```typescript
-function useChillerRiskScore(pmId: string, equipmentId: string) {
-  // Fetch current PM data
-  // Fetch prior year PM data for YoY comparison
-  // Calculate risk score in real-time
-  // Return result with loading/error states
-}
-```
+### Fields That Trigger Risk Score:
+| Field | Condition | Points | Red Flag |
+|-------|-----------|--------|----------|
+| `leak_detected` | = true | +25 | REFRIGERANT_LEAK |
+| `plugged_pct` | > 5% | +30 | TUBE_PLUGS_EXCEEDED |
+| `acid_number_mgkoh_g` | > 0.05 | +30 | OIL_ACID_FAIL |
+| `voltage_imbalance_pct` | > 2% | +20 | VOLTAGE_IMBALANCE |
+| `kw_per_ton` YoY | > 10% increase | +15 | EFFICIENCY_DEGRADED |
+| `legionella_detected` | = true | +40 | LEGIONELLA_DETECTED |
+| `insulation_resistance_megohms` | < 1 | +20 | LOW_INSULATION |
+| `wall_loss_pct` | > 20% | +25 | TUBE_WALL_LOSS_CRITICAL |
 
 ---
 
-## Summary
+## Error Handling
 
-| Component | Implementation |
-|-----------|----------------|
-| Risk Score Range | 0-100 (capped) |
-| Risk Levels | low (0-30), medium (31-60), high/critical (61+) |
-| Weighted Conditions | 5 primary triggers totaling up to 120 points |
-| Auto-Findings | Generated from red flags with standardized issue codes |
-| YoY Detection | Query prior year PM by equipment_id and inspection_year-1 |
-| Manufacturer Limits | Configurable per chiller model with sensible defaults |
+| Scenario | User Message | Recovery Action |
+|----------|--------------|-----------------|
+| No chillers in equipment list | "No chillers found. Add equipment first." | Link to Equipment page |
+| Duplicate annual PM for year | "This chiller already has a 2026 inspection. Continue editing?" | Open existing or create new |
+| Photo upload fails | "Photo saved locally. Will upload when online." | Queue in IndexedDB |
+| Form validation error | Field-specific inline error message | Highlight field, scroll to it |
+| Sync fails after submit | "Inspection saved offline. Will sync automatically." | Show in OfflineIndicator |
+| Session expired | "Please log in again to continue." | Save draft, redirect to login |
 
