@@ -94,6 +94,7 @@ export const maintenanceFormSchema = z.object({
   
   // Comprehensive Chiller - Compressor fields
   compressor_running_status: z.string().optional(),
+  compressor_vibration: z.string().optional(),
   chiller_control_signal: z.string().optional(),
   average_motor_current_pct_rla: z.string().optional(),
   compressor_starts: z.string().optional(),

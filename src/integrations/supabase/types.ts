@@ -1544,6 +1544,7 @@ export type Database = {
           compressor_suction_pressure: number | null
           compressor_suction_temp: number | null
           compressor_superheat: number | null
+          compressor_vibration: string | null
           condenser_approach_temp: number | null
           condenser_condition: string | null
           condenser_entering_water_temp: number | null
@@ -1671,6 +1672,7 @@ export type Database = {
           compressor_suction_pressure?: number | null
           compressor_suction_temp?: number | null
           compressor_superheat?: number | null
+          compressor_vibration?: string | null
           condenser_approach_temp?: number | null
           condenser_condition?: string | null
           condenser_entering_water_temp?: number | null
@@ -1800,6 +1802,7 @@ export type Database = {
           compressor_suction_pressure?: number | null
           compressor_suction_temp?: number | null
           compressor_superheat?: number | null
+          compressor_vibration?: string | null
           condenser_approach_temp?: number | null
           condenser_condition?: string | null
           condenser_entering_water_temp?: number | null
