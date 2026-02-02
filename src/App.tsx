@@ -29,6 +29,7 @@ import PredictiveMaintenance from "./pages/PredictiveMaintenance";
 import FilterChanges from "./pages/FilterChanges";
 import DigitalTwin from "./pages/DigitalTwin";
 import ChillerAnnuals from "./pages/ChillerAnnuals";
+import ChillerAnnualWizard from "./pages/ChillerAnnualWizard";
 import PrintView from "./pages/PrintView";
 import Index from "./pages/Index";
 import Solutions from "./pages/Solutions";
@@ -116,6 +117,11 @@ const AppContent = () => {
       <Route path="/chiller-annuals" element={
         <ProtectedRoute>
           <ChillerAnnuals />
+        </ProtectedRoute>
+      } />
+      <Route path="/chiller-annuals/wizard" element={
+        <ProtectedRoute>
+          <ChillerAnnualWizard />
         </ProtectedRoute>
       } />
       <Route path="/analytics" element={
