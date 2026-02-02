@@ -236,12 +236,12 @@ export function Step5WaterSystem({ formData, updateWater, updateWaterQuality }: 
   };
 
   return (
-    <div className="space-y-4 pb-24">
-      {/* Main Tabs for Water Loops */}
+    <div className="space-y-4">
+      {/* Main Tabs for Water Loops - touch-friendly */}
       <Tabs value={activeLoop} onValueChange={(v) => setActiveLoop(v as 'chilled_water' | 'condenser_water')}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="chilled_water">Chilled Water</TabsTrigger>
-          <TabsTrigger value="condenser_water">Condenser Water</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 h-12">
+          <TabsTrigger value="chilled_water" className="text-base">Chilled Water</TabsTrigger>
+          <TabsTrigger value="condenser_water" className="text-base">Condenser</TabsTrigger>
         </TabsList>
         <TabsContent value="chilled_water" className="mt-4">
           {renderWaterLoop('chilled_water')}
@@ -254,8 +254,8 @@ export function Step5WaterSystem({ formData, updateWater, updateWaterQuality }: 
       {/* Water Quality Section */}
       <Card className="mt-6">
         <CardContent className="p-4">
-          <h3 className="font-medium mb-4 flex items-center gap-2">
-            <Droplets className="h-4 w-4" />
+          <h3 className="font-medium mb-4 flex items-center gap-2 text-base">
+            <Droplets className="h-5 w-5" />
             Water Quality
           </h3>
           {renderWaterQuality()}

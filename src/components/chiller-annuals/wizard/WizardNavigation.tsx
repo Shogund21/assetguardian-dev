@@ -34,14 +34,13 @@ export function WizardNavigation({
 }: WizardNavigationProps) {
   return (
     <div className={cn('flex items-center gap-2 p-4 border-t bg-background', className)}>
-      {/* Back button */}
+      {/* Back button - 48px minimum touch target */}
       <Button
         type="button"
         variant="outline"
-        size="lg"
         onClick={onBack}
-        disabled={isFirstStep || isSaving}
-        className="flex-shrink-0"
+        disabled={isSaving}
+        className="h-12 px-4 shrink-0 active:scale-95 touch-manipulation"
       >
         <ChevronLeft className="h-5 w-5" />
         <span className="sr-only sm:not-sr-only sm:ml-1">Back</span>
@@ -52,13 +51,12 @@ export function WizardNavigation({
         <Button
           type="button"
           variant="ghost"
-          size="lg"
           onClick={onSkip}
           disabled={isSaving}
-          className="flex-shrink-0 text-muted-foreground"
+          className="h-12 px-3 shrink-0 text-muted-foreground active:scale-95 touch-manipulation"
         >
-          <SkipForward className="h-4 w-4 mr-1" />
-          Skip
+          <SkipForward className="h-4 w-4 sm:mr-1" />
+          <span className="hidden sm:inline">Skip</span>
         </Button>
       )}
 
@@ -73,14 +71,13 @@ export function WizardNavigation({
         </div>
       )}
 
-      {/* Next/Submit button */}
+      {/* Next/Submit button - larger touch target */}
       {isLastStep ? (
         <Button
           type="button"
-          size="lg"
           onClick={onSubmit}
           disabled={!canProceed || isSaving}
-          className="flex-shrink-0 min-w-[120px]"
+          className="h-12 px-6 min-w-[100px] text-base font-semibold active:scale-95 touch-manipulation"
         >
           Submit
           <ChevronRight className="h-5 w-5 ml-1" />
@@ -88,10 +85,9 @@ export function WizardNavigation({
       ) : (
         <Button
           type="button"
-          size="lg"
           onClick={onNext}
           disabled={!canProceed || isSaving}
-          className="flex-shrink-0 min-w-[100px]"
+          className="h-12 px-6 min-w-[90px] text-base font-semibold active:scale-95 touch-manipulation"
         >
           {nextLabel || 'Next'}
           <ChevronRight className="h-5 w-5 ml-1" />
@@ -101,10 +97,10 @@ export function WizardNavigation({
   );
 }
 
-// Sticky bottom navigation for mobile
+// Sticky bottom navigation for mobile with safe area padding
 export function WizardNavigationSticky(props: WizardNavigationProps) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 safe-area-bottom">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] pb-[env(safe-area-inset-bottom)]">
       <WizardNavigation {...props} />
     </div>
   );

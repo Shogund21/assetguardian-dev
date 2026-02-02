@@ -114,7 +114,7 @@ export function Step1AssetSelection({ formData, updateFormData, errors }: Step1P
   };
 
   return (
-    <div className="space-y-6 pb-24">
+    <div className="space-y-6">
       {/* Select Chiller */}
       <div className="space-y-3">
         <Label className={cn(hasError('chiller') && 'text-destructive')}>
@@ -151,16 +151,16 @@ export function Step1AssetSelection({ formData, updateFormData, errors }: Step1P
                 <div
                   key={eq.id}
                   className={cn(
-                    'flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-colors',
+                    'flex items-center space-x-3 p-4 rounded-lg border cursor-pointer transition-colors min-h-[56px] active:scale-[0.99] touch-manipulation',
                     formData.equipment_id === eq.id
                       ? 'bg-primary/10 border-primary'
                       : 'hover:bg-accent'
                   )}
                   onClick={() => handleEquipmentSelect(eq.id)}
                 >
-                  <RadioGroupItem value={eq.id} id={eq.id} />
+                  <RadioGroupItem value={eq.id} id={eq.id} className="h-5 w-5" />
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium truncate">{eq.name}</div>
+                    <div className="font-medium truncate text-base">{eq.name}</div>
                     <div className="text-sm text-muted-foreground truncate">
                       {eq.location}
                     </div>

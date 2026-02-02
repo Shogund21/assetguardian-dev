@@ -23,7 +23,8 @@ export function ToggleButtonPair({
 }: ToggleButtonPairProps) {
   const getYesStyles = () => {
     const selected = value === true;
-    const base = 'flex-1 py-3 px-4 text-center font-medium rounded-r-lg transition-all text-sm';
+    // min-h-[48px] for touch-friendly 48px minimum touch target
+    const base = 'flex-1 min-h-[48px] py-3 px-4 text-center font-medium rounded-r-lg transition-all text-base active:scale-[0.98]';
     
     if (disabled) {
       return cn(base, 'bg-muted text-muted-foreground cursor-not-allowed');
@@ -45,7 +46,8 @@ export function ToggleButtonPair({
 
   const getNoStyles = () => {
     const selected = value === false;
-    const base = 'flex-1 py-3 px-4 text-center font-medium rounded-l-lg transition-all text-sm';
+    // min-h-[48px] for touch-friendly 48px minimum touch target
+    const base = 'flex-1 min-h-[48px] py-3 px-4 text-center font-medium rounded-l-lg transition-all text-base active:scale-[0.98]';
     
     if (disabled) {
       return cn(base, 'bg-muted text-muted-foreground cursor-not-allowed');
