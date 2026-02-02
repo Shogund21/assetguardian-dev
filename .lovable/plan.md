@@ -1,474 +1,530 @@
 
 
-# Annual Chiller Maintenance & Risk Intelligence - Implementation Plan
+# Chiller Annual Risk Scoring & Auto-Flag Logic Implementation
 
 ## Overview
 
-This plan creates a **completely separate module** for annual chiller inspections that runs alongside (not replacing) the existing daily/weekly maintenance system. The existing `hvac_maintenance_checks` table and all associated functionality remains **100% untouched**.
+This plan implements a weighted risk scoring system for the Annual Chiller Maintenance module with automatic risk level assignment, recommended actions, and red flag triggers. The logic will be implemented as a service that can be called from both frontend (real-time preview) and potentially as a database trigger for persistence.
 
 ---
 
-## Architecture: Isolation Strategy
+## Risk Scoring Weights
+
+| Condition | Points | Database Field(s) |
+|-----------|--------|-------------------|
+| Refrigerant Leak Detected | +25 | `chiller_refrigerant_inspection.leak_detected = true` |
+| Tube Plugs Above Limit | +30 | `chiller_tube_inspection.plugged_pct > manufacturer_limit` |
+| Oil Acid Test Fail | +30 | `chiller_oil_analysis.acid_number_mgkoh_g > 0.05` |
+| Voltage Imbalance >2% | +20 | `chiller_electrical_check.voltage_imbalance_pct > 2.0` |
+| kW/ton YoY Degradation >10% | +15 | Compare current vs prior year `kw_per_ton` |
+
+---
+
+## Risk Level Thresholds
+
+| Score Range | Level | Color | Code |
+|-------------|-------|-------|------|
+| 0 - 30 | Green (Low) | #10B981 | `low` |
+| 31 - 60 | Yellow (Medium) | #F59E0B | `medium` |
+| 61 - 100 | Red (High/Critical) | #EF4444 | `high` or `critical` |
+
+---
+
+## Calculation Formulas
+
+### 1. Plug Percentage (plugged_pct)
 
 ```text
-EXISTING SYSTEM (UNTOUCHED)                 NEW ANNUAL MODULE (ADDITIVE)
-+---------------------------------+         +----------------------------------+
-| hvac_maintenance_checks         |         | annual_chiller_pm                |
-| - Daily/weekly checks           |    +--->| - Parent record for annual PM   |
-| - All equipment types           |    |    +----------------------------------+
-| - Current form/history UI       |    |              |
-+---------------------------------+    |              v
-                                       |    +----------------------------------+
-        NO CHANGES                     |    | chiller_refrigerant_inspection   |
-                                       |    | chiller_oil_analysis             |
-+---------------------------------+    |    | chiller_tube_inspection          |
-| equipment                       |----+    | chiller_water_side_inspection    |
-| - Links to both systems         |         | chiller_water_quality            |
-+---------------------------------+         | chiller_electrical_check         |
-                                            | chiller_performance_test         |
-                                            | chiller_annual_findings          |
-                                            | chiller_finding_attachments      |
-                                            +----------------------------------+
-                                                        |
-                                            +----------------------------------+
-                                            | Reference Tables (New)           |
-                                            | - chiller_ref_leak_locations     |
-                                            | - chiller_ref_sight_glass_cond   |
-                                            | - chiller_ref_starter_conditions |
-                                            | - chiller_ref_risk_levels        |
-                                            | - chiller_ref_issue_codes        |
-                                            | - chiller_ref_tube_test_methods  |
-                                            +----------------------------------+
+INPUT:
+  tubes_plugged_total: int (e.g., 12)
+  tube_count_total: int (e.g., 400)
+
+CALCULATION:
+  IF tube_count_total > 0 THEN
+    plugged_pct = (tubes_plugged_total / tube_count_total) * 100
+  ELSE
+    plugged_pct = 0
+
+EXAMPLE:
+  tubes_plugged_total = 12
+  tube_count_total = 400
+  plugged_pct = (12 / 400) * 100 = 3.0%
+
+MANUFACTURER LIMIT:
+  Default threshold: 5% (configurable per chiller model)
+  Trane CVHE: 5%
+  Carrier 30HXC: 5%
+  York YK: 6%
+```
+
+### 2. Voltage Imbalance Percentage (voltage_imbalance_pct)
+
+```text
+INPUT:
+  voltage_l1_l2: numeric (e.g., 460.5)
+  voltage_l2_l3: numeric (e.g., 458.0)
+  voltage_l3_l1: numeric (e.g., 455.2)
+
+CALCULATION:
+  avg_voltage = (voltage_l1_l2 + voltage_l2_l3 + voltage_l3_l1) / 3
+  max_deviation = MAX(
+    ABS(voltage_l1_l2 - avg_voltage),
+    ABS(voltage_l2_l3 - avg_voltage),
+    ABS(voltage_l3_l1 - avg_voltage)
+  )
+  voltage_imbalance_pct = (max_deviation / avg_voltage) * 100
+
+EXAMPLE:
+  voltages = [460.5, 458.0, 455.2]
+  avg_voltage = 457.9
+  max_deviation = |460.5 - 457.9| = 2.6
+  voltage_imbalance_pct = (2.6 / 457.9) * 100 = 0.57%
+  
+  Result: 0.57% < 2% threshold → NO penalty points
+```
+
+### 3. Tons Actual (derived if not entered directly)
+
+```text
+INPUT:
+  chw_delta_t_f: numeric (e.g., 10.5°F)
+  chw_flow_gpm: numeric (e.g., 2400 GPM)
+
+CALCULATION:
+  tons_actual = (chw_flow_gpm * chw_delta_t_f * 8.33 * 60) / 12000
+  
+  Simplified:
+  tons_actual = chw_flow_gpm * chw_delta_t_f * 0.04165
+
+EXAMPLE:
+  chw_delta_t_f = 10.5
+  chw_flow_gpm = 2400
+  tons_actual = 2400 * 10.5 * 0.04165 = 1049.6 tons
+
+ALTERNATE (if direct measurement):
+  tons_actual can be entered directly from chiller display
+```
+
+### 4. kW per Ton (kw_per_ton)
+
+```text
+INPUT:
+  kw_input: numeric (e.g., 580 kW)
+  tons_actual: numeric (e.g., 1049.6 tons)
+
+CALCULATION:
+  IF tons_actual > 0 THEN
+    kw_per_ton = kw_input / tons_actual
+  ELSE
+    kw_per_ton = NULL (cannot calculate)
+
+EXAMPLE:
+  kw_input = 580
+  tons_actual = 1049.6
+  kw_per_ton = 580 / 1049.6 = 0.553 kW/ton
+```
+
+### 5. Year-over-Year Efficiency Degradation
+
+```text
+INPUT:
+  current_year_kw_per_ton: numeric (e.g., 0.553)
+  prior_year_kw_per_ton: numeric (e.g., 0.520) -- from same equipment's prior year PM
+
+DETECTION RULE:
+  1. Query prior year's performance test for same equipment_id
+  2. Get prior_year.kw_per_ton
+
+CALCULATION:
+  IF prior_year_kw_per_ton EXISTS AND prior_year_kw_per_ton > 0 THEN
+    efficiency_variance_pct = ((current_kw_per_ton - prior_year_kw_per_ton) / prior_year_kw_per_ton) * 100
+    degradation_since_last_year_pct = efficiency_variance_pct
+  ELSE
+    degradation_since_last_year_pct = NULL (no prior data)
+
+TRIGGER CONDITION:
+  IF degradation_since_last_year_pct > 10.0 THEN
+    add +15 points to risk score
+
+EXAMPLE:
+  current_kw_per_ton = 0.553
+  prior_year_kw_per_ton = 0.520
+  degradation = ((0.553 - 0.520) / 0.520) * 100 = 6.35%
+  
+  Result: 6.35% < 10% threshold → NO penalty points
+
+EXAMPLE 2 (degraded):
+  current_kw_per_ton = 0.600
+  prior_year_kw_per_ton = 0.520
+  degradation = ((0.600 - 0.520) / 0.520) * 100 = 15.38%
+  
+  Result: 15.38% > 10% threshold → ADD +15 points
 ```
 
 ---
 
-## What Will NOT Change
+## Complete Risk Scoring Algorithm
 
-| Existing Component | Status |
-|-------------------|--------|
-| `hvac_maintenance_checks` table | **Unchanged** |
-| `MaintenanceCheckForm` / `MaintenanceCheckFormRefactored` | **Unchanged** |
-| `MaintenanceHistory` component | **Unchanged** |
-| `/maintenance-checks` page | **Unchanged** |
-| All existing maintenance mappers/schemas | **Unchanged** |
-| Equipment table structure | **Unchanged** |
-| Sidebar navigation (existing items) | **Unchanged** |
+```text
+FUNCTION calculateChillerRiskScore(pm: AnnualChillerPMComplete) -> RiskResult:
+  
+  total_score = 0
+  red_flags = []
+  findings_to_create = []
 
----
+  // === REFRIGERANT CHECK (+25) ===
+  IF pm.refrigerant_inspection.leak_detected = TRUE THEN
+    total_score += 25
+    red_flags.push("REFRIGERANT_LEAK")
+    findings_to_create.push({
+      issue_code: "REF002",
+      severity: "high",
+      recommended_action: "REPAIR"
+    })
+  END IF
 
-## New Database Tables
+  // === TUBE INSPECTION CHECK (+30) ===
+  FOR EACH tube_inspection IN pm.tube_inspections:
+    plugged_pct = calculatePluggedPct(tube_inspection)
+    manufacturer_limit = getManufacturerLimit(pm.chiller_model) // default 5%
+    
+    IF plugged_pct > manufacturer_limit THEN
+      total_score += 30
+      red_flags.push("TUBE_PLUGS_EXCEEDED")
+      findings_to_create.push({
+        issue_code: "TUBE003",
+        severity: "high",
+        recommended_action: "REPAIR"
+      })
+      BREAK  // Only count once even if both evap/cond exceed
+    END IF
+  END FOR
 
-### Reference Tables (6 Total)
+  // === OIL ACID CHECK (+30) ===
+  IF pm.oil_analysis EXISTS THEN
+    acid_threshold = 0.05  // mg KOH/g for POE oil (adjust for mineral)
+    
+    IF pm.oil_analysis.acid_number_mgkoh_g > acid_threshold THEN
+      total_score += 30
+      red_flags.push("OIL_ACID_FAIL")
+      findings_to_create.push({
+        issue_code: "OIL002",
+        severity: "high",
+        recommended_action: "HIGH_RISK"
+      })
+    END IF
+  END IF
 
-#### 1. chiller_ref_leak_locations
-| Column | Type | Constraints |
-|--------|------|-------------|
-| id | uuid | PK |
-| code | text | NOT NULL, UNIQUE |
-| label | text | NOT NULL |
-| category | text | (compressor, piping, valve, etc.) |
-| sort_order | int | default 0 |
-| is_active | boolean | default true |
+  // === ELECTRICAL CHECK (+20) ===
+  FOR EACH electrical_check IN pm.electrical_checks:
+    IF electrical_check.component = 'main_motor' THEN
+      IF electrical_check.voltage_imbalance_pct > 2.0 THEN
+        total_score += 20
+        red_flags.push("VOLTAGE_IMBALANCE")
+        findings_to_create.push({
+          issue_code: "ELEC001",
+          severity: "medium",
+          recommended_action: "MONITOR"
+        })
+      END IF
+      BREAK  // Only check main motor
+    END IF
+  END FOR
 
-**Sample Values:** shaft_seal, suction_flange, discharge_flange, oil_drain, relief_valve, sight_glass
+  // === PERFORMANCE DEGRADATION CHECK (+15) ===
+  IF pm.performance_test EXISTS THEN
+    prior_year_pm = getPriorYearPM(pm.equipment_id, pm.inspection_year - 1)
+    
+    IF prior_year_pm.performance_test.kw_per_ton EXISTS THEN
+      current_kw = pm.performance_test.kw_per_ton
+      prior_kw = prior_year_pm.performance_test.kw_per_ton
+      
+      IF prior_kw > 0 THEN
+        degradation_pct = ((current_kw - prior_kw) / prior_kw) * 100
+        
+        IF degradation_pct > 10.0 THEN
+          total_score += 15
+          red_flags.push("EFFICIENCY_DEGRADED")
+          findings_to_create.push({
+            issue_code: "PERF002",
+            severity: "medium",
+            recommended_action: "MONITOR"
+          })
+        END IF
+      END IF
+    END IF
+  END IF
 
-#### 2. chiller_ref_sight_glass_conditions
-| Column | Type | Constraints |
-|--------|------|-------------|
-| id | uuid | PK |
-| code | text | NOT NULL, UNIQUE |
-| label | text | NOT NULL |
-| severity_score | int | 1-5 scale for AI |
-| sort_order | int | |
+  // === DETERMINE RISK LEVEL ===
+  IF total_score <= 30 THEN
+    risk_level = "low"
+  ELSE IF total_score <= 60 THEN
+    risk_level = "medium"
+  ELSE
+    IF red_flags contains ["OIL_ACID_FAIL", "TUBE_PLUGS_EXCEEDED"] 
+       OR total_score > 80 THEN
+      risk_level = "critical"
+    ELSE
+      risk_level = "high"
+    END IF
+  END IF
 
-**Sample Values:** clear, bubbles_minor, bubbles_heavy, moisture_present, discolored
+  // === DETERMINE REQUIRES_IMMEDIATE_ACTION ===
+  requires_immediate_action = (
+    risk_level IN ["high", "critical"] 
+    OR red_flags contains "REFRIGERANT_LEAK"
+    OR red_flags contains "OIL_ACID_FAIL"
+  )
 
-#### 3. chiller_ref_starter_conditions
-| Column | Type | Constraints |
-|--------|------|-------------|
-| id | uuid | PK |
-| code | text | NOT NULL, UNIQUE |
-| label | text | NOT NULL |
-| risk_score | int | 1-10 scale |
+  RETURN {
+    overall_risk_score: MIN(total_score, 100),
+    overall_risk_level: risk_level,
+    requires_immediate_action: requires_immediate_action,
+    red_flags: red_flags,
+    auto_findings: findings_to_create
+  }
 
-**Sample Values:** operational, worn_contacts, overheating, arc_damage, replacement_recommended
-
-#### 4. chiller_ref_risk_levels
-| Column | Type | Constraints |
-|--------|------|-------------|
-| id | uuid | PK |
-| code | text | NOT NULL, UNIQUE (none, low, medium, high, critical) |
-| label | text | NOT NULL |
-| color_hex | text | For UI display |
-| priority_weight | int | For scoring |
-
-#### 5. chiller_ref_issue_codes
-| Column | Type | Constraints |
-|--------|------|-------------|
-| id | uuid | PK |
-| code | text | NOT NULL, UNIQUE (REF001, OIL002, etc.) |
-| category | text | NOT NULL (refrigerant, oil, tubes, water, electrical, performance) |
-| label | text | NOT NULL |
-| description | text | |
-| recommended_action | text | |
-| default_risk_level | text | FK to risk_levels |
-
-#### 6. chiller_ref_tube_test_methods
-| Column | Type | Constraints |
-|--------|------|-------------|
-| id | uuid | PK |
-| code | text | NOT NULL, UNIQUE |
-| label | text | NOT NULL |
-
-**Sample Values:** eddy_current, ultrasonic, visual, pressure_test, dye_penetrant
-
----
-
-### Main Tables (10 Total)
-
-#### 1. annual_chiller_pm (Parent Record)
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| id | uuid | PK | |
-| equipment_id | uuid | FK to equipment, NOT NULL | Chiller being inspected |
-| company_id | uuid | FK to companies | Multi-tenant |
-| location_id | uuid | FK to locations | |
-| technician_id | uuid | FK to technicians | Lead technician |
-| inspection_year | int | NOT NULL | Year of annual inspection |
-| inspection_date | timestamptz | NOT NULL | Actual inspection date |
-| chiller_model | text | | Trane CVHE, Carrier 30HXC, etc. |
-| chiller_serial | text | | |
-| chiller_age_years | numeric(4,1) | | |
-| operating_hours_at_inspection | int | | |
-| status | text | default 'in_progress' | draft, in_progress, pending_review, completed |
-| overall_risk_level | text | FK to risk_levels | |
-| overall_risk_score | numeric(5,2) | | AI-computed 0-100 |
-| requires_immediate_action | boolean | default false | |
-| labor_hours_total | numeric(6,2) | | |
-| parts_cost_total | numeric(10,2) | | |
-| labor_cost_total | numeric(10,2) | | |
-| notes | text | | |
-| ai_analysis_json | jsonb | | AI prediction results |
-| created_at | timestamptz | default now() | |
-| updated_at | timestamptz | default now() | |
-
-**Unique Constraint:** `(equipment_id, inspection_year)` - One annual PM per chiller per year
-
-#### 2. chiller_refrigerant_inspection
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid | PK |
-| annual_pm_id | uuid | FK to annual_chiller_pm, NOT NULL |
-| refrigerant_type | text | R-134a, R-123, R-514A |
-| charge_lbs | numeric(8,2) | Current charge weight |
-| nameplate_charge_lbs | numeric(8,2) | Original nameplate |
-| leak_detected | boolean | default false |
-| leak_location_code | text | FK to leak_locations |
-| leak_rate_oz_year | numeric(6,2) | Estimated annual leak rate |
-| suction_pressure_psig | numeric(6,2) | |
-| discharge_pressure_psig | numeric(6,2) | |
-| subcooling_f | numeric(5,2) | |
-| superheat_f | numeric(5,2) | |
-| sight_glass_condition | text | FK to sight_glass_conditions |
-| acid_test_passed | boolean | |
-| risk_level | text | FK to risk_levels |
-
-#### 3. chiller_oil_analysis
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid | PK |
-| annual_pm_id | uuid | FK, NOT NULL |
-| oil_type | text | POE, Mineral, etc. |
-| current_level_pct | numeric(5,2) | 0-100% |
-| oil_changed | boolean | |
-| sample_collected | boolean | |
-| viscosity_cst_40c | numeric(8,2) | |
-| acid_number_mgkoh_g | numeric(6,3) | Total Acid Number |
-| moisture_ppm | numeric(6,1) | |
-| iron_ppm | numeric(6,1) | Wear metal |
-| copper_ppm | numeric(6,1) | Wear metal |
-| appearance | text | clear, hazy, dark, contaminated |
-| oil_filter_replaced | boolean | |
-| risk_level | text | FK to risk_levels |
-
-#### 4. chiller_tube_inspection
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid | PK |
-| annual_pm_id | uuid | FK, NOT NULL |
-| bundle_type | text | 'evaporator' or 'condenser' |
-| tube_count_total | int | |
-| test_method | text | FK to tube_test_methods |
-| tubes_plugged_total | int | |
-| plugged_pct | numeric(5,2) | |
-| min_wall_thickness_mils | numeric(5,1) | |
-| wall_loss_pct | numeric(5,2) | |
-| fouling_factor_measured | numeric(8,5) | hr-ft2-F/BTU |
-| fouling_severity | text | none, light, moderate, heavy, severe |
-| tubes_cleaned | boolean | |
-| cleaning_method | text | mechanical, chemical, hydroblast |
-| waterbox_condition | text | |
-| risk_level | text | FK to risk_levels |
-
-#### 5. chiller_water_side_inspection
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid | PK |
-| annual_pm_id | uuid | FK, NOT NULL |
-| water_loop | text | 'chilled_water' or 'condenser_water' |
-| entering_water_temp_f | numeric(5,2) | |
-| leaving_water_temp_f | numeric(5,2) | |
-| delta_t_f | numeric(5,2) | |
-| flow_rate_gpm | numeric(8,2) | |
-| design_flow_gpm | numeric(8,2) | |
-| pressure_drop_psig | numeric(6,2) | |
-| strainer_cleaned | boolean | |
-| isolation_valves_condition | text | |
-| risk_level | text | FK to risk_levels |
-
-#### 6. chiller_water_quality
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid | PK |
-| annual_pm_id | uuid | FK, NOT NULL |
-| water_loop | text | 'chilled_water', 'condenser_water', 'makeup' |
-| sample_date | date | |
-| ph | numeric(4,2) | 6.5-9.0 typical |
-| conductivity_umhos | numeric(8,1) | |
-| total_dissolved_solids_ppm | numeric(8,1) | |
-| bacteria_count_cfu_ml | numeric(10,0) | |
-| legionella_detected | boolean | |
-| langelier_saturation_index | numeric(4,2) | |
-| within_spec | boolean | |
-| risk_level | text | FK to risk_levels |
-
-#### 7. chiller_electrical_check
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid | PK |
-| annual_pm_id | uuid | FK, NOT NULL |
-| component | text | 'main_motor', 'oil_pump', 'purge', 'controls', 'vfd' |
-| voltage_l1_l2 | numeric(6,1) | |
-| voltage_l2_l3 | numeric(6,1) | |
-| voltage_l3_l1 | numeric(6,1) | |
-| voltage_imbalance_pct | numeric(5,2) | |
-| amperage_l1 | numeric(7,2) | |
-| amperage_l2 | numeric(7,2) | |
-| amperage_l3 | numeric(7,2) | |
-| insulation_resistance_megohms | numeric(8,2) | Megger test |
-| vibration_ips_de | numeric(6,3) | Drive end |
-| vibration_acceptable | boolean | |
-| starter_condition | text | FK to starter_conditions |
-| risk_level | text | FK to risk_levels |
-
-#### 8. chiller_performance_test
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid | PK |
-| annual_pm_id | uuid | FK, NOT NULL |
-| test_date | timestamptz | |
-| load_pct | numeric(5,2) | % of design capacity |
-| chilled_water_supply_f | numeric(5,2) | |
-| chilled_water_return_f | numeric(5,2) | |
-| condenser_water_supply_f | numeric(5,2) | |
-| condenser_water_return_f | numeric(5,2) | |
-| kw_input | numeric(8,2) | |
-| tons_actual | numeric(8,2) | |
-| tons_design | numeric(8,2) | |
-| kw_per_ton | numeric(6,3) | Efficiency |
-| cop | numeric(5,2) | Coefficient of Performance |
-| meets_design_capacity | boolean | |
-| meets_design_efficiency | boolean | |
-| degradation_since_last_year_pct | numeric(5,2) | For trending |
-| risk_level | text | FK to risk_levels |
-
-#### 9. chiller_annual_findings
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid | PK |
-| annual_pm_id | uuid | FK, NOT NULL |
-| finding_number | int | Sequential within PM |
-| issue_code | text | FK to issue_codes |
-| category | text | refrigerant, oil, tubes, etc. |
-| description | text | NOT NULL |
-| severity | text | FK to risk_levels, NOT NULL |
-| is_repeat_finding | boolean | default false |
-| prior_finding_id | uuid | FK to self (for trending) |
-| recommended_action | text | |
-| status | text | default 'open' |
-| estimated_cost | numeric(10,2) | |
-| ai_confidence_score | numeric(5,2) | If AI-detected |
-| created_at | timestamptz | |
-
-#### 10. chiller_finding_attachments
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid | PK |
-| finding_id | uuid | FK to chiller_annual_findings, NOT NULL |
-| file_name | text | NOT NULL |
-| file_path | text | NOT NULL (Storage bucket path) |
-| file_type | text | NOT NULL |
-| is_primary | boolean | default false |
-| caption | text | |
-| uploaded_by | uuid | FK to technicians |
-| uploaded_at | timestamptz | default now() |
-
----
-
-## Database Indexes
-
-```sql
--- Performance indexes for year-over-year trending
-CREATE INDEX idx_annual_pm_equipment_year ON annual_chiller_pm(equipment_id, inspection_year);
-CREATE INDEX idx_annual_pm_company ON annual_chiller_pm(company_id);
-CREATE INDEX idx_annual_pm_risk ON annual_chiller_pm(overall_risk_level);
-CREATE INDEX idx_findings_pm ON chiller_annual_findings(annual_pm_id);
-CREATE INDEX idx_findings_status ON chiller_annual_findings(status);
-CREATE INDEX idx_attachments_finding ON chiller_finding_attachments(finding_id);
+END FUNCTION
 ```
 
 ---
 
-## Storage Bucket
+## Recommended Action Rules
 
-Create a new bucket for annual chiller attachments:
+| Condition | Action Code | Display Text |
+|-----------|-------------|--------------|
+| Score 0-30, no red flags | `MONITOR` | "Continue monitoring per schedule" |
+| Score 31-60, no critical red flags | `MONITOR_CLOSELY` | "Monitor closely, schedule follow-up" |
+| Any single red flag (except acid) | `REPAIR` | "Schedule repair within 30 days" |
+| Oil acid fail OR tube limit exceeded | `REPAIR_URGENT` | "Repair required within 14 days" |
+| Score 61+ OR multiple red flags | `HIGH_RISK` | "Immediate attention required" |
+| Refrigerant leak + acid fail | `CRITICAL` | "Critical - Take chiller offline for repair" |
 
-```sql
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('chiller-annual-attachments', 'chiller-annual-attachments', false);
+```text
+FUNCTION determineRecommendedAction(result: RiskResult) -> ActionRecommendation:
+  
+  flags = result.red_flags
+  score = result.overall_risk_score
+  
+  // Critical combinations
+  IF "REFRIGERANT_LEAK" IN flags AND "OIL_ACID_FAIL" IN flags THEN
+    RETURN { code: "CRITICAL", text: "Critical - Take chiller offline for repair", priority: 1 }
+  END IF
+  
+  // High risk with multiple issues
+  IF LENGTH(flags) >= 2 OR score > 80 THEN
+    RETURN { code: "HIGH_RISK", text: "Immediate attention required", priority: 2 }
+  END IF
+  
+  // Urgent repair scenarios
+  IF "OIL_ACID_FAIL" IN flags OR "TUBE_PLUGS_EXCEEDED" IN flags THEN
+    RETURN { code: "REPAIR_URGENT", text: "Repair required within 14 days", priority: 3 }
+  END IF
+  
+  // Standard repair
+  IF LENGTH(flags) = 1 THEN
+    RETURN { code: "REPAIR", text: "Schedule repair within 30 days", priority: 4 }
+  END IF
+  
+  // Elevated monitoring
+  IF score > 30 THEN
+    RETURN { code: "MONITOR_CLOSELY", text: "Monitor closely, schedule follow-up in 90 days", priority: 5 }
+  END IF
+  
+  // Normal
+  RETURN { code: "MONITOR", text: "Continue monitoring per annual schedule", priority: 6 }
+
+END FUNCTION
 ```
 
 ---
 
-## New Files to Create
+## Red Flag Triggers
 
-### Frontend Components
+| Trigger | Condition | Auto-Finding Code | Severity |
+|---------|-----------|-------------------|----------|
+| Refrigerant Leak | `leak_detected = true` | REF002 | critical |
+| Repeated Leak (YoY) | Current + prior year both had leaks | REF002 | critical |
+| Oil Acid Fail | `acid_number_mgkoh_g > 0.05` | OIL002 | high |
+| Tube Plugs Exceeded | `plugged_pct > 5%` | TUBE003 | high |
+| Tube Wall Loss Critical | `wall_loss_pct > 20%` | TUBE002 | high |
+| Voltage Imbalance | `voltage_imbalance_pct > 2%` | ELEC001 | medium |
+| Efficiency Degraded | `degradation_pct > 10%` | PERF002 | medium |
+| Legionella Detected | `legionella_detected = true` | WTR004 | critical |
+| Low Insulation Resistance | `insulation_resistance_megohms < 1` | ELEC003 | high |
+
+---
+
+## Example Calculations
+
+### Example 1: Healthy Chiller
+
+```text
+INPUT:
+  leak_detected: false
+  tubes_plugged_total: 8, tube_count_total: 400 → plugged_pct = 2%
+  acid_number_mgkoh_g: 0.02
+  voltage_imbalance_pct: 0.8%
+  kw_per_ton: 0.55, prior_year: 0.53 → degradation = 3.8%
+
+SCORING:
+  Refrigerant leak:     0 (no leak)
+  Tube plugs:           0 (2% < 5%)
+  Oil acid:             0 (0.02 < 0.05)
+  Voltage imbalance:    0 (0.8% < 2%)
+  Efficiency:           0 (3.8% < 10%)
+  
+  TOTAL SCORE: 0
+  RISK LEVEL: low (Green)
+  RECOMMENDED ACTION: MONITOR - "Continue monitoring per annual schedule"
+  RED FLAGS: []
+```
+
+### Example 2: Medium Risk Chiller
+
+```text
+INPUT:
+  leak_detected: false
+  tubes_plugged_total: 30, tube_count_total: 400 → plugged_pct = 7.5%
+  acid_number_mgkoh_g: 0.03
+  voltage_imbalance_pct: 2.5%
+  kw_per_ton: 0.60, prior_year: 0.52 → degradation = 15.4%
+
+SCORING:
+  Refrigerant leak:     0
+  Tube plugs:          +30 (7.5% > 5%)
+  Oil acid:             0
+  Voltage imbalance:   +20 (2.5% > 2%)
+  Efficiency:          +15 (15.4% > 10%)
+  
+  TOTAL SCORE: 65
+  RISK LEVEL: high (Red)
+  RECOMMENDED ACTION: HIGH_RISK - "Immediate attention required"
+  RED FLAGS: [TUBE_PLUGS_EXCEEDED, VOLTAGE_IMBALANCE, EFFICIENCY_DEGRADED]
+  REQUIRES_IMMEDIATE_ACTION: true
+```
+
+### Example 3: Critical Risk Chiller
+
+```text
+INPUT:
+  leak_detected: true (shaft seal)
+  tubes_plugged_total: 15, tube_count_total: 400 → plugged_pct = 3.75%
+  acid_number_mgkoh_g: 0.08
+  voltage_imbalance_pct: 1.2%
+  kw_per_ton: 0.58, prior_year: 0.55 → degradation = 5.5%
+
+SCORING:
+  Refrigerant leak:    +25
+  Tube plugs:           0 (3.75% < 5%)
+  Oil acid:            +30 (0.08 > 0.05)
+  Voltage imbalance:    0 (1.2% < 2%)
+  Efficiency:           0 (5.5% < 10%)
+  
+  TOTAL SCORE: 55
+  RISK LEVEL: critical (escalated due to leak + acid combo)
+  RECOMMENDED ACTION: CRITICAL - "Critical - Take chiller offline for repair"
+  RED FLAGS: [REFRIGERANT_LEAK, OIL_ACID_FAIL]
+  REQUIRES_IMMEDIATE_ACTION: true
+  
+  AUTO-GENERATED FINDINGS:
+    1. REF002 - Refrigerant Leak Detected (severity: critical)
+    2. OIL002 - High Acid Number (severity: high)
+```
+
+---
+
+## Implementation Files
 
 | File | Purpose |
 |------|---------|
-| `src/pages/ChillerAnnuals.tsx` | Main page for annual chiller PM |
-| `src/components/chiller-annuals/AnnualChillerForm.tsx` | Multi-step form for annual PM |
-| `src/components/chiller-annuals/AnnualChillerHistory.tsx` | List of past annual inspections |
-| `src/components/chiller-annuals/AnnualChillerDetails.tsx` | View completed annual PM |
-| `src/components/chiller-annuals/tabs/RefrigerantInspectionTab.tsx` | Refrigerant form section |
-| `src/components/chiller-annuals/tabs/OilAnalysisTab.tsx` | Oil analysis form section |
-| `src/components/chiller-annuals/tabs/TubeInspectionTab.tsx` | Tube inspection form section |
-| `src/components/chiller-annuals/tabs/WaterSideTab.tsx` | Water side inspection section |
-| `src/components/chiller-annuals/tabs/WaterQualityTab.tsx` | Water quality section |
-| `src/components/chiller-annuals/tabs/ElectricalCheckTab.tsx` | Electrical check section |
-| `src/components/chiller-annuals/tabs/PerformanceTestTab.tsx` | Performance test section |
-| `src/components/chiller-annuals/tabs/FindingsTab.tsx` | Findings with photo uploads |
-| `src/components/chiller-annuals/RiskScoreCard.tsx` | Risk visualization component |
-| `src/components/chiller-annuals/TrendingChart.tsx` | Year-over-year comparison charts |
-| `src/types/chillerAnnual.ts` | TypeScript types for annual PM |
-| `src/hooks/useChillerAnnualPM.ts` | Data fetching hook |
-| `src/hooks/useChillerReferenceData.ts` | Hook for reference tables |
-
-### Services
-
-| File | Purpose |
-|------|---------|
-| `src/services/chillerAnnualService.ts` | CRUD operations for annual PM |
-| `src/services/chillerRiskCalculator.ts` | Risk score calculation logic |
+| `src/services/chillerRiskCalculator.ts` | Core calculation logic (pure functions) |
+| `src/hooks/useChillerRiskScore.ts` | React hook for real-time calculation |
+| `src/types/chillerRisk.ts` | TypeScript interfaces for risk results |
 
 ---
 
-## Navigation Update
+## Technical Implementation
 
-Add new item to `src/components/sidebar/SidebarNav.tsx`:
+### New Types (`src/types/chillerRisk.ts`)
 
 ```typescript
-{
-  title: "Chiller Annuals",
-  url: "/chiller-annuals",
-  icon: Calendar, // or a custom icon
-},
+interface RedFlag {
+  code: 'REFRIGERANT_LEAK' | 'TUBE_PLUGS_EXCEEDED' | 'OIL_ACID_FAIL' | 
+        'VOLTAGE_IMBALANCE' | 'EFFICIENCY_DEGRADED' | 'LEGIONELLA_DETECTED' |
+        'LOW_INSULATION' | 'REPEATED_LEAK';
+  description: string;
+  issueCode: string;
+  severity: 'medium' | 'high' | 'critical';
+}
+
+interface RiskCalculationResult {
+  overallRiskScore: number;
+  overallRiskLevel: 'none' | 'low' | 'medium' | 'high' | 'critical';
+  requiresImmediateAction: boolean;
+  redFlags: RedFlag[];
+  recommendedAction: {
+    code: string;
+    text: string;
+    priority: number;
+  };
+  autoFindings: Array<{
+    issueCode: string;
+    category: string;
+    description: string;
+    severity: string;
+    recommendedAction: string;
+  }>;
+  scoreBreakdown: {
+    refrigerantLeak: number;
+    tubePlugs: number;
+    oilAcid: number;
+    voltageImbalance: number;
+    efficiencyDegradation: number;
+  };
+}
+
+interface ManufacturerLimits {
+  tubePluggedPctLimit: number;
+  oilAcidThreshold: number;
+  voltageImbalanceThreshold: number;
+  efficiencyDegradationThreshold: number;
+}
 ```
 
-Add route to `src/App.tsx`:
+### Service Implementation (`src/services/chillerRiskCalculator.ts`)
+
+The service will include:
+1. `calculatePluggedPct()` - Compute tube plug percentage
+2. `calculateVoltageImbalance()` - Compute voltage imbalance from 3-phase readings
+3. `calculateTonsActual()` - Derive tons from flow and delta-T
+4. `calculateKwPerTon()` - Compute efficiency metric
+5. `calculateEfficiencyDegradation()` - Compare YoY performance
+6. `calculateChillerRiskScore()` - Main orchestrator function
+7. `determineRecommendedAction()` - Map score to action
+8. `getManufacturerLimits()` - Lookup model-specific thresholds
+
+### Hook Implementation (`src/hooks/useChillerRiskScore.ts`)
 
 ```typescript
-<Route path="/chiller-annuals" element={
-  <ProtectedRoute>
-    <ChillerAnnuals />
-  </ProtectedRoute>
-} />
+function useChillerRiskScore(pmId: string, equipmentId: string) {
+  // Fetch current PM data
+  // Fetch prior year PM data for YoY comparison
+  // Calculate risk score in real-time
+  // Return result with loading/error states
+}
 ```
-
----
-
-## RLS Policies
-
-All new tables will follow existing patterns with company-scoped access:
-
-```sql
-ALTER TABLE annual_chiller_pm ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can view their company's annual PMs"
-  ON annual_chiller_pm FOR SELECT
-  USING (company_id IN (
-    SELECT company_id FROM technicians WHERE user_id = auth.uid()
-  ));
-
-CREATE POLICY "Users can insert annual PMs for their company"
-  ON annual_chiller_pm FOR INSERT
-  WITH CHECK (company_id IN (
-    SELECT company_id FROM technicians WHERE user_id = auth.uid()
-  ));
-
--- Similar policies for all child tables
-```
-
----
-
-## AI Extensibility Points
-
-| Feature | Field/Table |
-|---------|------------|
-| Risk score prediction | `annual_chiller_pm.ai_analysis_json` |
-| Finding confidence | `chiller_annual_findings.ai_confidence_score` |
-| Trending analysis | `(equipment_id, inspection_year)` composite key |
-| Severity scoring | Reference tables with `severity_score`, `risk_score` |
-| Fleet comparison | Query by `company_id` across all chillers |
-
----
-
-## Implementation Phases
-
-### Phase 1: Database Foundation
-1. Create migration with all 16 tables (6 reference + 10 main)
-2. Seed reference tables with standard values
-3. Set up RLS policies
-4. Create storage bucket
-
-### Phase 2: TypeScript Types
-1. Create comprehensive types in `src/types/chillerAnnual.ts`
-2. Update Supabase types (auto-generated)
-
-### Phase 3: Core UI Components
-1. Create page structure
-2. Implement form with tabs for each inspection type
-3. Build history/list view
-4. Add details view
-
-### Phase 4: Integration
-1. Add navigation item
-2. Add route
-3. Connect to equipment page (link to annual history)
 
 ---
 
 ## Summary
 
-This implementation creates a **completely parallel system** for annual chiller maintenance that:
-
-- Leaves all existing daily/weekly maintenance functionality **untouched**
-- Uses separate tables with clear `chiller_` prefix naming
-- Adds a new navigation item and page
-- Supports AI-ready structured data with numeric/boolean/enum fields
-- Enables year-over-year trending via `(equipment_id, inspection_year)` keys
-- Includes photo attachments linked to specific findings
-
-The existing `/maintenance-checks` page and all its components continue to work exactly as before.
+| Component | Implementation |
+|-----------|----------------|
+| Risk Score Range | 0-100 (capped) |
+| Risk Levels | low (0-30), medium (31-60), high/critical (61+) |
+| Weighted Conditions | 5 primary triggers totaling up to 120 points |
+| Auto-Findings | Generated from red flags with standardized issue codes |
+| YoY Detection | Query prior year PM by equipment_id and inspection_year-1 |
+| Manufacturer Limits | Configurable per chiller model with sensible defaults |
 
