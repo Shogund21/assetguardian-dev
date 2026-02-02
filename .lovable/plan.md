@@ -1,149 +1,134 @@
 
-# Fix: Scrolling and Print/Export for Maintenance Check Details
 
-## Issues Identified
+# Add Oil Level and Compressor Vibration Checks for Chiller Maintenance
 
-| Issue | Root Cause |
-|-------|------------|
-| Cannot scroll to see all details | `ScrollArea` lacks explicit height, and `DialogContent` uses `overflow-hidden` which clips content |
-| No print/export functionality | Missing buttons and print handler in the dialog |
+## Overview
 
----
-
-## Solution Overview
-
-Update the `EnhancedMaintenanceDetails` component to:
-1. Fix the scrolling by properly structuring the dialog with a flexible height layout
-2. Add Print and Export buttons in the dialog header/footer
+Add two checks to the chiller maintenance form:
+1. **Oil Level Status** - Already exists in the form but is not displayed in the maintenance details view
+2. **Compressor Vibration** - New field that needs to be added throughout the system
 
 ---
 
-## Technical Changes
+## Current State
 
-### File: `src/components/maintenance/details/EnhancedMaintenanceDetails.tsx`
+| Check | Form Field | Database Column | Details Display |
+|-------|-----------|-----------------|-----------------|
+| Oil Level Status | Exists (line 430-451) | `oil_level_status` (text) | Not shown for chillers |
+| Compressor Vibration | Does not exist | Does not exist | N/A |
 
-**1. Add Required Imports**
+---
 
-```typescript
-import { Button } from "@/components/ui/button";
-import { Printer, Download } from "lucide-react";
-import { DialogFooter } from "@/components/ui/dialog";
-```
+## Changes Required
 
-**2. Fix DialogContent Layout**
+### 1. Database Migration (New Column)
 
-Update the `DialogContent` structure to use flex layout with proper height constraints:
+Add a new `compressor_vibration` column to store vibration readings:
 
-```typescript
-<DialogContent className="max-w-4xl h-[90vh] flex flex-col overflow-hidden">
-  {/* Header - Fixed at top */}
-  <DialogHeader className="flex-shrink-0 pb-4 border-b">
-    {/* ... existing header content ... */}
-  </DialogHeader>
+```sql
+ALTER TABLE hvac_maintenance_checks 
+ADD COLUMN IF NOT EXISTS compressor_vibration text;
 
-  {/* Tabs with Scrollable Content */}
-  <Tabs defaultValue="overview" className="flex-1 flex flex-col min-h-0">
-    <TabsList className="flex-shrink-0 grid w-full grid-cols-4">
-      {/* ... tab triggers ... */}
-    </TabsList>
-
-    {/* Scrollable area for tab content */}
-    <ScrollArea className="flex-1 mt-4">
-      <div className="pr-4"> {/* Padding for scrollbar */}
-        {/* ... TabsContent elements ... */}
-      </div>
-    </ScrollArea>
-  </Tabs>
-
-  {/* Footer - Fixed at bottom */}
-  <DialogFooter className="flex-shrink-0 pt-4 border-t">
-    <Button variant="outline" onClick={handlePrint}>
-      <Printer className="mr-2 h-4 w-4" />
-      Print
-    </Button>
-    <Button variant="outline" onClick={handleExport}>
-      <Download className="mr-2 h-4 w-4" />
-      Export PDF
-    </Button>
-  </DialogFooter>
-</DialogContent>
-```
-
-**3. Add Print Handler**
-
-Add a print function that creates a print-friendly version of the maintenance check:
-
-```typescript
-const handlePrint = () => {
-  const printContent = document.createElement('div');
-  printContent.innerHTML = `
-    <style>
-      body { font-family: Arial, sans-serif; padding: 20px; }
-      h1 { font-size: 24px; margin-bottom: 10px; }
-      .header-info { margin-bottom: 20px; color: #666; }
-      .section { margin-bottom: 20px; }
-      .section-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
-      .reading-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee; }
-      .status-badge { padding: 2px 8px; border-radius: 4px; font-size: 12px; }
-      .good { background: #dcfce7; color: #166534; }
-      .warning { background: #fef9c3; color: #854d0e; }
-      .critical { background: #fee2e2; color: #991b1b; }
-      @media print { body { padding: 0; } }
-    </style>
-    <h1>${getEquipmentName()}</h1>
-    <div class="header-info">
-      <p>Location: ${getLocationName()}</p>
-      <p>Technician: ${getTechnicianName()}</p>
-      <p>Date: ${format(new Date(check.check_date || ""), "MMM dd, yyyy 'at' h:mm a")}</p>
-      <p>Status: ${check.status?.replace('_', ' ').toUpperCase() || 'UNKNOWN'}</p>
-      <p>Equipment Type: ${check.equipment_type?.toUpperCase() || 'N/A'}</p>
-    </div>
-    <!-- Readings section -->
-    <div class="section">
-      <div class="section-title">Readings</div>
-      ${readings.map(r => `<div class="reading-row"><span>${r.label}</span><span>${formatFieldValue(r.value, r.label.toLowerCase())}</span></div>`).join('')}
-    </div>
-    <!-- Conditions section -->
-    <div class="section">
-      <div class="section-title">Equipment Conditions</div>
-      ${conditions.map(c => `<div class="reading-row"><span>${c.label}</span><span class="status-badge ${c.status}">${formatFieldValue(c.value, c.label.toLowerCase())}</span></div>`).join('')}
-    </div>
-    <!-- Notes section -->
-    ${check.notes ? `<div class="section"><div class="section-title">Notes</div><p>${check.notes}</p></div>` : ''}
-    ${check.maintenance_recommendations ? `<div class="section"><div class="section-title">Recommendations</div><p>${check.maintenance_recommendations}</p></div>` : ''}
-  `;
-
-  const printWindow = window.open('', '_blank');
-  if (printWindow) {
-    printWindow.document.write(`<!DOCTYPE html><html><head><title>Maintenance Check - ${getEquipmentName()}</title></head><body>${printContent.innerHTML}</body></html>`);
-    printWindow.document.close();
-    printWindow.onload = () => {
-      printWindow.focus();
-      printWindow.print();
-    };
-  }
-};
-
-const handleExport = () => {
-  // For now, use print to PDF (browser's built-in PDF export)
-  handlePrint();
-};
+COMMENT ON COLUMN hvac_maintenance_checks.compressor_vibration IS 'Compressor vibration status: normal, slight, excessive';
 ```
 
 ---
 
-## Summary of Changes
+### 2. Form Schema Update
 
-| Location | Change |
-|----------|--------|
-| Line 284 | Change `max-h-[90vh] overflow-hidden` to `h-[90vh] flex flex-col overflow-hidden` |
-| Line 285-331 | Wrap `DialogHeader` with `flex-shrink-0` to prevent compression |
-| Line 333-351 | Add `flex-1 flex flex-col min-h-0` to `Tabs` container |
-| Line 353-517 | Wrap `ScrollArea` properly with explicit `flex-1` height |
-| After line 517 | Add `DialogFooter` with Print and Export buttons |
-| New function | Add `handlePrint()` and `handleExport()` functions |
+**File:** `src/components/maintenance/form/hooks/schema/maintenanceFormSchema.ts`
 
-This will enable:
-- Proper scrolling through all maintenance check details
-- Print button to generate a printer-friendly version
-- Export button (uses browser's Print to PDF functionality)
+Add new field for compressor vibration (around line 104, after other compressor fields):
+
+```typescript
+// Add to compressor fields section
+compressor_vibration: z.string().optional(),
+```
+
+---
+
+### 3. Compressor Form Fields Update
+
+**File:** `src/components/maintenance/form/ComprehensiveChillerFields.tsx`
+
+Add Compressor Vibration field after the Oil Level Status field (after line 524):
+
+```typescript
+<FormField
+  control={form.control}
+  name="compressor_vibration"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Compressor Vibration</FormLabel>
+      <Select onValueChange={field.onChange} defaultValue={field.value}>
+        <FormControl>
+          <SelectTrigger>
+            <SelectValue placeholder="Select vibration level" />
+          </SelectTrigger>
+        </FormControl>
+        <SelectContent>
+          <SelectItem value="normal">Normal</SelectItem>
+          <SelectItem value="slight">Slight Vibration</SelectItem>
+          <SelectItem value="excessive">Excessive Vibration</SelectItem>
+        </SelectContent>
+      </Select>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+```
+
+---
+
+### 4. Data Mapper Update
+
+**File:** `src/components/maintenance/form/hooks/mappers/chillerDataMapper.ts`
+
+Add mapping for the new field (in the compressor fields section around line 37):
+
+```typescript
+// Add to compressor fields
+compressor_vibration: processField(values.compressor_vibration),
+```
+
+---
+
+### 5. Details Display Update
+
+**File:** `src/components/maintenance/details/EnhancedMaintenanceDetails.tsx`
+
+Update the `getEquipmentConditions()` function to include both fields for chillers (around line 227):
+
+```typescript
+case 'chiller':
+  addCondition("Evaporator Condition", check.evaporator_condition);
+  addCondition("Condenser Condition", check.condenser_condition);
+  addCondition("Compressor Condition", check.compressor_condition);
+  addCondition("Motor Condition", check.motor_condition);
+  addCondition("Control System", check.control_system_status);
+  addCondition("Oil Level", check.oil_level_status);  // Add this line
+  addCondition("Compressor Vibration", check.compressor_vibration);  // Add this line
+  break;
+```
+
+---
+
+## Summary of Files to Modify
+
+| File | Change |
+|------|--------|
+| Database Migration | Add `compressor_vibration` column |
+| `maintenanceFormSchema.ts` | Add `compressor_vibration` field |
+| `ComprehensiveChillerFields.tsx` | Add Compressor Vibration form field in Compressor tab |
+| `chillerDataMapper.ts` | Map `compressor_vibration` to database |
+| `EnhancedMaintenanceDetails.tsx` | Display Oil Level and Compressor Vibration in conditions |
+
+---
+
+## Result
+
+After implementation:
+- Technicians can select Oil Level Status (already in form) and Compressor Vibration (new dropdown) when completing chiller maintenance
+- Both fields will be visible when viewing completed maintenance check details
+- Print/export will include both values
+
