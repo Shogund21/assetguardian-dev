@@ -251,6 +251,139 @@ export type Database = {
         }
         Relationships: []
       }
+      annual_chiller_pm: {
+        Row: {
+          ai_analysis_json: Json | null
+          chiller_age_years: number | null
+          chiller_model: string | null
+          chiller_serial: string | null
+          company_id: string | null
+          completion_date: string | null
+          created_at: string | null
+          equipment_id: string
+          id: string
+          inspection_date: string
+          inspection_year: number
+          labor_cost_total: number | null
+          labor_hours_total: number | null
+          location_id: string | null
+          next_annual_due: string | null
+          notes: string | null
+          operating_hours_at_inspection: number | null
+          overall_risk_level: string | null
+          overall_risk_score: number | null
+          parts_cost_total: number | null
+          requires_immediate_action: boolean | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          scheduled_date: string | null
+          status: string | null
+          technician_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          ai_analysis_json?: Json | null
+          chiller_age_years?: number | null
+          chiller_model?: string | null
+          chiller_serial?: string | null
+          company_id?: string | null
+          completion_date?: string | null
+          created_at?: string | null
+          equipment_id: string
+          id?: string
+          inspection_date: string
+          inspection_year: number
+          labor_cost_total?: number | null
+          labor_hours_total?: number | null
+          location_id?: string | null
+          next_annual_due?: string | null
+          notes?: string | null
+          operating_hours_at_inspection?: number | null
+          overall_risk_level?: string | null
+          overall_risk_score?: number | null
+          parts_cost_total?: number | null
+          requires_immediate_action?: boolean | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          scheduled_date?: string | null
+          status?: string | null
+          technician_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          ai_analysis_json?: Json | null
+          chiller_age_years?: number | null
+          chiller_model?: string | null
+          chiller_serial?: string | null
+          company_id?: string | null
+          completion_date?: string | null
+          created_at?: string | null
+          equipment_id?: string
+          id?: string
+          inspection_date?: string
+          inspection_year?: number
+          labor_cost_total?: number | null
+          labor_hours_total?: number | null
+          location_id?: string | null
+          next_annual_due?: string | null
+          notes?: string | null
+          operating_hours_at_inspection?: number | null
+          overall_risk_level?: string | null
+          overall_risk_score?: number | null
+          parts_cost_total?: number | null
+          requires_immediate_action?: boolean | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          scheduled_date?: string | null
+          status?: string | null
+          technician_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "annual_chiller_pm_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annual_chiller_pm_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "equipment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annual_chiller_pm_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annual_chiller_pm_overall_risk_level_fkey"
+            columns: ["overall_risk_level"]
+            isOneToOne: false
+            referencedRelation: "chiller_ref_risk_levels"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "annual_chiller_pm_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annual_chiller_pm_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -700,6 +833,1280 @@ export type Database = {
           visitor_info?: Json | null
         }
         Relationships: []
+      }
+      chiller_annual_findings: {
+        Row: {
+          action_date: string | null
+          action_taken: string | null
+          actual_cost: number | null
+          ai_confidence_score: number | null
+          ai_recommendation: string | null
+          annual_pm_id: string
+          category: string | null
+          created_at: string | null
+          description: string
+          estimated_cost: number | null
+          finding_number: number | null
+          follow_up_date: string | null
+          id: string
+          is_repeat_finding: boolean | null
+          issue_code: string | null
+          location_detail: string | null
+          parts_required: string[] | null
+          prior_finding_id: string | null
+          recommended_action: string | null
+          requires_follow_up: boolean | null
+          resolution_date: string | null
+          resolution_notes: string | null
+          responsible_party: string | null
+          severity: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          action_date?: string | null
+          action_taken?: string | null
+          actual_cost?: number | null
+          ai_confidence_score?: number | null
+          ai_recommendation?: string | null
+          annual_pm_id: string
+          category?: string | null
+          created_at?: string | null
+          description: string
+          estimated_cost?: number | null
+          finding_number?: number | null
+          follow_up_date?: string | null
+          id?: string
+          is_repeat_finding?: boolean | null
+          issue_code?: string | null
+          location_detail?: string | null
+          parts_required?: string[] | null
+          prior_finding_id?: string | null
+          recommended_action?: string | null
+          requires_follow_up?: boolean | null
+          resolution_date?: string | null
+          resolution_notes?: string | null
+          responsible_party?: string | null
+          severity: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          action_date?: string | null
+          action_taken?: string | null
+          actual_cost?: number | null
+          ai_confidence_score?: number | null
+          ai_recommendation?: string | null
+          annual_pm_id?: string
+          category?: string | null
+          created_at?: string | null
+          description?: string
+          estimated_cost?: number | null
+          finding_number?: number | null
+          follow_up_date?: string | null
+          id?: string
+          is_repeat_finding?: boolean | null
+          issue_code?: string | null
+          location_detail?: string | null
+          parts_required?: string[] | null
+          prior_finding_id?: string | null
+          recommended_action?: string | null
+          requires_follow_up?: boolean | null
+          resolution_date?: string | null
+          resolution_notes?: string | null
+          responsible_party?: string | null
+          severity?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chiller_annual_findings_annual_pm_id_fkey"
+            columns: ["annual_pm_id"]
+            isOneToOne: false
+            referencedRelation: "annual_chiller_pm"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chiller_annual_findings_issue_code_fkey"
+            columns: ["issue_code"]
+            isOneToOne: false
+            referencedRelation: "chiller_ref_issue_codes"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "chiller_annual_findings_prior_finding_id_fkey"
+            columns: ["prior_finding_id"]
+            isOneToOne: false
+            referencedRelation: "chiller_annual_findings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chiller_annual_findings_severity_fkey"
+            columns: ["severity"]
+            isOneToOne: false
+            referencedRelation: "chiller_ref_risk_levels"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      chiller_electrical_check: {
+        Row: {
+          amperage_imbalance_pct: number | null
+          amperage_l1: number | null
+          amperage_l2: number | null
+          amperage_l3: number | null
+          annual_pm_id: string
+          bearing_temp_drive_end_f: number | null
+          bearing_temp_non_drive_f: number | null
+          component: string
+          contactor_condition: string | null
+          control_wiring_condition: string | null
+          created_at: string | null
+          current_pct_fla: number | null
+          id: string
+          insulation_resistance_megohms: number | null
+          kw_measured: number | null
+          nameplate_fla: number | null
+          notes: string | null
+          overload_functional: boolean | null
+          overload_setting_amps: number | null
+          power_factor: number | null
+          risk_level: string | null
+          starter_condition: string | null
+          terminal_connections_tight: boolean | null
+          updated_at: string | null
+          vfd_fault_history_cleared: boolean | null
+          vfd_firmware_version: string | null
+          vibration_acceptable: boolean | null
+          vibration_ips_de: number | null
+          vibration_ips_nde: number | null
+          voltage_imbalance_pct: number | null
+          voltage_l1_l2: number | null
+          voltage_l2_l3: number | null
+          voltage_l3_l1: number | null
+          winding_temp_f: number | null
+        }
+        Insert: {
+          amperage_imbalance_pct?: number | null
+          amperage_l1?: number | null
+          amperage_l2?: number | null
+          amperage_l3?: number | null
+          annual_pm_id: string
+          bearing_temp_drive_end_f?: number | null
+          bearing_temp_non_drive_f?: number | null
+          component: string
+          contactor_condition?: string | null
+          control_wiring_condition?: string | null
+          created_at?: string | null
+          current_pct_fla?: number | null
+          id?: string
+          insulation_resistance_megohms?: number | null
+          kw_measured?: number | null
+          nameplate_fla?: number | null
+          notes?: string | null
+          overload_functional?: boolean | null
+          overload_setting_amps?: number | null
+          power_factor?: number | null
+          risk_level?: string | null
+          starter_condition?: string | null
+          terminal_connections_tight?: boolean | null
+          updated_at?: string | null
+          vfd_fault_history_cleared?: boolean | null
+          vfd_firmware_version?: string | null
+          vibration_acceptable?: boolean | null
+          vibration_ips_de?: number | null
+          vibration_ips_nde?: number | null
+          voltage_imbalance_pct?: number | null
+          voltage_l1_l2?: number | null
+          voltage_l2_l3?: number | null
+          voltage_l3_l1?: number | null
+          winding_temp_f?: number | null
+        }
+        Update: {
+          amperage_imbalance_pct?: number | null
+          amperage_l1?: number | null
+          amperage_l2?: number | null
+          amperage_l3?: number | null
+          annual_pm_id?: string
+          bearing_temp_drive_end_f?: number | null
+          bearing_temp_non_drive_f?: number | null
+          component?: string
+          contactor_condition?: string | null
+          control_wiring_condition?: string | null
+          created_at?: string | null
+          current_pct_fla?: number | null
+          id?: string
+          insulation_resistance_megohms?: number | null
+          kw_measured?: number | null
+          nameplate_fla?: number | null
+          notes?: string | null
+          overload_functional?: boolean | null
+          overload_setting_amps?: number | null
+          power_factor?: number | null
+          risk_level?: string | null
+          starter_condition?: string | null
+          terminal_connections_tight?: boolean | null
+          updated_at?: string | null
+          vfd_fault_history_cleared?: boolean | null
+          vfd_firmware_version?: string | null
+          vibration_acceptable?: boolean | null
+          vibration_ips_de?: number | null
+          vibration_ips_nde?: number | null
+          voltage_imbalance_pct?: number | null
+          voltage_l1_l2?: number | null
+          voltage_l2_l3?: number | null
+          voltage_l3_l1?: number | null
+          winding_temp_f?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chiller_electrical_check_annual_pm_id_fkey"
+            columns: ["annual_pm_id"]
+            isOneToOne: false
+            referencedRelation: "annual_chiller_pm"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chiller_electrical_check_risk_level_fkey"
+            columns: ["risk_level"]
+            isOneToOne: false
+            referencedRelation: "chiller_ref_risk_levels"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "chiller_electrical_check_starter_condition_fkey"
+            columns: ["starter_condition"]
+            isOneToOne: false
+            referencedRelation: "chiller_ref_starter_conditions"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      chiller_finding_attachments: {
+        Row: {
+          caption: string | null
+          created_at: string | null
+          file_name: string
+          file_path: string
+          file_size_bytes: number | null
+          file_type: string
+          finding_id: string
+          gps_latitude: number | null
+          gps_longitude: number | null
+          id: string
+          is_primary: boolean | null
+          mime_type: string | null
+          taken_at: string | null
+          uploaded_at: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string | null
+          file_name: string
+          file_path: string
+          file_size_bytes?: number | null
+          file_type: string
+          finding_id: string
+          gps_latitude?: number | null
+          gps_longitude?: number | null
+          id?: string
+          is_primary?: boolean | null
+          mime_type?: string | null
+          taken_at?: string | null
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string | null
+          file_name?: string
+          file_path?: string
+          file_size_bytes?: number | null
+          file_type?: string
+          finding_id?: string
+          gps_latitude?: number | null
+          gps_longitude?: number | null
+          id?: string
+          is_primary?: boolean | null
+          mime_type?: string | null
+          taken_at?: string | null
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chiller_finding_attachments_finding_id_fkey"
+            columns: ["finding_id"]
+            isOneToOne: false
+            referencedRelation: "chiller_annual_findings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chiller_finding_attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chiller_oil_analysis: {
+        Row: {
+          acid_number_mgkoh_g: number | null
+          aluminum_ppm: number | null
+          annual_pm_id: string
+          appearance: string | null
+          copper_ppm: number | null
+          created_at: string | null
+          current_level_pct: number | null
+          dielectric_strength_kv: number | null
+          foam_test_passed: boolean | null
+          id: string
+          iron_ppm: number | null
+          lab_recommendations: string | null
+          lead_ppm: number | null
+          moisture_ppm: number | null
+          notes: string | null
+          oil_added_gallons: number | null
+          oil_capacity_gallons: number | null
+          oil_changed: boolean | null
+          oil_filter_dp_psig: number | null
+          oil_filter_replaced: boolean | null
+          oil_heater_functional: boolean | null
+          oil_pump_pressure_psig: number | null
+          oil_type: string | null
+          oxidation_number: number | null
+          risk_level: string | null
+          sample_collected: boolean | null
+          sample_date: string | null
+          sample_lab_id: string | null
+          silicon_ppm: number | null
+          tin_ppm: number | null
+          updated_at: string | null
+          viscosity_cst_100c: number | null
+          viscosity_cst_40c: number | null
+        }
+        Insert: {
+          acid_number_mgkoh_g?: number | null
+          aluminum_ppm?: number | null
+          annual_pm_id: string
+          appearance?: string | null
+          copper_ppm?: number | null
+          created_at?: string | null
+          current_level_pct?: number | null
+          dielectric_strength_kv?: number | null
+          foam_test_passed?: boolean | null
+          id?: string
+          iron_ppm?: number | null
+          lab_recommendations?: string | null
+          lead_ppm?: number | null
+          moisture_ppm?: number | null
+          notes?: string | null
+          oil_added_gallons?: number | null
+          oil_capacity_gallons?: number | null
+          oil_changed?: boolean | null
+          oil_filter_dp_psig?: number | null
+          oil_filter_replaced?: boolean | null
+          oil_heater_functional?: boolean | null
+          oil_pump_pressure_psig?: number | null
+          oil_type?: string | null
+          oxidation_number?: number | null
+          risk_level?: string | null
+          sample_collected?: boolean | null
+          sample_date?: string | null
+          sample_lab_id?: string | null
+          silicon_ppm?: number | null
+          tin_ppm?: number | null
+          updated_at?: string | null
+          viscosity_cst_100c?: number | null
+          viscosity_cst_40c?: number | null
+        }
+        Update: {
+          acid_number_mgkoh_g?: number | null
+          aluminum_ppm?: number | null
+          annual_pm_id?: string
+          appearance?: string | null
+          copper_ppm?: number | null
+          created_at?: string | null
+          current_level_pct?: number | null
+          dielectric_strength_kv?: number | null
+          foam_test_passed?: boolean | null
+          id?: string
+          iron_ppm?: number | null
+          lab_recommendations?: string | null
+          lead_ppm?: number | null
+          moisture_ppm?: number | null
+          notes?: string | null
+          oil_added_gallons?: number | null
+          oil_capacity_gallons?: number | null
+          oil_changed?: boolean | null
+          oil_filter_dp_psig?: number | null
+          oil_filter_replaced?: boolean | null
+          oil_heater_functional?: boolean | null
+          oil_pump_pressure_psig?: number | null
+          oil_type?: string | null
+          oxidation_number?: number | null
+          risk_level?: string | null
+          sample_collected?: boolean | null
+          sample_date?: string | null
+          sample_lab_id?: string | null
+          silicon_ppm?: number | null
+          tin_ppm?: number | null
+          updated_at?: string | null
+          viscosity_cst_100c?: number | null
+          viscosity_cst_40c?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chiller_oil_analysis_annual_pm_id_fkey"
+            columns: ["annual_pm_id"]
+            isOneToOne: false
+            referencedRelation: "annual_chiller_pm"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chiller_oil_analysis_risk_level_fkey"
+            columns: ["risk_level"]
+            isOneToOne: false
+            referencedRelation: "chiller_ref_risk_levels"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      chiller_performance_test: {
+        Row: {
+          annual_pm_id: string
+          capacity_pct: number | null
+          chilled_water_return_f: number | null
+          chilled_water_supply_f: number | null
+          chw_delta_t_f: number | null
+          chw_flow_gpm: number | null
+          condenser_approach_f: number | null
+          condenser_sat_temp_f: number | null
+          condenser_water_return_f: number | null
+          condenser_water_supply_f: number | null
+          cop: number | null
+          created_at: string | null
+          cw_delta_t_f: number | null
+          cw_flow_gpm: number | null
+          degradation_since_last_year_pct: number | null
+          design_kw_per_ton: number | null
+          discharge_pressure_psig: number | null
+          efficiency_variance_pct: number | null
+          evaporator_approach_f: number | null
+          evaporator_sat_temp_f: number | null
+          guide_vane_position_pct: number | null
+          id: string
+          iplv: number | null
+          kw_input: number | null
+          kw_per_ton: number | null
+          lift_psig: number | null
+          load_pct: number | null
+          meets_design_capacity: boolean | null
+          meets_design_efficiency: boolean | null
+          motor_amps: number | null
+          notes: string | null
+          nplv: number | null
+          oil_pressure_psig: number | null
+          risk_level: string | null
+          slide_valve_position_pct: number | null
+          suction_pressure_psig: number | null
+          test_date: string | null
+          test_duration_minutes: number | null
+          tons_actual: number | null
+          tons_design: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          annual_pm_id: string
+          capacity_pct?: number | null
+          chilled_water_return_f?: number | null
+          chilled_water_supply_f?: number | null
+          chw_delta_t_f?: number | null
+          chw_flow_gpm?: number | null
+          condenser_approach_f?: number | null
+          condenser_sat_temp_f?: number | null
+          condenser_water_return_f?: number | null
+          condenser_water_supply_f?: number | null
+          cop?: number | null
+          created_at?: string | null
+          cw_delta_t_f?: number | null
+          cw_flow_gpm?: number | null
+          degradation_since_last_year_pct?: number | null
+          design_kw_per_ton?: number | null
+          discharge_pressure_psig?: number | null
+          efficiency_variance_pct?: number | null
+          evaporator_approach_f?: number | null
+          evaporator_sat_temp_f?: number | null
+          guide_vane_position_pct?: number | null
+          id?: string
+          iplv?: number | null
+          kw_input?: number | null
+          kw_per_ton?: number | null
+          lift_psig?: number | null
+          load_pct?: number | null
+          meets_design_capacity?: boolean | null
+          meets_design_efficiency?: boolean | null
+          motor_amps?: number | null
+          notes?: string | null
+          nplv?: number | null
+          oil_pressure_psig?: number | null
+          risk_level?: string | null
+          slide_valve_position_pct?: number | null
+          suction_pressure_psig?: number | null
+          test_date?: string | null
+          test_duration_minutes?: number | null
+          tons_actual?: number | null
+          tons_design?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          annual_pm_id?: string
+          capacity_pct?: number | null
+          chilled_water_return_f?: number | null
+          chilled_water_supply_f?: number | null
+          chw_delta_t_f?: number | null
+          chw_flow_gpm?: number | null
+          condenser_approach_f?: number | null
+          condenser_sat_temp_f?: number | null
+          condenser_water_return_f?: number | null
+          condenser_water_supply_f?: number | null
+          cop?: number | null
+          created_at?: string | null
+          cw_delta_t_f?: number | null
+          cw_flow_gpm?: number | null
+          degradation_since_last_year_pct?: number | null
+          design_kw_per_ton?: number | null
+          discharge_pressure_psig?: number | null
+          efficiency_variance_pct?: number | null
+          evaporator_approach_f?: number | null
+          evaporator_sat_temp_f?: number | null
+          guide_vane_position_pct?: number | null
+          id?: string
+          iplv?: number | null
+          kw_input?: number | null
+          kw_per_ton?: number | null
+          lift_psig?: number | null
+          load_pct?: number | null
+          meets_design_capacity?: boolean | null
+          meets_design_efficiency?: boolean | null
+          motor_amps?: number | null
+          notes?: string | null
+          nplv?: number | null
+          oil_pressure_psig?: number | null
+          risk_level?: string | null
+          slide_valve_position_pct?: number | null
+          suction_pressure_psig?: number | null
+          test_date?: string | null
+          test_duration_minutes?: number | null
+          tons_actual?: number | null
+          tons_design?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chiller_performance_test_annual_pm_id_fkey"
+            columns: ["annual_pm_id"]
+            isOneToOne: false
+            referencedRelation: "annual_chiller_pm"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chiller_performance_test_risk_level_fkey"
+            columns: ["risk_level"]
+            isOneToOne: false
+            referencedRelation: "chiller_ref_risk_levels"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      chiller_ref_issue_codes: {
+        Row: {
+          category: string
+          code: string
+          created_at: string | null
+          default_risk_level: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          label: string
+          recommended_action: string | null
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          code: string
+          created_at?: string | null
+          default_risk_level?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          label: string
+          recommended_action?: string | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          code?: string
+          created_at?: string | null
+          default_risk_level?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          label?: string
+          recommended_action?: string | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chiller_ref_issue_codes_default_risk_level_fkey"
+            columns: ["default_risk_level"]
+            isOneToOne: false
+            referencedRelation: "chiller_ref_risk_levels"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      chiller_ref_leak_locations: {
+        Row: {
+          category: string | null
+          code: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          label: string
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          code: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          label: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          code?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          label?: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      chiller_ref_risk_levels: {
+        Row: {
+          code: string
+          color_hex: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          label: string
+          priority_weight: number | null
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          color_hex?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          label: string
+          priority_weight?: number | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          color_hex?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          label?: string
+          priority_weight?: number | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      chiller_ref_sight_glass_conditions: {
+        Row: {
+          code: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          label: string
+          severity_score: number | null
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          label: string
+          severity_score?: number | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          label?: string
+          severity_score?: number | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      chiller_ref_starter_conditions: {
+        Row: {
+          code: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          label: string
+          risk_score: number | null
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          label: string
+          risk_score?: number | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          label?: string
+          risk_score?: number | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      chiller_ref_tube_test_methods: {
+        Row: {
+          code: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          label: string
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          label: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          label?: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      chiller_refrigerant_inspection: {
+        Row: {
+          acid_ppm: number | null
+          acid_test_passed: boolean | null
+          added_amount_lbs: number | null
+          annual_pm_id: string
+          charge_lbs: number | null
+          charge_variance_pct: number | null
+          created_at: string | null
+          discharge_pressure_psig: number | null
+          drier_moisture_ppm: number | null
+          drier_replaced: boolean | null
+          id: string
+          leak_detected: boolean | null
+          leak_location_code: string | null
+          leak_rate_oz_year: number | null
+          moisture_indicator_color: string | null
+          nameplate_charge_lbs: number | null
+          non_condensable_test_passed: boolean | null
+          notes: string | null
+          purge_unit_cycles: number | null
+          purge_unit_hours: number | null
+          recovery_amount_lbs: number | null
+          refrigerant_type: string | null
+          risk_level: string | null
+          sight_glass_condition: string | null
+          subcooling_f: number | null
+          suction_pressure_psig: number | null
+          superheat_f: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          acid_ppm?: number | null
+          acid_test_passed?: boolean | null
+          added_amount_lbs?: number | null
+          annual_pm_id: string
+          charge_lbs?: number | null
+          charge_variance_pct?: number | null
+          created_at?: string | null
+          discharge_pressure_psig?: number | null
+          drier_moisture_ppm?: number | null
+          drier_replaced?: boolean | null
+          id?: string
+          leak_detected?: boolean | null
+          leak_location_code?: string | null
+          leak_rate_oz_year?: number | null
+          moisture_indicator_color?: string | null
+          nameplate_charge_lbs?: number | null
+          non_condensable_test_passed?: boolean | null
+          notes?: string | null
+          purge_unit_cycles?: number | null
+          purge_unit_hours?: number | null
+          recovery_amount_lbs?: number | null
+          refrigerant_type?: string | null
+          risk_level?: string | null
+          sight_glass_condition?: string | null
+          subcooling_f?: number | null
+          suction_pressure_psig?: number | null
+          superheat_f?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          acid_ppm?: number | null
+          acid_test_passed?: boolean | null
+          added_amount_lbs?: number | null
+          annual_pm_id?: string
+          charge_lbs?: number | null
+          charge_variance_pct?: number | null
+          created_at?: string | null
+          discharge_pressure_psig?: number | null
+          drier_moisture_ppm?: number | null
+          drier_replaced?: boolean | null
+          id?: string
+          leak_detected?: boolean | null
+          leak_location_code?: string | null
+          leak_rate_oz_year?: number | null
+          moisture_indicator_color?: string | null
+          nameplate_charge_lbs?: number | null
+          non_condensable_test_passed?: boolean | null
+          notes?: string | null
+          purge_unit_cycles?: number | null
+          purge_unit_hours?: number | null
+          recovery_amount_lbs?: number | null
+          refrigerant_type?: string | null
+          risk_level?: string | null
+          sight_glass_condition?: string | null
+          subcooling_f?: number | null
+          suction_pressure_psig?: number | null
+          superheat_f?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chiller_refrigerant_inspection_annual_pm_id_fkey"
+            columns: ["annual_pm_id"]
+            isOneToOne: false
+            referencedRelation: "annual_chiller_pm"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chiller_refrigerant_inspection_leak_location_code_fkey"
+            columns: ["leak_location_code"]
+            isOneToOne: false
+            referencedRelation: "chiller_ref_leak_locations"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "chiller_refrigerant_inspection_risk_level_fkey"
+            columns: ["risk_level"]
+            isOneToOne: false
+            referencedRelation: "chiller_ref_risk_levels"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "chiller_refrigerant_inspection_sight_glass_condition_fkey"
+            columns: ["sight_glass_condition"]
+            isOneToOne: false
+            referencedRelation: "chiller_ref_sight_glass_conditions"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      chiller_tube_inspection: {
+        Row: {
+          annual_pm_id: string
+          anode_depletion_pct: number | null
+          approach_temp_after_f: number | null
+          approach_temp_before_f: number | null
+          avg_wall_thickness_mils: number | null
+          bundle_type: string
+          cleaning_method: string | null
+          created_at: string | null
+          estimated_remaining_life_years: number | null
+          fouling_factor_design: number | null
+          fouling_factor_measured: number | null
+          fouling_severity: string | null
+          fouling_type: string | null
+          id: string
+          min_wall_thickness_mils: number | null
+          next_test_recommended: string | null
+          notes: string | null
+          original_wall_thickness_mils: number | null
+          plugged_pct: number | null
+          risk_level: string | null
+          sacrificial_anodes_replaced: boolean | null
+          test_method: string | null
+          tube_count_total: number | null
+          tube_sheet_condition: string | null
+          tubes_cleaned: boolean | null
+          tubes_plugged_new: number | null
+          tubes_plugged_previous: number | null
+          tubes_plugged_total: number | null
+          tubes_tested_count: number | null
+          tubes_tested_pct: number | null
+          tubes_with_pitting: number | null
+          tubes_with_thinning: number | null
+          updated_at: string | null
+          wall_loss_pct: number | null
+          waterbox_condition: string | null
+          waterbox_gaskets_replaced: boolean | null
+        }
+        Insert: {
+          annual_pm_id: string
+          anode_depletion_pct?: number | null
+          approach_temp_after_f?: number | null
+          approach_temp_before_f?: number | null
+          avg_wall_thickness_mils?: number | null
+          bundle_type: string
+          cleaning_method?: string | null
+          created_at?: string | null
+          estimated_remaining_life_years?: number | null
+          fouling_factor_design?: number | null
+          fouling_factor_measured?: number | null
+          fouling_severity?: string | null
+          fouling_type?: string | null
+          id?: string
+          min_wall_thickness_mils?: number | null
+          next_test_recommended?: string | null
+          notes?: string | null
+          original_wall_thickness_mils?: number | null
+          plugged_pct?: number | null
+          risk_level?: string | null
+          sacrificial_anodes_replaced?: boolean | null
+          test_method?: string | null
+          tube_count_total?: number | null
+          tube_sheet_condition?: string | null
+          tubes_cleaned?: boolean | null
+          tubes_plugged_new?: number | null
+          tubes_plugged_previous?: number | null
+          tubes_plugged_total?: number | null
+          tubes_tested_count?: number | null
+          tubes_tested_pct?: number | null
+          tubes_with_pitting?: number | null
+          tubes_with_thinning?: number | null
+          updated_at?: string | null
+          wall_loss_pct?: number | null
+          waterbox_condition?: string | null
+          waterbox_gaskets_replaced?: boolean | null
+        }
+        Update: {
+          annual_pm_id?: string
+          anode_depletion_pct?: number | null
+          approach_temp_after_f?: number | null
+          approach_temp_before_f?: number | null
+          avg_wall_thickness_mils?: number | null
+          bundle_type?: string
+          cleaning_method?: string | null
+          created_at?: string | null
+          estimated_remaining_life_years?: number | null
+          fouling_factor_design?: number | null
+          fouling_factor_measured?: number | null
+          fouling_severity?: string | null
+          fouling_type?: string | null
+          id?: string
+          min_wall_thickness_mils?: number | null
+          next_test_recommended?: string | null
+          notes?: string | null
+          original_wall_thickness_mils?: number | null
+          plugged_pct?: number | null
+          risk_level?: string | null
+          sacrificial_anodes_replaced?: boolean | null
+          test_method?: string | null
+          tube_count_total?: number | null
+          tube_sheet_condition?: string | null
+          tubes_cleaned?: boolean | null
+          tubes_plugged_new?: number | null
+          tubes_plugged_previous?: number | null
+          tubes_plugged_total?: number | null
+          tubes_tested_count?: number | null
+          tubes_tested_pct?: number | null
+          tubes_with_pitting?: number | null
+          tubes_with_thinning?: number | null
+          updated_at?: string | null
+          wall_loss_pct?: number | null
+          waterbox_condition?: string | null
+          waterbox_gaskets_replaced?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chiller_tube_inspection_annual_pm_id_fkey"
+            columns: ["annual_pm_id"]
+            isOneToOne: false
+            referencedRelation: "annual_chiller_pm"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chiller_tube_inspection_risk_level_fkey"
+            columns: ["risk_level"]
+            isOneToOne: false
+            referencedRelation: "chiller_ref_risk_levels"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "chiller_tube_inspection_test_method_fkey"
+            columns: ["test_method"]
+            isOneToOne: false
+            referencedRelation: "chiller_ref_tube_test_methods"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      chiller_water_quality: {
+        Row: {
+          alkalinity_ppm: number | null
+          annual_pm_id: string
+          bacteria_count_cfu_ml: number | null
+          biocide_residual_ppm: number | null
+          chlorides_ppm: number | null
+          conductivity_umhos: number | null
+          copper_ppm: number | null
+          created_at: string | null
+          cycles_of_concentration: number | null
+          hardness_ppm_caco3: number | null
+          id: string
+          inhibitor_residual_ppm: number | null
+          iron_ppm: number | null
+          langelier_saturation_index: number | null
+          legionella_cfu_l: number | null
+          legionella_detected: boolean | null
+          notes: string | null
+          ph: number | null
+          risk_level: string | null
+          ryznar_stability_index: number | null
+          sample_date: string | null
+          sample_location: string | null
+          silica_ppm: number | null
+          sulfates_ppm: number | null
+          total_dissolved_solids_ppm: number | null
+          treatment_vendor: string | null
+          updated_at: string | null
+          water_loop: string
+          within_spec: boolean | null
+        }
+        Insert: {
+          alkalinity_ppm?: number | null
+          annual_pm_id: string
+          bacteria_count_cfu_ml?: number | null
+          biocide_residual_ppm?: number | null
+          chlorides_ppm?: number | null
+          conductivity_umhos?: number | null
+          copper_ppm?: number | null
+          created_at?: string | null
+          cycles_of_concentration?: number | null
+          hardness_ppm_caco3?: number | null
+          id?: string
+          inhibitor_residual_ppm?: number | null
+          iron_ppm?: number | null
+          langelier_saturation_index?: number | null
+          legionella_cfu_l?: number | null
+          legionella_detected?: boolean | null
+          notes?: string | null
+          ph?: number | null
+          risk_level?: string | null
+          ryznar_stability_index?: number | null
+          sample_date?: string | null
+          sample_location?: string | null
+          silica_ppm?: number | null
+          sulfates_ppm?: number | null
+          total_dissolved_solids_ppm?: number | null
+          treatment_vendor?: string | null
+          updated_at?: string | null
+          water_loop: string
+          within_spec?: boolean | null
+        }
+        Update: {
+          alkalinity_ppm?: number | null
+          annual_pm_id?: string
+          bacteria_count_cfu_ml?: number | null
+          biocide_residual_ppm?: number | null
+          chlorides_ppm?: number | null
+          conductivity_umhos?: number | null
+          copper_ppm?: number | null
+          created_at?: string | null
+          cycles_of_concentration?: number | null
+          hardness_ppm_caco3?: number | null
+          id?: string
+          inhibitor_residual_ppm?: number | null
+          iron_ppm?: number | null
+          langelier_saturation_index?: number | null
+          legionella_cfu_l?: number | null
+          legionella_detected?: boolean | null
+          notes?: string | null
+          ph?: number | null
+          risk_level?: string | null
+          ryznar_stability_index?: number | null
+          sample_date?: string | null
+          sample_location?: string | null
+          silica_ppm?: number | null
+          sulfates_ppm?: number | null
+          total_dissolved_solids_ppm?: number | null
+          treatment_vendor?: string | null
+          updated_at?: string | null
+          water_loop?: string
+          within_spec?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chiller_water_quality_annual_pm_id_fkey"
+            columns: ["annual_pm_id"]
+            isOneToOne: false
+            referencedRelation: "annual_chiller_pm"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chiller_water_quality_risk_level_fkey"
+            columns: ["risk_level"]
+            isOneToOne: false
+            referencedRelation: "chiller_ref_risk_levels"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      chiller_water_side_inspection: {
+        Row: {
+          air_separator_functional: boolean | null
+          annual_pm_id: string
+          created_at: string | null
+          delta_t_f: number | null
+          design_delta_t_f: number | null
+          design_flow_gpm: number | null
+          design_pressure_drop_psig: number | null
+          entering_water_temp_f: number | null
+          expansion_tank_level_pct: number | null
+          flow_rate_gpm: number | null
+          flow_variance_pct: number | null
+          glycol_concentration_pct: number | null
+          id: string
+          isolation_valves_condition: string | null
+          leaving_water_temp_f: number | null
+          notes: string | null
+          pressure_drop_psig: number | null
+          pump_discharge_pressure_psig: number | null
+          pump_suction_pressure_psig: number | null
+          risk_level: string | null
+          strainer_cleaned: boolean | null
+          strainer_dp_psig: number | null
+          updated_at: string | null
+          valve_operation_checked: boolean | null
+          water_loop: string
+        }
+        Insert: {
+          air_separator_functional?: boolean | null
+          annual_pm_id: string
+          created_at?: string | null
+          delta_t_f?: number | null
+          design_delta_t_f?: number | null
+          design_flow_gpm?: number | null
+          design_pressure_drop_psig?: number | null
+          entering_water_temp_f?: number | null
+          expansion_tank_level_pct?: number | null
+          flow_rate_gpm?: number | null
+          flow_variance_pct?: number | null
+          glycol_concentration_pct?: number | null
+          id?: string
+          isolation_valves_condition?: string | null
+          leaving_water_temp_f?: number | null
+          notes?: string | null
+          pressure_drop_psig?: number | null
+          pump_discharge_pressure_psig?: number | null
+          pump_suction_pressure_psig?: number | null
+          risk_level?: string | null
+          strainer_cleaned?: boolean | null
+          strainer_dp_psig?: number | null
+          updated_at?: string | null
+          valve_operation_checked?: boolean | null
+          water_loop: string
+        }
+        Update: {
+          air_separator_functional?: boolean | null
+          annual_pm_id?: string
+          created_at?: string | null
+          delta_t_f?: number | null
+          design_delta_t_f?: number | null
+          design_flow_gpm?: number | null
+          design_pressure_drop_psig?: number | null
+          entering_water_temp_f?: number | null
+          expansion_tank_level_pct?: number | null
+          flow_rate_gpm?: number | null
+          flow_variance_pct?: number | null
+          glycol_concentration_pct?: number | null
+          id?: string
+          isolation_valves_condition?: string | null
+          leaving_water_temp_f?: number | null
+          notes?: string | null
+          pressure_drop_psig?: number | null
+          pump_discharge_pressure_psig?: number | null
+          pump_suction_pressure_psig?: number | null
+          risk_level?: string | null
+          strainer_cleaned?: boolean | null
+          strainer_dp_psig?: number | null
+          updated_at?: string | null
+          valve_operation_checked?: boolean | null
+          water_loop?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chiller_water_side_inspection_annual_pm_id_fkey"
+            columns: ["annual_pm_id"]
+            isOneToOne: false
+            referencedRelation: "annual_chiller_pm"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chiller_water_side_inspection_risk_level_fkey"
+            columns: ["risk_level"]
+            isOneToOne: false
+            referencedRelation: "chiller_ref_risk_levels"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       companies: {
         Row: {

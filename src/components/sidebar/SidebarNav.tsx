@@ -1,5 +1,5 @@
 
-import { Calendar, Home, Inbox, Search, Settings, Wrench, Building2, ClipboardList, BarChart4, FileText, LogOut, Brain, Filter, Cpu } from "lucide-react";
+import { Calendar, Home, Inbox, Search, Settings, Wrench, Building2, ClipboardList, BarChart4, FileText, LogOut, Brain, Filter, Cpu, CalendarCheck } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import {
   SidebarGroup,
@@ -43,6 +43,11 @@ const items = [
     title: "Predictive Maintenance",
     url: "/predictive-maintenance",
     icon: Brain,
+  },
+  {
+    title: "Chiller Annuals",
+    url: "/chiller-annuals",
+    icon: CalendarCheck,
   },
   {
     title: "Digital Twin",
