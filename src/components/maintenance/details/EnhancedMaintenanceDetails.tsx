@@ -224,6 +224,8 @@ const EnhancedMaintenanceDetails = ({ check, open, onOpenChange }: EnhancedMaint
         addCondition("Compressor Condition", check.compressor_condition);
         addCondition("Motor Condition", check.motor_condition);
         addCondition("Control System", check.control_system_status);
+        addCondition("Oil Level", check.oil_level_status);
+        addCondition("Compressor Vibration", (check as any).compressor_vibration);
         break;
       
       case 'ahu':

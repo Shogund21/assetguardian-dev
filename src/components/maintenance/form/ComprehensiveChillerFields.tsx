@@ -522,6 +522,29 @@ const ComprehensiveChillerFields = ({ form }: ComprehensiveChillerFieldsProps) =
                     </FormItem>
                   )}
                 />
+
+                <FormField
+                  control={form.control}
+                  name="compressor_vibration"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Compressor Vibration</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select vibration level" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="normal">Normal</SelectItem>
+                          <SelectItem value="slight">Slight Vibration</SelectItem>
+                          <SelectItem value="excessive">Excessive Vibration</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </CardContent>
           </Card>
