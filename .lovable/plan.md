@@ -1,134 +1,56 @@
 
 
-# Add Oil Level and Compressor Vibration Checks for Chiller Maintenance
+# Fix: Add Oil Level Status Mapping for Chiller Maintenance
 
-## Overview
+## Problem Identified
 
-Add two checks to the chiller maintenance form:
-1. **Oil Level Status** - Already exists in the form but is not displayed in the maintenance details view
-2. **Compressor Vibration** - New field that needs to be added throughout the system
+The `oil_level_status` field exists in the form for chillers, but it's **not being saved to the database** because:
 
----
+| Component | Status |
+|-----------|--------|
+| Form Schema | ✅ Exists |
+| Form Field | ✅ Exists in ComprehensiveChillerFields.tsx |
+| Details Display | ✅ Added in previous change |
+| **Data Mapper** | ❌ **Missing from chillerDataMapper.ts** |
 
-## Current State
-
-| Check | Form Field | Database Column | Details Display |
-|-------|-----------|-----------------|-----------------|
-| Oil Level Status | Exists (line 430-451) | `oil_level_status` (text) | Not shown for chillers |
-| Compressor Vibration | Does not exist | Does not exist | N/A |
+The `standardEquipmentMapper.ts` includes `oil_level_status` (line 24), but it **skips chillers** (line 10). The `chillerDataMapper.ts` handles all chiller-specific mappings but doesn't include `oil_level_status`.
 
 ---
 
-## Changes Required
+## Solution
 
-### 1. Database Migration (New Column)
-
-Add a new `compressor_vibration` column to store vibration readings:
-
-```sql
-ALTER TABLE hvac_maintenance_checks 
-ADD COLUMN IF NOT EXISTS compressor_vibration text;
-
-COMMENT ON COLUMN hvac_maintenance_checks.compressor_vibration IS 'Compressor vibration status: normal, slight, excessive';
-```
+Add `oil_level_status` to the chiller data mapper.
 
 ---
 
-### 2. Form Schema Update
-
-**File:** `src/components/maintenance/form/hooks/schema/maintenanceFormSchema.ts`
-
-Add new field for compressor vibration (around line 104, after other compressor fields):
-
-```typescript
-// Add to compressor fields section
-compressor_vibration: z.string().optional(),
-```
-
----
-
-### 3. Compressor Form Fields Update
-
-**File:** `src/components/maintenance/form/ComprehensiveChillerFields.tsx`
-
-Add Compressor Vibration field after the Oil Level Status field (after line 524):
-
-```typescript
-<FormField
-  control={form.control}
-  name="compressor_vibration"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Compressor Vibration</FormLabel>
-      <Select onValueChange={field.onChange} defaultValue={field.value}>
-        <FormControl>
-          <SelectTrigger>
-            <SelectValue placeholder="Select vibration level" />
-          </SelectTrigger>
-        </FormControl>
-        <SelectContent>
-          <SelectItem value="normal">Normal</SelectItem>
-          <SelectItem value="slight">Slight Vibration</SelectItem>
-          <SelectItem value="excessive">Excessive Vibration</SelectItem>
-        </SelectContent>
-      </Select>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
-```
-
----
-
-### 4. Data Mapper Update
+## Technical Change
 
 **File:** `src/components/maintenance/form/hooks/mappers/chillerDataMapper.ts`
 
-Add mapping for the new field (in the compressor fields section around line 37):
+Add the oil level status mapping in the compressor fields section (after line 37):
 
 ```typescript
-// Add to compressor fields
+// Compressor fields
+compressor_suction_temp: processNumberField(values.evap_sat_rfgt_temp),
+compressor_discharge_temp: processNumberField(values.compressor_refrigerant_discharge_temp),
+compressor_suction_pressure: processNumberField(values.evap_rfgt_pressure),
+compressor_discharge_pressure: processNumberField(values.cond_rfgt_pressure),
+compressor_superheat: processNumberField(values.differential_refrigerant_pressure),
+compressor_subcooling: processNumberField(values.cond_sat_rfgt_temp),
+compressor_oil_pressure: processNumberField(values.oil_differential_pressure),
+compressor_oil_temp: processNumberField(values.oil_tank_pressure),
+compressor_condition: processField(values.compressor_running_status),
 compressor_vibration: processField(values.compressor_vibration),
+oil_level_status: processField(values.oil_level_status),  // <-- ADD THIS LINE
 ```
 
 ---
 
-### 5. Details Display Update
-
-**File:** `src/components/maintenance/details/EnhancedMaintenanceDetails.tsx`
-
-Update the `getEquipmentConditions()` function to include both fields for chillers (around line 227):
-
-```typescript
-case 'chiller':
-  addCondition("Evaporator Condition", check.evaporator_condition);
-  addCondition("Condenser Condition", check.condenser_condition);
-  addCondition("Compressor Condition", check.compressor_condition);
-  addCondition("Motor Condition", check.motor_condition);
-  addCondition("Control System", check.control_system_status);
-  addCondition("Oil Level", check.oil_level_status);  // Add this line
-  addCondition("Compressor Vibration", check.compressor_vibration);  // Add this line
-  break;
-```
-
----
-
-## Summary of Files to Modify
+## Summary
 
 | File | Change |
 |------|--------|
-| Database Migration | Add `compressor_vibration` column |
-| `maintenanceFormSchema.ts` | Add `compressor_vibration` field |
-| `ComprehensiveChillerFields.tsx` | Add Compressor Vibration form field in Compressor tab |
-| `chillerDataMapper.ts` | Map `compressor_vibration` to database |
-| `EnhancedMaintenanceDetails.tsx` | Display Oil Level and Compressor Vibration in conditions |
+| `chillerDataMapper.ts` | Add `oil_level_status: processField(values.oil_level_status)` to compressor fields section |
 
----
-
-## Result
-
-After implementation:
-- Technicians can select Oil Level Status (already in form) and Compressor Vibration (new dropdown) when completing chiller maintenance
-- Both fields will be visible when viewing completed maintenance check details
-- Print/export will include both values
+This single-line fix ensures the oil level status selected in the chiller maintenance form is properly saved to the database.
 
