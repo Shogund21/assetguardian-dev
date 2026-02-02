@@ -85,47 +85,28 @@ const MaintenanceHistory = () => {
 
       console.log("Raw maintenance data:", data);
 
-      // Transform the data from direct table queries
+      // Transform the data from direct table queries - spread ALL fields first, then override relationships
       const transformedData: MaintenanceCheck[] = data.map((item: any) => {
         console.log("Processing maintenance check item:", item);
         
         const check: MaintenanceCheck = {
-          id: item.id,
-          equipment_id: item.equipment_id,
-          technician_id: item.technician_id,
-          check_date: item.check_date,
-          status: item.status || 'pending',
-          equipment_type: item.equipment_type,
-          notes: item.notes,
-          // Equipment details from JOIN - matching MaintenanceCheck interface
+          ...item, // Spread ALL database fields to preserve readings (temps, pressures, motor data, etc.)
+          // Override relationship objects with properly formatted versions
           equipment: item.equipment ? {
             name: item.equipment.name,
             location: item.equipment.location,
             type: item.equipment.type
           } : undefined,
-          // Technician details from JOIN - matching MaintenanceCheck interface
           technician: item.technician ? {
             firstName: item.technician.firstName,
             lastName: item.technician.lastName
           } : undefined,
-          // Location details from JOIN
           selectedLocation: item.location ? {
             id: item.location.id,
             name: item.location.name,
             store_number: item.location.store_number,
             company_id: item.company_id
           } : undefined,
-          // Additional maintenance check fields
-          air_filter_status: item.air_filter_status,
-          belt_condition: item.belt_condition,
-          motor_condition: item.motor_condition,
-          control_system_status: item.control_system_status,
-          maintenance_frequency: item.maintenance_frequency,
-          // Add other fields as needed
-          company_id: item.company_id,
-          location_id: item.location_id,
-          created_at: item.created_at,
-          updated_at: item.updated_at
         };
 
         console.log("Transformed maintenance check:", check);
