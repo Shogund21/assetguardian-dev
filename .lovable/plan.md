@@ -1,89 +1,149 @@
 
-# Fix: Maintenance Check Readings Not Displayed
+# Fix: Scrolling and Print/Export for Maintenance Check Details
 
-## Problem Identified
+## Issues Identified
 
-When viewing a completed maintenance check, all the readings (temperature, pressure, motor data) show as "Not Checked" even though the data exists in the database.
-
-### Root Cause
-
-The `fetchMaintenanceChecks` function in `MaintenanceHistory.tsx` fetches ALL data from the database (using `SELECT *`), but then **only maps a tiny subset of fields** to the check object:
-
-| What's Fetched | What's Mapped |
-|----------------|---------------|
-| All 50+ fields from database | Only ~15 fields |
-| Temperature readings | ❌ Lost in transformation |
-| Pressure readings | ❌ Lost in transformation |
-| Motor data | ❌ Lost in transformation |
-| Compressor data | ❌ Lost in transformation |
-
-The database query at line 43-72 returns complete data, but the transformation at lines 92-133 explicitly constructs a new object with only these fields:
-- `id`, `equipment_id`, `technician_id`, `check_date`, `status`, `equipment_type`, `notes`
-- `equipment`, `technician`, `selectedLocation` (from JOINs)
-- `air_filter_status`, `belt_condition`, `motor_condition`, `control_system_status`
-- `maintenance_frequency`, `company_id`, `location_id`, `created_at`, `updated_at`
-
-**All chiller readings (evaporator temps, condenser temps, compressor temps, motor amperage, etc.) are discarded.**
+| Issue | Root Cause |
+|-------|------------|
+| Cannot scroll to see all details | `ScrollArea` lacks explicit height, and `DialogContent` uses `overflow-hidden` which clips content |
+| No print/export functionality | Missing buttons and print handler in the dialog |
 
 ---
 
-## Solution
+## Solution Overview
 
-Modify the data transformation to **spread all database fields** instead of manually cherry-picking a few fields. This ensures any field stored in the database will be available for display.
-
-### Technical Changes
-
-**File: `src/components/maintenance/MaintenanceHistory.tsx`**
-
-Update the `transformedData` mapping (around line 89-133) to spread the entire `item` object and then override with the properly formatted relationship data:
-
-**Current code (problematic):**
-```typescript
-const check: MaintenanceCheck = {
-  id: item.id,
-  equipment_id: item.equipment_id,
-  technician_id: item.technician_id,
-  // ... only a few fields explicitly listed
-  air_filter_status: item.air_filter_status,
-  belt_condition: item.belt_condition,
-  motor_condition: item.motor_condition,
-  control_system_status: item.control_system_status,
-  // Missing: evaporator_leaving_water_temp, compressor_suction_temp, etc.
-};
-```
-
-**Fixed code:**
-```typescript
-const check: MaintenanceCheck = {
-  ...item, // Spread ALL database fields first
-  // Override relationship objects with properly formatted versions
-  equipment: item.equipment ? {
-    name: item.equipment.name,
-    location: item.equipment.location,
-    type: item.equipment.type
-  } : undefined,
-  technician: item.technician ? {
-    firstName: item.technician.firstName,
-    lastName: item.technician.lastName
-  } : undefined,
-  location: item.location ? {
-    name: item.location.name,
-    store_number: item.location.store_number
-  } : undefined,
-};
-```
-
-This ensures:
-1. All scalar fields from the database are preserved (temperatures, pressures, conditions, etc.)
-2. Relationship objects (equipment, technician, location) are properly formatted to match the TypeScript interface
-3. Any new fields added to the database will automatically be available in the UI
+Update the `EnhancedMaintenanceDetails` component to:
+1. Fix the scrolling by properly structuring the dialog with a flexible height layout
+2. Add Print and Export buttons in the dialog header/footer
 
 ---
 
-## Summary
+## Technical Changes
 
-| Change | Description |
-|--------|-------------|
-| `MaintenanceHistory.tsx` | Replace explicit field mapping with spread operator to include all fields |
+### File: `src/components/maintenance/details/EnhancedMaintenanceDetails.tsx`
 
-This is a one-file fix that will immediately show all the chiller readings (and other equipment type readings) that are currently being lost during data transformation.
+**1. Add Required Imports**
+
+```typescript
+import { Button } from "@/components/ui/button";
+import { Printer, Download } from "lucide-react";
+import { DialogFooter } from "@/components/ui/dialog";
+```
+
+**2. Fix DialogContent Layout**
+
+Update the `DialogContent` structure to use flex layout with proper height constraints:
+
+```typescript
+<DialogContent className="max-w-4xl h-[90vh] flex flex-col overflow-hidden">
+  {/* Header - Fixed at top */}
+  <DialogHeader className="flex-shrink-0 pb-4 border-b">
+    {/* ... existing header content ... */}
+  </DialogHeader>
+
+  {/* Tabs with Scrollable Content */}
+  <Tabs defaultValue="overview" className="flex-1 flex flex-col min-h-0">
+    <TabsList className="flex-shrink-0 grid w-full grid-cols-4">
+      {/* ... tab triggers ... */}
+    </TabsList>
+
+    {/* Scrollable area for tab content */}
+    <ScrollArea className="flex-1 mt-4">
+      <div className="pr-4"> {/* Padding for scrollbar */}
+        {/* ... TabsContent elements ... */}
+      </div>
+    </ScrollArea>
+  </Tabs>
+
+  {/* Footer - Fixed at bottom */}
+  <DialogFooter className="flex-shrink-0 pt-4 border-t">
+    <Button variant="outline" onClick={handlePrint}>
+      <Printer className="mr-2 h-4 w-4" />
+      Print
+    </Button>
+    <Button variant="outline" onClick={handleExport}>
+      <Download className="mr-2 h-4 w-4" />
+      Export PDF
+    </Button>
+  </DialogFooter>
+</DialogContent>
+```
+
+**3. Add Print Handler**
+
+Add a print function that creates a print-friendly version of the maintenance check:
+
+```typescript
+const handlePrint = () => {
+  const printContent = document.createElement('div');
+  printContent.innerHTML = `
+    <style>
+      body { font-family: Arial, sans-serif; padding: 20px; }
+      h1 { font-size: 24px; margin-bottom: 10px; }
+      .header-info { margin-bottom: 20px; color: #666; }
+      .section { margin-bottom: 20px; }
+      .section-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+      .reading-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee; }
+      .status-badge { padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+      .good { background: #dcfce7; color: #166534; }
+      .warning { background: #fef9c3; color: #854d0e; }
+      .critical { background: #fee2e2; color: #991b1b; }
+      @media print { body { padding: 0; } }
+    </style>
+    <h1>${getEquipmentName()}</h1>
+    <div class="header-info">
+      <p>Location: ${getLocationName()}</p>
+      <p>Technician: ${getTechnicianName()}</p>
+      <p>Date: ${format(new Date(check.check_date || ""), "MMM dd, yyyy 'at' h:mm a")}</p>
+      <p>Status: ${check.status?.replace('_', ' ').toUpperCase() || 'UNKNOWN'}</p>
+      <p>Equipment Type: ${check.equipment_type?.toUpperCase() || 'N/A'}</p>
+    </div>
+    <!-- Readings section -->
+    <div class="section">
+      <div class="section-title">Readings</div>
+      ${readings.map(r => `<div class="reading-row"><span>${r.label}</span><span>${formatFieldValue(r.value, r.label.toLowerCase())}</span></div>`).join('')}
+    </div>
+    <!-- Conditions section -->
+    <div class="section">
+      <div class="section-title">Equipment Conditions</div>
+      ${conditions.map(c => `<div class="reading-row"><span>${c.label}</span><span class="status-badge ${c.status}">${formatFieldValue(c.value, c.label.toLowerCase())}</span></div>`).join('')}
+    </div>
+    <!-- Notes section -->
+    ${check.notes ? `<div class="section"><div class="section-title">Notes</div><p>${check.notes}</p></div>` : ''}
+    ${check.maintenance_recommendations ? `<div class="section"><div class="section-title">Recommendations</div><p>${check.maintenance_recommendations}</p></div>` : ''}
+  `;
+
+  const printWindow = window.open('', '_blank');
+  if (printWindow) {
+    printWindow.document.write(`<!DOCTYPE html><html><head><title>Maintenance Check - ${getEquipmentName()}</title></head><body>${printContent.innerHTML}</body></html>`);
+    printWindow.document.close();
+    printWindow.onload = () => {
+      printWindow.focus();
+      printWindow.print();
+    };
+  }
+};
+
+const handleExport = () => {
+  // For now, use print to PDF (browser's built-in PDF export)
+  handlePrint();
+};
+```
+
+---
+
+## Summary of Changes
+
+| Location | Change |
+|----------|--------|
+| Line 284 | Change `max-h-[90vh] overflow-hidden` to `h-[90vh] flex flex-col overflow-hidden` |
+| Line 285-331 | Wrap `DialogHeader` with `flex-shrink-0` to prevent compression |
+| Line 333-351 | Add `flex-1 flex flex-col min-h-0` to `Tabs` container |
+| Line 353-517 | Wrap `ScrollArea` properly with explicit `flex-1` height |
+| After line 517 | Add `DialogFooter` with Print and Export buttons |
+| New function | Add `handlePrint()` and `handleExport()` functions |
+
+This will enable:
+- Proper scrolling through all maintenance check details
+- Print button to generate a printer-friendly version
+- Export button (uses browser's Print to PDF functionality)
