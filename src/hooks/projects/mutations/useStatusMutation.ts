@@ -1,16 +1,11 @@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Project } from "@/types/project";
 
-export const useStatusMutation = (
-  projects: Project[],
-  setProjects: (projects: Project[]) => void
-) => {
+export const useStatusMutation = (refetch: () => Promise<any>) => {
   const { toast } = useToast();
 
   const handleStatusChange = async (projectId: string, newStatus: string) => {
     try {
-      const timestamp = new Date().toISOString();
       console.log("Updating project status:", { projectId, newStatus });
       
       const { error } = await supabase.rpc('set_project_status', {
@@ -23,11 +18,7 @@ export const useStatusMutation = (
         throw error;
       }
 
-      setProjects(projects.map(project => 
-        project.id === projectId 
-          ? { ...project, status: newStatus, updatedat: timestamp }
-          : project
-      ));
+      await refetch();
 
       toast({
         title: "Success",

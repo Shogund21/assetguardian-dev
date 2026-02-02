@@ -1,17 +1,13 @@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Project } from "@/types/project";
 import { useState } from "react";
 
-export const useDeleteMutation = (
-  projects: Project[],
-  setProjects: (projects: Project[]) => void
-) => {
+export const useDeleteMutation = (refetch: () => Promise<any>) => {
   const { toast } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async (projectId: string) => {
-    if (isDeleting) return; // Prevent multiple clicks
+    if (isDeleting) return;
     
     setIsDeleting(true);
     
@@ -29,7 +25,6 @@ export const useDeleteMutation = (
 
       console.log("Delete response:", data);
 
-      // Type assertion for the JSON response
       const response = data as { success: boolean; error?: string; message?: string; code?: string };
 
       if (!response?.success) {
@@ -44,8 +39,7 @@ export const useDeleteMutation = (
         return;
       }
 
-      // Only update local state if deletion was successful
-      setProjects(projects.filter(project => project.id !== projectId));
+      await refetch();
 
       toast({
         title: "Success",
