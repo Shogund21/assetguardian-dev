@@ -7,11 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Plus, AlertTriangle, CheckCircle2, Clock, BarChart3, LayoutDashboard, FileText } from "lucide-react";
+import { Calendar, Plus, AlertTriangle, CheckCircle2, Clock, BarChart3, LayoutDashboard, FileText, FileDown } from "lucide-react";
 import { format } from "date-fns";
 import CustomLayout from "@/components/CustomLayout";
 import ChillerAnnualsDashboard from "@/components/chiller-annuals/dashboard/ChillerAnnualsDashboard";
 import ExecutiveReportGenerator from "@/components/chiller-annuals/reports/ExecutiveReportGenerator";
+import { ChillerPMReportGenerator } from "@/components/chiller-annuals/reports/ChillerPMReportGenerator";
 import type { AnnualChillerPM } from "@/types/chillerAnnual";
 
 const ChillerAnnuals = () => {
@@ -19,6 +20,7 @@ const ChillerAnnuals = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("inspections");
   const [inspectionFilter, setInspectionFilter] = useState("all");
+  const [selectedPmForReport, setSelectedPmForReport] = useState<string | null>(null);
 
   // Fetch annual chiller PMs
   const { data: annualPMs, isLoading } = useQuery({
@@ -246,9 +248,25 @@ const ChillerAnnuals = () => {
                                 </div>
                               </div>
                             )}
-                            <Button variant="outline" size="sm">
-                              View Details
-                            </Button>
+                            <div className="flex gap-2">
+                              {pm.status === "completed" && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedPmForReport(pm.id);
+                                    setActiveTab("reports");
+                                  }}
+                                >
+                                  <FileDown className="h-4 w-4 mr-1" />
+                                  Export PDF
+                                </Button>
+                              )}
+                              <Button variant="outline" size="sm">
+                                View Details
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </CardContent>
@@ -264,7 +282,14 @@ const ChillerAnnuals = () => {
             </TabsContent>
 
             {/* Reports Tab */}
-            <TabsContent value="reports" className="mt-4">
+            <TabsContent value="reports" className="mt-4 space-y-6">
+              {/* Individual Inspection Reports */}
+              <ChillerPMReportGenerator
+                preSelectedPmId={selectedPmForReport}
+                onClose={() => setSelectedPmForReport(null)}
+              />
+              
+              {/* Executive Summary Reports */}
               <ExecutiveReportGenerator />
             </TabsContent>
           </Tabs>
