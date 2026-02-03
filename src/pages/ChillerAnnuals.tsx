@@ -6,14 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Plus, AlertTriangle, CheckCircle2, Clock, BarChart3 } from "lucide-react";
+import { Calendar, Plus, AlertTriangle, CheckCircle2, Clock, BarChart3, LayoutDashboard, FileText } from "lucide-react";
 import { format } from "date-fns";
 import CustomLayout from "@/components/CustomLayout";
+import ChillerAnnualsDashboard from "@/components/chiller-annuals/dashboard/ChillerAnnualsDashboard";
+import ExecutiveReportGenerator from "@/components/chiller-annuals/reports/ExecutiveReportGenerator";
 import type { AnnualChillerPM } from "@/types/chillerAnnual";
 
 const ChillerAnnuals = () => {
   const { currentCompany } = useCompany();
-  const [activeTab, setActiveTab] = useState("all");
+  const [activeTab, setActiveTab] = useState("inspections");
+  const [inspectionFilter, setInspectionFilter] = useState("all");
 
   // Fetch annual chiller PMs
   const { data: annualPMs, isLoading } = useQuery({
@@ -50,10 +53,10 @@ const ChillerAnnuals = () => {
     };
   }, [annualPMs]);
 
-  // Filter PMs based on active tab
+  // Filter PMs based on inspection filter
   const filteredPMs = React.useMemo(() => {
     if (!annualPMs) return [];
-    switch (activeTab) {
+    switch (inspectionFilter) {
       case "completed":
         return annualPMs.filter(pm => pm.status === "completed");
       case "in_progress":
@@ -63,7 +66,7 @@ const ChillerAnnuals = () => {
       default:
         return annualPMs;
     }
-  }, [annualPMs, activeTab]);
+  }, [annualPMs, inspectionFilter]);
 
   const getRiskBadgeVariant = (riskLevel: string | null) => {
     switch (riskLevel) {
@@ -141,16 +144,35 @@ const ChillerAnnuals = () => {
             </Card>
           </div>
 
-          {/* Tabs and List */}
+          {/* Main Tabs: Inspections, Dashboard, Reports */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 max-w-md">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="in_progress">In Progress</TabsTrigger>
-              <TabsTrigger value="completed">Completed</TabsTrigger>
-              <TabsTrigger value="critical">Critical</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3 max-w-md">
+              <TabsTrigger value="inspections" className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Inspections
+              </TabsTrigger>
+              <TabsTrigger value="dashboard" className="flex items-center gap-2">
+                <LayoutDashboard className="h-4 w-4" />
+                Dashboard
+              </TabsTrigger>
+              <TabsTrigger value="reports" className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Reports
+              </TabsTrigger>
             </TabsList>
 
-            <TabsContent value={activeTab} className="mt-4">
+            {/* Inspections Tab */}
+            <TabsContent value="inspections" className="mt-4">
+              {/* Inspection Filters */}
+              <Tabs value={inspectionFilter} onValueChange={setInspectionFilter} className="w-full mb-4">
+                <TabsList className="grid w-full grid-cols-4 max-w-md">
+                  <TabsTrigger value="all">All</TabsTrigger>
+                  <TabsTrigger value="in_progress">In Progress</TabsTrigger>
+                  <TabsTrigger value="completed">Completed</TabsTrigger>
+                  <TabsTrigger value="critical">Critical</TabsTrigger>
+                </TabsList>
+              </Tabs>
+
               {isLoading ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -161,11 +183,11 @@ const ChillerAnnuals = () => {
                     <BarChart3 className="h-12 w-12 text-muted-foreground mb-4" />
                     <h3 className="text-lg font-medium">No Annual Inspections</h3>
                     <p className="text-muted-foreground text-center max-w-sm mt-2">
-                      {activeTab === "all" 
+                      {inspectionFilter === "all" 
                         ? "Start by creating your first annual chiller maintenance inspection."
-                        : `No ${activeTab.replace("_", " ")} inspections found.`}
+                        : `No ${inspectionFilter.replace("_", " ")} inspections found.`}
                     </p>
-                    {activeTab === "all" && (
+                    {inspectionFilter === "all" && (
                       <Button className="mt-4" variant="outline">
                         <Plus className="h-4 w-4 mr-2" />
                         Create First Inspection
@@ -225,6 +247,16 @@ const ChillerAnnuals = () => {
                   ))}
                 </div>
               )}
+            </TabsContent>
+
+            {/* Dashboard Tab */}
+            <TabsContent value="dashboard" className="mt-4">
+              <ChillerAnnualsDashboard />
+            </TabsContent>
+
+            {/* Reports Tab */}
+            <TabsContent value="reports" className="mt-4">
+              <ExecutiveReportGenerator />
             </TabsContent>
           </Tabs>
         </div>
