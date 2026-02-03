@@ -2,7 +2,7 @@ import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Activity, AlertTriangle, Calendar, Thermometer, Shield } from "lucide-react";
+import { Activity, AlertTriangle, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { useChillerFleetHealth } from "@/hooks/useChillerFleetHealth";
 import type { ChillerFleetHealth } from "@/types/chillerDashboard";
@@ -33,8 +33,8 @@ export function FleetHealthOverview({ data, isLoading }: FleetHealthOverviewProp
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        {[...Array(5)].map((_, i) => (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {[...Array(3)].map((_, i) => (
           <Card key={i}>
             <CardHeader className="pb-2">
               <Skeleton className="h-4 w-24" />
@@ -47,23 +47,7 @@ export function FleetHealthOverview({ data, isLoading }: FleetHealthOverviewProp
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-      {/* Total Chillers */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardDescription className="flex items-center gap-2">
-            <Thermometer className="h-4 w-4" />
-            Total Chillers
-          </CardDescription>
-          <CardTitle className="text-3xl">
-            {fleetData?.totalChillers || 0}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <p className="text-xs text-muted-foreground">Active in fleet</p>
-        </CardContent>
-      </Card>
-
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {/* Average Health Score */}
       <Card className={getHealthScoreBg(fleetData?.averageHealthScore || 0)}>
         <CardHeader className="pb-2">
@@ -99,24 +83,6 @@ export function FleetHealthOverview({ data, isLoading }: FleetHealthOverviewProp
           ) : (
             <p className="text-xs text-muted-foreground">All assets healthy</p>
           )}
-        </CardContent>
-      </Card>
-
-      {/* No Redundancy Risk */}
-      <Card className={fleetData?.noRedundancyRiskCount ? "bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800" : ""}>
-        <CardHeader className="pb-2">
-          <CardDescription className="flex items-center gap-2">
-            <Shield className="h-4 w-4" />
-            No Backup
-          </CardDescription>
-          <CardTitle className={`text-3xl ${fleetData?.noRedundancyRiskCount ? "text-orange-600 dark:text-orange-400" : ""}`}>
-            {fleetData?.noRedundancyRiskCount || 0}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <p className="text-xs text-muted-foreground">
-            Single point of failure
-          </p>
         </CardContent>
       </Card>
 
