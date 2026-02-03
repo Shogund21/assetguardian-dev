@@ -429,6 +429,26 @@ The system shows data quality badges to help you understand your analysis:
 
 ---
 
+---
+
+## Annual Chiller Inspections
+
+For comprehensive annual chiller assessments with multi-year trending, use the dedicated **Annual Chiller Maintenance** module which provides:
+
+- **Tube Loss % Trending**: Track plugging percentages with 5% threshold alerts
+- **Refrigerant Loss Tracking**: Monitor annual additions with leak location heatmaps
+- **kW/ton Efficiency Analysis**: Detect degradation compared to design specifications
+- **Risk Scoring**: Automated health assessment with color-coded severity levels
+- **Executive Reporting**: Generate 1-page summaries for leadership review
+
+This module is designed for annual water-cooled chiller inspections and complements the routine predictive maintenance readings captured in this system.
+
+**Access via**: Main Menu → Chiller Annuals
+
+For detailed guidance, see the [Annual Chiller Maintenance Guide](/docs/chiller-annual-maintenance.md).
+
+---
+
 ## Conclusion
 
 Regular use of the predictive maintenance system will:

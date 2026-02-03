@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import DocumentationViewer from "../DocumentationViewer";
-import { FileText, BookOpen, Info, Brain } from "lucide-react";
+import { FileText, BookOpen, Info, Brain, Gauge } from "lucide-react";
 
 export const DocumentationSection = () => {
   const [selectedDoc, setSelectedDoc] = useState<string | null>(null);
@@ -37,6 +37,12 @@ export const DocumentationSection = () => {
       description: "Complete guide for manual readings, AI analysis, and predictive maintenance.",
       icon: Brain,
       path: "/docs/predictive-maintenance.md",
+    },
+    {
+      title: "Annual Chiller Maintenance",
+      description: "Complete guide for annual chiller inspections, risk intelligence, and executive reporting.",
+      icon: Gauge,
+      path: "/docs/chiller-annual-maintenance.md",
     },
     {
       title: "Settings Management",
