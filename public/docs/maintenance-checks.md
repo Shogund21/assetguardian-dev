@@ -47,3 +47,20 @@ The maintenance check system provides comprehensive tracking and documentation o
 - Include detailed notes for any unusual findings
 - Attach relevant images for documentation
 - Follow up on maintenance recommendations
+
+---
+
+## Specialized Maintenance Modules
+
+### Annual Chiller Maintenance & Risk Intelligence
+
+For water-cooled chillers requiring comprehensive annual inspections, use the dedicated **Annual Chiller Maintenance** module. This specialized system provides:
+
+- **16 Structured Inspection Categories**: Covers refrigerant, oil, tubes, water side, water quality, electrical, and performance
+- **Risk Scoring and Health Metrics**: Automated risk assessment with color-coded severity levels
+- **Multi-Year Trend Analysis**: Track tube loss %, refrigerant loss, and kW/ton efficiency degradation
+- **Executive Reporting**: Generate 1-page summaries for leadership review
+
+**Access via**: Main Menu → Chiller Annuals
+
+For detailed guidance, see the [Annual Chiller Maintenance Guide](/docs/chiller-annual-maintenance.md).
