@@ -8,8 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, Plus, AlertTriangle, CheckCircle2, Clock, BarChart3 } from "lucide-react";
 import { format } from "date-fns";
-import Sidebar from "@/components/Sidebar";
-import { SidebarInset } from "@/components/ui/sidebar";
+import CustomLayout from "@/components/CustomLayout";
 import type { AnnualChillerPM } from "@/types/chillerAnnual";
 
 const ChillerAnnuals = () => {
@@ -95,11 +94,9 @@ const ChillerAnnuals = () => {
   };
 
   return (
-    <div className="flex min-h-screen w-full bg-background">
-      <Sidebar />
-      <SidebarInset className="flex-1">
-        <div className="container mx-auto p-4 md:p-6 space-y-6">
-          {/* Header */}
+    <CustomLayout>
+      <div className="container mx-auto p-4 md:p-6 space-y-6">
+        {/* Header */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
@@ -231,8 +228,7 @@ const ChillerAnnuals = () => {
             </TabsContent>
           </Tabs>
         </div>
-      </SidebarInset>
-    </div>
+    </CustomLayout>
   );
 };
 
