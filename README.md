@@ -54,6 +54,18 @@ A comprehensive AI-powered facility management system that cuts downtime by 81% 
 - **Degradation Analysis**: Component-level degradation tracking with replacement thresholds
 - **ROI Analysis**: Return on investment calculations for recommended maintenance actions
 
+### Annual Chiller Maintenance & Risk Intelligence
+- **Chiller Health Dashboard**: Comprehensive fleet health overview with KPI cards and risk distribution
+- **Health Score by Asset**: Asset-by-asset health scoring table with YoY trend indicators and color-coded risk levels
+- **Tube Loss Trend Analysis**: Multi-year line charts tracking evaporator/condenser tube plugging % with 5% threshold indicators
+- **Refrigerant Analytics**: Refrigerant loss trend visualization with leak location heatmap by building/location
+- **Efficiency Trend Monitoring**: kW/ton trend charts with degradation indicators comparing actual vs design performance
+- **High Risk Asset Identification**: Automated identification of high-risk assets with no redundancy backup
+- **Vendor Accountability Summary**: Track findings created vs resolved by vendor/technician with resolution rates
+- **Executive Report Generator**: 1-page executive summary template with fleet snapshot, risk assessment, and capital recommendations
+- **Print-Optimized Reports**: Professional report formatting optimized for printing and PDF export
+- **Sample Data Demonstration**: Built-in sample dataset (3 chillers, 2 years) for dashboard demonstration
+
 ### AI Image Reading & Analysis
 - **Photo-based Readings**: Extract sensor readings directly from equipment photos using AI
 - **OpenAI Integration**: ChatGPT-4o powered image analysis for accurate data extraction
@@ -298,6 +310,19 @@ A comprehensive AI-powered facility management system that cuts downtime by 81% 
 - `equipment_thresholds` - Alert thresholds and monitoring rules
 - `predictive_alerts` - AI-generated maintenance alerts
 - `automated_work_orders` - System-generated work orders
+
+### Annual Chiller Maintenance
+- `annual_chiller_pm` - Annual chiller preventive maintenance records with risk scoring
+- `chiller_tube_inspection` - Evaporator and condenser tube inspection data
+- `chiller_refrigerant_inspection` - Refrigerant charge, leak detection, and analysis
+- `chiller_performance_test` - kW/ton efficiency testing and degradation tracking
+- `chiller_oil_analysis` - Oil sample analysis with wear metal trending
+- `chiller_electrical_check` - Motor and electrical component inspections
+- `chiller_water_quality` - Chilled and condenser water chemistry analysis
+- `chiller_annual_findings` - Inspection findings with severity, cost, and status tracking
+- `chiller_ref_risk_levels` - Reference table for risk level classifications
+- `chiller_ref_issue_codes` - Standardized issue code library for findings
+- `chiller_ref_leak_locations` - Reference table for leak location tracking
 
 ### Role Management & Security
 - `company_users` - User-company relationships and role assignments with secure access control
