@@ -1,222 +1,173 @@
 
 
-# Fix Annual Chiller PM Wizard Issues
+# Implement Steps 7, 8, and 9 for Annual Chiller PM Wizard
 
 ## Overview
 
-This plan addresses four issues reported by the user in the Annual Chiller PM wizard:
+This plan implements the three remaining wizard steps that currently show "Coming soon":
 
-1. **Add R-11 to refrigerant type list** - Simple addition to the REFRIGERANT_TYPES array
-2. **Treatment Vendor input not working** - The field uses NumberStepper (a numeric-only component) instead of a text Input
-3. **Step 6 shows "Coming Soon"** - The Electrical step (Step 6) needs to be implemented
-4. **Submit button doesn't save to database** - The wizard only saves to IndexedDB (offline storage) but never syncs to Supabase
-
----
-
-## Issue 1: Add R-11 to Refrigerant Type List
-
-**File**: `src/components/chiller-annuals/wizard/steps/Step2Refrigerant.tsx`
-
-**Current** (lines 51-60):
-```typescript
-const REFRIGERANT_TYPES = [
-  'R-134a',
-  'R-123',
-  'R-1233zd',
-  'R-514A',
-  'R-22',
-  'R-410A',
-  'R-407C',
-  'Other',
-];
-```
-
-**Change**: Add `'R-11'` to the list (typically between R-123 and R-1233zd for logical ordering of older CFC/HCFC types).
+| Step | Title | Purpose |
+|------|-------|---------|
+| 7 | Performance Test | Capture kW, tons, temperatures, and auto-calculate kW/ton efficiency |
+| 8 | Findings & Photos | Document issues with photos, severity ratings, and recommended actions |
+| 9 | Review & Submit | Display summary of all data with risk score before final submission |
 
 ---
 
-## Issue 2: Fix Treatment Vendor Input
+## Step 7: Performance Test
 
-**File**: `src/components/chiller-annuals/wizard/steps/Step5WaterSystem.tsx`
+### New File: `src/components/chiller-annuals/wizard/steps/Step7PerformanceTest.tsx`
 
-**Problem**: The Treatment Vendor field (lines 212-221) incorrectly uses `NumberStepper` component which is designed for numeric input only. Text input is being ignored.
+This component captures operating performance data during inspection:
 
-**Current Code**:
-```tsx
-{/* Treatment Vendor */}
-<div className="space-y-2">
-  <Label>Treatment Vendor</Label>
-  <NumberStepper
-    value={null}
-    onChange={() => {}}  // Empty handler - nothing happens!
-    showButtons={false}
-    placeholder="Enter vendor name..."
-  />
-</div>
-```
+**Fields to capture:**
 
-**Fix**: Replace `NumberStepper` with a standard `Input` component and wire it to `updateWaterQuality`:
+| Field | Type | Auto-Calculated |
+|-------|------|-----------------|
+| Test Date | date | No |
+| Load % | number (0-100) | No |
+| Chilled Water Supply Temp (F) | number | No |
+| Chilled Water Return Temp (F) | number | No |
+| Condenser Water Supply Temp (F) | number | No |
+| Condenser Water Return Temp (F) | number | No |
+| CHW Flow (GPM) | number | No |
+| kW Input | number | No |
+| Tons Actual | number | Yes (if flow & temps provided) |
+| Tons Design | number | No |
+| kW/ton | number | Yes (kW / tons) |
+| Design kW/ton | number | No |
+| Notes | text | No |
 
-```tsx
-{/* Treatment Vendor */}
-<div className="space-y-2">
-  <Label>Treatment Vendor</Label>
-  <Input
-    value={quality.treatment_vendor || ''}
-    onChange={(e) => updateWaterQuality('treatment_vendor', e.target.value)}
-    placeholder="Enter vendor name..."
-    className="min-h-[48px]"
-  />
-</div>
-```
+**Features:**
+- Auto-calculate tons using formula: `flow * deltaT * 0.04165`
+- Auto-calculate kW/ton when kW and tons are available
+- Show efficiency comparison badge (actual vs design kW/ton)
+- Display warning if efficiency degraded > 10% from design
 
-**Import needed**: Add `Input` to the imports from `@/components/ui/input`.
-
----
-
-## Issue 3: Implement Step 6 - Electrical Inspection
-
-**File**: `src/components/chiller-annuals/wizard/ChillerInspectionWizard.tsx`
-
-**Problem**: Steps 6-9 all show "Coming soon" placeholder (lines 121-129).
-
-**Solution**: Create a new `Step6Electrical.tsx` component and render it in the wizard.
-
-### New File: `src/components/chiller-annuals/wizard/steps/Step6Electrical.tsx`
-
-This component will capture electrical inspection data for the main motor (and optionally oil pump/VFD):
-
-| Field | Type | Component |
-|-------|------|-----------|
-| Voltage L1-L2 | number | NumberStepper |
-| Voltage L2-L3 | number | NumberStepper |
-| Voltage L3-L1 | number | NumberStepper |
-| Voltage Imbalance % | number (auto-calculated) | Display badge |
-| Amperage L1, L2, L3 | number | NumberStepper |
-| Insulation Resistance | number (MΩ) | NumberStepper |
-| Vibration Acceptable | boolean | ToggleButtonPair |
-| Starter Condition | select | Select dropdown |
-| Notes | text | Textarea |
-
-The component will:
-- Display a tabbed interface for Main Motor (required), Oil Pump (optional), VFD (optional)
-- Auto-calculate voltage imbalance % using the existing `calculateVoltageImbalance` utility
-- Show risk warning if voltage imbalance > 2% (+20 risk points)
-- Show risk warning if insulation resistance < 1 MΩ (+20 risk points)
-
-### Update Wizard to Render Step 6
-
-**File**: `src/components/chiller-annuals/wizard/ChillerInspectionWizard.tsx`
-
-Add import and render case for Step 6:
-
-```tsx
-import { Step6Electrical } from './steps/Step6Electrical';
-
-// In renderStep():
-case 6:
-  return (
-    <Step6Electrical
-      formData={formData}
-      updateElectrical={updateElectrical}
-    />
-  );
-```
+**UI Components:**
+- Card sections for Water Temps and Performance Metrics
+- NumberStepper inputs for numeric fields
+- Efficiency comparison display with color-coded badge
+- Notes textarea
 
 ---
 
-## Issue 4: Submit Button Not Saving to Supabase
+## Step 8: Findings & Photos
 
-**Root Cause**: The current submit flow only saves to IndexedDB (offline storage) via `saveDraft()`. There is no sync service that uploads the data to Supabase's `annual_chiller_pm` table.
+### New File: `src/components/chiller-annuals/wizard/steps/Step8Findings.tsx`
 
-**Current Flow**:
-```
-Submit Button → saveDraft() → IndexedDB only → Navigate away
-```
+This component allows technicians to document issues discovered during inspection:
 
-**Required Flow**:
-```
-Submit Button → saveDraft() → syncToSupabase() → annual_chiller_pm table → Navigate away
-```
+**Finding Structure (per `FindingData` type):**
+- Issue Code (predefined codes + custom)
+- Category (dropdown: Refrigerant, Oil, Tubes, Electrical, Controls, Mechanical, Water, Other)
+- Description (text)
+- Severity (Critical, High, Medium, Low)
+- Recommended Action (text)
+- Photos (using existing PhotoCapture component)
 
-### Solution: Create a Sync Service
+**Features:**
+- Add/remove findings dynamically
+- Pre-defined issue codes with auto-fill descriptions
+- Severity selection with color indicators
+- Photo attachment per finding (max 5 per finding)
+- Display auto-generated findings from risk calculations (marked as "Auto-detected")
+- Collapsible cards for each finding
 
-**New File**: `src/services/chillerSyncService.ts`
+**Issue Code Options:**
+- REFRIG_LEAK - Refrigerant Leak Detected
+- TUBE_PLUGS - Excessive Tube Plugging
+- OIL_ACID - High Oil Acid Level
+- VOLTAGE_IMBAL - Voltage Imbalance > 2%
+- LOW_INSUL - Low Insulation Resistance
+- BEARING_WEAR - Bearing Wear Detected
+- CONTROL_FAULT - Controls Malfunction
+- LEGIONELLA - Legionella Detected
+- CORROSION - Corrosion Observed
+- OTHER - Other (specify)
 
-This service will:
-1. Take the form data from IndexedDB
-2. Transform it into the database schema format
-3. Insert/upsert into `annual_chiller_pm` table
-4. Insert related data into child tables (`chiller_refrigerant_inspection`, `chiller_oil_analysis`, `chiller_tube_inspection`, `chiller_water_side`, `chiller_water_quality`, `chiller_electrical_check`, `chiller_performance_test`)
-5. Mark the draft as synced
+**UI Components:**
+- Button to add new finding
+- Collapsible Accordion for each finding
+- Select dropdowns for category and severity
+- Textarea for description and recommended action
+- PhotoCapture component integration
+- Delete button for each finding
+
+### Update Hook: `src/hooks/useChillerWizardForm.ts`
+
+Add new function to manage findings:
 
 ```typescript
-interface ChillerSyncService {
-  syncDraft(draftId: string, companyId: string): Promise<{success: boolean, pmId?: string, error?: string}>;
-}
+const updateFindings = useCallback((findings: FindingData[]) => {
+  setFormData(prev => ({
+    ...prev,
+    findings,
+  }));
+  setHasUnsavedChanges(true);
+}, []);
+
+const addFinding = useCallback((finding: FindingData) => {
+  setFormData(prev => ({
+    ...prev,
+    findings: [...prev.findings, finding],
+  }));
+  setHasUnsavedChanges(true);
+}, []);
+
+const removeFinding = useCallback((findingId: string) => {
+  setFormData(prev => ({
+    ...prev,
+    findings: prev.findings.filter(f => f.id !== findingId),
+  }));
+  setHasUnsavedChanges(true);
+}, []);
+
+const updateFinding = useCallback((findingId: string, updates: Partial<FindingData>) => {
+  setFormData(prev => ({
+    ...prev,
+    findings: prev.findings.map(f => 
+      f.id === findingId ? { ...f, ...updates } : f
+    ),
+  }));
+  setHasUnsavedChanges(true);
+}, []);
 ```
 
-### Update Submit Handler
+---
 
-**File**: `src/components/chiller-annuals/wizard/ChillerInspectionWizard.tsx`
+## Step 9: Review & Submit
 
-Update `handleSubmit` to:
-1. Save draft to IndexedDB
-2. Sync to Supabase
-3. Invalidate React Query cache so the dashboard refreshes
-4. Navigate back
+### New File: `src/components/chiller-annuals/wizard/steps/Step9Review.tsx`
 
-```tsx
-import { useQueryClient } from '@tanstack/react-query';
-import { chillerSyncService } from '@/services/chillerSyncService';
-import { useCompany } from '@/contexts/CompanyContext';
-import { useToast } from '@/hooks/use-toast';
+This component displays a comprehensive summary before final submission:
 
-// Inside component:
-const queryClient = useQueryClient();
-const { currentCompany } = useCompany();
-const { toast } = useToast();
+**Sections:**
+1. **Asset Information** - Equipment name, date, technician
+2. **Risk Score** - Using RiskScoreDisplay component with breakdown
+3. **Section Summaries** - Collapsible accordions for each completed step:
+   - Refrigerant: leak status, pressures, type
+   - Oil: level, appearance, acid number
+   - Tubes: plugged %, wall loss %, cleaning status
+   - Water: temps, quality, treatment vendor
+   - Electrical: voltage imbalance, insulation resistance
+   - Performance: kW/ton, efficiency comparison
+4. **Findings** - List of all documented findings with severity badges
+5. **Skipped Steps** - List any skipped steps with reasons
 
-const handleSubmit = async () => {
-  try {
-    // Save locally first
-    await saveDraft();
-    
-    // Sync to Supabase
-    if (currentCompany?.id) {
-      const result = await chillerSyncService.syncDraft(draftId, currentCompany.id);
-      
-      if (!result.success) {
-        toast({
-          variant: "destructive",
-          title: "Sync Failed",
-          description: result.error || "Failed to save to server. Data is saved locally.",
-        });
-        return;
-      }
-      
-      // Invalidate queries to refresh dashboard
-      queryClient.invalidateQueries({ queryKey: ['annual-chiller-pms'] });
-      queryClient.invalidateQueries({ queryKey: ['chiller-fleet-health'] });
-    }
-    
-    toast({
-      title: "Success",
-      description: "Annual inspection saved successfully.",
-    });
-    
-    onComplete?.();
-    navigate('/chiller-annuals');
-  } catch (error) {
-    console.error('Submit error:', error);
-    toast({
-      variant: "destructive",
-      title: "Error",
-      description: "Failed to submit inspection. Please try again.",
-    });
-  }
-};
-```
+**Features:**
+- Calculate and display final risk score using `chillerRiskCalculator`
+- Show red flags prominently at top if any critical issues
+- Accordion sections allow drilling into details
+- Edit buttons to jump back to specific steps
+- Final confirmation checkbox before submit
+
+**UI Components:**
+- RiskScoreDisplay component for risk visualization
+- Accordion for section summaries
+- Badge components for statuses and severities
+- Alert component for red flags/warnings
+- Button to navigate back to any step for editing
 
 ---
 
@@ -224,66 +175,93 @@ const handleSubmit = async () => {
 
 | File | Purpose |
 |------|---------|
-| `src/components/chiller-annuals/wizard/steps/Step6Electrical.tsx` | Electrical inspection step UI |
-| `src/services/chillerSyncService.ts` | Sync IndexedDB drafts to Supabase |
+| `src/components/chiller-annuals/wizard/steps/Step7PerformanceTest.tsx` | Performance test data capture |
+| `src/components/chiller-annuals/wizard/steps/Step8Findings.tsx` | Findings and photo documentation |
+| `src/components/chiller-annuals/wizard/steps/Step9Review.tsx` | Final review and submission screen |
 
 ## Files to Modify
 
 | File | Changes |
 |------|---------|
-| `src/components/chiller-annuals/wizard/steps/Step2Refrigerant.tsx` | Add R-11 to REFRIGERANT_TYPES array |
-| `src/components/chiller-annuals/wizard/steps/Step5WaterSystem.tsx` | Replace NumberStepper with Input for treatment_vendor |
-| `src/components/chiller-annuals/wizard/ChillerInspectionWizard.tsx` | Import Step6, render it, update handleSubmit with sync logic |
+| `src/hooks/useChillerWizardForm.ts` | Add `updateFindings`, `addFinding`, `removeFinding`, `updateFinding` functions |
+| `src/components/chiller-annuals/wizard/ChillerInspectionWizard.tsx` | Import and render Step7, Step8, Step9 components; remove "Coming soon" placeholder |
 
 ---
 
 ## Technical Details
 
-### Sync Service Database Mapping
+### ChillerInspectionWizard.tsx Changes
 
-The sync service will map `ChillerWizardFormData` to the following tables:
+Update the `renderStep()` function:
 
-| Form Section | Target Table |
-|--------------|--------------|
-| Root fields (equipment_id, date, technician) | `annual_chiller_pm` |
-| `formData.refrigerant` | `chiller_refrigerant_inspection` |
-| `formData.oil` | `chiller_oil_analysis` |
-| `formData.tubes.evaporator` | `chiller_tube_inspection` (bundle_type='evaporator') |
-| `formData.tubes.condenser` | `chiller_tube_inspection` (bundle_type='condenser') |
-| `formData.water.chilled_water` | `chiller_water_side` (water_loop='chilled_water') |
-| `formData.water.condenser_water` | `chiller_water_side` (water_loop='condenser_water') |
-| `formData.water.quality` | `chiller_water_quality` |
-| `formData.electrical.main_motor` | `chiller_electrical_check` (component='main_motor') |
-| `formData.performance` | `chiller_performance_test` |
-| `formData.findings` | `chiller_annual_finding` |
+```tsx
+import { Step7PerformanceTest } from './steps/Step7PerformanceTest';
+import { Step8Findings } from './steps/Step8Findings';
+import { Step9Review } from './steps/Step9Review';
 
-The service will use upsert logic to handle both new inspections and resuming drafts.
+// In renderStep():
+case 7:
+  return (
+    <Step7PerformanceTest
+      formData={formData}
+      updatePerformance={updatePerformance}
+    />
+  );
+case 8:
+  return (
+    <Step8Findings
+      formData={formData}
+      updateFindings={updateFindings}
+      addFinding={addFinding}
+      removeFinding={removeFinding}
+      updateFinding={updateFinding}
+    />
+  );
+case 9:
+  return (
+    <Step9Review
+      formData={formData}
+      goToStep={goToStep}
+      getStepStatus={getStepStatus}
+    />
+  );
+```
 
-### Risk Score Calculation
+### Risk Score Calculation for Review
 
-The sync service will also calculate the overall risk score before saving:
+Import and use the risk calculator service:
 
 ```typescript
-let riskScore = 0;
-if (formData.refrigerant.leak_detected) riskScore += 25;
-if (evaporatorPluggedPct > 5 || condenserPluggedPct > 5) riskScore += 30;
-if (oilAcidNumber > 0.05) riskScore += 30;
-if (voltageImbalance > 2) riskScore += 20;
-if (insulationResistance < 1) riskScore += 20;
-if (legionellaDetected) riskScore += 40;
-// ... etc based on memory context
+import { calculateRiskScore } from '@/services/chillerRiskCalculator';
 
-const riskLevel = riskScore <= 30 ? 'low' : riskScore <= 60 ? 'medium' : 'high';
+// In Step9Review:
+const riskResult = useMemo(() => 
+  calculateRiskScore(formData), 
+  [formData]
+);
+```
+
+### Finding Photo Integration
+
+Each finding can have photos attached using the existing PhotoCapture component:
+
+```tsx
+<PhotoCapture
+  photos={finding.photos}
+  onChange={(photos) => updateFinding(finding.id, { photos })}
+  maxPhotos={5}
+/>
 ```
 
 ---
 
 ## Summary
 
-| Issue | Root Cause | Solution |
-|-------|------------|----------|
-| R-11 missing | Not in array | Add to REFRIGERANT_TYPES |
-| Vendor input broken | Wrong component (NumberStepper vs Input) | Replace with Input |
-| Step 6 "Coming soon" | Not implemented | Create Step6Electrical component |
-| Submit not saving | No Supabase sync | Create chillerSyncService, update handleSubmit |
+| Step | Implementation | Key Features |
+|------|---------------|--------------|
+| 7 | Performance Test | Auto-calc kW/ton, efficiency comparison |
+| 8 | Findings | Photo capture, severity ratings, issue codes |
+| 9 | Review | Risk score display, section summaries, final check |
+
+All three steps follow the existing UI patterns established in Steps 1-6, using the same components (NumberStepper, ToggleButtonPair, Card, etc.) for consistency.
 
