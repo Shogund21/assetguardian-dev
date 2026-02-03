@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCompany } from "@/contexts/CompanyContext";
@@ -15,6 +16,7 @@ import type { AnnualChillerPM } from "@/types/chillerAnnual";
 
 const ChillerAnnuals = () => {
   const { currentCompany } = useCompany();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("inspections");
   const [inspectionFilter, setInspectionFilter] = useState("all");
 
@@ -110,7 +112,10 @@ const ChillerAnnuals = () => {
                 Comprehensive annual inspections for water-cooled chillers
               </p>
             </div>
-            <Button className="flex items-center gap-2">
+            <Button 
+              className="flex items-center gap-2"
+              onClick={() => navigate("/chiller-annuals/wizard")}
+            >
               <Plus className="h-4 w-4" />
               New Annual PM
             </Button>
@@ -188,7 +193,11 @@ const ChillerAnnuals = () => {
                         : `No ${inspectionFilter.replace("_", " ")} inspections found.`}
                     </p>
                     {inspectionFilter === "all" && (
-                      <Button className="mt-4" variant="outline">
+                      <Button 
+                        className="mt-4" 
+                        variant="outline"
+                        onClick={() => navigate("/chiller-annuals/wizard")}
+                      >
                         <Plus className="h-4 w-4 mr-2" />
                         Create First Inspection
                       </Button>
