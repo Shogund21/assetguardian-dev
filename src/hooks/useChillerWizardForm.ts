@@ -3,6 +3,7 @@ import {
   ChillerWizardFormData, 
   WizardStep, 
   SkipReason,
+  FindingData,
   getInitialWizardFormData,
   WIZARD_STEPS 
 } from '@/types/chillerWizard';
@@ -358,6 +359,33 @@ export function useChillerWizardForm(options: UseChillerWizardFormOptions = {}) 
     lastSavedDataRef.current = '';
   }, []);
 
+  // Finding management helpers
+  const addFinding = useCallback((finding: FindingData) => {
+    setFormData(prev => ({
+      ...prev,
+      findings: [...prev.findings, finding],
+    }));
+    setHasUnsavedChanges(true);
+  }, []);
+
+  const removeFinding = useCallback((findingId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      findings: prev.findings.filter(f => f.id !== findingId),
+    }));
+    setHasUnsavedChanges(true);
+  }, []);
+
+  const updateFinding = useCallback((findingId: string, updates: Partial<FindingData>) => {
+    setFormData(prev => ({
+      ...prev,
+      findings: prev.findings.map(f => 
+        f.id === findingId ? { ...f, ...updates } : f
+      ),
+    }));
+    setHasUnsavedChanges(true);
+  }, []);
+
   return {
     // State
     draftId,
@@ -377,6 +405,11 @@ export function useChillerWizardForm(options: UseChillerWizardFormOptions = {}) 
     updateElectrical,
     updatePerformance,
     setFormData,
+    
+    // Findings
+    addFinding,
+    removeFinding,
+    updateFinding,
     
     // Navigation
     goToStep,

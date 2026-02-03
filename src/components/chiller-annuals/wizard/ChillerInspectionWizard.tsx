@@ -10,6 +10,9 @@ import { Step3OilSystem } from './steps/Step3OilSystem';
 import { Step4TubeInspection } from './steps/Step4TubeInspection';
 import { Step5WaterSystem } from './steps/Step5WaterSystem';
 import { Step6Electrical } from './steps/Step6Electrical';
+import { Step7PerformanceTest } from './steps/Step7PerformanceTest';
+import { Step8Findings } from './steps/Step8Findings';
+import { Step9Review } from './steps/Step9Review';
 import { useChillerWizardForm } from '@/hooks/useChillerWizardForm';
 import { WIZARD_STEPS, WizardStep, SkipReason } from '@/types/chillerWizard';
 import { useNavigate } from 'react-router-dom';
@@ -47,6 +50,10 @@ export function ChillerInspectionWizard({ draftId: initialDraftId, onComplete }:
     updateWaterQuality,
     updateElectrical,
     updatePerformance,
+    addFinding,
+    removeFinding,
+    updateFinding,
+    goToStep,
     nextStep,
     prevStep,
     skipStep,
@@ -174,12 +181,28 @@ export function ChillerInspectionWizard({ draftId: initialDraftId, onComplete }:
           />
         );
       case 7:
+        return (
+          <Step7PerformanceTest
+            formData={formData}
+            updatePerformance={updatePerformance}
+          />
+        );
       case 8:
+        return (
+          <Step8Findings
+            formData={formData}
+            addFinding={addFinding}
+            removeFinding={removeFinding}
+            updateFinding={updateFinding}
+          />
+        );
       case 9:
         return (
-          <div className="flex items-center justify-center h-64 text-muted-foreground">
-            Step {currentStep} - Coming soon
-          </div>
+          <Step9Review
+            formData={formData}
+            goToStep={goToStep}
+            getStepStatus={getStepStatus}
+          />
         );
       default:
         return null;
