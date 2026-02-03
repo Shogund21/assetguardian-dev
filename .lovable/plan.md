@@ -1,151 +1,66 @@
 
+# Fix "New Annual PM" Button Navigation
 
-# Update Customer Manual Documentation for Annual Chiller Maintenance Module
+## Problem
+The "New Annual PM" button on the Chiller Annuals page (line 113-116) is missing an `onClick` handler. When clicked, nothing happens because the button has no navigation logic to take users to the inspection wizard.
 
-## Overview
+## Root Cause
+The Button component is rendered without any event handler:
+```tsx
+<Button className="flex items-center gap-2">
+  <Plus className="h-4 w-4" />
+  New Annual PM
+</Button>
+```
 
-This plan adds comprehensive documentation for the newly implemented **Annual Chiller Maintenance & Risk Intelligence** module to the customer manual tab. The documentation will cover the dashboard, analytics, executive reporting, and inspection wizard features.
+The wizard route `/chiller-annuals/wizard` exists and is properly configured in `App.tsx`, but no navigation is triggered when the button is clicked.
 
----
+## Solution
+Add navigation functionality to both the "New Annual PM" button in the header and the "Create First Inspection" button in the empty state.
 
 ## Changes Required
 
-### 1. Create New Documentation File
+### File: `src/pages/ChillerAnnuals.tsx`
 
-**File**: `public/docs/chiller-annual-maintenance.md`
-
-This comprehensive guide will cover:
-
-**Table of Contents:**
-- Overview & Introduction
-- Accessing the Module
-- Chiller Health Dashboard
-  - Fleet Health Overview (KPI Cards)
-  - Health Score by Asset
-  - Tube Loss Trend Analysis
-  - Refrigerant Analytics & Leak Heatmap
-  - Efficiency Trend (kW/ton)
-  - High Risk Asset Identification
-  - Vendor Accountability Summary
-- Annual Inspection Wizard
-  - Step-by-step inspection process (9 steps)
-  - Mobile usage guidelines
-- Executive Reporting
-  - Report generation
-  - Print/export options
-  - Understanding the executive summary
-- Best Practices
-- Troubleshooting
-
----
-
-### 2. Update DocumentationSection Component
-
-**File**: `src/components/settings/sections/DocumentationSection.tsx`
-
-Add the new chiller annuals documentation to the `documentationLinks` array:
-
-```typescript
-{
-  title: "Annual Chiller Maintenance",
-  description: "Complete guide for annual chiller inspections, risk intelligence, and executive reporting.",
-  icon: Gauge, // or appropriate icon
-  path: "/docs/chiller-annual-maintenance.md",
-}
+**1. Add useNavigate import (line 1-14):**
+```tsx
+import { useNavigate } from "react-router-dom";
 ```
 
----
-
-### 3. Update Maintenance Checks Documentation
-
-**File**: `public/docs/maintenance-checks.md`
-
-Add a section referencing the specialized Annual Chiller Maintenance module:
-
-```markdown
-## Specialized Maintenance Modules
-
-### Annual Chiller Maintenance & Risk Intelligence
-For water-cooled chillers requiring comprehensive annual inspections, 
-use the dedicated **Annual Chiller Maintenance** module. This specialized 
-system provides:
-- 16 structured inspection categories
-- Risk scoring and health metrics
-- Multi-year trend analysis
-- Executive reporting capabilities
-
-Access via: Main Menu → Chiller Annuals
-
-For detailed guidance, see the [Annual Chiller Maintenance Guide](/docs/chiller-annual-maintenance.md).
+**2. Add navigate hook inside component (after line 19):**
+```tsx
+const navigate = useNavigate();
 ```
 
----
-
-### 4. Update Predictive Maintenance Documentation
-
-**File**: `public/docs/predictive-maintenance.md`
-
-Add a reference to the chiller-specific analytics available in the Annual Chiller module:
-
-```markdown
-### Annual Chiller Inspections
-
-For comprehensive annual chiller assessments with multi-year trending, 
-use the dedicated **Annual Chiller Maintenance** module which provides:
-- Tube loss % trending with threshold alerts
-- Refrigerant loss tracking with leak heatmaps
-- kW/ton efficiency degradation analysis
-- Risk scoring and executive reporting
-
-This module is designed for annual water-cooled chiller inspections 
-and complements the routine predictive maintenance readings.
+**3. Update header "New Annual PM" button (line 113-116):**
+```tsx
+<Button 
+  className="flex items-center gap-2"
+  onClick={() => navigate("/chiller-annuals/wizard")}
+>
+  <Plus className="h-4 w-4" />
+  New Annual PM
+</Button>
 ```
 
----
-
-## New Documentation Content Summary
-
-The new `chiller-annual-maintenance.md` file will include approximately 400-500 lines covering:
-
-| Section | Content |
-|---------|---------|
-| Overview | Purpose of annual inspections, module capabilities, target equipment |
-| Dashboard Guide | Detailed explanation of all 7 dashboard components with screenshots descriptions |
-| Inspection Wizard | Step-by-step guide through all 9 inspection steps with field explanations |
-| Executive Reports | How to generate, interpret, and share executive summaries |
-| Best Practices | Recommended workflows, data quality tips, timing guidelines |
-| Troubleshooting | Common issues and solutions |
-
----
-
-## Technical Details
-
-### Files to Create:
-- `public/docs/chiller-annual-maintenance.md` - New comprehensive documentation (approx. 450 lines)
-
-### Files to Modify:
-- `src/components/settings/sections/DocumentationSection.tsx` - Add new documentation link
-- `public/docs/maintenance-checks.md` - Add reference to chiller annuals module
-- `public/docs/predictive-maintenance.md` - Add reference to chiller analytics
-
-### Import Changes:
-- Add `Gauge` icon import from `lucide-react` in DocumentationSection.tsx
-
----
-
-## Documentation Structure
-
-```text
-Customer Manual Documentation
-├── Equipment Management
-├── Maintenance Checks (updated with cross-reference)
-├── Project Management
-├── Technician Management
-├── Predictive Maintenance (updated with cross-reference)
-├── Annual Chiller Maintenance (NEW)  ← Primary addition
-├── Settings Management
-├── Authentication Guide
-├── Mobile Usage Guide
-└── Administrator Features
+**4. Update empty state "Create First Inspection" button (line 191-194):**
+```tsx
+<Button 
+  className="mt-4" 
+  variant="outline"
+  onClick={() => navigate("/chiller-annuals/wizard")}
+>
+  <Plus className="h-4 w-4 mr-2" />
+  Create First Inspection
+</Button>
 ```
 
+## Summary
+| Change | Location | Description |
+|--------|----------|-------------|
+| Import | Line 10 | Add `useNavigate` from react-router-dom |
+| Hook | Line 20 | Initialize `navigate` function |
+| Header Button | Line 113-116 | Add `onClick` to navigate to wizard |
+| Empty State Button | Line 191-194 | Add `onClick` to navigate to wizard |
+
+This is a simple fix that connects the existing buttons to the already-implemented wizard route.
