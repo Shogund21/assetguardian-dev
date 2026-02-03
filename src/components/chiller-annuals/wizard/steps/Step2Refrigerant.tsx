@@ -49,6 +49,7 @@ const MOISTURE_COLORS = [
 ];
 
 const REFRIGERANT_TYPES = [
+  'R-11',
   'R-134a',
   'R-123',
   'R-1233zd',

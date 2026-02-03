@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AlertTriangle, Droplets } from 'lucide-react';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
@@ -212,11 +213,11 @@ export function Step5WaterSystem({ formData, updateWater, updateWaterQuality }: 
         {/* Treatment Vendor */}
         <div className="space-y-2">
           <Label>Treatment Vendor</Label>
-          <NumberStepper
-            value={null}
-            onChange={() => {}}
-            showButtons={false}
+          <Input
+            value={quality.treatment_vendor || ''}
+            onChange={(e) => updateWaterQuality('treatment_vendor', e.target.value)}
             placeholder="Enter vendor name..."
+            className="min-h-[48px]"
           />
         </div>
 

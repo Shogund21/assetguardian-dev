@@ -9,9 +9,14 @@ import { Step2Refrigerant } from './steps/Step2Refrigerant';
 import { Step3OilSystem } from './steps/Step3OilSystem';
 import { Step4TubeInspection } from './steps/Step4TubeInspection';
 import { Step5WaterSystem } from './steps/Step5WaterSystem';
+import { Step6Electrical } from './steps/Step6Electrical';
 import { useChillerWizardForm } from '@/hooks/useChillerWizardForm';
 import { WIZARD_STEPS, WizardStep, SkipReason } from '@/types/chillerWizard';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import { useCompany } from '@/contexts/CompanyContext';
+import { useToast } from '@/hooks/use-toast';
+import { chillerSyncService } from '@/services/chillerSyncService';
 import { cn } from '@/lib/utils';
 
 interface ChillerInspectionWizardProps {
@@ -19,12 +24,17 @@ interface ChillerInspectionWizardProps {
   onComplete?: () => void;
 }
 
-export function ChillerInspectionWizard({ draftId, onComplete }: ChillerInspectionWizardProps) {
+export function ChillerInspectionWizard({ draftId: initialDraftId, onComplete }: ChillerInspectionWizardProps) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { currentCompany } = useCompany();
+  const { toast } = useToast();
   const [showSkipDialog, setShowSkipDialog] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOnline] = useState(navigator.onLine);
 
   const {
+    draftId,
     formData,
     currentStep,
     isLoading,
@@ -44,7 +54,7 @@ export function ChillerInspectionWizard({ draftId, onComplete }: ChillerInspecti
     canProceed,
     getStepStatus,
     saveDraft,
-  } = useChillerWizardForm({ draftId });
+  } = useChillerWizardForm({ draftId: initialDraftId });
 
   const currentStepInfo = WIZARD_STEPS.find(s => s.step === currentStep)!;
   const errors = validateStep(currentStep);
@@ -73,9 +83,47 @@ export function ChillerInspectionWizard({ draftId, onComplete }: ChillerInspecti
   };
 
   const handleSubmit = async () => {
-    await saveDraft();
-    onComplete?.();
-    navigate('/chiller-annuals');
+    setIsSubmitting(true);
+    try {
+      // Save locally first
+      await saveDraft();
+      
+      // Sync to Supabase
+      if (currentCompany?.id) {
+        const result = await chillerSyncService.syncDraft(draftId, currentCompany.id);
+        
+        if (!result.success) {
+          toast({
+            variant: "destructive",
+            title: "Sync Failed",
+            description: result.error || "Failed to save to server. Data is saved locally.",
+          });
+          setIsSubmitting(false);
+          return;
+        }
+        
+        // Invalidate queries to refresh dashboard
+        queryClient.invalidateQueries({ queryKey: ['annual-chiller-pms'] });
+        queryClient.invalidateQueries({ queryKey: ['chiller-fleet-health'] });
+      }
+      
+      toast({
+        title: "Success",
+        description: "Annual inspection saved successfully.",
+      });
+      
+      onComplete?.();
+      navigate('/chiller-annuals');
+    } catch (error) {
+      console.error('Submit error:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to submit inspection. Please try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderStep = () => {
@@ -119,6 +167,12 @@ export function ChillerInspectionWizard({ draftId, onComplete }: ChillerInspecti
           />
         );
       case 6:
+        return (
+          <Step6Electrical
+            formData={formData}
+            updateElectrical={updateElectrical}
+          />
+        );
       case 7:
       case 8:
       case 9:
@@ -181,7 +235,7 @@ export function ChillerInspectionWizard({ draftId, onComplete }: ChillerInspecti
         currentStep={currentStep}
         canProceed={canProceed(currentStep) || currentStepInfo.canSkip}
         canSkip={currentStepInfo.canSkip}
-        isSaving={isSaving}
+        isSaving={isSaving || isSubmitting}
         isFirstStep={currentStep === 1}
         isLastStep={currentStep === 9}
         onBack={handleBack}
