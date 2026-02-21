@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,7 +19,7 @@ const EquipmentDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { handleStatusChange } = useEquipmentStatus();
-
+  const [showChillerManual, setShowChillerManual] = useState(false);
   const { data: equipment, isLoading } = useQuery({
     queryKey: ['equipment', id],
     queryFn: async () => {
@@ -125,17 +126,45 @@ const EquipmentDetails = () => {
               </div>
             </div>
 
-            {equipment.type?.toLowerCase().includes('chiller') && (
-              <>
-              <ChillerHealthBadge equipmentId={equipment.id} />
-              <ChillerDetailsForm
-                equipmentId={equipment.id}
-                installationDate={equipment.installation_date ?? null}
-                expectedLifeYears={equipment.expected_life_years ?? null}
-                conditionRating={equipment.condition_rating ?? null}
-              />
-              </>
-            )}
+            {(() => {
+              const autoDetected =
+                equipment.type?.toLowerCase().includes('chill') ||
+                equipment.name?.toLowerCase().includes('chill');
+              const showSection = autoDetected || showChillerManual;
+
+              return showSection ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold text-foreground">
+                      Chiller Details (Install Date, Life, Condition)
+                    </h2>
+                    {!autoDetected && (
+                      <button
+                        onClick={() => setShowChillerManual(false)}
+                        className="text-sm text-muted-foreground underline hover:text-foreground"
+                      >
+                        Not a chiller? Hide this section
+                      </button>
+                    )}
+                  </div>
+                  <ChillerHealthBadge equipmentId={equipment.id} />
+                  <ChillerDetailsForm
+                    equipmentId={equipment.id}
+                    installationDate={equipment.installation_date ?? null}
+                    expectedLifeYears={equipment.expected_life_years ?? null}
+                    conditionRating={equipment.condition_rating ?? null}
+                  />
+                </div>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowChillerManual(true)}
+                >
+                  Show Chiller Details
+                </Button>
+              );
+            })()}
 
             <div className="bg-white p-6 rounded-lg shadow border">
               <EquipmentFilterChanges equipmentId={equipment.id} />
