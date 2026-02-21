@@ -1,36 +1,36 @@
 
 
-# Add Expanded Chiller Details Section to Equipment Detail Page
+# Update README and Customer Manual with Chiller Details Section Changes
 
 ## Summary
-Update `src/pages/EquipmentDetails.tsx` to broaden when the chiller section appears and add a manual toggle for non-chiller equipment.
+Update two files to document the new "Chiller Details" section on the Equipment Detail page, including the auto-detection logic and manual toggle feature.
 
-## Current Behavior
-The chiller section (health badge + details form) only shows when `equipment.type` contains "chiller".
+## Changes
 
-## What Changes
+### 1. File: `README.md`
 
-### File: `src/pages/EquipmentDetails.tsx`
+Add a new bullet point under the **Equipment Management** section (around line 27-35) describing the chiller details feature:
 
-1. **Add `useState` import** for a manual toggle (`showChillerSection`).
+- Add after the existing equipment management bullets:
+  - **Chiller Details Section**: Auto-detected chiller equipment displays installation date, expected life years, and condition rating fields. Non-chiller equipment can manually toggle the section via a "Show Chiller Details" button.
 
-2. **Add detection logic** -- a helper that checks (case-insensitive):
-   - `equipment.type` contains "chill"
-   - `equipment.name` contains "chill"
-   - (No `category` column exists in the DB, so skip that check)
+### 2. File: `public/docs/equipment-management.md`
 
-3. **Replace the current conditional block** (lines 128-138) with:
-   - If auto-detected OR manually toggled on, show a titled section:
-     - Section header: **"Chiller Details (Install Date, Life, Condition)"**
-     - `ChillerHealthBadge` component
-     - `ChillerDetailsForm` component (already bound to `installation_date`, `expected_life_years`, `condition_rating` -- columns confirmed to exist)
-   - If NOT auto-detected, show a small button: **"Show Chiller Details"** to manually toggle the section on
-   - When the section is visible and was manually toggled, show a **"Not a chiller? Hide this section"** link to toggle it back off
+Add a new subsection under **Advanced Features** (after line 94) titled **Chiller Details (Install Date, Life, Condition)** covering:
 
-4. **DB columns already exist** (`installation_date`, `expected_life_years`, `condition_rating`), so no missing-column message is needed. The query on line 29 already selects them.
+- **What it is**: A dedicated section on the Equipment Detail page for managing chiller lifecycle data.
+- **Auto-Detection**: The section appears automatically when the equipment name or type contains "chill" (case-insensitive).
+- **Manual Toggle**: For non-chiller equipment, a "Show Chiller Details" button reveals the section. A "Not a chiller? Hide this section" link hides it again.
+- **Editable Fields**:
+  - Installation Date (date picker)
+  - Expected Life Years (number input)
+  - Condition Rating (1-5 dropdown)
+- **Health Score**: A `ChillerHealthBadge` displays calculated health based on these values.
+- **Location on page**: Between the main equipment card/QR code row and the Filter Changes section.
 
 ### No other files change.
 
-## Where It Appears
-On the Equipment Detail page (`/equipment/:id`), between the main equipment card/QR code row and the Filter Changes section -- same position as today, but now with a clear title and broader visibility rules.
+## Technical Details
+- `README.md`: Insert ~2 lines around line 35.
+- `public/docs/equipment-management.md`: Insert ~25 lines as a new subsection after line 94.
 
