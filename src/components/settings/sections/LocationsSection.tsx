@@ -1,6 +1,6 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LocationList } from "../location/LocationList";
+import { ChillerRiskRanking } from "@/components/equipment/ChillerRiskRanking";
 
 export const LocationsSection = () => {
   return (
@@ -16,6 +16,7 @@ export const LocationsSection = () => {
           <LocationList />
         </CardContent>
       </Card>
+      <ChillerRiskRanking />
     </div>
   );
 };
