@@ -384,6 +384,50 @@ export type Database = {
           },
         ]
       }
+      asset_health: {
+        Row: {
+          age_years: number | null
+          calculated_at: string | null
+          corrective_wo_12m_count: number | null
+          equipment_id: string
+          health_score: number
+          id: string
+          open_wo_count: number | null
+          pm_compliance_pct: number | null
+          risk_level: string
+        }
+        Insert: {
+          age_years?: number | null
+          calculated_at?: string | null
+          corrective_wo_12m_count?: number | null
+          equipment_id: string
+          health_score: number
+          id?: string
+          open_wo_count?: number | null
+          pm_compliance_pct?: number | null
+          risk_level: string
+        }
+        Update: {
+          age_years?: number | null
+          calculated_at?: string | null
+          corrective_wo_12m_count?: number | null
+          equipment_id?: string
+          health_score?: number
+          id?: string
+          open_wo_count?: number | null
+          pm_compliance_pct?: number | null
+          risk_level?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_health_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: true
+            referencedRelation: "equipment"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
