@@ -1,0 +1,1 @@
+UPDATE equipment SET type = 'Chiller' WHERE lower(name) LIKE '%chiller%' AND type IS NULL;
