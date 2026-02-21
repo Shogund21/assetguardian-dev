@@ -32,6 +32,7 @@ A comprehensive AI-powered facility management system that cuts downtime by 81% 
 - **Location-based Organization**: Equipment mapping and location tracking
 - **Password Protection**: Enhanced security for sensitive equipment management areas
 - **Print Capabilities**: Generate equipment lists and documentation for offline reference
+- **Chiller Details Section**: Auto-detected chiller equipment displays installation date, expected life years, and condition rating fields. Non-chiller equipment can manually toggle the section via a "Show Chiller Details" button.
 
 ### Predictive Maintenance (AI-Powered)
 - **AI Equipment Health Monitoring**: Real-time analysis of equipment condition and performance
