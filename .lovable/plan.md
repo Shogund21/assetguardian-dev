@@ -1,33 +1,30 @@
 
 
-# Set Initial Maintenance Dates for Equipment Without Records
+# Fix: Include Maintenance Date Fields in Equipment Details Query
 
-## What This Does
-Sets `lastMaintenance` for all 18 equipment rows that currently have `NULL`, using two different dates based on equipment type:
-- **Chillers**: January 23, 2026
-- **All other equipment**: February 6, 2023
+## Problem
+The database has `lastMaintenance` and `nextMaintenance` populated for all chillers, but the `EquipmentDetails.tsx` page query does not include these columns in its `select()` call. The UI therefore always shows "No record" and "Not scheduled."
 
-The existing `update_equipment_maintenance_schedule` trigger will automatically calculate `nextMaintenance` (3 months later) for each row.
+## Fix (single file change)
 
-## SQL to Execute
+**File:** `src/pages/EquipmentDetails.tsx` (line 30)
 
-Two UPDATE statements using the Supabase data tool:
+Update the `.select()` string to add the two missing columns:
 
-```sql
--- Chillers: Jan 23, 2026
-UPDATE equipment
-SET "lastMaintenance" = '2026-01-23'
-WHERE "lastMaintenance" IS NULL
-  AND lower(name) LIKE '%chiller%';
+```
+Before:
+.select('id, name, model, serial_number, location, status, type, company_id, created_at, updated_at, installation_date, expected_life_years, condition_rating')
 
--- Everything else: Feb 6, 2023
-UPDATE equipment
-SET "lastMaintenance" = '2023-02-06'
-WHERE "lastMaintenance" IS NULL;
+After:
+.select('id, name, model, serial_number, location, status, type, company_id, created_at, updated_at, installation_date, expected_life_years, condition_rating, lastMaintenance, nextMaintenance')
 ```
 
-## Expected Result
-- ~7 chiller rows get `lastMaintenance = 2026-01-23` and `nextMaintenance = 2026-04-23`
-- ~11 remaining rows get `lastMaintenance = 2023-02-06` and `nextMaintenance = 2023-05-06`
-- No frontend changes needed -- the UI already reads these fields
+Then update the Maintenance Schedule display section (~lines 97-109) to render the actual dates instead of hardcoded "No record" / "Not scheduled":
 
+- **Last Maintenance:** Show `equipment.lastMaintenance` formatted as a readable date, or "No record" if null.
+- **Next Maintenance:** Show `equipment.nextMaintenance` formatted as a readable date, or "Not scheduled" if null.
+
+## No other changes needed
+- The database already has the correct data for all equipment.
+- The `Equipment` TypeScript type does not need changes since the Supabase query returns dynamic data.
+- No migration or backend changes required.
