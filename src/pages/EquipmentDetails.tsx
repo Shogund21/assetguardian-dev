@@ -27,7 +27,7 @@ const EquipmentDetails = () => {
 
       const { data, error } = await supabase
         .from('equipment')
-        .select('id, name, model, serial_number, location, status, type, company_id, created_at, updated_at, installation_date, expected_life_years, condition_rating')
+        .select('id, name, model, serial_number, location, status, type, company_id, created_at, updated_at, installation_date, expected_life_years, condition_rating, lastMaintenance, nextMaintenance')
         .eq('id', id)
         .single();
       
@@ -106,12 +106,12 @@ const EquipmentDetails = () => {
                             <div className="flex items-center border-b pb-2">
                               <Clock className="h-4 w-4 mr-2 text-gray-500" />
                               <span className="font-medium mr-2">Last Maintenance:</span>
-                              <span>No record</span>
+                              <span>{equipment.lastMaintenance ? new Date(equipment.lastMaintenance).toLocaleDateString() : 'No record'}</span>
                             </div>
                             <div className="flex items-center pt-2">
                               <Clock className="h-4 w-4 mr-2 text-gray-500" />
                               <span className="font-medium mr-2">Next Maintenance:</span>
-                              <span>Not scheduled</span>
+                              <span>{equipment.nextMaintenance ? new Date(equipment.nextMaintenance).toLocaleDateString() : 'Not scheduled'}</span>
                             </div>
                           </div>
                         </div>
