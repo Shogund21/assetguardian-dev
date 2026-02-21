@@ -1,36 +1,93 @@
 
 
-# Fix and Run `calculate_chiller_health_scores()`
+# Edit Chiller Details Form on Equipment Detail Page
 
-## Issue Found
-The function failed with **"permission denied for table asset_health"** because:
-- RLS is enabled on `asset_health` with only a SELECT policy for authenticated users
-- The function runs as the calling user and has no INSERT/UPDATE permission through RLS
+## What This Adds
+A new card on the equipment detail page -- visible only for chiller-type equipment -- with an editable form for chiller-specific fields plus a "Recalculate Health Score" button that triggers the health scoring function.
 
-## Fix
-Recreate the function with `SECURITY DEFINER` so it executes with the owner's privileges, bypassing RLS. This is the correct pattern for internal computation functions that need to write data. A `SET search_path TO 'public'` clause will be added for security best practice.
+## Changes
 
-### Migration SQL
+### 1. New Component: `ChillerDetailsForm`
+**File:** `src/components/equipment/ChillerDetailsForm.tsx`
 
-```sql
-CREATE OR REPLACE FUNCTION public.calculate_chiller_health_scores()
-RETURNS integer
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path TO 'public'
-AS $$
-DECLARE
-  -- (same body as before, unchanged)
-END;
-$$;
+A self-contained form component that:
+- Accepts `equipmentId`, current `installation_date`, `expected_life_years`, and `condition_rating` as props
+- Uses controlled state for each field
+- **Date picker** using the existing Shadcn Calendar + Popover pattern (with `pointer-events-auto`)
+- **Number input** for expected life years (default 25)
+- **Dropdown (Select)** for condition rating with labels: 1 Excellent, 2 Good, 3 Fair, 4 Poor, 5 Critical
+- **Save button** that updates the `equipment` table via Supabase and invalidates the query cache
+- **"Recalculate Health Score" button** (shown after save) that calls `supabase.rpc('calculate_chiller_health_scores')` and refreshes the health data
+- Displays current health score and risk level badge from `asset_health` table
+
+### 2. Update Equipment Details Page
+**File:** `src/pages/EquipmentDetails.tsx`
+
+- Expand the equipment query `.select()` to include `installation_date`, `expected_life_years`, `condition_rating`, and `type`
+- Add a chiller type check: `equipment.type?.toLowerCase().includes('chiller')`
+- When true, render `<ChillerDetailsForm>` below the existing equipment card
+- Add a query for `asset_health` data for this equipment to show current health badge
+
+### 3. Health Score Badge
+Displayed within the chiller form card showing:
+- Current health score (0-100)
+- Risk level with color coding (critical = red, high = orange, medium = yellow, low = green)
+- Last calculated timestamp
+
+## Technical Details
+
+### Equipment Query Update
+```typescript
+.select('id, name, model, serial_number, location, status, type, company_id, created_at, updated_at, installation_date, expected_life_years, condition_rating')
 ```
 
-## After the Fix
-Run the function, then return:
-- **10 lowest** health_score chillers with name, location, score, risk, open WOs, PM compliance
-- **10 highest** health_score chillers with the same columns
+### Save Logic
+```typescript
+await supabase
+  .from('equipment')
+  .update({
+    installation_date: date,
+    expected_life_years: years,
+    condition_rating: rating,
+  })
+  .eq('id', equipmentId);
+```
 
-## Why SECURITY DEFINER?
-- The function is an internal batch computation, not called directly by end users
-- It needs to INSERT/UPDATE `asset_health` which has RLS enabled
-- This matches the pattern used by other privileged functions in the project (e.g., `set_work_order_company`, `approve_access_request_and_create_technician`)
+### Recalculate Logic
+```typescript
+await supabase.rpc('calculate_chiller_health_scores');
+// Then refetch asset_health for this equipment
+```
+
+### Asset Health Query
+```typescript
+const { data: healthData } = useQuery({
+  queryKey: ['asset_health', id],
+  queryFn: async () => {
+    const { data } = await supabase
+      .from('asset_health')
+      .select('*')
+      .eq('equipment_id', id)
+      .maybeSingle();
+    return data;
+  },
+  enabled: isChiller,
+});
+```
+
+### Condition Rating Options
+| Value | Label |
+|-------|-------|
+| 1 | Excellent |
+| 2 | Good |
+| 3 | Fair |
+| 4 | Poor |
+| 5 | Critical |
+
+## Files Modified
+- `src/pages/EquipmentDetails.tsx` -- add chiller fields to query, conditionally render form
+- `src/components/equipment/ChillerDetailsForm.tsx` -- new component with form + health badge
+
+## No Database Changes Required
+All columns (`installation_date`, `expected_life_years`, `condition_rating`) already exist on the `equipment` table. The `asset_health` table and `calculate_chiller_health_scores()` RPC are already in place.
+
