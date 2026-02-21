@@ -1,93 +1,77 @@
 
 
-# Edit Chiller Details Form on Equipment Detail Page
+# Create `ChillerHealthBadge` Component
 
-## What This Adds
-A new card on the equipment detail page -- visible only for chiller-type equipment -- with an editable form for chiller-specific fields plus a "Recalculate Health Score" button that triggers the health scoring function.
+## Overview
+A dedicated, visually rich health badge component that displays all `asset_health` metrics for a chiller. It handles loading, empty state (with a "Calculate Now" button), and the full data display.
 
-## Changes
+## New File
+**`src/components/equipment/ChillerHealthBadge.tsx`**
 
-### 1. New Component: `ChillerDetailsForm`
-**File:** `src/components/equipment/ChillerDetailsForm.tsx`
+### Props
+```text
+equipmentId: string
+```
 
-A self-contained form component that:
-- Accepts `equipmentId`, current `installation_date`, `expected_life_years`, and `condition_rating` as props
-- Uses controlled state for each field
-- **Date picker** using the existing Shadcn Calendar + Popover pattern (with `pointer-events-auto`)
-- **Number input** for expected life years (default 25)
-- **Dropdown (Select)** for condition rating with labels: 1 Excellent, 2 Good, 3 Fair, 4 Poor, 5 Critical
-- **Save button** that updates the `equipment` table via Supabase and invalidates the query cache
-- **"Recalculate Health Score" button** (shown after save) that calls `supabase.rpc('calculate_chiller_health_scores')` and refreshes the health data
-- Displays current health score and risk level badge from `asset_health` table
+### Data Fetching
+- Uses `useQuery` with key `["asset_health", equipmentId]` to fetch from `asset_health` where `equipment_id = equipmentId` using `.maybeSingle()`
+- Reuses the same query key as `ChillerDetailsForm` so they share cache
 
-### 2. Update Equipment Details Page
-**File:** `src/pages/EquipmentDetails.tsx`
+### States
 
-- Expand the equipment query `.select()` to include `installation_date`, `expected_life_years`, `condition_rating`, and `type`
-- Add a chiller type check: `equipment.type?.toLowerCase().includes('chiller')`
-- When true, render `<ChillerDetailsForm>` below the existing equipment card
-- Add a query for `asset_health` data for this equipment to show current health badge
+**Loading:** Skeleton placeholders inside the card.
 
-### 3. Health Score Badge
-Displayed within the chiller form card showing:
-- Current health score (0-100)
-- Risk level with color coding (critical = red, high = orange, medium = yellow, low = green)
-- Last calculated timestamp
+**No Data (empty state):** Message "No health score calculated yet" with a "Calculate Now" button that calls `supabase.rpc('calculate_chiller_health_scores')` then refetches.
+
+**Data Present:** A card with:
+- **Large health score** number front and center (big text, e.g. `text-4xl font-bold`)
+- **Risk level badge** next to it, color-coded using the same `RISK_COLORS` map from `ChillerDetailsForm` (critical=red, high=orange, medium=yellow, low=green)
+- **Metric grid** (2x3 or responsive) showing:
+  - Age (years) with label
+  - Open Work Orders count
+  - Corrective WOs (12m) count
+  - PM Compliance % (formatted with `%` suffix)
+  - Calculated At (formatted date/time via `date-fns` `format`)
+
+### UI Pattern
+Uses existing `Card`, `CardHeader`, `CardContent`, `Badge`, `Button`, `Skeleton` components. Follows the same styling conventions as `ChillerDetailsForm`.
+
+## Update Equipment Details Page
+**`src/pages/EquipmentDetails.tsx`**
+
+- Import `ChillerHealthBadge`
+- Render it inside the chiller conditional block, **above** `ChillerDetailsForm`, so users see the health overview first before the edit form
+
+```text
+{equipment.type?.toLowerCase().includes('chiller') && (
+  <>
+    <ChillerHealthBadge equipmentId={equipment.id} />
+    <ChillerDetailsForm ... />
+  </>
+)}
+```
 
 ## Technical Details
 
-### Equipment Query Update
-```typescript
-.select('id, name, model, serial_number, location, status, type, company_id, created_at, updated_at, installation_date, expected_life_years, condition_rating')
-```
+### Risk Color Map
+| Level | Background | Text | Border |
+|-------|-----------|------|--------|
+| critical | red-100 | red-800 | red-300 |
+| high | orange-100 | orange-800 | orange-300 |
+| medium | yellow-100 | yellow-800 | yellow-300 |
+| low | green-100 | green-800 | green-300 |
 
-### Save Logic
-```typescript
-await supabase
-  .from('equipment')
-  .update({
-    installation_date: date,
-    expected_life_years: years,
-    condition_rating: rating,
-  })
-  .eq('id', equipmentId);
-```
+### Metric Display
+Each metric shown as a small card/stat block:
+- Label in muted small text
+- Value in semibold text
+- PM compliance formatted as `XX.X%`
+- Age formatted to 1 decimal (`X.X yrs`)
+- Calculated at formatted as `MMM d, yyyy h:mm a`
 
-### Recalculate Logic
-```typescript
-await supabase.rpc('calculate_chiller_health_scores');
-// Then refetch asset_health for this equipment
-```
-
-### Asset Health Query
-```typescript
-const { data: healthData } = useQuery({
-  queryKey: ['asset_health', id],
-  queryFn: async () => {
-    const { data } = await supabase
-      .from('asset_health')
-      .select('*')
-      .eq('equipment_id', id)
-      .maybeSingle();
-    return data;
-  },
-  enabled: isChiller,
-});
-```
-
-### Condition Rating Options
-| Value | Label |
-|-------|-------|
-| 1 | Excellent |
-| 2 | Good |
-| 3 | Fair |
-| 4 | Poor |
-| 5 | Critical |
-
-## Files Modified
-- `src/pages/EquipmentDetails.tsx` -- add chiller fields to query, conditionally render form
-- `src/components/equipment/ChillerDetailsForm.tsx` -- new component with form + health badge
+## Files Changed
+- `src/components/equipment/ChillerHealthBadge.tsx` -- new component
+- `src/pages/EquipmentDetails.tsx` -- import and render above the form
 
 ## No Database Changes Required
-All columns (`installation_date`, `expected_life_years`, `condition_rating`) already exist on the `equipment` table. The `asset_health` table and `calculate_chiller_health_scores()` RPC are already in place.
 
