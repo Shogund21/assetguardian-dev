@@ -12,6 +12,7 @@ import { StatusDropdown } from "@/components/equipment/StatusDropdown";
 import { useEquipmentStatus } from "@/hooks/equipment/useEquipmentStatus";
 import EquipmentFilterChanges from "@/components/filter/EquipmentFilterChanges";
 import ChillerDetailsForm from "@/components/equipment/ChillerDetailsForm";
+import ChillerHealthBadge from "@/components/equipment/ChillerHealthBadge";
 
 const EquipmentDetails = () => {
   const { id } = useParams();
@@ -125,12 +126,15 @@ const EquipmentDetails = () => {
             </div>
 
             {equipment.type?.toLowerCase().includes('chiller') && (
+              <>
+              <ChillerHealthBadge equipmentId={equipment.id} />
               <ChillerDetailsForm
                 equipmentId={equipment.id}
                 installationDate={equipment.installation_date ?? null}
                 expectedLifeYears={equipment.expected_life_years ?? null}
                 conditionRating={equipment.condition_rating ?? null}
               />
+              </>
             )}
 
             <div className="bg-white p-6 rounded-lg shadow border">
