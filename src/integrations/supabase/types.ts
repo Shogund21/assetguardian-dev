@@ -5379,6 +5379,12 @@ export type Database = {
         Returns: boolean
       }
       is_admin_or_engineer: { Args: never; Returns: boolean }
+      is_chiller_asset: {
+        Args: {
+          equipment_row: Database["public"]["Tables"]["equipment"]["Row"]
+        }
+        Returns: boolean
+      }
       is_current_user_admin: { Args: never; Returns: boolean }
       is_demo_user: { Args: { p_user_id?: string }; Returns: boolean }
       is_member_of: { Args: { company_id: string }; Returns: boolean }
