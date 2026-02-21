@@ -1,16 +1,36 @@
 
-# Add `calculated_at` Column to Chiller Risk Ranking
 
-## What Already Exists
-The `ChillerRiskRanking` component is fully built and integrated into `LocationsSection.tsx`. It displays chillers sorted by health score (worst first) with a location selector, "Recalculate All" button, and columns for name, health_score, risk_level, open_wo_count, and pm_compliance_pct.
+# Add Expanded Chiller Details Section to Equipment Detail Page
 
-## What Needs to Change
-Add the **`calculated_at`** column to the table, which is the only field from the request not currently displayed.
+## Summary
+Update `src/pages/EquipmentDetails.tsx` to broaden when the chiller section appears and add a manual toggle for non-chiller equipment.
 
-## File: `src/components/equipment/ChillerRiskRanking.tsx`
+## Current Behavior
+The chiller section (health badge + details form) only shows when `equipment.type` contains "chiller".
 
-1. Add `import { format } from "date-fns"` at the top
-2. Add a `Calculated At` column header after `PM Compliance`
-3. Add a table cell that formats `chiller.health?.calculated_at` using `format(new Date(...), "MMM d, yyyy h:mm a")`, or shows a dash if null
+## What Changes
 
-No other files need changes. No database changes required.
+### File: `src/pages/EquipmentDetails.tsx`
+
+1. **Add `useState` import** for a manual toggle (`showChillerSection`).
+
+2. **Add detection logic** -- a helper that checks (case-insensitive):
+   - `equipment.type` contains "chill"
+   - `equipment.name` contains "chill"
+   - (No `category` column exists in the DB, so skip that check)
+
+3. **Replace the current conditional block** (lines 128-138) with:
+   - If auto-detected OR manually toggled on, show a titled section:
+     - Section header: **"Chiller Details (Install Date, Life, Condition)"**
+     - `ChillerHealthBadge` component
+     - `ChillerDetailsForm` component (already bound to `installation_date`, `expected_life_years`, `condition_rating` -- columns confirmed to exist)
+   - If NOT auto-detected, show a small button: **"Show Chiller Details"** to manually toggle the section on
+   - When the section is visible and was manually toggled, show a **"Not a chiller? Hide this section"** link to toggle it back off
+
+4. **DB columns already exist** (`installation_date`, `expected_life_years`, `condition_rating`), so no missing-column message is needed. The query on line 29 already selects them.
+
+### No other files change.
+
+## Where It Appears
+On the Equipment Detail page (`/equipment/:id`), between the main equipment card/QR code row and the Filter Changes section -- same position as today, but now with a clear title and broader visibility rules.
+
