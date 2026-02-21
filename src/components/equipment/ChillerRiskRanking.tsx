@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshCw } from "lucide-react";
+import { format } from "date-fns";
 import { toast } from "sonner";
 
 const RISK_COLORS: Record<string, string> = {
@@ -155,6 +156,7 @@ export const ChillerRiskRanking = () => {
                   <TableHead>Risk Level</TableHead>
                   <TableHead>Open WOs</TableHead>
                   <TableHead>PM Compliance</TableHead>
+                  <TableHead>Calculated At</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -183,6 +185,11 @@ export const ChillerRiskRanking = () => {
                     <TableCell>
                       {chiller.health?.pm_compliance_pct != null
                         ? `${chiller.health.pm_compliance_pct.toFixed(1)}%`
+                        : "—"}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {chiller.health?.calculated_at
+                        ? format(new Date(chiller.health.calculated_at), "MMM d, yyyy h:mm a")
                         : "—"}
                     </TableCell>
                   </TableRow>
