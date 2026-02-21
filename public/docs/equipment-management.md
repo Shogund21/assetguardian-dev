@@ -94,6 +94,29 @@ The equipment management system provides comprehensive tracking and maintenance 
 
 ## Advanced Features
 
+### Chiller Details (Install Date, Life, Condition)
+
+The Equipment Detail page includes a dedicated **Chiller Details** section for managing chiller lifecycle data.
+
+#### Auto-Detection
+- The section appears **automatically** when the equipment name or type contains "chill" (case-insensitive).
+- No manual action is required for recognized chiller equipment.
+
+#### Manual Toggle
+- For non-chiller equipment, click the **"Show Chiller Details"** button to reveal the section.
+- To hide it again, click the **"Not a chiller? Hide this section"** link.
+
+#### Editable Fields
+- **Installation Date**: Select the original installation date using the date picker.
+- **Expected Life Years**: Enter the expected service life in years (number input).
+- **Condition Rating**: Choose a rating from 1 (Poor) to 5 (Excellent) via the dropdown.
+
+#### Health Score
+- A **ChillerHealthBadge** is displayed alongside the fields, showing a calculated health score based on installation date, expected life, and condition rating.
+
+#### Location on Page
+- The Chiller Details section is located between the main equipment card / QR code row and the Filter Changes section.
+
 ### QR Code Integration
 - **Generate Codes**: Create unique QR codes for each piece of equipment
 - **Print Labels**: Print QR code labels for equipment attachment
