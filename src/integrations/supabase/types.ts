@@ -2361,8 +2361,11 @@ export type Database = {
       equipment: {
         Row: {
           company_id: string | null
+          condition_rating: number | null
           created_at: string | null
+          expected_life_years: number | null
           id: string
+          installation_date: string | null
           lastMaintenance: string | null
           location: string
           model: string | null
@@ -2375,8 +2378,11 @@ export type Database = {
         }
         Insert: {
           company_id?: string | null
+          condition_rating?: number | null
           created_at?: string | null
+          expected_life_years?: number | null
           id?: string
+          installation_date?: string | null
           lastMaintenance?: string | null
           location: string
           model?: string | null
@@ -2389,8 +2395,11 @@ export type Database = {
         }
         Update: {
           company_id?: string | null
+          condition_rating?: number | null
           created_at?: string | null
+          expected_life_years?: number | null
           id?: string
+          installation_date?: string | null
           lastMaintenance?: string | null
           location?: string
           model?: string | null
