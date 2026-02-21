@@ -1,30 +1,33 @@
 
 
-# Fix: Include Maintenance Date Fields in Equipment Details Query
+# One-Time Data Cleanup: Set `type = 'Chiller'` for Chiller Equipment
 
-## Problem
-The database has `lastMaintenance` and `nextMaintenance` populated for all chillers, but the `EquipmentDetails.tsx` page query does not include these columns in its `select()` call. The UI therefore always shows "No record" and "Not scheduled."
+## What This Does
+Updates all equipment rows where `type IS NULL` and the name contains "chiller" (case-insensitive), setting their `type` to `'Chiller'`.
 
-## Fix (single file change)
+## SQL to Execute (via Supabase data tool)
 
-**File:** `src/pages/EquipmentDetails.tsx` (line 30)
-
-Update the `.select()` string to add the two missing columns:
-
-```
-Before:
-.select('id, name, model, serial_number, location, status, type, company_id, created_at, updated_at, installation_date, expected_life_years, condition_rating')
-
-After:
-.select('id, name, model, serial_number, location, status, type, company_id, created_at, updated_at, installation_date, expected_life_years, condition_rating, lastMaintenance, nextMaintenance')
+```sql
+UPDATE equipment
+SET type = 'Chiller'
+WHERE type IS NULL
+  AND lower(name) LIKE '%chiller%';
 ```
 
-Then update the Maintenance Schedule display section (~lines 97-109) to render the actual dates instead of hardcoded "No record" / "Not scheduled":
+## Verification Query
 
-- **Last Maintenance:** Show `equipment.lastMaintenance` formatted as a readable date, or "No record" if null.
-- **Next Maintenance:** Show `equipment.nextMaintenance` formatted as a readable date, or "Not scheduled" if null.
+After the update, run:
 
-## No other changes needed
-- The database already has the correct data for all equipment.
-- The `Equipment` TypeScript type does not need changes since the Supabase query returns dynamic data.
-- No migration or backend changes required.
+```sql
+SELECT id, name, location, type
+FROM equipment
+WHERE lower(name) LIKE '%chiller%'
+ORDER BY name;
+```
+
+This confirms all chiller-named rows now have `type = 'Chiller'` and reports the updated rows with their id, name, location, and type.
+
+## Scope
+- Only affects rows where `type IS NULL` -- rows with an existing type value are untouched.
+- No frontend or schema changes needed.
+
