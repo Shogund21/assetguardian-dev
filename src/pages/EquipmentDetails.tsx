@@ -11,6 +11,7 @@ import { QRCodeGenerator } from "@/components/equipment/QRCodeGenerator";
 import { StatusDropdown } from "@/components/equipment/StatusDropdown";
 import { useEquipmentStatus } from "@/hooks/equipment/useEquipmentStatus";
 import EquipmentFilterChanges from "@/components/filter/EquipmentFilterChanges";
+import ChillerDetailsForm from "@/components/equipment/ChillerDetailsForm";
 
 const EquipmentDetails = () => {
   const { id } = useParams();
@@ -24,7 +25,7 @@ const EquipmentDetails = () => {
 
       const { data, error } = await supabase
         .from('equipment')
-        .select('id, name, model, serial_number, location, status, type, company_id, created_at, updated_at')
+        .select('id, name, model, serial_number, location, status, type, company_id, created_at, updated_at, installation_date, expected_life_years, condition_rating')
         .eq('id', id)
         .single();
       
@@ -122,6 +123,15 @@ const EquipmentDetails = () => {
                 <QRCodeGenerator equipment={equipment} />
               </div>
             </div>
+
+            {equipment.type?.toLowerCase().includes('chiller') && (
+              <ChillerDetailsForm
+                equipmentId={equipment.id}
+                installationDate={equipment.installation_date ?? null}
+                expectedLifeYears={equipment.expected_life_years ?? null}
+                conditionRating={equipment.condition_rating ?? null}
+              />
+            )}
 
             <div className="bg-white p-6 rounded-lg shadow border">
               <EquipmentFilterChanges equipmentId={equipment.id} />
