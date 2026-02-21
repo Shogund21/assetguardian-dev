@@ -7,6 +7,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { EquipmentList } from "@/components/equipment/EquipmentList";
 import { EquipmentAuth } from "@/components/equipment/EquipmentAuth";
 import { useEquipmentStatus } from "@/hooks/equipment/useEquipmentStatus";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChillerHealthBadge } from "@/components/equipment/ChillerHealthBadge";
+
+interface ChillerRankingRow {
+  asset_id: string;
+  name: string;
+  model: string | null;
+  location: string;
+  pm_compliance_pct: number | null;
+  open_work_orders: number;
+  corrective_wo_last_12m: number;
+  health_score: number;
+  risk_band: "low" | "medium" | "high" | "critical";
+}
 
 const Equipment = () => {
   const navigate = useNavigate();
@@ -25,6 +39,25 @@ const Equipment = () => {
         throw error;
       }
       return data;
+    },
+  });
+
+  const { data: chillerRanking, isLoading: rankingLoading } = useQuery({
+    queryKey: ["chiller-health-ranking"],
+    queryFn: async () => {
+      await supabase.rpc("calculate_chiller_health_scores" as never);
+
+      const { data, error } = await supabase
+        .from("chiller_health_ranking" as never)
+        .select("*")
+        .limit(25);
+
+      if (error) {
+        console.error("Error loading chiller ranking:", error);
+        return [];
+      }
+
+      return (data || []) as unknown as ChillerRankingRow[];
     },
   });
 
@@ -56,6 +89,36 @@ const Equipment = () => {
               onDelete={handleDelete}
             />
           )}
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Chiller Health Ranking (Worst → Best)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {rankingLoading ? (
+                <p className="text-sm text-muted-foreground">Calculating chiller health...</p>
+              ) : !chillerRanking?.length ? (
+                <p className="text-sm text-muted-foreground">No chiller health data available yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  {chillerRanking.map((row, index: number) => (
+                    <div key={row.asset_id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
+                      <div>
+                        <p className="font-medium">#{index + 1} {row.name}</p>
+                        <p className="text-xs text-muted-foreground">{row.location} • {row.model || "Unknown model"}</p>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                        <span>PM: {row.pm_compliance_pct ?? 0}%</span>
+                        <span>Open WO: {row.open_work_orders ?? 0}</span>
+                        <span>Corrective 12m: {row.corrective_wo_last_12m ?? 0}</span>
+                        <ChillerHealthBadge score={row.health_score} riskBand={row.risk_band} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </EquipmentAuth>
     </Layout>
