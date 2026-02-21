@@ -4985,6 +4985,7 @@ export type Database = {
         Args: { p_user_email: string }
         Returns: string
       }
+      calculate_chiller_health_scores: { Args: never; Returns: number }
       can_access_all_data: { Args: never; Returns: boolean }
       can_modify_data: { Args: { p_company_id: string }; Returns: boolean }
       can_switch_companies: { Args: never; Returns: boolean }
