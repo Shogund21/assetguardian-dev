@@ -10,6 +10,7 @@ import { QRCodeGenerator } from "@/components/equipment/QRCodeGenerator";
 import { StatusDropdown } from "@/components/equipment/StatusDropdown";
 import { useEquipmentStatus } from "@/hooks/equipment/useEquipmentStatus";
 import EquipmentFilterChanges from "@/components/filter/EquipmentFilterChanges";
+import { ChillerHealthBadge } from "@/components/equipment/ChillerHealthBadge";
 
 const EquipmentDetails = () => {
   const { id } = useParams();
@@ -32,6 +33,29 @@ const EquipmentDetails = () => {
         throw error;
       }
       
+      return data;
+    },
+    enabled: !!id,
+  });
+
+  const { data: health } = useQuery({
+    queryKey: ["asset-health", id],
+    queryFn: async () => {
+      if (!id) return null;
+
+      await supabase.rpc("calculate_chiller_health_scores" as never);
+
+      const { data, error } = await supabase
+        .from("asset_health" as never)
+        .select("health_score,risk_band,age_years,pm_compliance_pct,open_work_orders,corrective_wo_last_12m")
+        .eq("asset_id", id)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error fetching asset health:", error);
+        return null;
+      }
+
       return data;
     },
     enabled: !!id,
@@ -62,9 +86,14 @@ const EquipmentDetails = () => {
               <div className="lg:col-span-2">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-2xl text-black">
-                      {equipment.name}
-                    </CardTitle>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <CardTitle className="text-2xl text-black">
+                        {equipment.name}
+                      </CardTitle>
+                      {health?.health_score !== undefined && health?.risk_band ? (
+                        <ChillerHealthBadge score={health.health_score} riskBand={health.risk_band} />
+                      ) : null}
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -120,6 +149,30 @@ const EquipmentDetails = () => {
                           </div>
                         </div>
                       </div>
+
+                      {health ? (
+                        <div>
+                          <h3 className="text-lg font-medium text-black">Chiller Health</h3>
+                          <div className="mt-2 space-y-2 text-sm">
+                            <div className="flex justify-between border-b pb-2">
+                              <span className="font-medium">Age (years):</span>
+                              <span>{health.age_years ?? "N/A"}</span>
+                            </div>
+                            <div className="flex justify-between border-b pb-2">
+                              <span className="font-medium">PM Compliance:</span>
+                              <span>{health.pm_compliance_pct ?? 0}%</span>
+                            </div>
+                            <div className="flex justify-between border-b pb-2">
+                              <span className="font-medium">Open Work Orders:</span>
+                              <span>{health.open_work_orders ?? 0}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="font-medium">Corrective WOs (12m):</span>
+                              <span>{health.corrective_wo_last_12m ?? 0}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ) : null}
                     </div>
                   </CardContent>
                 </Card>
