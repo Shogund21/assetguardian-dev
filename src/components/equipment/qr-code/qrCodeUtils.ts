@@ -1,20 +1,36 @@
 
+import DOMPurify from "dompurify";
 import { Equipment } from "@/types/equipment";
+
+// Sanitize a string for safe HTML insertion
+const sanitize = (value: string | null | undefined): string => {
+  return DOMPurify.sanitize(value || 'N/A', { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+};
 
 // Generate a URL for equipment (ensuring it's an absolute URL)
 export const generateEquipmentUrl = (equipmentId: string): string => {
-  // Get the base URL of the current window location
   const baseUrl = window.location.origin;
-  // Create an absolute URL by combining the base URL with the relative path
-  return `${baseUrl}/equipment/details/${equipmentId}`;
+  return `${baseUrl}/equipment/details/${encodeURIComponent(equipmentId)}`;
 };
 
 // Generate HTML for printable QR code page
 export const generatePrintableHtml = (equipment: Equipment, qrCodeHtml: string): string => {
+  const safeName = sanitize(equipment.name);
+  const safeModel = sanitize(equipment.model);
+  const safeSerial = sanitize(equipment.serial_number);
+  const safeLocation = sanitize(equipment.location);
+  const safeStatus = sanitize(equipment.status);
+  // Sanitize QR code HTML but allow SVG elements
+  const safeQrCode = DOMPurify.sanitize(qrCodeHtml, { 
+    USE_PROFILES: { svg: true, html: true },
+    ADD_TAGS: ['svg', 'path', 'rect', 'circle', 'g'],
+    ADD_ATTR: ['viewBox', 'd', 'fill', 'width', 'height', 'x', 'y', 'rx', 'ry', 'xmlns']
+  });
+
   return `
     <html>
       <head>
-        <title>Equipment QR Code - ${equipment.name}</title>
+        <title>Equipment QR Code - ${safeName}</title>
         <style>
           body { font-family: Arial, sans-serif; text-align: center; }
           .container { margin: 20px; }
@@ -27,26 +43,14 @@ export const generatePrintableHtml = (equipment: Equipment, qrCodeHtml: string):
       <body>
         <div class="container">
           <h2>Equipment QR Code</h2>
-          ${qrCodeHtml}
+          ${safeQrCode}
           <div class="details">
-            <h3>${equipment.name}</h3>
+            <h3>${safeName}</h3>
             <table>
-              <tr>
-                <th>Model</th>
-                <td>${equipment.model || 'N/A'}</td>
-              </tr>
-              <tr>
-                <th>Serial Number</th>
-                <td>${equipment.serial_number || 'N/A'}</td>
-              </tr>
-              <tr>
-                <th>Location</th>
-                <td>${equipment.location || 'N/A'}</td>
-              </tr>
-              <tr>
-                <th>Status</th>
-                <td>${equipment.status || 'N/A'}</td>
-              </tr>
+              <tr><th>Model</th><td>${safeModel}</td></tr>
+              <tr><th>Serial Number</th><td>${safeSerial}</td></tr>
+              <tr><th>Location</th><td>${safeLocation}</td></tr>
+              <tr><th>Status</th><td>${safeStatus}</td></tr>
             </table>
           </div>
         </div>
