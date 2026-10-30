@@ -35,27 +35,31 @@ export function QRCodeActions({ equipment, qrCodeContainerRef, size }: QRCodeAct
     }
 
     if (!printWindow) {
-      // Fallback: Use CSS @media print approach instead of replacing DOM
+      // Fallback: Use current window with temporary content replacement
       toast({
         title: "Info",
-        description: "Opening print dialog. Only the QR code will be printed.",
+        description: "Opening print view in current window. Your page will be restored after printing.",
       });
       
-      const printStyle = document.createElement('style');
-      printStyle.id = 'qr-print-style';
-      printStyle.media = 'print';
-      printStyle.textContent = `
-        @media print {
-          body > *:not(.qr-code-container) { display: none !important; }
-          .qr-code-container { display: block !important; }
-        }
-      `;
-      document.head.appendChild(printStyle);
+      const currentContent = document.body.innerHTML;
+      const printableHtml = generatePrintableHtml(equipment, qrCodeContent);
+      
+      // Extract just the body content from the generated HTML
+      const bodyMatch = printableHtml.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+      const bodyContent = bodyMatch ? bodyMatch[1] : qrCodeContent;
+      
+      // Temporarily replace page content
+      document.body.innerHTML = bodyContent;
+      document.body.className = 'print-mode';
+      
+      // Print and restore
       window.print();
       
-      // Clean up print styles
-      const styleEl = document.getElementById('qr-print-style');
-      if (styleEl) document.head.removeChild(styleEl);
+      // Restore original content after a short delay
+      setTimeout(() => {
+        document.body.innerHTML = currentContent;
+        document.body.className = '';
+      }, 100);
       
       return;
     }

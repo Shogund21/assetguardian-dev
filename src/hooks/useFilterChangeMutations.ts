@@ -78,7 +78,7 @@ export function useFilterChangeMutations() {
 
       const { data: updatedData, error } = await supabase
         .from('filter_changes')
-        .update(formattedValues)
+        .update(formattedValues as any)
         .eq('id', id)
         .select();
 

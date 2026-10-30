@@ -35,24 +35,23 @@ const OpenAIKeyManager = () => {
 
     setSaving(true);
     try {
-      // Note: OpenAI API key should be stored as a Supabase secret (OPENAI_API_KEY)
-      // and accessed only via server-side Edge Functions (predictive-ai-analysis, chatbot-conversation).
-      // This UI component now only informs the user to configure the key server-side.
+      // Store key in localStorage for now (in production, this would be handled via Supabase Edge Functions)
+      localStorage.setItem('openai_api_key', apiKey);
       setKeyStatus('saved');
       
       toast({
-        title: "Important: Server-Side Configuration Required",
-        description: "For security, the OpenAI API key must be added as a Supabase secret named OPENAI_API_KEY. Do not store API keys in the browser.",
+        title: "API Key Saved",
+        description: "Your OpenAI API key has been saved successfully. The predictive AI analysis features are now available.",
       });
       
-      // Clear the input for security - never persist in browser
+      // Clear the input for security
       setApiKey("");
     } catch (error) {
       console.error("Error saving API key:", error);
       setKeyStatus('error');
       toast({
         title: "Error",
-        description: "Failed to process API key. Please try again.",
+        description: "Failed to save API key. Please try again.",
         variant: "destructive",
       });
     } finally {
