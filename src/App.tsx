@@ -37,6 +37,7 @@ import Product from "./pages/Product";
 import Results from "./pages/Results";
 import Pricing from "./pages/Pricing";
 import Resources from "./pages/Resources";
+import ResourcePost from "./pages/ResourcePost";
 import About from "./pages/About";
 import BookDemo from "./pages/BookDemo";
 
@@ -61,6 +62,7 @@ const AppContent = () => {
       <Route path="/results" element={<Results />} />
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/resources" element={<Resources />} />
+      <Route path="/resources/:slug" element={<ResourcePost />} />
       <Route path="/about" element={<About />} />
       <Route path="/book-demo" element={<BookDemo />} />
       <Route path="/auth" element={<Auth />} />

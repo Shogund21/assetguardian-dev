@@ -2,6 +2,7 @@ import { SEO } from "@/components/SEO";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { resourcePosts } from "@/data/resourcePosts";
 
 const Resources = () => {
   return (
@@ -24,6 +25,24 @@ const Resources = () => {
                 Expert guides, checklists, and playbooks to help you optimize your facility operations 
                 and improve technician effectiveness.
               </p>
+            </div>
+
+            {/* Articles */}
+            <div className="mb-16">
+              <h2 className="text-3xl font-bold mb-8">Latest Articles</h2>
+              <div className="grid md:grid-cols-2 gap-8">
+                {resourcePosts.map((post) => (
+                  <Link
+                    key={post.slug}
+                    to={`/resources/${post.slug}`}
+                    className="block bg-gray-800 p-8 rounded-lg hover:bg-gray-700 transition-colors"
+                  >
+                    <h3 className="text-2xl font-bold mb-3">{post.title}</h3>
+                    <p className="text-gray-300 mb-4">{post.description}</p>
+                    <span className="text-yellow-400 font-semibold">Read article →</span>
+                  </Link>
+                ))}
+              </div>
             </div>
 
             {/* Featured Resources */}
